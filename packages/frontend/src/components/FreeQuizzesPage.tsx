@@ -127,6 +127,7 @@ const FreeQuizzesPage: React.FC = () => {
                 questions: fullQuiz.questions,
                 quizId: fullQuiz._id
             }));
+            localStorage.setItem('currentQuizId', fullQuiz._id);
 
             navigate('/quiz/generated');
         } catch (error) {

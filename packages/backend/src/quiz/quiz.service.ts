@@ -325,11 +325,17 @@ Gere agora {quantidade_questoes} questões de nível {nivel} sobre "{titulo}" na
     });
 
     // Update quiz statistics
+    const allAttempts = await this.quizAttemptModel.find({ quizId }).exec();
+    const averageScore = allAttempts.length > 0
+      ? allAttempts.reduce((sum, a) => sum + a.percentage, 0) / allAttempts.length
+      : 0;
+
     await this.quizModel.findByIdAndUpdate(quizId, {
       $inc: {
         totalAttempts: 1,
         totalCompletions: 1,
       },
+      averageScore: Math.round(averageScore * 100) / 100, // Round to 2 decimal places
     });
 
     return attempt;

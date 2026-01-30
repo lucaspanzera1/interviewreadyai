@@ -339,16 +339,6 @@ class ApiClient {
     return res.data;
   }
 
-  async recordQuizAttempt(quizId: string, selectedAnswers: number[], score: number, totalQuestions: number, timeSpent?: number) {
-    const res = await this.client.post(`/quiz/${quizId}/attempt`, {
-      selectedAnswers,
-      score,
-      totalQuestions,
-      timeSpent,
-    });
-    return res.data;
-  }
-
   // Admin Quiz methods
   async getAllQuizzes(page: number = 1, limit: number = 10) {
     const res = await this.client.get('/admin/quiz', {
@@ -401,6 +391,16 @@ class ApiClient {
 
   async recordQuizAccess(quizId: string) {
     const res = await this.client.post(`/quiz/${quizId}/access`);
+    return res.data;
+  }
+
+  async recordQuizAttempt(quizId: string, selectedAnswers: number[], score: number, totalQuestions: number, timeSpent?: number) {
+    const res = await this.client.post(`/quiz/${quizId}/attempt`, {
+      selectedAnswers,
+      score,
+      totalQuestions,
+      timeSpent,
+    });
     return res.data;
   }
 }
