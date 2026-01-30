@@ -24,18 +24,20 @@ export interface ToastMessage {
 interface ToastProps {
   id: string;
   type: ToastType;
-  message: string;
+  title: string;
+  description?: string;
   duration?: number;
   onClose: (id: string) => void;
 }
 
 /**
- * Componente de notificação toast
+ * Componente de notificação toast - Estilo "Violet Evolution"
  */
 const Toast: React.FC<ToastProps> = ({
   id,
   type,
-  message,
+  title,
+  description,
   duration = 5000,
   onClose
 }) => {
@@ -49,65 +51,94 @@ const Toast: React.FC<ToastProps> = ({
     }
   }, [id, duration, onClose]);
 
-  const getIcon = () => {
+  const getStyleConfig = () => {
     switch (type) {
       case 'success':
-        return <CheckCircleIcon className="h-5 w-5 text-green-600 dark:text-green-400" />;
+        return {
+          icon: <CheckCircleIcon className="h-6 w-6 text-green-600 dark:text-green-400" />,
+          bgIcon: 'bg-green-100 dark:bg-green-900/30',
+          border: 'border-green-200 dark:border-green-800',
+          progress: 'from-green-500 to-emerald-400',
+          glow: 'shadow-green-500/20'
+        };
       case 'error':
-        return <XCircleIcon className="h-5 w-5 text-red-600 dark:text-red-400" />;
+        return {
+          icon: <XCircleIcon className="h-6 w-6 text-red-600 dark:text-red-400" />,
+          bgIcon: 'bg-red-100 dark:bg-red-900/30',
+          border: 'border-red-200 dark:border-red-800',
+          progress: 'from-red-500 to-rose-400',
+          glow: 'shadow-red-500/20'
+        };
       case 'warning':
-        return <ExclamationTriangleIcon className="h-5 w-5 text-amber-600 dark:text-amber-400" />;
+        return {
+          icon: <ExclamationTriangleIcon className="h-6 w-6 text-amber-600 dark:text-amber-400" />,
+          bgIcon: 'bg-amber-100 dark:bg-amber-900/30',
+          border: 'border-amber-200 dark:border-amber-800',
+          progress: 'from-amber-500 to-yellow-400',
+          glow: 'shadow-amber-500/20'
+        };
       case 'info':
-        return <InformationCircleIcon className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />;
       default:
-        return <InformationCircleIcon className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />;
+        // Using Primary (Violet) for Info to match brand
+        return {
+          icon: <InformationCircleIcon className="h-6 w-6 text-primary-600 dark:text-primary-400" />,
+          bgIcon: 'bg-primary-100 dark:bg-primary-900/30',
+          border: 'border-primary-200 dark:border-primary-800',
+          progress: 'from-primary-500 to-violet-400',
+          glow: 'shadow-primary-500/20'
+        };
     }
   };
 
-  const getBorderColor = () => {
-    switch (type) {
-      case 'success':
-        return 'border-l-green-500';
-      case 'error':
-        return 'border-l-red-500';
-      case 'warning':
-        return 'border-l-amber-500';
-      case 'info':
-        return 'border-l-indigo-500';
-      default:
-        return 'border-l-indigo-500';
-    }
-  };
+  const style = getStyleConfig();
 
   return (
-    <div className={`bg-white dark:bg-slate-800 rounded-lg shadow-lifted border border-slate-200 dark:border-slate-700 border-l-4 ${getBorderColor()} overflow-hidden animate-slide-in`}>
-      <div className="p-4">
-        <div className="flex items-start">
-          <div className="flex-shrink-0">
-            {getIcon()}
-          </div>
-          <div className="ml-3 w-0 flex-1">
-            <p className="text-sm font-medium text-slate-900 dark:text-white">
-              {message}
+    <div
+      className={`
+        relative overflow-hidden w-full max-w-sm
+        bg-white/95 dark:bg-slate-800/95 backdrop-blur-md
+        border ${style.border} rounded-2xl
+        shadow-lg ${style.glow}
+        transform transition-all duration-300 hover:scale-[1.02]
+        animate-slide-up
+      `}
+      role="alert"
+    >
+      <div className="p-4 flex items-start gap-4">
+        {/* Icon Container */}
+        <div className={`flex-shrink-0 p-2 rounded-xl ${style.bgIcon} transition-colors duration-300`}>
+          {style.icon}
+        </div>
+
+        {/* Content */}
+        <div className="flex-1 pt-0.5 min-w-0">
+          <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-50 leading-snug">
+            {title}
+          </h3>
+          {description && (
+            <p className="mt-1 text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+              {description}
             </p>
-          </div>
-          <div className="ml-4 flex-shrink-0 flex">
-            <button
-              className="rounded-lg p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors"
-              onClick={() => onClose(id)}
-            >
-              <span className="sr-only">Close</span>
-              <XMarkIcon className="h-5 w-5" aria-hidden="true" />
-            </button>
-          </div>
+          )}
+        </div>
+
+        {/* Close Button */}
+        <div className="flex-shrink-0 -ml-2 -mt-1">
+          <button
+            onClick={() => onClose(id)}
+            className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700/50 transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500/50"
+          >
+            <span className="sr-only">Fechar</span>
+            <XMarkIcon className="h-5 w-5" />
+          </button>
         </div>
       </div>
 
-      {/* Progress bar */}
+      {/* Progress Bar */}
       {duration > 0 && (
-        <div className="h-1 bg-slate-100 dark:bg-slate-700">
+        <div className="absolute bottom-0 left-0 right-0 h-1 bg-slate-100 dark:bg-slate-700/50">
           <div
-            className="h-full bg-indigo-500 transition-all ease-linear"
+            className={`h-full bg-gradient-to-r ${style.progress}`}
             style={{ animation: `shrink ${duration}ms linear forwards` }}
           />
         </div>

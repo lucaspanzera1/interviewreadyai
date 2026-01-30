@@ -20,7 +20,8 @@ const ToastContainer: React.FC = () => {
           key={toast.id}
           id={toast.id}
           type={toast.type}
-          message={toast.title}
+          title={toast.title}
+          description={toast.message}
           duration={toast.duration}
           onClose={removeToast}
         />
