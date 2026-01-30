@@ -9,6 +9,7 @@ import ErrorBoundary from './components/ErrorBoundary'
 import HomePage from './components/HomePage'
 import AdminUsers from './components/AdminUsers'
 import TokensPage from './components/TokensPage'
+import FreeQuizzesPage from './components/FreeQuizzesPage'
 
 function App() {
   return (
@@ -52,6 +53,18 @@ function App() {
             <ProtectedRoute>
               <AppLayout>
                 <AdminUsers />
+              </AppLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Free Quizzes page */}
+        <Route
+          path="/free-quizzes"
+          element={
+            <ProtectedRoute>
+              <AppLayout>
+                <FreeQuizzesPage />
               </AppLayout>
             </ProtectedRoute>
           }

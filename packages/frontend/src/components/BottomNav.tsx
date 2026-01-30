@@ -14,13 +14,15 @@ import {
     SunIcon,
     MoonIcon,
     TicketIcon,
-    PlusCircleIcon
+    PlusCircleIcon,
+    AcademicCapIcon
 } from '@heroicons/react/24/outline';
 import {
     HomeIcon as HomeIconSolid,
     DocumentTextIcon as DocumentTextIconSolid,
     ChartBarIcon as ChartBarIconSolid,
-    TicketIcon as TicketIconSolid
+    TicketIcon as TicketIconSolid,
+    AcademicCapIcon as AcademicCapIconSolid
 } from '@heroicons/react/24/solid';
 import { useAuth } from '../contexts/AuthContext';
 import { useSidebar } from '../contexts/SidebarContext';
@@ -53,6 +55,7 @@ const Sidebar: React.FC = () => {
     const mainNavItems = [
         { name: 'Dashboard', path: '/', icon: HomeIcon, activeIcon: HomeIconSolid },
         { name: 'Simulados', path: '/simulados', icon: DocumentTextIcon, activeIcon: DocumentTextIconSolid },
+        { name: 'Gratuitos', path: '/free-quizzes', icon: AcademicCapIcon, activeIcon: AcademicCapIconSolid },
         { name: 'Desempenho', path: '/desempenho', icon: ChartBarIcon, activeIcon: ChartBarIconSolid },
         { name: 'Tokens', path: '/tokens', icon: TicketIcon, activeIcon: TicketIconSolid },
     ];
