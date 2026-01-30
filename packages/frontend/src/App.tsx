@@ -16,6 +16,7 @@ import ToastContainer from './components/ToastContainer'
 import GeneratedQuizPage from './components/GeneratedQuizPage'
 import AdminQuizzesPage from './components/AdminQuizzesPage'
 import AdminQuizStatsPage from './components/AdminQuizStatsPage'
+import AdminQuizDetailsPage from './components/AdminQuizDetailsPage'
 
 function App() {
   return (
@@ -131,6 +132,18 @@ function App() {
             <ProtectedRoute>
               <AppLayout>
                 <AdminQuizStatsPage />
+              </AppLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Admin Quiz Details page */}
+        <Route
+          path="/admin/quizzes/:id/details"
+          element={
+            <ProtectedRoute>
+              <AppLayout>
+                <AdminQuizDetailsPage />
               </AppLayout>
             </ProtectedRoute>
           }

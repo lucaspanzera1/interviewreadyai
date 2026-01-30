@@ -7,7 +7,8 @@ import {
     CheckCircleIcon,
     XCircleIcon,
     MagnifyingGlassIcon,
-    FunnelIcon
+    FunnelIcon,
+    EyeIcon
 } from '@heroicons/react/24/outline';
 import { apiClient } from '../lib/api';
 import { toast } from 'react-toastify';
@@ -94,6 +95,10 @@ const AdminQuizzesPage: React.FC = () => {
 
     const viewQuizStats = (quizId: string) => {
         navigate(`/admin/quizzes/${quizId}/stats`);
+    };
+
+    const viewQuizDetails = (quizId: string) => {
+        navigate(`/admin/quizzes/${quizId}/details`);
     };
 
     const filteredQuizzes = quizzes.filter(quiz => {
@@ -237,6 +242,13 @@ const AdminQuizzesPage: React.FC = () => {
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                         <div className="flex items-center space-x-2">
+                                            <button
+                                                onClick={() => viewQuizDetails(quiz._id)}
+                                                className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300"
+                                                title="Ver detalhes das questões"
+                                            >
+                                                <EyeIcon className="w-5 h-5" />
+                                            </button>
                                             <button
                                                 onClick={() => viewQuizStats(quiz._id)}
                                                 className="text-primary-600 hover:text-primary-900 dark:text-primary-400 dark:hover:text-primary-300"

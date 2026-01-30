@@ -304,7 +304,10 @@ Gere agora {quantidade_questoes} questões de nível {nivel} sobre "{titulo}" na
       .exec();
 
     const stats = {
-      quiz,
+      quiz: {
+        ...quiz.toObject(),
+        questions: quiz.questions // Include questions in the response
+      },
       attempts,
       totalAttempts: attempts.length,
       completedAttempts: attempts.filter(a => a.completed).length,
