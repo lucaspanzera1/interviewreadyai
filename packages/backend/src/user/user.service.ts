@@ -195,4 +195,47 @@ export class UserService {
       timestamp: new Date().toISOString(),
     };
   }
+
+  /**
+   * Busca quantidade de tokens do usuário
+   * @param userId ID do usuário
+   * @returns Quantidade de tokens do usuário
+   */
+  async getUserTokens(userId: string): Promise<number> {
+    const user = await this.findById(userId);
+    return user.tokens || 0;
+  }
+
+  /**
+   * Define quantidade de tokens do usuário
+   * @param userId ID do usuário
+   * @param amount Quantidade de tokens
+   */
+  async setUserTokens(userId: string, amount: number): Promise<void> {
+    const user = await this.findById(userId);
+    user.tokens = Math.max(0, amount); // Garante que não seja negativo
+    await user.save();
+  }
+
+  /**
+   * Adiciona tokens ao usuário
+   * @param userId ID do usuário
+   * @param amount Quantidade a adicionar
+   */
+  async addTokensToUser(userId: string, amount: number): Promise<void> {
+    const user = await this.findById(userId);
+    user.tokens = Math.max(0, (user.tokens || 0) + amount);
+    await user.save();
+  }
+
+  /**
+   * Remove tokens do usuário
+   * @param userId ID do usuário
+   * @param amount Quantidade a remover
+   */
+  async removeTokensFromUser(userId: string, amount: number): Promise<void> {
+    const user = await this.findById(userId);
+    user.tokens = Math.max(0, (user.tokens || 0) - amount);
+    await user.save();
+  }
 }

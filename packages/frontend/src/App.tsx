@@ -8,6 +8,7 @@ import AppLayout from './components/AppLayout'
 import ErrorBoundary from './components/ErrorBoundary'
 import HomePage from './components/HomePage'
 import AdminUsers from './components/AdminUsers'
+import TokensPage from './components/TokensPage'
 
 function App() {
   return (
@@ -51,6 +52,18 @@ function App() {
             <ProtectedRoute>
               <AppLayout>
                 <AdminUsers />
+              </AppLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Tokens page */}
+        <Route
+          path="/tokens"
+          element={
+            <ProtectedRoute>
+              <AppLayout>
+                <TokensPage />
               </AppLayout>
             </ProtectedRoute>
           }

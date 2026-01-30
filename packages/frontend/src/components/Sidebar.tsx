@@ -2,7 +2,8 @@ import React from 'react';
 import { NavLink } from 'react-router-dom';
 import {
   XMarkIcon,
-  UserCircleIcon
+  UserCircleIcon,
+  KeyIcon
 } from '@heroicons/react/24/outline';
 import { Users as UsersIcon } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
@@ -13,6 +14,7 @@ interface SidebarProps {
 
 const navigation = [
   { name: 'Perfil', href: '/profile', icon: UserCircleIcon },
+  { name: 'Tokens', href: '/tokens', icon: KeyIcon },
 ];
 
 const Sidebar: React.FC<SidebarProps> = ({ onClose }) => {

@@ -19,6 +19,7 @@ export interface User {
   lastLoginAt?: string;
   cellphone?: string | null;
   taxid?: string | null;
+  tokens?: number;
 }
 
 export interface LoginResponse {
@@ -44,7 +45,7 @@ class ApiClient {
   constructor() {
     const baseURL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001';
     const timeout = parseInt(import.meta.env.VITE_API_TIMEOUT || '10000');
-    
+
     this.client = axios.create({
       baseURL,
       timeout,
@@ -151,8 +152,17 @@ class ApiClient {
       return this.userProfilePromise;
     }
 
-    this.userProfilePromise = this.client.get('/users/profile').then((response) => {
+    this.userProfilePromise = this.client.get('/users/profile').then(async (response) => {
       const user = response.data as User;
+
+      // Fetch user tokens separately since they might not be in the profile
+      try {
+        const tokenRes = await this.client.get('/users/me/tokens');
+        user.tokens = tokenRes.data.tokens;
+      } catch (error) {
+        console.warn('Failed to fetch tokens for user profile:', error);
+      }
+
       this._cachedUser = user;
       this._cachedUserAt = Date.now();
       return user;
@@ -193,6 +203,24 @@ class ApiClient {
 
   isAuthenticated(): boolean {
     return !!this.getAccessToken();
+  }
+
+  // Token methods
+  async getUserTokenBalance(): Promise<number> {
+    const res = await this.client.get('/users/me/tokens');
+    return res.data.tokens || 0;
+  }
+
+  async setUserTokenBalance(tokens: number): Promise<void> {
+    await this.client.put('/users/me/tokens', { tokens });
+  }
+
+  async addTokensToUser(amount: number): Promise<void> {
+    await this.client.post('/users/me/tokens/add', { amount });
+  }
+
+  async removeTokensFromUser(amount: number): Promise<void> {
+    await this.client.post('/users/me/tokens/remove', { amount });
   }
 
   // Address methods

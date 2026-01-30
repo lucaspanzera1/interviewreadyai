@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document } from 'mongoose';
+import { Document, Types } from 'mongoose';
 
 export type UserDocument = User & Document;
 
@@ -36,6 +36,9 @@ export class User {
 
   @Prop()
   refreshToken?: string;
+
+  @Prop({ type: Number, default: 0 })
+  tokens: number;
 
   createdAt: Date;
   updatedAt: Date;

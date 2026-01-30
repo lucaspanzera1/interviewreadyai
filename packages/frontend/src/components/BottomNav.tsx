@@ -13,7 +13,8 @@ import {
     XMarkIcon,
     SunIcon,
     MoonIcon,
-    TicketIcon
+    TicketIcon,
+    PlusCircleIcon
 } from '@heroicons/react/24/outline';
 import {
     HomeIcon as HomeIconSolid,
@@ -155,6 +156,29 @@ const Sidebar: React.FC = () => {
 
             {/* User Section */}
             <div className="border-t border-slate-200 dark:border-slate-700 p-3 space-y-1">
+                {/* Token Display - Atraente */}
+                {/* Token Display - Minimalista */}
+                {user && (
+                    <div className={`mb-2 ${isCollapsed ? 'flex justify-center' : ''}`}>
+                        <div
+                            className={`group flex items-center ${isCollapsed ? 'justify-center w-10 h-10' : 'justify-between w-full px-3 py-2'} bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg hover:border-amber-400 dark:hover:border-amber-500 transition-colors cursor-pointer`}
+                            onClick={() => handleNavClick('/tokens')}
+                            title={`${user.tokens || 0} Tokens Disponíveis`}
+                        >
+                            <div className="flex items-center gap-2.5">
+                                <TicketIcon className={`w-4 h-4 ${isCollapsed ? 'text-amber-500' : 'text-slate-400 group-hover:text-amber-500'} transition-colors`} />
+                                {!isCollapsed && (
+                                    <span className="text-sm font-medium text-slate-600 dark:text-slate-300 group-hover:text-slate-900 dark:group-hover:text-white transition-colors">
+                                        {user.tokens || 0} Tokens
+                                    </span>
+                                )}
+                            </div>
+                            {!isCollapsed && (
+                                <PlusCircleIcon className="w-4 h-4 text-slate-300 group-hover:text-amber-500 transition-colors" />
+                            )}
+                        </div>
+                    </div>
+                )}
                 {/* Theme Toggle */}
                 <button
                     onClick={toggleTheme}

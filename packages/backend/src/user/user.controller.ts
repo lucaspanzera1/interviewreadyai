@@ -1,4 +1,4 @@
-import { Controller, Get, Put, Body, Param, UseGuards } from '@nestjs/common';
+import { Controller, Get, Put, Body, Param, UseGuards, Post, Delete } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiParam } from '@nestjs/swagger';
 import { UserService } from './user.service';
 import { UserDto, UpdateUserDto } from './dto';
@@ -119,6 +119,79 @@ export class UserController {
     return this.userService.toDto(updatedUser);
   }
 
+
+  /**
+   * Busca quantidade de tokens do usuário atual
+   * @returns Quantidade de tokens do usuário
+   */
+  @Get('me/tokens')
+  @ApiOperation({
+    summary: 'Buscar quantidade de tokens do usuário',
+    description: 'Retorna a quantidade de tokens do usuário atual'
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Quantidade de tokens retornada com sucesso'
+  })
+  async getMyTokens(@CurrentUser() user: any): Promise<{ tokens: number }> {
+    const userId = user.userId || user.sub;
+    const tokens = await this.userService.getUserTokens(userId);
+    return { tokens };
+  }
+
+  /**
+   * Define quantidade de tokens do usuário atual
+   * @param body Dados com quantidade de tokens
+   */
+  @Put('me/tokens')
+  @ApiOperation({
+    summary: 'Definir quantidade de tokens do usuário',
+    description: 'Define a quantidade de tokens do usuário atual'
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Quantidade de tokens definida com sucesso'
+  })
+  async setTokens(@CurrentUser() user: any, @Body() body: { tokens: number }): Promise<void> {
+    const userId = user.userId || user.sub;
+    await this.userService.setUserTokens(userId, body.tokens);
+  }
+
+  /**
+   * Adiciona tokens ao usuário atual
+   * @param body Dados com quantidade a adicionar
+   */
+  @Post('me/tokens/add')
+  @ApiOperation({
+    summary: 'Adicionar tokens ao usuário',
+    description: 'Adiciona tokens ao saldo do usuário atual'
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Tokens adicionados com sucesso'
+  })
+  async addTokens(@CurrentUser() user: any, @Body() body: { amount: number }): Promise<void> {
+    const userId = user.userId || user.sub;
+    await this.userService.addTokensToUser(userId, body.amount);
+  }
+
+  /**
+   * Remove tokens do usuário atual
+   * @param body Dados com quantidade a remover
+   */
+  @Post('me/tokens/remove')
+  @ApiOperation({
+    summary: 'Remover tokens do usuário',
+    description: 'Remove tokens do saldo do usuário atual'
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Tokens removidos com sucesso'
+  })
+  async removeTokens(@CurrentUser() user: any, @Body() body: { amount: number }): Promise<void> {
+    const userId = user.userId || user.sub;
+    await this.userService.removeTokensFromUser(userId, body.amount);
+  }
 
   /**
    * Endpoint temporário para testar o módulo de usuários
