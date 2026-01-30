@@ -106,7 +106,6 @@ const ProfilePage: React.FC = () => {
         techStack: formData.techStack.filter(s => s),
       };
       await updateProfile(processedData);
-      showToast('Perfil atualizado com sucesso!', 'success');
       setIsEditing(false);
     } catch {
       showToast('Erro ao atualizar perfil', 'error');

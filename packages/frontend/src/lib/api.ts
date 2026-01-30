@@ -214,9 +214,9 @@ class ApiClient {
   }
 
 
-  async updateUserProfile(userData: Partial<User>): Promise<User> {
+  async updateUserProfile(userData: Partial<User>): Promise<{ data: User; message?: string }> {
     const response = await this.client.put('/users/profile', userData);
-    return response.data;
+    return response.data.message ? { data: response.data.data, message: response.data.message } : { data: response.data };
   }
 
 
@@ -254,12 +254,14 @@ class ApiClient {
     await this.client.put('/users/me/tokens', { tokens });
   }
 
-  async addTokensToUser(amount: number): Promise<void> {
-    await this.client.post('/users/me/tokens/add', { amount });
+  async addTokensToUser(amount: number): Promise<{ message: string }> {
+    const res = await this.client.post('/users/me/tokens/add', { amount });
+    return res.data;
   }
 
-  async removeTokensFromUser(amount: number): Promise<void> {
-    await this.client.post('/users/me/tokens/remove', { amount });
+  async removeTokensFromUser(amount: number): Promise<{ message: string }> {
+    const res = await this.client.post('/users/me/tokens/remove', { amount });
+    return res.data;
   }
 
   // Address methods
@@ -288,14 +290,14 @@ class ApiClient {
     return res.data;
   }
 
-  async updateUserProfileData(profileData: Partial<UserProfile>): Promise<UserProfile> {
+  async updateUserProfileData(profileData: Partial<UserProfile>): Promise<{ data: UserProfile; message?: string }> {
     const res = await this.client.put('/users/me/profile', profileData);
-    return res.data;
+    return res.data.message ? { data: res.data.data, message: res.data.message } : { data: res.data };
   }
 
-  async completeOnboarding(profileData: CompleteOnboardingData): Promise<UserProfile> {
+  async completeOnboarding(profileData: CompleteOnboardingData): Promise<{ data: UserProfile; message?: string }> {
     const res = await this.client.post('/users/me/onboarding', profileData);
-    return res.data;
+    return res.data.message ? { data: res.data.data, message: res.data.message } : { data: res.data };
   }
 
   async getOnboardingStatus(): Promise<{ hasCompletedOnboarding: boolean }> {

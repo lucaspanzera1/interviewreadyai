@@ -11,6 +11,7 @@ import AdminUsers from './components/AdminUsers'
 import TokensPage from './components/TokensPage'
 import FreeQuizzesPage from './components/FreeQuizzesPage'
 import OnboardingProvider from './components/OnboardingProvider'
+import ToastContainer from './components/ToastContainer'
 
 function App() {
   return (
@@ -89,6 +90,9 @@ function App() {
 
       {/* Onboarding modal */}
       <OnboardingProvider />
+
+      {/* Toast notifications */}
+      <ToastContainer />
     </ErrorBoundary>
   )
 }

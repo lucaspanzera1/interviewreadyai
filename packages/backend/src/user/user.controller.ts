@@ -93,7 +93,14 @@ export class UserController {
   @ApiResponse({ 
     status: 200, 
     description: 'Perfil atualizado com sucesso',
-    type: UserDto
+    schema: {
+      type: 'object',
+      properties: {
+        success: { type: 'boolean', example: true },
+        data: { $ref: '#/components/schemas/UserDto' },
+        message: { type: 'string', example: 'Perfil atualizado com sucesso!' }
+      }
+    }
   })
   @ApiResponse({ 
     status: 400, 
@@ -113,10 +120,10 @@ export class UserController {
   async updateProfile(
     @CurrentUser() user: any,
     @Body() updateData: UpdateUserDto,
-  ): Promise<UserDto> {
+  ): Promise<{ success: boolean; data: UserDto; message: string }> {
     const userId = user.userId || user.sub;
     const updatedUser = await this.userService.updateUser(userId, updateData);
-    return this.userService.toDto(updatedUser);
+    return { success: true, data: this.userService.toDto(updatedUser), message: "Perfil atualizado com sucesso!" };
   }
 
 
@@ -150,11 +157,19 @@ export class UserController {
   })
   @ApiResponse({
     status: 200,
-    description: 'Quantidade de tokens definida com sucesso'
+    description: 'Quantidade de tokens definida com sucesso',
+    schema: {
+      type: 'object',
+      properties: {
+        success: { type: 'boolean', example: true },
+        message: { type: 'string', example: 'Quantidade de tokens definida com sucesso!' }
+      }
+    }
   })
-  async setTokens(@CurrentUser() user: any, @Body() body: { tokens: number }): Promise<void> {
+  async setTokens(@CurrentUser() user: any, @Body() body: { tokens: number }): Promise<{ success: boolean; message: string }> {
     const userId = user.userId || user.sub;
     await this.userService.setUserTokens(userId, body.tokens);
+    return { success: true, message: "Quantidade de tokens definida com sucesso!" };
   }
 
   /**
@@ -168,11 +183,19 @@ export class UserController {
   })
   @ApiResponse({
     status: 200,
-    description: 'Tokens adicionados com sucesso'
+    description: 'Tokens adicionados com sucesso',
+    schema: {
+      type: 'object',
+      properties: {
+        success: { type: 'boolean', example: true },
+        message: { type: 'string', example: '10 tokens adicionados com sucesso!' }
+      }
+    }
   })
-  async addTokens(@CurrentUser() user: any, @Body() body: { amount: number }): Promise<void> {
+  async addTokens(@CurrentUser() user: any, @Body() body: { amount: number }): Promise<{ success: boolean; message: string }> {
     const userId = user.userId || user.sub;
     await this.userService.addTokensToUser(userId, body.amount);
+    return { success: true, message: `${body.amount} tokens adicionados com sucesso!` };
   }
 
   /**
@@ -186,11 +209,19 @@ export class UserController {
   })
   @ApiResponse({
     status: 200,
-    description: 'Tokens removidos com sucesso'
+    description: 'Tokens removidos com sucesso',
+    schema: {
+      type: 'object',
+      properties: {
+        success: { type: 'boolean', example: true },
+        message: { type: 'string', example: '10 tokens removidos com sucesso!' }
+      }
+    }
   })
-  async removeTokens(@CurrentUser() user: any, @Body() body: { amount: number }): Promise<void> {
+  async removeTokens(@CurrentUser() user: any, @Body() body: { amount: number }): Promise<{ success: boolean; message: string }> {
     const userId = user.userId || user.sub;
     await this.userService.removeTokensFromUser(userId, body.amount);
+    return { success: true, message: `${body.amount} tokens removidos com sucesso!` };
   }
 
   /**
@@ -232,20 +263,32 @@ export class UserController {
   })
   @ApiResponse({
     status: 200,
-    description: 'Perfil atualizado com sucesso'
+    description: 'Perfil atualizado com sucesso',
+    schema: {
+      type: 'object',
+      properties: {
+        success: { type: 'boolean', example: true },
+        data: { type: 'object' },
+        message: { type: 'string', example: 'Perfil atualizado com sucesso!' }
+      }
+    }
   })
-  async updateMyProfile(@CurrentUser() user: any, @Body() profileData: ProfileDto): Promise<any> {
+  async updateMyProfile(@CurrentUser() user: any, @Body() profileData: ProfileDto): Promise<{ success: boolean; data: any; message: string }> {
     const userId = user.userId || user.sub;
     const updatedUser = await this.userService.updateProfile(userId, profileData);
     return {
-      hasCompletedOnboarding: updatedUser.hasCompletedOnboarding,
-      careerTime: updatedUser.careerTime,
-      techArea: updatedUser.techArea,
-      techStack: updatedUser.techStack,
-      bio: updatedUser.bio,
-      location: updatedUser.location,
-      linkedinUrl: updatedUser.linkedinUrl,
-      githubUrl: updatedUser.githubUrl,
+      success: true,
+      data: {
+        hasCompletedOnboarding: updatedUser.hasCompletedOnboarding,
+        careerTime: updatedUser.careerTime,
+        techArea: updatedUser.techArea,
+        techStack: updatedUser.techStack,
+        bio: updatedUser.bio,
+        location: updatedUser.location,
+        linkedinUrl: updatedUser.linkedinUrl,
+        githubUrl: updatedUser.githubUrl,
+      },
+      message: "Perfil atualizado com sucesso!"
     };
   }
 
@@ -260,20 +303,30 @@ export class UserController {
   })
   @ApiResponse({
     status: 200,
-    description: 'Onboarding completado com sucesso'
+    description: 'Onboarding completado com sucesso',
+    schema: {
+      type: 'object',
+      properties: {
+        success: { type: 'boolean', example: true },
+        data: { type: 'object' },
+        message: { type: 'string', example: 'Onboarding completado com sucesso!' }
+      }
+    }
   })
-  async completeOnboarding(@CurrentUser() user: any, @Body() profileData: CompleteOnboardingDto): Promise<any> {
+  async completeOnboarding(@CurrentUser() user: any, @Body() profileData: CompleteOnboardingDto): Promise<{ success: boolean; data: any; message: string }> {
     const userId = user.userId || user.sub;
     const updatedUser = await this.userService.completeOnboarding(userId, profileData);
-    return {
-      hasCompletedOnboarding: updatedUser.hasCompletedOnboarding,
-      careerTime: updatedUser.careerTime,
-      techArea: updatedUser.techArea,
-      techStack: updatedUser.techStack,
-      bio: updatedUser.bio,
-      location: updatedUser.location,
-      linkedinUrl: updatedUser.linkedinUrl,
-      githubUrl: updatedUser.githubUrl,
+    return {      success: true,      data: {
+        hasCompletedOnboarding: updatedUser.hasCompletedOnboarding,
+        careerTime: updatedUser.careerTime,
+        techArea: updatedUser.techArea,
+        techStack: updatedUser.techStack,
+        bio: updatedUser.bio,
+        location: updatedUser.location,
+        linkedinUrl: updatedUser.linkedinUrl,
+        githubUrl: updatedUser.githubUrl,
+      },
+      message: "Onboarding completado com sucesso!"
     };
   }
 

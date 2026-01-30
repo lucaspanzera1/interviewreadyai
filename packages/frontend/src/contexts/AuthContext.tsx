@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { apiClient, User } from '../lib/api';
+import { useToast } from './ToastContext';
 
 interface AuthContextType {
   user: User | null;
@@ -24,6 +25,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [showOnboarding, setShowOnboarding] = useState(false);
+  const { showToast } = useToast();
 
   const isAuthenticated = !!user && apiClient.isAuthenticated();
 
@@ -127,13 +129,20 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       });
 
       // Update basic profile if there are basic fields
+      let message: string | undefined;
       if (Object.keys(basicData).length > 0) {
-        await apiClient.updateUserProfile(basicData);
+        const result = await apiClient.updateUserProfile(basicData);
+        message = result.message;
       }
 
       // Update profile data if there are profile fields
       if (Object.keys(profileData).length > 0) {
-        await apiClient.updateUserProfileData(profileData);
+        const result = await apiClient.updateUserProfileData(profileData);
+        message = result.message || message;
+      }
+
+      if (message) {
+        showToast(message, 'success');
       }
 
       // Refresh user data to get the latest

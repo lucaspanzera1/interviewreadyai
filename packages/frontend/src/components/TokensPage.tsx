@@ -54,13 +54,13 @@ const TokensPage: React.FC = () => {
   const handleUpdateTokens = async (amount: number, type: 'add' | 'remove') => {
     try {
       setIsUpdating(true);
+      let result;
       if (type === 'add') {
-        await apiClient.addTokensToUser(amount);
-        showToast(`${amount} tokens adicionados`, 'success');
+        result = await apiClient.addTokensToUser(amount);
       } else {
-        await apiClient.removeTokensFromUser(amount);
-        showToast(`${amount} tokens removidos`, 'success');
+        result = await apiClient.removeTokensFromUser(amount);
       }
+      showToast(result.message, 'success');
       await refreshUser();
     } catch (error) {
       showToast(`Erro ao ${type === 'add' ? 'adicionar' : 'remover'} tokens`, 'error');

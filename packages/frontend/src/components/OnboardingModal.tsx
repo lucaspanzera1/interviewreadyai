@@ -75,8 +75,8 @@ const OnboardingModal = ({ isOpen, onComplete }: OnboardingModalProps) => {
   const handleComplete = async () => {
     setLoading(true);
     try {
-      await apiClient.completeOnboarding(formData);
-      showToast('Perfil profissional criado com sucesso!', 'success');
+      const result = await apiClient.completeOnboarding(formData);
+      showToast(result.message || 'Perfil profissional criado com sucesso!', 'success');
       onComplete();
     } catch (error) {
       showToast('Erro ao salvar perfil', 'error');
