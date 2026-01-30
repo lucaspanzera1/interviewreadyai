@@ -8,7 +8,8 @@ import {
     XCircleIcon,
     MagnifyingGlassIcon,
     FunnelIcon,
-    EyeIcon
+    EyeIcon,
+    EllipsisHorizontalIcon
 } from '@heroicons/react/24/outline';
 import { apiClient } from '../lib/api';
 import { toast } from 'react-toastify';
@@ -67,10 +68,11 @@ const AdminQuizzesPage: React.FC = () => {
         }
     };
 
-    const handleStatusToggle = async (quizId: string, currentStatus: boolean) => {
+    const handleStatusToggle = async (quizId: string, currentStatus: boolean, e: React.MouseEvent) => {
+        e.stopPropagation();
         try {
             await apiClient.updateQuizStatus(quizId, !currentStatus);
-            toast.success('Status do quiz atualizado!');
+            toast.success(currentStatus ? 'Quiz desativado' : 'Quiz ativado');
             loadQuizzes();
         } catch (error) {
             toast.error('Erro ao atualizar status');
@@ -78,7 +80,8 @@ const AdminQuizzesPage: React.FC = () => {
         }
     };
 
-    const handleDeleteQuiz = async (quizId: string) => {
+    const handleDeleteQuiz = async (quizId: string, e: React.MouseEvent) => {
+        e.stopPropagation();
         if (!confirm('Tem certeza que deseja excluir este quiz? Esta ação não pode ser desfeita.')) {
             return;
         }
@@ -93,221 +96,241 @@ const AdminQuizzesPage: React.FC = () => {
         }
     };
 
-    const viewQuizStats = (quizId: string) => {
-        navigate(`/admin/quizzes/${quizId}/stats`);
-    };
-
-    const viewQuizDetails = (quizId: string) => {
-        navigate(`/admin/quizzes/${quizId}/details`);
-    };
-
     const filteredQuizzes = quizzes.filter(quiz => {
         const matchesSearch = quiz.titulo.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                            quiz.categoria.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                            quiz.createdBy.name.toLowerCase().includes(searchQuery.toLowerCase());
+            quiz.categoria.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            quiz.createdBy.name.toLowerCase().includes(searchQuery.toLowerCase());
 
         const matchesStatus = statusFilter === 'all' ||
-                            (statusFilter === 'active' && quiz.isActive) ||
-                            (statusFilter === 'inactive' && !quiz.isActive);
+            (statusFilter === 'active' && quiz.isActive) ||
+            (statusFilter === 'inactive' && !quiz.isActive);
 
         return matchesSearch && matchesStatus;
     });
 
     if (loading) {
         return (
-            <div className="flex items-center justify-center min-h-96">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
+            <div className="flex items-center justify-center min-h-[60vh]">
+                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary-600"></div>
             </div>
         );
     }
 
     return (
-        <div className="max-w-7xl mx-auto space-y-8">
-            <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
-                <PageTitle title="Gerenciar Quizzes" />
-                <div className="text-sm text-slate-500 dark:text-slate-400">
-                    Total: {quizzes.length} quizzes
-                </div>
-            </div>
-
-            {/* Filters */}
-            <div className="bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
-                <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
-                    {/* Search */}
-                    <div className="relative w-full md:w-96">
-                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <MagnifyingGlassIcon className="h-5 w-5 text-slate-400" />
-                        </div>
-                        <input
-                            type="text"
-                            placeholder="Buscar por título, categoria ou criador..."
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                            className="block w-full pl-10 pr-3 py-2 border border-slate-200 dark:border-slate-700 rounded-lg leading-5 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
-                        />
-                    </div>
-
-                    {/* Status Filter */}
-                    <div className="flex items-center gap-2">
-                        <FunnelIcon className="w-4 h-4 text-slate-400" />
-                        <select
-                            value={statusFilter}
-                            onChange={(e) => setStatusFilter(e.target.value as any)}
-                            className="text-sm border-slate-200 dark:border-slate-700 rounded-lg bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-200 focus:ring-primary-500 focus:border-primary-500"
-                        >
-                            <option value="all">Todos os Status</option>
-                            <option value="active">Ativos</option>
-                            <option value="inactive">Inativos</option>
-                        </select>
-                    </div>
-                </div>
-            </div>
-
-            {/* Quizzes Table */}
-            <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
-                <div className="overflow-x-auto">
-                    <table className="min-w-full divide-y divide-slate-200 dark:divide-slate-700">
-                        <thead className="bg-slate-50 dark:bg-slate-800">
-                            <tr>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-                                    Quiz
-                                </th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-                                    Criador
-                                </th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-                                    Estatísticas
-                                </th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-                                    Status
-                                </th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-                                    Ações
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody className="bg-white dark:bg-slate-900 divide-y divide-slate-200 dark:divide-slate-700">
-                            {filteredQuizzes.map((quiz) => (
-                                <tr key={quiz._id} className="hover:bg-slate-50 dark:hover:bg-slate-800">
-                                    <td className="px-6 py-4 whitespace-nowrap">
-                                        <div className="flex flex-col">
-                                            <div className="text-sm font-medium text-slate-900 dark:text-white">
-                                                {quiz.titulo}
-                                            </div>
-                                            <div className="text-sm text-slate-500 dark:text-slate-400">
-                                                {quiz.categoria} • {quiz.nivel} • {quiz.quantidade_questoes} questões
-                                            </div>
-                                            <div className="text-xs text-slate-400 dark:text-slate-500 mt-1">
-                                                {new Date(quiz.createdAt).toLocaleDateString('pt-BR')}
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td className="px-6 py-4 whitespace-nowrap">
-                                        <div className="text-sm text-slate-900 dark:text-white">
-                                            {quiz.createdBy.name}
-                                        </div>
-                                        <div className="text-sm text-slate-500 dark:text-slate-400">
-                                            {quiz.createdBy.email}
-                                        </div>
-                                    </td>
-                                    <td className="px-6 py-4 whitespace-nowrap">
-                                        <div className="text-sm text-slate-900 dark:text-white">
-                                            <div>Acessos: {quiz.totalAccess}</div>
-                                            <div>Tentativas: {quiz.totalAttempts}</div>
-                                            <div>Completados: {quiz.totalCompletions}</div>
-                                            <div>Média: {quiz.averageScore.toFixed(1)}%</div>
-                                        </div>
-                                    </td>
-                                    <td className="px-6 py-4 whitespace-nowrap">
-                                        <button
-                                            onClick={() => handleStatusToggle(quiz._id, quiz.isActive)}
-                                            className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                                                quiz.isActive
-                                                    ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
-                                                    : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
-                                            }`}
-                                        >
-                                            {quiz.isActive ? (
-                                                <>
-                                                    <CheckCircleIcon className="w-4 h-4 mr-1" />
-                                                    Ativo
-                                                </>
-                                            ) : (
-                                                <>
-                                                    <XCircleIcon className="w-4 h-4 mr-1" />
-                                                    Inativo
-                                                </>
-                                            )}
-                                        </button>
-                                    </td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                        <div className="flex items-center space-x-2">
-                                            <button
-                                                onClick={() => viewQuizDetails(quiz._id)}
-                                                className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300"
-                                                title="Ver detalhes das questões"
-                                            >
-                                                <EyeIcon className="w-5 h-5" />
-                                            </button>
-                                            <button
-                                                onClick={() => viewQuizStats(quiz._id)}
-                                                className="text-primary-600 hover:text-primary-900 dark:text-primary-400 dark:hover:text-primary-300"
-                                                title="Ver estatísticas detalhadas"
-                                            >
-                                                <ChartBarIcon className="w-5 h-5" />
-                                            </button>
-                                            <button
-                                                onClick={() => handleDeleteQuiz(quiz._id)}
-                                                className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300"
-                                                title="Excluir quiz"
-                                            >
-                                                <TrashIcon className="w-5 h-5" />
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
-
-                {filteredQuizzes.length === 0 && (
-                    <div className="text-center py-12">
-                        <ChartBarIcon className="mx-auto h-12 w-12 text-slate-400" />
-                        <h3 className="mt-2 text-sm font-medium text-slate-900 dark:text-white">
-                            Nenhum quiz encontrado
-                        </h3>
-                        <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-                            Tente ajustar os filtros de busca.
+        <div className="min-h-screen bg-slate-50 dark:bg-slate-900 pb-20 animate-fade-in">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+                <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+                    <div>
+                        <PageTitle title="Gerenciar Quizzes" />
+                        <p className="text-slate-500 dark:text-slate-400 mt-1">
+                            Administre todos os quizzes disponíveis na plataforma
                         </p>
+                    </div>
+                    <div className="text-sm font-medium bg-white dark:bg-slate-800 px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm text-slate-600 dark:text-slate-300">
+                        Total: <span className="text-primary-600 dark:text-primary-400 font-bold">{quizzes.length}</span> quizzes
+                    </div>
+                </div>
+
+                {/* Filters Toolbar */}
+                <div className="bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
+                    <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
+                        {/* Search */}
+                        <div className="relative w-full md:w-96 group">
+                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <MagnifyingGlassIcon className="h-5 w-5 text-slate-400 group-focus-within:text-primary-500 transition-colors" />
+                            </div>
+                            <input
+                                type="text"
+                                placeholder="Buscar por título, categoria ou criador..."
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                className="block w-full pl-10 pr-3 py-2.5 border border-slate-200 dark:border-slate-600 rounded-lg leading-5 bg-slate-50 dark:bg-slate-900/50 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all"
+                            />
+                        </div>
+
+                        {/* Status Filter */}
+                        <div className="flex items-center gap-3 w-full md:w-auto">
+                            <FunnelIcon className="w-5 h-5 text-slate-400 hidden md:block" />
+                            <select
+                                value={statusFilter}
+                                onChange={(e) => setStatusFilter(e.target.value as any)}
+                                className="w-full md:w-48 text-sm border-slate-200 dark:border-slate-600 rounded-lg bg-slate-50 dark:bg-slate-900/50 text-slate-700 dark:text-slate-300 focus:ring-primary-500 focus:border-primary-500 py-2.5"
+                            >
+                                <option value="all">Todos os Status</option>
+                                <option value="active">Ativos</option>
+                                <option value="inactive">Inativos</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Quizzes List */}
+                <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-lg shadow-slate-200/50 dark:shadow-none overflow-hidden">
+                    <div className="overflow-x-auto">
+                        <table className="min-w-full divide-y divide-slate-200 dark:divide-slate-700/50">
+                            <thead className="bg-slate-50 dark:bg-slate-900/50">
+                                <tr>
+                                    <th className="px-6 py-4 text-left text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                                        Quiz Detalhes
+                                    </th>
+                                    <th className="px-6 py-4 text-left text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                                        Criador
+                                    </th>
+                                    <th className="px-6 py-4 text-left text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                                        Analytics
+                                    </th>
+                                    <th className="px-6 py-4 text-center text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                                        Status
+                                    </th>
+                                    <th className="px-6 py-4 text-right text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                                        Ações
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-slate-100 dark:divide-slate-700/50">
+                                {filteredQuizzes.map((quiz, index) => (
+                                    <tr
+                                        key={quiz._id}
+                                        onClick={() => navigate(`/admin/quizzes/${quiz._id}/details`)}
+                                        className="hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors cursor-pointer group"
+                                    >
+                                        <td className="px-6 py-4">
+                                            <div className="flex flex-col">
+                                                <div className="text-base font-semibold text-slate-900 dark:text-white group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">
+                                                    {quiz.titulo}
+                                                </div>
+                                                <div className="flex items-center gap-2 mt-1">
+                                                    <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400">
+                                                        {quiz.categoria}
+                                                    </span>
+                                                    <span className="text-slate-300 dark:text-slate-600">•</span>
+                                                    <span className="text-xs text-slate-500 dark:text-slate-400">
+                                                        {quiz.quantidade_questoes} questões
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap">
+                                            <div className="flex items-center">
+                                                <div className="h-8 w-8 rounded-full bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center text-primary-700 dark:text-primary-300 font-bold text-xs mr-3">
+                                                    {quiz.createdBy.name.charAt(0).toUpperCase()}
+                                                </div>
+                                                <div>
+                                                    <div className="text-sm font-medium text-slate-900 dark:text-white">
+                                                        {quiz.createdBy.name}
+                                                    </div>
+                                                    <div className="text-xs text-slate-500 dark:text-slate-400">
+                                                        {quiz.createdBy.email}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap">
+                                            <div className="flex items-center gap-4 text-sm text-slate-500 dark:text-slate-400">
+                                                <div className="text-center">
+                                                    <div className="font-bold text-slate-900 dark:text-white">{quiz.totalAccess}</div>
+                                                    <div className="text-xs">Acessos</div>
+                                                </div>
+                                                <div className="text-center">
+                                                    <div className="font-bold text-slate-900 dark:text-white">{quiz.totalCompletions}</div>
+                                                    <div className="text-xs">Concluídos</div>
+                                                </div>
+                                                <div className="text-center">
+                                                    <div className="font-bold text-slate-900 dark:text-white">{quiz.averageScore.toFixed(0)}%</div>
+                                                    <div className="text-xs">Média</div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-center">
+                                            <button
+                                                onClick={(e) => handleStatusToggle(quiz._id, quiz.isActive, e)}
+                                                className={`
+                                                    relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-primary-600 focus:ring-offset-2
+                                                    ${quiz.isActive ? 'bg-primary-600' : 'bg-slate-200 dark:bg-slate-700'}
+                                                `}
+                                            >
+                                                <span
+                                                    className={`
+                                                        pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out
+                                                        ${quiz.isActive ? 'translate-x-5' : 'translate-x-0'}
+                                                    `}
+                                                />
+                                            </button>
+                                            <div className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                                                {quiz.isActive ? 'Ativo' : 'Inativo'}
+                                            </div>
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-right">
+                                            <div className="flex items-center justify-end gap-2">
+                                                <button
+                                                    onClick={(e) => { e.stopPropagation(); navigate(`/admin/quizzes/${quiz._id}/stats`); }}
+                                                    className="p-2 text-slate-400 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-lg transition-colors"
+                                                    title="Estatísticas"
+                                                >
+                                                    <ChartBarIcon className="w-5 h-5" />
+                                                </button>
+                                                <button
+                                                    onClick={(e) => { e.stopPropagation(); navigate(`/admin/quizzes/${quiz._id}/details`); }}
+                                                    className="p-2 text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
+                                                    title="Detalhes"
+                                                >
+                                                    <EyeIcon className="w-5 h-5" />
+                                                </button>
+                                                <button
+                                                    onClick={(e) => handleDeleteQuiz(quiz._id, e)}
+                                                    className="p-2 text-slate-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                                                    title="Excluir"
+                                                >
+                                                    <TrashIcon className="w-5 h-5" />
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    {filteredQuizzes.length === 0 && (
+                        <div className="text-center py-20 bg-white dark:bg-slate-800">
+                            <div className="mx-auto h-12 w-12 text-slate-400 bg-slate-100 dark:bg-slate-700 rounded-full flex items-center justify-center mb-4">
+                                <MagnifyingGlassIcon className="h-6 w-6" />
+                            </div>
+                            <h3 className="text-lg font-medium text-slate-900 dark:text-white">
+                                Nenhum quiz encontrado
+                            </h3>
+                            <p className="mt-1 text-slate-500 dark:text-slate-400">
+                                Tente ajustar os filtros de busca.
+                            </p>
+                        </div>
+                    )}
+                </div>
+
+                {/* Pagination */}
+                {totalPages > 1 && (
+                    <div className="flex items-center justify-between pt-4">
+                        <div className="text-sm text-slate-500 dark:text-slate-400">
+                            Mostrando página <span className="font-semibold text-slate-900 dark:text-white">{page}</span> de <span className="font-semibold text-slate-900 dark:text-white">{totalPages}</span>
+                        </div>
+                        <div className="flex gap-2">
+                            <button
+                                onClick={() => setPage(Math.max(1, page - 1))}
+                                disabled={page === 1}
+                                className="px-4 py-2 text-sm font-medium border border-slate-200 dark:border-slate-700 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-white dark:hover:bg-slate-800 transition-colors"
+                            >
+                                Anterior
+                            </button>
+                            <button
+                                onClick={() => setPage(Math.min(totalPages, page + 1))}
+                                disabled={page === totalPages}
+                                className="px-4 py-2 text-sm font-medium border border-slate-200 dark:border-slate-700 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-white dark:hover:bg-slate-800 transition-colors"
+                            >
+                                Próxima
+                            </button>
+                        </div>
                     </div>
                 )}
             </div>
-
-            {/* Pagination */}
-            {totalPages > 1 && (
-                <div className="flex items-center justify-between">
-                    <div className="text-sm text-slate-700 dark:text-slate-300">
-                        Página {page} de {totalPages}
-                    </div>
-                    <div className="flex items-center space-x-2">
-                        <button
-                            onClick={() => setPage(Math.max(1, page - 1))}
-                            disabled={page === 1}
-                            className="px-3 py-1 text-sm border border-slate-300 dark:border-slate-600 rounded-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50 dark:hover:bg-slate-800"
-                        >
-                            Anterior
-                        </button>
-                        <button
-                            onClick={() => setPage(Math.min(totalPages, page + 1))}
-                            disabled={page === totalPages}
-                            className="px-3 py-1 text-sm border border-slate-300 dark:border-slate-600 rounded-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50 dark:hover:bg-slate-800"
-                        >
-                            Próxima
-                        </button>
-                    </div>
-                </div>
-            )}
         </div>
     );
 };
