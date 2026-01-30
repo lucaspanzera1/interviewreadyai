@@ -44,6 +44,25 @@ const extractUsername = (url?: string) => {
   }
 };
 
+const TECH_STACK_OPTIONS = [
+  'JavaScript', 'TypeScript', 'React', 'Vue.js', 'Angular', 'Node.js',
+  'Python', 'Java', 'C#', '.NET', 'PHP', 'Ruby', 'Go', 'Rust',
+  'HTML', 'CSS', 'Sass', 'Tailwind CSS', 'Bootstrap',
+  'MongoDB', 'PostgreSQL', 'MySQL', 'Redis', 'Docker', 'Kubernetes',
+  'AWS', 'Azure', 'GCP', 'Git', 'Linux', 'Figma', 'Adobe XD'
+];
+
+interface FormData {
+  name: string;
+  careerTime: string;
+  techArea: string;
+  techStack: string[];
+  bio: string;
+  location: string;
+  linkedinUrl: string;
+  githubUrl: string;
+}
+
 /**
  * Página de perfil do usuário
  */
@@ -53,11 +72,11 @@ const ProfilePage: React.FC = () => {
   const navigate = useNavigate();
   const [isEditing, setIsEditing] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<FormData>({
     name: user?.name || '',
     careerTime: user?.careerTime || '',
     techArea: user?.techArea || '',
-    techStack: user?.techStack?.join(', ') || '',
+    techStack: user?.techStack || [],
     bio: user?.bio || '',
     location: user?.location || '',
     linkedinUrl: user?.linkedinUrl || '',
@@ -69,12 +88,22 @@ const ProfilePage: React.FC = () => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
+  const handleTechStackToggle = (tech: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      techStack: prev.techStack.includes(tech)
+        ? prev.techStack.filter((t) => t !== tech)
+        : [...prev.techStack, tech]
+    }));
+  };
+
   const handleSave = async () => {
     setIsLoading(true);
     try {
       const processedData = {
         ...formData,
-        techStack: formData.techStack.split(',').map(s => s.trim()).filter(s => s),
+        // Ensure techStack is clean
+        techStack: formData.techStack.filter(s => s),
       };
       await updateProfile(processedData);
       showToast('Perfil atualizado com sucesso!', 'success');
@@ -91,7 +120,7 @@ const ProfilePage: React.FC = () => {
       name: user?.name || '',
       careerTime: user?.careerTime || '',
       techArea: user?.techArea || '',
-      techStack: user?.techStack?.join(', ') || '',
+      techStack: user?.techStack || [],
       bio: user?.bio || '',
       location: user?.location || '',
       linkedinUrl: user?.linkedinUrl || '',
@@ -323,8 +352,36 @@ const ProfilePage: React.FC = () => {
 
             {/* 2. PROFESSIONAL PROFILE CARD (NEW SECTION) */}
             <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg shadow-sm">
-              <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-800">
+              <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
                 <h2 className="text-base font-semibold text-slate-900 dark:text-white">Perfil Profissional</h2>
+                {!isEditing ? (
+                  <button
+                    onClick={() => setIsEditing(true)}
+                    className="flex items-center text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors"
+                  >
+                    <PencilIcon className="h-4 w-4 mr-1.5 opacity-70" />
+                    Editar
+                  </button>
+                ) : (
+                  <div className="flex gap-3">
+                    <button
+                      onClick={handleCancel}
+                      className="flex items-center px-3 py-1.5 text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-800 rounded-md transition-all"
+                      disabled={isLoading}
+                    >
+                      <XMarkIcon className="h-4 w-4 mr-1" />
+                      Cancelar
+                    </button>
+                    <button
+                      onClick={handleSave}
+                      className="flex items-center px-4 py-2 text-sm font-semibold text-white bg-primary-600 hover:bg-primary-500 rounded-lg transition-all shadow-md shadow-primary-600/20 active:scale-95"
+                      disabled={isLoading}
+                    >
+                      <CheckIcon className="h-4 w-4 mr-1.5" />
+                      {isLoading ? 'Salvando...' : 'Salvar'}
+                    </button>
+                  </div>
+                )}
               </div>
               <div className="p-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
@@ -382,19 +439,29 @@ const ProfilePage: React.FC = () => {
                     Stack e Tecnologias
                   </label>
                   {isEditing ? (
-                    <input
-                      type="text"
-                      name="techStack"
-                      value={formData.techStack}
-                      onChange={handleInputChange}
-                      placeholder="Ex: React, Node, Python (separados por vírgula)"
-                      className="block w-full px-4 py-2 text-sm bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:border-primary-500 dark:text-white"
-                    />
+                    <div className="flex flex-wrap gap-2 max-h-[300px] overflow-y-auto p-2 border border-slate-200 dark:border-slate-700 rounded-xl">
+                      {TECH_STACK_OPTIONS.map((tech) => {
+                        const isSelected = formData.techStack.includes(tech);
+                        return (
+                          <button
+                            key={tech}
+                            onClick={() => handleTechStackToggle(tech)}
+                            className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-200
+                              ${isSelected
+                                ? 'bg-primary-600 text-white shadow-sm shadow-primary-500/30'
+                                : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
+                              }`}
+                          >
+                            {tech}
+                          </button>
+                        );
+                      })}
+                    </div>
                   ) : (
                     <div className="flex flex-wrap gap-2">
                       {user?.techStack && user.techStack.length > 0 ? (
                         user.techStack.map((tech, i) => (
-                          <span key={i} className="px-3 py-1 bg-primary-50 dark:bg-primary-900/40 text-primary-700 dark:text-primary-300 rounded-full text-xs font-semibold border border-primary-100 dark:border-primary-800">
+                          <span key={i} className="px-3 py-1 bg-primary-600 text-white shadow-sm shadow-primary-500/30 rounded-full text-xs font-medium">
                             {tech}
                           </span>
                         ))

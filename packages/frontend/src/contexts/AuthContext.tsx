@@ -108,7 +108,36 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const updateProfile = async (userData: Partial<User>): Promise<void> => {
     try {
-      const updatedUser = await apiClient.updateUserProfile(userData);
+      // Separate basic profile fields from onboarding/profile fields
+      const basicFields = ['name'];
+      const profileFields = ['careerTime', 'techArea', 'techStack', 'bio', 'location', 'linkedinUrl', 'githubUrl'];
+
+      const basicData: Partial<User> = {};
+      const profileData: Partial<User> = {};
+
+      Object.keys(userData).forEach(key => {
+        const value = userData[key as keyof User];
+        if (value !== undefined) {
+          if (basicFields.includes(key)) {
+            (basicData as any)[key] = value;
+          } else if (profileFields.includes(key)) {
+            (profileData as any)[key] = value;
+          }
+        }
+      });
+
+      // Update basic profile if there are basic fields
+      if (Object.keys(basicData).length > 0) {
+        await apiClient.updateUserProfile(basicData);
+      }
+
+      // Update profile data if there are profile fields
+      if (Object.keys(profileData).length > 0) {
+        await apiClient.updateUserProfileData(profileData);
+      }
+
+      // Refresh user data to get the latest
+      const updatedUser = await apiClient.getUserProfile();
       setUser(updatedUser);
     } catch (error) {
       console.error('Failed to update profile:', error);
