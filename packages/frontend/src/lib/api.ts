@@ -410,6 +410,11 @@ class ApiClient {
     });
     return res.data;
   }
+
+  async getUserAttemptDetails(attemptId: string) {
+    const res = await this.client.get(`/quiz/my-attempts/${attemptId}`);
+    return res.data;
+  }
 }
 
 export const apiClient = new ApiClient();

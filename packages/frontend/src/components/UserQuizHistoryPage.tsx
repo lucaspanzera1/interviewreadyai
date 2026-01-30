@@ -257,6 +257,12 @@ const UserQuizHistoryPage: React.FC = () => {
                                                     <AcademicCapIcon className="h-4 w-4" />
                                                     {attempt.score}/{attempt.totalQuestions} questões
                                                 </div>
+                                                <button
+                                                    onClick={() => navigate(`/profile/quiz-history/${attempt._id}`)}
+                                                    className="text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 font-medium transition-colors"
+                                                >
+                                                    Ver Detalhes →
+                                                </button>
                                             </div>
                                         </div>
 

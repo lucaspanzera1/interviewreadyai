@@ -17,6 +17,7 @@ import GeneratedQuizPage from './components/GeneratedQuizPage'
 import AdminQuizzesPage from './components/AdminQuizzesPage'
 import AdminQuizStatsPage from './components/AdminQuizStatsPage'
 import AdminQuizDetailsPage from './components/AdminQuizDetailsPage'
+import UserQuizAttemptDetailsPage from './components/UserQuizAttemptDetailsPage'
 
 function App() {
   return (
@@ -53,6 +54,18 @@ function App() {
             <ProtectedRoute>
               <AppLayout>
                 <UserQuizHistoryPage />
+              </AppLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        {/* User Quiz Attempt Details page */}
+        <Route
+          path="/profile/quiz-history/:attemptId"
+          element={
+            <ProtectedRoute>
+              <AppLayout>
+                <UserQuizAttemptDetailsPage />
               </AppLayout>
             </ProtectedRoute>
           }

@@ -78,4 +78,13 @@ export class QuizController {
   ) {
     return this.quizService.getUserAttempts(user.userId, parseInt(page), parseInt(limit));
   }
+
+  @Get('my-attempts/:attemptId')
+  @UseGuards(JwtAuthGuard)
+  async getUserAttemptDetails(
+    @Param('attemptId') attemptId: string,
+    @CurrentUser() user: any,
+  ) {
+    return this.quizService.getUserAttemptDetails(attemptId, user.userId);
+  }
 }

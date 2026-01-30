@@ -1,4 +1,4 @@
-import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
+import { Injectable, HttpException, HttpStatus, NotFoundException } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
 import { InjectModel } from '@nestjs/mongoose';
@@ -387,5 +387,21 @@ Gere agora {quantidade_questoes} questões de nível {nivel} sobre "{titulo}" na
     return this.quizModel.findByIdAndUpdate(quizId, {
       $inc: { totalAccess: 1 },
     });
+  }
+
+  async getUserAttemptDetails(attemptId: string, userId: string) {
+    const attempt = await this.quizAttemptModel
+      .findOne({ _id: attemptId, userId })
+      .populate({
+        path: 'quizId',
+        select: 'titulo categoria nivel quantidade_questoes questions tags'
+      })
+      .exec();
+
+    if (!attempt) {
+      throw new NotFoundException('Attempt not found or does not belong to user');
+    }
+
+    return attempt;
   }
 }
