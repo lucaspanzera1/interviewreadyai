@@ -59,6 +59,18 @@ function App() {
           }
         />
 
+        {/* Desempenho / Performance page */}
+        <Route
+          path="/desempenho"
+          element={
+            <ProtectedRoute>
+              <AppLayout>
+                <UserQuizHistoryPage />
+              </AppLayout>
+            </ProtectedRoute>
+          }
+        />
+
         {/* User Quiz Attempt Details page */}
         <Route
           path="/profile/quiz-history/:attemptId"

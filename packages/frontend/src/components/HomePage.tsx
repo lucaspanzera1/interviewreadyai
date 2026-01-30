@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { toast } from 'react-toastify';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import Sidebar from './BottomNav';
@@ -44,11 +45,15 @@ const HomePage: React.FC = () => {
     { label: 'Continuar Último', icon: PlayIcon, action: () => navigate('/simulados/continuar') },
   ];
 
-  // Load user stats when logged in
+  const [suggestedQuizzes, setSuggestedQuizzes] = useState<any[]>([]);
+  const [startingQuizId, setStartingQuizId] = useState<string | null>(null);
+
+  // Load user stats and suggested quizzes
   useEffect(() => {
     if (user) {
       loadUserStats();
     }
+    loadSuggestedQuizzes();
   }, [user]);
 
   const loadUserStats = async () => {
@@ -57,36 +62,44 @@ const HomePage: React.FC = () => {
       setUserStats(stats);
     } catch (error) {
       console.error('Erro ao carregar estatísticas:', error);
-      // Don't show toast error for stats loading, just use default values
     }
   };
 
-  const freeQuizzes = [
-    {
-      id: 'free-1',
-      title: 'Lógica de Programação',
-      questions: 10,
-      time: '15 min',
-      difficulty: 'Iniciante',
-      tags: ['Lógica', 'Algoritmos']
-    },
-    {
-      id: 'free-2',
-      title: 'Fundamentos do React',
-      questions: 15,
-      time: '20 min',
-      difficulty: 'Intermediário',
-      tags: ['Frontend', 'React']
-    },
-    {
-      id: 'free-3',
-      title: 'SQL para Iniciantes',
-      questions: 12,
-      time: '15 min',
-      difficulty: 'Iniciante',
-      tags: ['Backend', 'Dados']
+  const loadSuggestedQuizzes = async () => {
+    try {
+      // Fetch 3 random/latest public quizzes
+      const response = await apiClient.getPublicQuizzes(1, 3);
+      setSuggestedQuizzes(response.quizzes);
+    } catch (error) {
+      console.error('Erro ao carregar quizzes sugeridos:', error);
     }
-  ];
+  };
+
+  const startSuggestedQuiz = async (quizId: string) => {
+    setStartingQuizId(quizId);
+    try {
+      await apiClient.recordQuizAccess(quizId);
+      const fullQuiz = await apiClient.getPublicQuizById(quizId);
+
+      if (!fullQuiz || !fullQuiz.questions || fullQuiz.questions.length === 0) {
+        toast.error('Quiz indísponivel no momento');
+        return;
+      }
+
+      localStorage.setItem('generatedQuiz', JSON.stringify({
+        questions: fullQuiz.questions,
+        quizId: fullQuiz._id
+      }));
+      localStorage.setItem('currentQuizId', fullQuiz._id);
+
+      navigate('/quiz/generated');
+    } catch (error) {
+      toast.error('Erro ao iniciar quiz');
+      console.error(error);
+    } finally {
+      setStartingQuizId(null);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-50 transition-colors duration-200">
@@ -262,38 +275,59 @@ const HomePage: React.FC = () => {
                   </div>
 
                   <div className="grid sm:grid-cols-3 gap-4">
-                    {freeQuizzes.map((quiz) => (
+                    {suggestedQuizzes.map((quiz) => (
                       <div
-                        key={quiz.id}
-                        className="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl p-4 hover:bg-white/20 transition-all cursor-pointer group hover:-translate-y-1"
-                        onClick={() => navigate(`/simulados/novo?template=${quiz.id}`)}
+                        key={quiz._id}
+                        className="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl p-4 hover:bg-white/20 transition-all cursor-pointer group hover:-translate-y-1 flex flex-col"
+                        onClick={() => startSuggestedQuiz(quiz._id)}
                       >
                         <div className="flex justify-between items-start mb-3">
-                          <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center text-white">
+                          <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center text-white shrink-0">
                             <BoltIcon className="w-4 h-4" />
                           </div>
-                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/30 text-emerald-100 border border-emerald-400/50">
-                            Grátis
+                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/30 text-emerald-100 border border-emerald-400/50 shrink-0">
+                            {quiz.categoria}
                           </span>
                         </div>
 
-                        <h3 className="text-sm font-semibold text-white mb-1 line-clamp-1" title={quiz.title}>{quiz.title}</h3>
+                        <h3 className="text-sm font-semibold text-white mb-1 line-clamp-1" title={quiz.titulo}>{quiz.titulo}</h3>
 
-                        <div className="flex items-center gap-3 text-xs text-white/70 mb-4">
+                        <div className="flex items-center gap-3 text-xs text-white/70 mb-4 mt-auto">
                           <div className="flex items-center gap-1">
                             <ClockIcon className="w-3 h-3" />
-                            <span>{quiz.time}</span>
+                            <span>{quiz.nivel}</span>
                           </div>
                           <span>•</span>
-                          <span>{quiz.questions} questões</span>
+                          <span>{quiz.quantidade_questoes} qtd</span>
                         </div>
 
-                        <button className="w-full py-2 text-xs font-bold bg-white text-primary-700 rounded-lg hover:bg-slate-50 transition-colors flex items-center justify-center gap-1 group-hover:shadow-lg">
-                          <span>Praticar</span>
-                          <ArrowRightOnRectangleIcon className="w-3 h-3 -rotate-45" />
+                        <button
+                          className="w-full py-2 text-xs font-bold bg-white text-primary-700 rounded-lg hover:bg-slate-50 transition-colors flex items-center justify-center gap-1 group-hover:shadow-lg disabled:opacity-70 disabled:cursor-wait"
+                          disabled={startingQuizId === quiz._id}
+                        >
+                          {startingQuizId === quiz._id ? (
+                            <div className="animate-spin rounded-full h-3 w-3 border-2 border-primary-600 border-t-transparent"></div>
+                          ) : (
+                            <>
+                              <span>Praticar</span>
+                              <ArrowRightOnRectangleIcon className="w-3 h-3 -rotate-45" />
+                            </>
+                          )}
                         </button>
                       </div>
                     ))}
+
+                    {suggestedQuizzes.length === 0 && (
+                      <div className="col-span-3 text-center py-8 text-white/70">
+                        <p className="text-sm">Nenhum quiz sugerido no momento.</p>
+                        <button
+                          onClick={(e) => { e.stopPropagation(); navigate('/free-quizzes'); }}
+                          className="mt-2 text-xs hover:text-white underline"
+                        >
+                          Ver todos os quizzes
+                        </button>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
