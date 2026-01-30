@@ -17,7 +17,8 @@ import {
   MapPinIcon,
   DocumentTextIcon,
   CpuChipIcon,
-  AcademicCapIcon
+  AcademicCapIcon,
+  ChartBarIcon
 } from '@heroicons/react/24/outline';
 
 const LinkedInIcon = (props: React.ComponentProps<'svg'>) => (
@@ -519,6 +520,43 @@ const ProfilePage: React.FC = () => {
                   <span className="text-xl font-bold text-slate-900 dark:text-white">
                     {user?.tokens || 0}
                   </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Activity & Achievements Card */}
+            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg shadow-sm">
+              <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-800">
+                <h2 className="text-base font-semibold text-slate-900 dark:text-white">Atividades & Conquistas</h2>
+              </div>
+              <div className="p-6 space-y-4">
+                <button
+                  onClick={() => navigate('/profile/quiz-history')}
+                  className="w-full flex items-center justify-between p-4 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border border-blue-200 dark:border-blue-800 rounded-xl hover:shadow-md transition-all group"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg text-blue-600 dark:text-blue-400 group-hover:bg-blue-200 dark:group-hover:bg-blue-800/50 transition-colors">
+                      <ChartBarIcon className="h-5 w-5" />
+                    </div>
+                    <div className="text-left">
+                      <p className="font-semibold text-slate-900 dark:text-white">Histórico de Quizzes</p>
+                      <p className="text-sm text-slate-500 dark:text-slate-400">Veja seu progresso e pontuações</p>
+                    </div>
+                  </div>
+                  <ArrowRightOnRectangleIcon className="h-5 w-5 text-slate-400 dark:text-slate-500 group-hover:text-slate-600 dark:group-hover:text-slate-300 transition-colors" />
+                </button>
+
+                <div className="grid grid-cols-2 gap-4 pt-2">
+                  <div className="text-center p-3 bg-slate-50 dark:bg-slate-800/50 rounded-lg border border-slate-100 dark:border-slate-700">
+                    <AcademicCapIcon className="h-6 w-6 text-primary-500 mx-auto mb-2" />
+                    <p className="text-xs text-slate-500 dark:text-slate-400">Quizzes Feitos</p>
+                    <p className="text-lg font-bold text-slate-900 dark:text-white">-</p>
+                  </div>
+                  <div className="text-center p-3 bg-slate-50 dark:bg-slate-800/50 rounded-lg border border-slate-100 dark:border-slate-700">
+                    <ShieldCheckIcon className="h-6 w-6 text-green-500 mx-auto mb-2" />
+                    <p className="text-xs text-slate-500 dark:text-slate-400">Média Geral</p>
+                    <p className="text-lg font-bold text-slate-900 dark:text-white">-</p>
+                  </div>
                 </div>
               </div>
             </div>

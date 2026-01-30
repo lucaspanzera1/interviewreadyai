@@ -8,9 +8,9 @@ import {
     FunnelIcon,
     MagnifyingGlassIcon,
     PlusIcon,
-    XMarkIcon,
-    StarIcon
+    XMarkIcon
 } from '@heroicons/react/24/outline';
+import { StarIcon as StarIconSolid } from '@heroicons/react/24/solid';
 import { apiClient, QuizLevel } from '../lib/api';
 import { toast } from 'react-toastify';
 
@@ -26,6 +26,7 @@ const FreeQuizzesPage: React.FC = () => {
     const [loading, setLoading] = useState(true);
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
+    const [startingQuiz, setStartingQuiz] = useState<string | null>(null);
 
     // Modal and form states
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -115,12 +116,23 @@ const FreeQuizzesPage: React.FC = () => {
     };
 
     const startPublicQuiz = async (quiz: any) => {
+        setStartingQuiz(quiz._id);
         try {
             // Record access
             await apiClient.recordQuizAccess(quiz._id);
 
             // Get full quiz data
             const fullQuiz = await apiClient.getPublicQuizById(quiz._id);
+
+            if (!fullQuiz) {
+                toast.error('Quiz não encontrado');
+                return;
+            }
+
+            if (!fullQuiz.questions || fullQuiz.questions.length === 0) {
+                toast.error('Este quiz não possui questões disponíveis');
+                return;
+            }
 
             // Store quiz data for the quiz page
             localStorage.setItem('generatedQuiz', JSON.stringify({
@@ -132,7 +144,9 @@ const FreeQuizzesPage: React.FC = () => {
             navigate('/quiz/generated');
         } catch (error) {
             toast.error('Erro ao iniciar quiz');
-            console.error(error);
+            console.error('Erro ao iniciar quiz público:', error);
+        } finally {
+            setStartingQuiz(null);
         }
     };
 
@@ -253,10 +267,15 @@ const FreeQuizzesPage: React.FC = () => {
                                         }`}>
                                         {quiz.categoria}
                                     </span>
-                                    <div className="flex items-center gap-1 text-amber-500">
-                                        <StarIcon className="w-3.5 h-3.5" />
+                                    <div className="flex items-center gap-1">
+                                        <StarIconSolid
+                                            className="w-4 h-4 text-amber-400"
+                                        />
                                         <span className="text-xs font-bold text-slate-700 dark:text-slate-300">
-                                            {quiz.averageScore > 0 ? (quiz.averageScore / 10).toFixed(1) : 'N/A'}
+                                            {quiz.averageScore > 0 ? ((quiz.averageScore / 100) * 5).toFixed(1) : 'N/A'}
+                                        </span>
+                                        <span className="text-xs text-slate-500 dark:text-slate-400 ml-2">
+                                            ({quiz.totalAccess || 0})
                                         </span>
                                     </div>
                                 </div>
@@ -298,8 +317,17 @@ const FreeQuizzesPage: React.FC = () => {
                                     </div>
                                 </div>
                                 <div className="flex items-center gap-1 text-xs font-bold text-primary-600 dark:text-primary-400 opacity-0 group-hover:opacity-100 transition-opacity transform translate-x-2 group-hover:translate-x-0">
-                                    Começar
-                                    <PlayCircleIcon className="w-4 h-4" />
+                                    {startingQuiz === quiz._id ? (
+                                        <>
+                                            <div className="animate-spin rounded-full h-3 w-3 border border-primary-600 border-t-transparent"></div>
+                                            Carregando...
+                                        </>
+                                    ) : (
+                                        <>
+                                            Começar
+                                            <PlayCircleIcon className="w-4 h-4" />
+                                        </>
+                                    )}
                                 </div>
                             </div>
                         </div>

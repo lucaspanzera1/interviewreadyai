@@ -3,6 +3,7 @@ import ProtectedRoute from './components/ProtectedRoute'
 import LoginPage from './components/LoginPage'
 import AuthCallback from './components/AuthCallback'
 import ProfilePage from './components/ProfilePage'
+import UserQuizHistoryPage from './components/UserQuizHistoryPage'
 import AppLayout from './components/AppLayout'
 
 import ErrorBoundary from './components/ErrorBoundary'
@@ -39,6 +40,18 @@ function App() {
             <ProtectedRoute>
               <AppLayout>
                 <ProfilePage />
+              </AppLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        {/* User Quiz History page */}
+        <Route
+          path="/profile/quiz-history"
+          element={
+            <ProtectedRoute>
+              <AppLayout>
+                <UserQuizHistoryPage />
               </AppLayout>
             </ProtectedRoute>
           }

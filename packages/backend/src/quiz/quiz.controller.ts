@@ -62,10 +62,20 @@ export class QuizController {
 
   @Get('public/:id')
   async getPublicQuizById(@Param('id') id: string) {
-    const quiz = await this.quizService.getQuizById(id);
-    if (!quiz || !quiz.isActive) {
+    const quiz = await this.quizService.getPublicQuizById(id);
+    if (!quiz) {
       throw new NotFoundException('Quiz not found');
     }
     return quiz;
+  }
+
+  @Get('my-attempts')
+  @UseGuards(JwtAuthGuard)
+  async getUserAttempts(
+    @Query('page') page: string = '1',
+    @Query('limit') limit: string = '10',
+    @CurrentUser() user: any,
+  ) {
+    return this.quizService.getUserAttempts(user.userId, parseInt(page), parseInt(limit));
   }
 }

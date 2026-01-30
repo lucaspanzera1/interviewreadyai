@@ -403,6 +403,13 @@ class ApiClient {
     });
     return res.data;
   }
+
+  async getUserAttempts(page: number = 1, limit: number = 10) {
+    const res = await this.client.get('/quiz/my-attempts', {
+      params: { page, limit },
+    });
+    return res.data;
+  }
 }
 
 export const apiClient = new ApiClient();

@@ -6,6 +6,7 @@ export { default as Sidebar } from './Sidebar';
 // Page Components
 export { default as LoginPage } from './LoginPage';
 export { default as ProfilePage } from './ProfilePage';
+export { default as UserQuizHistoryPage } from './UserQuizHistoryPage';
 export { default as AuthCallback } from './AuthCallback';
 
 // Utility Components

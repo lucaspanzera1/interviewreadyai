@@ -273,6 +273,14 @@ Gere agora {quantidade_questoes} questões de nível {nivel} sobre "{titulo}" na
       .exec();
   }
 
+  async getPublicQuizById(id: string) {
+    return this.quizModel
+      .findOne({ _id: id, isActive: true })
+      .populate('createdBy', 'name')
+      .select('titulo descricao categoria tags nivel quantidade_questoes questions totalAccess totalAttempts totalCompletions averageScore createdAt')
+      .exec();
+  }
+
   async updateQuizStatus(id: string, isActive: boolean) {
     return this.quizModel
       .findByIdAndUpdate(id, { isActive }, { new: true })
@@ -339,6 +347,37 @@ Gere agora {quantidade_questoes} questões de nível {nivel} sobre "{titulo}" na
     });
 
     return attempt;
+  }
+
+  async getUserAttempts(userId: string, page: number = 1, limit: number = 10) {
+    const skip = (page - 1) * limit;
+
+    const attempts = await this.quizAttemptModel
+      .find({ userId })
+      .populate({
+        path: 'quizId',
+        select: 'titulo categoria nivel quantidade_questoes tags',
+        match: { isActive: true }
+      })
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit)
+      .exec();
+
+    // Filter out attempts where quiz was not found or inactive
+    const validAttempts = attempts.filter(attempt => attempt.quizId);
+
+    const total = await this.quizAttemptModel.countDocuments({
+      userId,
+      quizId: { $in: validAttempts.map(a => a.quizId) }
+    }).exec();
+
+    return {
+      attempts: validAttempts,
+      total,
+      page,
+      totalPages: Math.ceil(total / limit),
+    };
   }
 
   async incrementQuizAccess(quizId: string) {
