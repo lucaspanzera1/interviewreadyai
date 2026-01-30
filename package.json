@@ -1,0 +1,55 @@
+{
+  "name": "treinavagaai-app",
+  "version": "1.0.0",
+  "description": "TreinaVagaAI App com autenticação OAuth Google",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "node scripts/dev-start.js",
+    "dev:simple": "concurrently --names \"DB,API,WEB\" --prefix-colors \"blue,green,yellow\" --kill-others-on-fail \"pnpm docker:up\" \"pnpm dev:backend\" \"pnpm dev:frontend\"",
+    "dev:services": "concurrently --names \"API,WEB\" --prefix-colors \"green,yellow\" --kill-others-on-fail \"pnpm dev:backend\" \"pnpm dev:frontend\"",
+    "dev:backend": "pnpm --filter backend dev",
+    "dev:frontend": "pnpm --filter frontend dev",
+    "dev:full": "pnpm setup:env && pnpm dev",
+    "dev:api-only": "concurrently --names \"DB,API\" --prefix-colors \"blue,green\" \"pnpm docker:up\" \"pnpm dev:backend\"",
+    "dev:web-only": "pnpm --filter frontend dev",
+    "build": "pnpm --filter backend build && pnpm --filter frontend build",
+    "build:backend": "pnpm --filter backend build",
+    "build:frontend": "pnpm --filter frontend build",
+    "start": "pnpm --filter backend start",
+    "start:prod": "pnpm build && pnpm start",
+    "docker:up": "docker-compose -f docker/docker-compose.yml up -d",
+    "docker:down": "docker-compose -f docker/docker-compose.yml down",
+    "docker:logs": "docker-compose -f docker/docker-compose.yml logs -f",
+    "docker:restart": "pnpm docker:down && pnpm docker:up",
+    "setup:env": "node scripts/setup-env.js",
+    "setup": "pnpm install && pnpm setup:env && pnpm docker:up",
+    "install:all": "pnpm install",
+    "clean": "pnpm --filter backend clean && pnpm --filter frontend clean",
+    "clean:all": "pnpm clean && pnpm docker:down && rm -rf node_modules packages/*/node_modules",
+    "lint": "pnpm --filter backend lint && pnpm --filter frontend lint",
+    "lint:fix": "pnpm --filter backend lint --fix && pnpm --filter frontend lint --fix",
+    "test": "pnpm --filter backend test --run",
+    "test:watch": "pnpm --filter backend test:watch",
+    "test:coverage": "pnpm --filter backend test:cov",
+    "type-check": "pnpm --filter backend build:check && pnpm --filter frontend build"
+  },
+  "devDependencies": {
+    "@types/aos": "^3.0.7",
+    "concurrently": "^8.2.2",
+    "typescript": "^5.3.3",
+    "wait-on": "^7.2.0"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "pnpm": ">=8.0.0"
+  },
+  "dependencies": {
+    "aos": "^2.3.4",
+    "axios": "^1.12.2",
+    "body-parser": "^2.2.0",
+    "lucide-react": "^0.548.0"
+  }
+}

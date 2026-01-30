@@ -1,0 +1,1 @@
+// Arquivo removido: não é mais necessário RequiresActive

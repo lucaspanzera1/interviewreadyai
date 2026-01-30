@@ -1,0 +1,186 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    font-family: 'Inter', system-ui, sans-serif;
+    -webkit-tap-highlight-color: transparent;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    @apply bg-white text-slate-900 antialiased overflow-x-hidden;
+    /* Selection color for technical feel */
+    @apply selection:bg-slate-900 selection:text-white;
+  }
+}
+
+@layer components {
+
+  /* Modern Tech Card - Linear/Vercel Style */
+  .card {
+    @apply bg-white rounded-lg border border-slate-200 shadow-sm transition-all duration-200;
+    /* Removed heavy shadows, added subtle border */
+  }
+
+  .card:hover {
+    @apply border-slate-300 shadow-md;
+  }
+
+  .card-header {
+    @apply px-6 py-4 border-b border-slate-100 flex items-center justify-between;
+  }
+
+  .card-body {
+    @apply px-6 py-4;
+  }
+
+  .card-footer {
+    @apply px-6 py-4 border-t border-slate-100 bg-slate-50/50 rounded-b-lg flex items-center;
+  }
+
+  /* Glass Card - Refined */
+  .glass-card {
+    @apply bg-white/60 backdrop-blur-md rounded-lg border border-slate-200/60 shadow-sm;
+  }
+
+  /* Button Components - Engineering Style */
+  .btn {
+    @apply inline-flex items-center justify-center px-4 py-2.5 text-sm font-medium rounded-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-1 disabled:opacity-50 disabled:cursor-not-allowed select-none;
+  }
+
+  .btn-primary {
+    /* Solid Black/Dark Gray for high contrast */
+    @apply btn bg-slate-900 text-white border border-transparent shadow-sm hover:bg-slate-800 hover:shadow focus:ring-slate-900;
+  }
+
+  .btn-secondary {
+    /* White with delicate border */
+    @apply btn bg-white text-slate-700 border border-slate-200 shadow-sm hover:bg-slate-50 hover:border-slate-300 hover:text-slate-900 focus:ring-slate-200;
+  }
+
+  .btn-ghost {
+    @apply btn text-slate-600 hover:text-slate-900 hover:bg-slate-100 focus:ring-slate-200;
+  }
+
+  .btn-danger {
+    @apply btn bg-red-600 text-white hover:bg-red-700 focus:ring-red-500 shadow-sm;
+  }
+
+  .btn-outline {
+    @apply btn bg-transparent border border-slate-300 text-slate-700 hover:border-slate-900 hover:text-slate-900;
+  }
+
+  .btn-icon {
+    @apply p-2 rounded-md text-slate-500 hover:text-slate-900 hover:bg-slate-100 transition-colors border border-transparent hover:border-slate-200;
+  }
+
+  .btn-sm {
+    @apply px-3 py-1.5 text-xs;
+  }
+
+  .btn-lg {
+    @apply px-6 py-3 text-base;
+  }
+
+  /* Input Components - Precise */
+  .input {
+    @apply block w-full px-3 py-2 text-sm bg-white border border-slate-200 rounded-md shadow-sm placeholder-slate-400 text-slate-900 transition-all duration-200;
+    @apply focus:outline-none focus:border-slate-500 focus:ring-1 focus:ring-slate-500;
+    /* Removed large colored rings, kept it technical */
+  }
+
+  .label {
+    @apply block text-xs font-medium text-slate-700 mb-1.5 uppercase tracking-wide;
+  }
+
+  /* Badge Components - Subtle */
+  .badge {
+    @apply inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border;
+  }
+
+  .badge-primary {
+    @apply bg-slate-100 text-slate-800 border-slate-200;
+  }
+
+  .badge-success {
+    @apply bg-emerald-50 text-emerald-700 border-emerald-200;
+  }
+
+  .badge-warning {
+    @apply bg-amber-50 text-amber-700 border-amber-200;
+  }
+
+  .badge-danger {
+    @apply bg-red-50 text-red-700 border-red-200;
+  }
+
+  .badge-outline {
+    @apply bg-transparent text-slate-600 border-slate-300;
+  }
+
+  /* Typography */
+  .heading-gradient {
+    /* Subtle metallic gradient or solid dark */
+    @apply bg-clip-text text-transparent bg-gradient-to-br from-slate-900 to-slate-600;
+  }
+
+  .text-gradient-primary {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-slate-900 via-slate-700 to-slate-900;
+  }
+
+  /* Utilities */
+  .border-subtle {
+    @apply border border-slate-200;
+  }
+
+  .bg-dot-pattern {
+    background-image: radial-gradient(#e5e7eb 1px, transparent 1px);
+    background-size: 24px 24px;
+  }
+
+  /* Animations */
+  @keyframes slide-up {
+    from {
+      transform: translateY(10px);
+      opacity: 0;
+    }
+
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+
+  .animate-slide-up {
+    animation: slide-up 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+    }
+
+    to {
+      opacity: 1;
+    }
+  }
+
+  .animate-fade-in {
+    animation: fade-in 0.3s ease-out forwards;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  .font-mono-num {
+    font-variant-numeric: tabular-nums;
+  }
+}
