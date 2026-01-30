@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import Sidebar from './BottomNav';
 import { useSidebar } from '../contexts/SidebarContext';
+import { apiClient } from '../lib/api';
 import {
   SparklesIcon,
   DocumentTextIcon,
@@ -21,25 +22,44 @@ const HomePage: React.FC = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const { isCollapsed } = useSidebar();
+  const [userStats, setUserStats] = useState<any>(null);
 
-  // Mock data for dashboard
-  const stats = [
-    { label: 'Simulados Realizados', value: '12', icon: DocumentTextIcon, color: 'indigo' },
-    { label: 'Taxa de Acerto', value: '78%', icon: CheckCircleIcon, color: 'green' },
-    { label: 'Tempo Médio', value: '45min', icon: ClockIcon, color: 'amber' },
-    { label: 'Evolução', value: '+15%', icon: ArrowTrendingUpIcon, color: 'purple' },
+  // Real data for logged in users
+  const stats = userStats ? [
+    { label: 'Simulados Realizados', value: userStats.totalAttempts.toString(), icon: DocumentTextIcon, color: 'indigo' },
+    { label: 'Taxa de Acerto', value: `${userStats.averageScore.toFixed(0)}%`, icon: CheckCircleIcon, color: 'green' },
+    { label: 'Tempo Médio', value: `${Math.floor(userStats.averageTime / 60)}min`, icon: ClockIcon, color: 'amber' },
+    { label: 'Evolução', value: `${userStats.evolution >= 0 ? '+' : ''}${userStats.evolution.toFixed(0)}%`, icon: ArrowTrendingUpIcon, color: 'purple' },
+  ] : [
+    { label: 'Simulados Realizados', value: '0', icon: DocumentTextIcon, color: 'indigo' },
+    { label: 'Taxa de Acerto', value: '0%', icon: CheckCircleIcon, color: 'green' },
+    { label: 'Tempo Médio', value: '0min', icon: ClockIcon, color: 'amber' },
+    { label: 'Evolução', value: '0%', icon: ArrowTrendingUpIcon, color: 'purple' },
   ];
 
-  const recentSimulados = [
-    { id: 1, title: 'Entrevista Front-End Developer', score: 85, date: '28 Jan 2026', status: 'completed' },
-    { id: 2, title: 'Fit Cultural - Startup', score: 72, date: '25 Jan 2026', status: 'completed' },
-    { id: 3, title: 'Técnico - React & TypeScript', score: 90, date: '22 Jan 2026', status: 'completed' },
-  ];
+  const recentSimulados = userStats?.recentSimulados || [];
 
   const quickActions = [
     { label: 'Novo Simulado', icon: PlusIcon, action: () => navigate('/simulados/novo'), primary: true },
     { label: 'Continuar Último', icon: PlayIcon, action: () => navigate('/simulados/continuar') },
   ];
+
+  // Load user stats when logged in
+  useEffect(() => {
+    if (user) {
+      loadUserStats();
+    }
+  }, [user]);
+
+  const loadUserStats = async () => {
+    try {
+      const stats = await apiClient.getUserStats();
+      setUserStats(stats);
+    } catch (error) {
+      console.error('Erro ao carregar estatísticas:', error);
+      // Don't show toast error for stats loading, just use default values
+    }
+  };
 
   const freeQuizzes = [
     {
@@ -166,7 +186,7 @@ const HomePage: React.FC = () => {
                 <div className="flex items-center justify-between mb-6">
                   <h2 className="text-base font-semibold text-slate-900 dark:text-white">Simulados Recentes</h2>
                   <button
-                    onClick={() => navigate('/simulados')}
+                    onClick={() => navigate('/profile/quiz-history')}
                     className="text-xs font-medium text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors"
                   >
                     Ver todos
@@ -174,11 +194,11 @@ const HomePage: React.FC = () => {
                 </div>
 
                 <div className="space-y-3">
-                  {recentSimulados.map((simulado) => (
+                  {recentSimulados.map((simulado: any) => (
                     <div
                       key={simulado.id}
                       className="group flex items-center justify-between p-4 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-600 rounded-md transition-all cursor-pointer hover:shadow-sm"
-                      onClick={() => navigate(`/simulados/${simulado.id}`)}
+                      onClick={() => navigate(`/profile/quiz-history/${simulado.id}`)}
                     >
                       <div className="flex items-center gap-4">
                         <div className="w-10 h-10 bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 flex items-center justify-center rounded-md text-slate-500 dark:text-slate-400">
@@ -186,7 +206,13 @@ const HomePage: React.FC = () => {
                         </div>
                         <div>
                           <p className="text-sm font-medium text-slate-900 dark:text-white">{simulado.title}</p>
-                          <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">{simulado.date}</p>
+                          <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                            {new Date(simulado.date).toLocaleDateString('pt-BR', {
+                              day: '2-digit',
+                              month: 'short',
+                              year: 'numeric'
+                            })}
+                          </p>
                         </div>
                       </div>
                       <div className="flex items-center gap-4">
@@ -195,7 +221,7 @@ const HomePage: React.FC = () => {
                           <span className={`text-sm font-mono font-medium ${simulado.score >= 80 ? 'text-emerald-700 dark:text-emerald-400' :
                             simulado.score >= 60 ? 'text-amber-700 dark:text-amber-400' : 'text-red-700 dark:text-red-400'
                             }`}>
-                            {simulado.score}%
+                            {simulado.score.toFixed(0)}%
                           </span>
                         </div>
                         <ArrowRightOnRectangleIcon className="w-4 h-4 text-slate-300 dark:text-slate-600 group-hover:text-slate-600 dark:group-hover:text-slate-300 transition-colors -rotate-45" />
@@ -209,10 +235,10 @@ const HomePage: React.FC = () => {
                     <DocumentTextIcon className="w-10 h-10 text-slate-300 dark:text-slate-700 mx-auto mb-3" />
                     <p className="text-sm text-slate-500 dark:text-slate-400">Nenhum simulado realizado ainda</p>
                     <button
-                      onClick={() => navigate('/simulados/novo')}
+                      onClick={() => navigate('/free-quizzes')}
                       className="mt-4 text-slate-900 dark:text-white border-b border-slate-900 dark:border-white text-xs font-semibold hover:opacity-70 pb-0.5 transition-opacity"
                     >
-                      Começar agora
+                      Começar com quizzes gratuitos
                     </button>
                   </div>
                 )}

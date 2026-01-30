@@ -415,6 +415,11 @@ class ApiClient {
     const res = await this.client.get(`/quiz/my-attempts/${attemptId}`);
     return res.data;
   }
+
+  async getUserStats() {
+    const res = await this.client.get('/quiz/my-stats');
+    return res.data;
+  }
 }
 
 export const apiClient = new ApiClient();

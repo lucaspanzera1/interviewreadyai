@@ -228,7 +228,7 @@ Gere agora {quantidade_questoes} questões de nível {nivel} sobre "{titulo}" na
 
   async getPublicQuizzes(page: number = 1, limit: number = 10, category?: string, level?: string, search?: string) {
     const skip = (page - 1) * limit;
-    const filter: any = { isActive: true };
+    const filter: any = { isActive: true, isFree: true };
 
     if (category && category !== 'Todas') {
       filter.categoria = category;
@@ -403,5 +403,50 @@ Gere agora {quantidade_questoes} questões de nível {nivel} sobre "{titulo}" na
     }
 
     return attempt;
+  }
+
+  async getUserStats(userId: string) {
+    const attempts = await this.quizAttemptModel
+      .find({ userId })
+      .populate('quizId', 'titulo categoria')
+      .sort({ createdAt: -1 })
+      .exec();
+
+    const totalAttempts = attempts.length;
+    const completedAttempts = attempts.filter(a => a.completed).length;
+    const averageScore = completedAttempts > 0
+      ? attempts.filter(a => a.completed).reduce((sum, a) => sum + a.percentage, 0) / completedAttempts
+      : 0;
+
+    const totalTime = attempts.reduce((sum, a) => sum + a.timeSpent, 0);
+    const averageTime = totalAttempts > 0 ? totalTime / totalAttempts : 0;
+
+    // Calculate evolution (compare last 5 vs first 5 attempts)
+    const recentAttempts = attempts.slice(0, 5);
+    const olderAttempts = attempts.slice(-5);
+    const recentAvg = recentAttempts.length > 0
+      ? recentAttempts.reduce((sum, a) => sum + a.percentage, 0) / recentAttempts.length
+      : 0;
+    const olderAvg = olderAttempts.length > 0
+      ? olderAttempts.reduce((sum, a) => sum + a.percentage, 0) / olderAttempts.length
+      : 0;
+    const evolution = olderAvg > 0 ? ((recentAvg - olderAvg) / olderAvg) * 100 : 0;
+
+    // Get recent attempts (last 3)
+    const recentSimulados = attempts.slice(0, 3).map(attempt => ({
+      id: attempt._id,
+      title: (attempt.quizId as any).titulo,
+      score: attempt.percentage,
+      date: (attempt as any).createdAt.toISOString(),
+      status: attempt.completed ? 'completed' : 'in_progress'
+    }));
+
+    return {
+      totalAttempts,
+      averageScore,
+      averageTime,
+      evolution,
+      recentSimulados
+    };
   }
 }

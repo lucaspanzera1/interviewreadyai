@@ -65,6 +65,9 @@ export class Quiz {
 
   @Prop({ default: true })
   isActive: boolean;
+
+  @Prop({ default: true })
+  isFree: boolean;
 }
 
 export const QuizSchema = SchemaFactory.createForClass(Quiz);
