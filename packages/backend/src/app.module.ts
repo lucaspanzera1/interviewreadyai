@@ -8,6 +8,7 @@ import { UserModule } from './user/user.module';
 import { DatabaseModule } from './database/database.module';
 import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
 import { RolesGuard } from './auth/guards/roles.guard';
+import { QuizModule } from './quiz/quiz.module';
 
 /**
  * Módulo principal da aplicação
@@ -27,6 +28,7 @@ import { RolesGuard } from './auth/guards/roles.guard';
     // Módulos de funcionalidade
     AuthModule,
     UserModule,
+    QuizModule,
   ],
   controllers: [AppController],
   providers: [

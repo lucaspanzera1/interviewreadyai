@@ -12,6 +12,7 @@ import TokensPage from './components/TokensPage'
 import FreeQuizzesPage from './components/FreeQuizzesPage'
 import OnboardingProvider from './components/OnboardingProvider'
 import ToastContainer from './components/ToastContainer'
+import GeneratedQuizPage from './components/GeneratedQuizPage'
 
 function App() {
   return (
@@ -67,6 +68,18 @@ function App() {
             <ProtectedRoute>
               <AppLayout>
                 <FreeQuizzesPage />
+              </AppLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Generated Quiz page */}
+        <Route
+          path="/quiz/generated"
+          element={
+            <ProtectedRoute>
+              <AppLayout>
+                <GeneratedQuizPage />
               </AppLayout>
             </ProtectedRoute>
           }

@@ -63,6 +63,33 @@ export interface CompleteOnboardingData {
   hasCompletedOnboarding: boolean;
 }
 
+export enum QuizLevel {
+  INICIANTE = 'INICIANTE',
+  MEDIO = 'MEDIO',
+  DIFICIL = 'DIFÍCIL',
+  EXPERT = 'EXPERT',
+}
+
+export interface GenerateQuizDto {
+  categoria: string;
+  titulo: string;
+  descricao: string;
+  tags: string[];
+  quantidade_questoes: number;
+  nivel: QuizLevel;
+}
+
+export interface QuizQuestion {
+  question: string;
+  options: string[];
+  correct_answer: number;
+  explanation: string;
+}
+
+export interface GeneratedQuiz {
+  questions: QuizQuestion[];
+}
+
 class ApiClient {
 
   private client: AxiosInstance;
@@ -302,6 +329,12 @@ class ApiClient {
 
   async getOnboardingStatus(): Promise<{ hasCompletedOnboarding: boolean }> {
     const res = await this.client.get('/users/me/onboarding/status');
+    return res.data;
+  }
+
+  // Quiz methods
+  async generateQuiz(dto: GenerateQuizDto): Promise<GeneratedQuiz> {
+    const res = await this.client.post('/quiz/generate', dto);
     return res.data;
   }
 }
