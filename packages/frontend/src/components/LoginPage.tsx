@@ -34,15 +34,15 @@ const LoginPage: React.FC = () => {
           <div className="w-full max-w-[380px] space-y-8">
             {/* Logo */}
             <div className="flex flex-col items-start gap-4">
-              <div className="h-10 w-10 bg-slate-900 dark:bg-white rounded-lg flex items-center justify-center shadow-lg shadow-slate-900/10 dark:shadow-slate-50/10">
-                <SparklesIcon className="w-5 h-5 text-white dark:text-slate-900" />
+              <div className="h-12 w-12 bg-primary-600 dark:bg-primary-500 rounded-xl flex items-center justify-center shadow-lg shadow-primary-600/20 dark:shadow-primary-500/20">
+                <SparklesIcon className="w-6 h-6 text-white" />
               </div>
               <div>
-                <h1 className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">
-                  TreinaVaga
+                <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-slate-900 to-slate-600 dark:from-white dark:to-slate-300 tracking-tight">
+                  TreinaVaga<span className="text-primary-600 dark:text-primary-400">AI</span>
                 </h1>
-                <p className="text-slate-500 dark:text-slate-400 text-sm mt-2 leading-relaxed">
-                  Prepare-se para suas entrevistas com inteligência artificial.
+                <p className="text-slate-500 dark:text-slate-400 text-base mt-2 leading-relaxed">
+                  A sua plataforma de evolução profissional com IA.
                 </p>
               </div>
             </div>
@@ -116,25 +116,20 @@ const LoginPage: React.FC = () => {
 
         {/* Right Side - AI Visualization */}
         <div className="hidden lg:block relative bg-slate-50 dark:bg-slate-900 overflow-hidden transition-colors duration-200">
-          <div className="absolute inset-0 bg-slate-50 dark:bg-slate-900 z-0 text-slate-200 dark:text-slate-800 transition-colors duration-200">
+          <div className="absolute inset-0 bg-gradient-to-br from-primary-50/50 to-purple-50/30 dark:from-primary-900/20 dark:to-slate-900 z-0 transition-colors duration-200">
             {/* Subtle grid pattern */}
-            <div className="absolute inset-0 bg-[linear-gradient(rgba(0,0,0,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(0,0,0,0.02)_1px,transparent_1px)] dark:bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:32px_32px]"></div>
+            <div className="absolute inset-0 opacity-30 dark:opacity-20 bg-[linear-gradient(rgba(139,92,246,0.1)_1px,transparent_1px),linear-gradient(90deg,rgba(139,92,246,0.1)_1px,transparent_1px)] bg-[size:32px_32px]"></div>
           </div>
           <div className="absolute inset-0 z-10 flex items-center justify-center">
             <AIVisualization3D />
           </div>
 
-          {/* Overlay Content */}
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20 pointer-events-none text-center w-full max-w-lg px-6">
-            {/* Content is visually integrated into the 3D scene now */}
-          </div>
-
           <div className="absolute bottom-12 left-12 right-12 z-20 pointer-events-none">
-            <h2 className="text-3xl font-bold text-slate-900 dark:text-white tracking-tight mb-2">
-              Potencialize sua Carreira
+            <h2 className="text-3xl font-bold tracking-tight mb-3 heading-gradient">
+              Domine sua próxima entrevista
             </h2>
-            <p className="text-lg text-slate-500 dark:text-slate-400 max-w-lg">
-              Simulados técnicos personalizados gerados por IA para garantir sua aprovação.
+            <p className="text-lg text-slate-600 dark:text-slate-300 max-w-lg leading-relaxed">
+              Junte-se a milhares de desenvolvedores praticando com a inteligência artificial da TreinaVaga.
             </p>
           </div>
         </div>

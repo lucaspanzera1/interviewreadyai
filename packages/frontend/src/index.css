@@ -1,11 +1,11 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Roboto:wght@300;400;500;700&display=swap');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   html {
-    font-family: 'Inter', system-ui, sans-serif;
+    font-family: 'Poppins', system-ui, sans-serif;
     -webkit-tap-highlight-color: transparent;
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
@@ -13,26 +13,25 @@
   }
 
   body {
-    @apply bg-white text-slate-900 antialiased overflow-x-hidden;
-    /* Selection color for technical feel */
-    @apply selection:bg-slate-900 selection:text-white;
+    @apply bg-white text-slate-900 antialiased overflow-x-hidden dark:bg-slate-800 dark:text-slate-50;
+    /* Selection color for Violet Evolution */
+    @apply selection:bg-primary-500 selection:text-white;
   }
 }
 
 @layer components {
 
-  /* Modern Tech Card - Linear/Vercel Style */
+  /* Modern Card - TreinaVaga Style */
   .card {
-    @apply bg-white rounded-lg border border-slate-200 shadow-sm transition-all duration-200;
-    /* Removed heavy shadows, added subtle border */
+    @apply bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm transition-all duration-300;
   }
 
   .card:hover {
-    @apply border-slate-300 shadow-md;
+    @apply border-primary-300 dark:border-primary-700 shadow-lg transform -translate-y-1;
   }
 
   .card-header {
-    @apply px-6 py-4 border-b border-slate-100 flex items-center justify-between;
+    @apply px-6 py-4 border-b border-slate-100 dark:border-slate-700 flex items-center justify-between;
   }
 
   .card-body {
@@ -40,43 +39,41 @@
   }
 
   .card-footer {
-    @apply px-6 py-4 border-t border-slate-100 bg-slate-50/50 rounded-b-lg flex items-center;
+    @apply px-6 py-4 border-t border-slate-100 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-900/50 rounded-b-2xl flex items-center;
   }
 
-  /* Glass Card - Refined */
+  /* Glass Card */
   .glass-card {
-    @apply bg-white/60 backdrop-blur-md rounded-lg border border-slate-200/60 shadow-sm;
+    @apply bg-white/70 dark:bg-slate-800/70 backdrop-blur-lg rounded-2xl border border-white/20 shadow-lg;
   }
 
-  /* Button Components - Engineering Style */
+  /* Button Components - Gamified Style */
   .btn {
-    @apply inline-flex items-center justify-center px-4 py-2.5 text-sm font-medium rounded-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-1 disabled:opacity-50 disabled:cursor-not-allowed select-none;
+    @apply inline-flex items-center justify-center px-5 py-2.5 text-sm font-semibold rounded-xl transition-all duration-200 focus:outline-none focus:ring-4 focus:ring-primary-500/20 disabled:opacity-50 disabled:cursor-not-allowed select-none;
   }
 
   .btn-primary {
-    /* Solid Black/Dark Gray for high contrast */
-    @apply btn bg-slate-900 text-white border border-transparent shadow-sm hover:bg-slate-800 hover:shadow focus:ring-slate-900;
+    @apply btn bg-primary-600 text-white shadow-lg shadow-primary-500/30 hover:bg-primary-500 hover:shadow-primary-500/50 hover:scale-[1.02] active:scale-[0.98];
   }
 
   .btn-secondary {
-    /* White with delicate border */
-    @apply btn bg-white text-slate-700 border border-slate-200 shadow-sm hover:bg-slate-50 hover:border-slate-300 hover:text-slate-900 focus:ring-slate-200;
+    @apply btn bg-transparent text-primary-600 border-2 border-primary-600 hover:bg-primary-50 dark:text-primary-400 dark:border-primary-400 dark:hover:bg-primary-900/20;
   }
 
   .btn-ghost {
-    @apply btn text-slate-600 hover:text-slate-900 hover:bg-slate-100 focus:ring-slate-200;
+    @apply btn text-slate-600 dark:text-slate-300 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-primary-50 dark:hover:bg-slate-700/50;
   }
 
   .btn-danger {
-    @apply btn bg-red-600 text-white hover:bg-red-700 focus:ring-red-500 shadow-sm;
+    @apply btn bg-danger text-white shadow-lg shadow-danger/30 hover:bg-danger-dark hover:shadow-danger/50;
   }
 
   .btn-outline {
-    @apply btn bg-transparent border border-slate-300 text-slate-700 hover:border-slate-900 hover:text-slate-900;
+    @apply btn bg-transparent border-2 border-slate-300 text-slate-700 hover:border-primary-600 hover:text-primary-600 dark:border-slate-600 dark:text-slate-300 dark:hover:border-primary-400 dark:hover:text-primary-400;
   }
 
   .btn-icon {
-    @apply p-2 rounded-md text-slate-500 hover:text-slate-900 hover:bg-slate-100 transition-colors border border-transparent hover:border-slate-200;
+    @apply p-2 rounded-xl text-slate-500 hover:text-primary-600 hover:bg-primary-50 dark:text-slate-400 dark:hover:text-primary-400 dark:hover:bg-slate-700/50 transition-all;
   }
 
   .btn-sm {
@@ -84,94 +81,52 @@
   }
 
   .btn-lg {
-    @apply px-6 py-3 text-base;
+    @apply px-8 py-3.5 text-base;
   }
 
-  /* Input Components - Precise */
+  /* Input Components */
   .input {
-    @apply block w-full px-3 py-2 text-sm bg-white border border-slate-200 rounded-md shadow-sm placeholder-slate-400 text-slate-900 transition-all duration-200;
-    @apply focus:outline-none focus:border-slate-500 focus:ring-1 focus:ring-slate-500;
-    /* Removed large colored rings, kept it technical */
+    @apply block w-full px-4 py-3 text-sm bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl shadow-sm placeholder-slate-400 text-slate-900 dark:text-white transition-all duration-200;
+    @apply focus:outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20;
   }
 
   .label {
-    @apply block text-xs font-medium text-slate-700 mb-1.5 uppercase tracking-wide;
+    @apply block text-sm font-semibold text-slate-700 dark:text-slate-200 mb-2;
   }
 
-  /* Badge Components - Subtle */
+  /* Badge Components */
   .badge {
-    @apply inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border;
+    @apply inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold uppercase tracking-wide;
   }
 
   .badge-primary {
-    @apply bg-slate-100 text-slate-800 border-slate-200;
+    @apply bg-primary-100 text-primary-700 dark:bg-primary-900/30 dark:text-primary-300;
   }
 
   .badge-success {
-    @apply bg-emerald-50 text-emerald-700 border-emerald-200;
+    @apply bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300;
   }
 
   .badge-warning {
-    @apply bg-amber-50 text-amber-700 border-amber-200;
+    @apply bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300;
   }
 
   .badge-danger {
-    @apply bg-red-50 text-red-700 border-red-200;
+    @apply bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300;
   }
 
-  .badge-outline {
-    @apply bg-transparent text-slate-600 border-slate-300;
-  }
-
-  /* Typography */
+  /* Typography Gradients */
   .heading-gradient {
-    /* Subtle metallic gradient or solid dark */
-    @apply bg-clip-text text-transparent bg-gradient-to-br from-slate-900 to-slate-600;
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-primary-600 to-primary-800 dark:from-primary-400 dark:to-primary-200;
   }
 
-  .text-gradient-primary {
-    @apply bg-clip-text text-transparent bg-gradient-to-r from-slate-900 via-slate-700 to-slate-900;
+  /* Progress Bar */
+  .progress-bar-container {
+    @apply w-full bg-slate-100 dark:bg-slate-700 rounded-full h-3 overflow-hidden;
   }
 
-  /* Utilities */
-  .border-subtle {
-    @apply border border-slate-200;
-  }
-
-  .bg-dot-pattern {
-    background-image: radial-gradient(#e5e7eb 1px, transparent 1px);
-    background-size: 24px 24px;
-  }
-
-  /* Animations */
-  @keyframes slide-up {
-    from {
-      transform: translateY(10px);
-      opacity: 0;
-    }
-
-    to {
-      transform: translateY(0);
-      opacity: 1;
-    }
-  }
-
-  .animate-slide-up {
-    animation: slide-up 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-  }
-
-  @keyframes fade-in {
-    from {
-      opacity: 0;
-    }
-
-    to {
-      opacity: 1;
-    }
-  }
-
-  .animate-fade-in {
-    animation: fade-in 0.3s ease-out forwards;
+  .progress-bar-fill {
+    @apply h-full bg-gradient-to-r from-primary-500 to-primary-600 transition-all duration-500 ease-out;
   }
 }
 

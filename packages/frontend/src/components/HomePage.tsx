@@ -75,19 +75,19 @@ const HomePage: React.FC = () => {
       {/* Main Content */}
       <main className={`min-h-screen transition-all duration-300 ${isCollapsed ? 'lg:ml-16' : 'lg:ml-64'}`}>
         {/* Header */}
-        <header className="bg-white/80 dark:bg-slate-950/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 sticky top-0 z-10 transition-colors duration-200">
+        <header className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 sticky top-0 z-10 transition-colors duration-200">
           <div className="px-6 lg:px-8 py-4">
             <div className="flex items-center justify-between">
               <div className="ml-10 lg:ml-0">
-                <h1 className="text-xl font-semibold text-slate-900 dark:text-white tracking-tight">Dashboard</h1>
+                <h1 className="text-xl font-bold text-slate-900 dark:text-white tracking-tight heading-gradient">Dashboard</h1>
                 <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
-                  Bem-vindo de volta, {user?.name?.split(' ')[0] || 'Usuário'}
+                  Bem-vindo de volta, <span className="text-primary-600 dark:text-primary-400 font-medium">{user?.name?.split(' ')[0] || 'Usuário'}</span>
                 </p>
               </div>
               <div className="flex items-center gap-3">
                 <button
                   onClick={() => navigate('/simulados/novo')}
-                  className="hidden sm:flex items-center justify-center px-4 py-2 bg-slate-900 dark:bg-slate-50 text-white dark:text-slate-900 text-sm font-medium hover:bg-slate-800 dark:hover:bg-slate-200 transition-all rounded-md shadow-sm border border-transparent hover:shadow-md"
+                  className="hidden sm:flex items-center justify-center px-4 py-2 bg-primary-600 text-white text-sm font-semibold hover:bg-primary-500 hover:shadow-lg hover:shadow-primary-500/30 transition-all rounded-xl shadow-sm active:scale-95"
                 >
                   <PlusIcon className="w-4 h-4 mr-2" />
                   Novo Simulado
@@ -102,13 +102,19 @@ const HomePage: React.FC = () => {
           {/* Stats Cards */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
             {stats.map((stat, index) => (
-              <div key={index} className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-5 hover:border-slate-300 dark:hover:border-slate-700 transition-colors shadow-sm">
+              <div key={index} className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-5 hover:border-primary-300 dark:hover:border-primary-600 transition-all duration-300 shadow-sm hover:shadow-md hover:-translate-y-1 group">
                 <div className="flex items-center justify-between mb-4">
-                  <p className="text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wide">{stat.label}</p>
-                  <stat.icon className="w-5 h-5 text-slate-400 dark:text-slate-500" />
+                  <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide">{stat.label}</p>
+                  <div className={`p-2 rounded-lg ${stat.color === 'indigo' ? 'bg-indigo-50 text-indigo-600 dark:bg-indigo-900/20 dark:text-indigo-400' :
+                      stat.color === 'green' ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-900/20 dark:text-emerald-400' :
+                        stat.color === 'amber' ? 'bg-amber-50 text-amber-600 dark:bg-amber-900/20 dark:text-amber-400' :
+                          'bg-primary-50 text-primary-600 dark:bg-primary-900/20 dark:text-primary-400'
+                    }`}>
+                    <stat.icon className="w-5 h-5" />
+                  </div>
                 </div>
                 <div className="flex items-baseline gap-2">
-                  <p className="text-2xl font-semibold text-slate-900 dark:text-white tracking-tight text-balance">{stat.value}</p>
+                  <p className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight text-balance group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">{stat.value}</p>
                 </div>
               </div>
             ))}
@@ -124,16 +130,16 @@ const HomePage: React.FC = () => {
                     <button
                       key={index}
                       onClick={action.action}
-                      className={`w-full flex items-center justify-between p-3 rounded-md border text-sm font-medium transition-all ${action.primary
-                        ? 'bg-slate-900 dark:bg-slate-50 border-slate-900 dark:border-slate-50 text-white dark:text-slate-900 hover:bg-slate-800 dark:hover:bg-slate-200 shadow-sm'
-                        : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-slate-300 dark:hover:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-800'
+                      className={`w-full flex items-center justify-between p-3 rounded-xl border text-sm font-semibold transition-all ${action.primary
+                        ? 'bg-primary-600 border-transparent text-white hover:bg-primary-500 shadow-md shadow-primary-500/20'
+                        : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-primary-500 dark:hover:border-primary-500 hover:text-primary-700 dark:hover:text-primary-400'
                         }`}
                     >
                       <div className="flex items-center gap-3">
-                        <action.icon className="w-4 h-4 opacity-70" />
+                        <action.icon className="w-5 h-5 opacity-80" />
                         <span>{action.label}</span>
                       </div>
-                      {action.primary && <ArrowRightOnRectangleIcon className="w-4 h-4 opacity-50 -rotate-45" />}
+                      {action.primary && <ArrowRightOnRectangleIcon className="w-4 h-4 opacity-70 -rotate-45" />}
                     </button>
                   ))}
                 </div>
@@ -213,37 +219,37 @@ const HomePage: React.FC = () => {
               </div>
 
               {/* Free Quizzes Section */}
-              <div className="bg-gradient-to-br from-slate-900 to-slate-800 dark:from-slate-800 dark:to-slate-900 rounded-lg p-6 text-white shadow-md relative overflow-hidden">
+              <div className="bg-gradient-to-br from-primary-900 to-primary-700 dark:from-primary-950 dark:to-primary-800 rounded-2xl p-6 text-white shadow-lg shadow-primary-900/20 relative overflow-hidden">
                 {/* Decorative background elements */}
-                <div className="absolute top-0 right-0 p-8 opacity-10">
+                <div className="absolute top-0 right-0 p-8 opacity-20">
                   <AcademicCapIcon className="w-32 h-32 -mr-10 -mt-10 transform rotate-12" />
                 </div>
 
                 <div className="relative z-10">
                   <div className="flex items-center gap-2 mb-6">
-                    <SparklesIcon className="w-5 h-5 text-yellow-400" />
-                    <h2 className="text-base font-semibold text-white">Sugestões para Você (Grátis)</h2>
+                    <SparklesIcon className="w-5 h-5 text-yellow-300" />
+                    <h2 className="text-base font-bold text-white">Sugestões para Você (Grátis)</h2>
                   </div>
 
                   <div className="grid sm:grid-cols-3 gap-4">
                     {freeQuizzes.map((quiz) => (
                       <div
                         key={quiz.id}
-                        className="bg-white/10 dark:bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg p-4 hover:bg-white/20 transition-all cursor-pointer group"
+                        className="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl p-4 hover:bg-white/20 transition-all cursor-pointer group hover:-translate-y-1"
                         onClick={() => navigate(`/simulados/novo?template=${quiz.id}`)}
                       >
                         <div className="flex justify-between items-start mb-3">
-                          <div className="w-8 h-8 rounded-full bg-indigo-500/20 flex items-center justify-center text-indigo-300">
+                          <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center text-white">
                             <BoltIcon className="w-4 h-4" />
                           </div>
-                          <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/30 text-emerald-100 border border-emerald-400/50">
                             Grátis
                           </span>
                         </div>
 
-                        <h3 className="text-sm font-medium text-white mb-1 line-clamp-1" title={quiz.title}>{quiz.title}</h3>
+                        <h3 className="text-sm font-semibold text-white mb-1 line-clamp-1" title={quiz.title}>{quiz.title}</h3>
 
-                        <div className="flex items-center gap-3 text-xs text-slate-300 mb-4">
+                        <div className="flex items-center gap-3 text-xs text-white/70 mb-4">
                           <div className="flex items-center gap-1">
                             <ClockIcon className="w-3 h-3" />
                             <span>{quiz.time}</span>
@@ -252,7 +258,7 @@ const HomePage: React.FC = () => {
                           <span>{quiz.questions} questões</span>
                         </div>
 
-                        <button className="w-full py-1.5 text-xs font-semibold bg-white text-slate-900 rounded hover:bg-slate-100 transition-colors flex items-center justify-center gap-1 group-hover:shadow-lg">
+                        <button className="w-full py-2 text-xs font-bold bg-white text-primary-700 rounded-lg hover:bg-slate-50 transition-colors flex items-center justify-center gap-1 group-hover:shadow-lg">
                           <span>Praticar</span>
                           <ArrowRightOnRectangleIcon className="w-3 h-3 -rotate-45" />
                         </button>

@@ -102,11 +102,11 @@ const ProfilePage: React.FC = () => {
                     </button>
                     <button
                       onClick={handleSave}
-                      className="flex items-center px-3 py-1.5 text-sm font-medium text-white bg-slate-900 dark:bg-slate-50 dark:text-slate-900 hover:bg-slate-800 dark:hover:bg-slate-200 rounded-md transition-all shadow-sm"
+                      className="flex items-center px-4 py-2 text-sm font-semibold text-white bg-primary-600 hover:bg-primary-500 rounded-lg transition-all shadow-md shadow-primary-600/20 active:scale-95"
                       disabled={isLoading}
                     >
-                      <CheckIcon className="h-4 w-4 mr-1" />
-                      {isLoading ? 'Salvando...' : 'Salvar'}
+                      <CheckIcon className="h-4 w-4 mr-1.5" />
+                      {isLoading ? 'Salvando...' : 'Salvar Alterações'}
                     </button>
                   </div>
                 )}
@@ -141,7 +141,7 @@ const ProfilePage: React.FC = () => {
                         name="name"
                         value={formData.name}
                         onChange={handleInputChange}
-                        className="block w-full px-3 py-2 text-sm bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-md shadow-sm placeholder-slate-400 dark:placeholder-slate-500 text-slate-900 dark:text-white focus:outline-none focus:border-slate-400 dark:focus:border-slate-500 focus:ring-1 focus:ring-slate-400 dark:focus:ring-slate-500 transition-all"
+                        className="block w-full px-4 py-2 text-sm bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl shadow-sm placeholder-slate-400 dark:placeholder-slate-500 text-slate-900 dark:text-white focus:outline-none focus:border-primary-500 dark:focus:border-primary-500 focus:ring-4 focus:ring-primary-500/10 transition-all"
                         placeholder="Digite seu nome completo"
                       />
                     ) : (

@@ -82,12 +82,14 @@ const Sidebar: React.FC = () => {
     const SidebarContent = () => (
         <div className="flex flex-col h-full">
             {/* Logo */}
-            <div className={`flex items-center gap-3 px-4 py-6 border-b border-slate-200 dark:border-slate-700 ${isCollapsed ? 'justify-center' : ''}`}>
-                <div className="h-8 w-8 bg-slate-900 rounded-md flex items-center justify-center flex-shrink-0 shadow-sm">
+            <div className={`flex items-center gap-3 px-4 py-6 border-b border-subtle dark:border-slate-800 ${isCollapsed ? 'justify-center' : ''}`}>
+                <div className="h-8 w-8 bg-primary-600 rounded-lg flex items-center justify-center flex-shrink-0 shadow-lg shadow-primary-500/20">
                     <SparklesIcon className="w-4 h-4 text-white" />
                 </div>
                 {!isCollapsed && (
-                    <span className="text-base font-bold text-slate-900 dark:text-white tracking-tight">TreinaVagaAI</span>
+                    <span className="text-base font-bold bg-clip-text text-transparent bg-gradient-to-r from-slate-900 to-slate-600 dark:from-white dark:to-slate-300 tracking-tight">
+                        TreinaVaga<span className="text-primary-600 dark:text-primary-400">AI</span>
+                    </span>
                 )}
             </div>
 
@@ -101,13 +103,13 @@ const Sidebar: React.FC = () => {
                         <button
                             key={item.name}
                             onClick={() => handleNavClick(item.path)}
-                            className={`w-full flex items-center gap-3 px-3 py-2 rounded-md transition-all duration-200 border border-transparent ${active
-                                ? 'bg-slate-100 text-slate-900 font-medium'
-                                : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900'
-                                } ${isCollapsed ? 'justify-center' : ''}`}
+                            className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 border-l-4 ${active
+                                ? 'bg-primary-50 dark:bg-primary-900/10 text-primary-700 dark:text-primary-300 font-semibold border-primary-600'
+                                : 'text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white border-transparent'
+                                } ${isCollapsed ? 'justify-center px-0' : ''}`}
                             title={isCollapsed ? item.name : undefined}
                         >
-                            <Icon className={`w-4 h-4 flex-shrink-0 ${active ? 'text-slate-900' : 'text-slate-400 group-hover:text-slate-600'}`} />
+                            <Icon className={`w-5 h-5 flex-shrink-0 transition-colors ${active ? 'text-primary-600 dark:text-primary-400' : 'text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-300'}`} />
                             {!isCollapsed && (
                                 <span className="text-sm">{item.name}</span>
                             )}
