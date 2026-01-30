@@ -238,4 +238,35 @@ export class UserService {
     user.tokens = Math.max(0, (user.tokens || 0) - amount);
     await user.save();
   }
+
+  /**
+   * Atualiza o perfil do usuário
+   * @param userId ID do usuário
+   * @param profileData Dados do perfil
+   */
+  async updateProfile(userId: string, profileData: any): Promise<UserDocument> {
+    const user = await this.findById(userId);
+    Object.assign(user, profileData);
+    return await user.save();
+  }
+
+  /**
+   * Completa o onboarding do usuário
+   * @param userId ID do usuário
+   * @param profileData Dados do perfil
+   */
+  async completeOnboarding(userId: string, profileData: any): Promise<UserDocument> {
+    const user = await this.findById(userId);
+    Object.assign(user, { ...profileData, hasCompletedOnboarding: true });
+    return await user.save();
+  }
+
+  /**
+   * Verifica se o usuário completou o onboarding
+   * @param userId ID do usuário
+   */
+  async hasCompletedOnboarding(userId: string): Promise<boolean> {
+    const user = await this.findById(userId);
+    return user.hasCompletedOnboarding || false;
+  }
 }

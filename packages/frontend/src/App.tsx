@@ -10,6 +10,7 @@ import HomePage from './components/HomePage'
 import AdminUsers from './components/AdminUsers'
 import TokensPage from './components/TokensPage'
 import FreeQuizzesPage from './components/FreeQuizzesPage'
+import OnboardingProvider from './components/OnboardingProvider'
 
 function App() {
   return (
@@ -85,6 +86,9 @@ function App() {
         {/* Catch all - redirect to home */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
+
+      {/* Onboarding modal */}
+      <OnboardingProvider />
     </ErrorBoundary>
   )
 }

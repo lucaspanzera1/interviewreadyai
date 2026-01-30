@@ -5,7 +5,6 @@ import { useAuth } from '../contexts/AuthContext';
 import { useToast } from '../contexts/ToastContext';
 import {
   UserCircleIcon,
-  EnvelopeIcon,
   PencilIcon,
   CheckIcon,
   XMarkIcon,
@@ -14,7 +13,36 @@ import {
   CalendarIcon,
   ShieldCheckIcon,
   TicketIcon,
+  BriefcaseIcon,
+  MapPinIcon,
+  DocumentTextIcon,
+  CpuChipIcon,
+  AcademicCapIcon
 } from '@heroicons/react/24/outline';
+
+const LinkedInIcon = (props: React.ComponentProps<'svg'>) => (
+  <svg fill="currentColor" viewBox="0 0 24 24" {...props}>
+    <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" />
+  </svg>
+);
+
+const GitHubIcon = (props: React.ComponentProps<'svg'>) => (
+  <svg fill="currentColor" viewBox="0 0 24 24" {...props}>
+    <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z" />
+  </svg>
+);
+
+const extractUsername = (url?: string) => {
+  if (!url) return '';
+  try {
+    const urlObj = new URL(url.startsWith('http') ? url : `https://${url}`);
+    const pathname = urlObj.pathname.replace(/\/$/, ''); // Remove trailing slash
+    const parts = pathname.split('/');
+    return parts[parts.length - 1] || url;
+  } catch {
+    return url;
+  }
+};
 
 /**
  * Página de perfil do usuário
@@ -27,9 +55,16 @@ const ProfilePage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     name: user?.name || '',
+    careerTime: user?.careerTime || '',
+    techArea: user?.techArea || '',
+    techStack: user?.techStack?.join(', ') || '',
+    bio: user?.bio || '',
+    location: user?.location || '',
+    linkedinUrl: user?.linkedinUrl || '',
+    githubUrl: user?.githubUrl || '',
   });
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
@@ -37,7 +72,11 @@ const ProfilePage: React.FC = () => {
   const handleSave = async () => {
     setIsLoading(true);
     try {
-      await updateProfile(formData);
+      const processedData = {
+        ...formData,
+        techStack: formData.techStack.split(',').map(s => s.trim()).filter(s => s),
+      };
+      await updateProfile(processedData);
       showToast('Perfil atualizado com sucesso!', 'success');
       setIsEditing(false);
     } catch {
@@ -50,6 +89,13 @@ const ProfilePage: React.FC = () => {
   const handleCancel = () => {
     setFormData({
       name: user?.name || '',
+      careerTime: user?.careerTime || '',
+      techArea: user?.techArea || '',
+      techStack: user?.techStack?.join(', ') || '',
+      bio: user?.bio || '',
+      location: user?.location || '',
+      linkedinUrl: user?.linkedinUrl || '',
+      githubUrl: user?.githubUrl || '',
     });
     setIsEditing(false);
   };
@@ -72,14 +118,35 @@ const ProfilePage: React.FC = () => {
     });
   };
 
+  const careerTimeOptions = [
+    { value: '0-1', label: '0-1 ano' },
+    { value: '1-3', label: '1-3 anos' },
+    { value: '3-5', label: '3-5 anos' },
+    { value: '5-10', label: '5-10 anos' },
+    { value: '10+', label: '10+ anos' },
+  ];
+
+  const techAreaOptions = [
+    { value: 'frontend', label: 'Frontend' },
+    { value: 'backend', label: 'Backend' },
+    { value: 'fullstack', label: 'Fullstack' },
+    { value: 'mobile', label: 'Mobile' },
+    { value: 'devops', label: 'DevOps' },
+    { value: 'data', label: 'Data Science/Analytics' },
+    { value: 'other', label: 'Outro' },
+  ];
+
   return (
     <>
       <PageTitle title="Perfil - TreinaVagaAI" />
 
       <div className="space-y-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Profile Card */}
-          <div className="lg:col-span-2">
+
+          {/* Left Column Group */}
+          <div className="lg:col-span-2 space-y-6">
+
+            {/* 1. PERSONAL INFO CARD */}
             <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg shadow-sm">
               <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
                 <h2 className="text-base font-semibold text-slate-900 dark:text-white">Informações Pessoais</h2>
@@ -107,11 +174,12 @@ const ProfilePage: React.FC = () => {
                       disabled={isLoading}
                     >
                       <CheckIcon className="h-4 w-4 mr-1.5" />
-                      {isLoading ? 'Salvando...' : 'Salvar Alterações'}
+                      {isLoading ? 'Salvando...' : 'Salvar'}
                     </button>
                   </div>
                 )}
               </div>
+
               <div className="p-6">
                 <div className="flex items-center mb-8">
                   {user?.picture ? (
@@ -132,6 +200,7 @@ const ProfilePage: React.FC = () => {
                 </div>
 
                 <div className="space-y-6 max-w-xl">
+                  {/* Name */}
                   <div>
                     <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                       Nome Completo
@@ -142,8 +211,7 @@ const ProfilePage: React.FC = () => {
                         name="name"
                         value={formData.name}
                         onChange={handleInputChange}
-                        className="block w-full px-4 py-2 text-sm bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl shadow-sm placeholder-slate-400 dark:placeholder-slate-500 text-slate-900 dark:text-white focus:outline-none focus:border-primary-500 dark:focus:border-primary-500 focus:ring-4 focus:ring-primary-500/10 transition-all"
-                        placeholder="Digite seu nome completo"
+                        className="block w-full px-4 py-2 text-sm bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:border-primary-500 dark:text-white"
                       />
                     ) : (
                       <div className="flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 rounded-md">
@@ -153,24 +221,195 @@ const ProfilePage: React.FC = () => {
                     )}
                   </div>
 
+                  {/* Bio */}
                   <div>
                     <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                      Email
+                      Biografia
                     </label>
-                    <div className="flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 rounded-md">
-                      <EnvelopeIcon className="h-5 w-5 text-slate-400 dark:text-slate-500" />
-                      <span className="text-slate-700 dark:text-slate-200 font-medium text-sm">{user?.email}</span>
-                    </div>
-                    <p className="text-xs text-slate-400 dark:text-slate-500 mt-1.5">
-                      O email não pode ser alterado.
-                    </p>
+                    {isEditing ? (
+                      <textarea
+                        name="bio"
+                        value={formData.bio}
+                        onChange={handleInputChange}
+                        rows={3}
+                        className="block w-full px-4 py-2 text-sm bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:border-primary-500 dark:text-white resize-none"
+                      />
+                    ) : (
+                      <div className="flex items-start gap-3 p-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 rounded-md">
+                        <DocumentTextIcon className="h-5 w-5 text-slate-400 dark:text-slate-500 mt-0.5" />
+                        <span className="text-slate-700 dark:text-slate-200 font-medium text-sm">
+                          {user?.bio || 'Não informado'}
+                        </span>
+                      </div>
+                    )}
                   </div>
+
+                  {/* Location */}
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                      Localização
+                    </label>
+                    {isEditing ? (
+                      <input
+                        type="text"
+                        name="location"
+                        value={formData.location}
+                        onChange={handleInputChange}
+                        className="block w-full px-4 py-2 text-sm bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:border-primary-500 dark:text-white"
+                      />
+                    ) : (
+                      <div className="flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 rounded-md">
+                        <MapPinIcon className="h-5 w-5 text-slate-400 dark:text-slate-500" />
+                        <span className="text-slate-700 dark:text-slate-200 font-medium text-sm">
+                          {user?.location || 'Não informado'}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Links */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                        LinkedIn
+                      </label>
+                      {isEditing ? (
+                        <input
+                          type="url"
+                          name="linkedinUrl"
+                          value={formData.linkedinUrl}
+                          onChange={handleInputChange}
+                          className="block w-full px-4 py-2 text-sm bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:border-primary-500 dark:text-white"
+                        />
+                      ) : (
+                        <div className="flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 rounded-md">
+                          <LinkedInIcon className="h-5 w-5 text-[#0a66c2] dark:text-[#0a66c2]" />
+                          {user?.linkedinUrl ? (
+                            <a href={user.linkedinUrl} target="_blank" rel="noopener noreferrer" className="text-primary-600 dark:text-primary-400 hover:underline text-sm font-medium">
+                              {extractUsername(user.linkedinUrl)}
+                            </a>
+                          ) : <span className="text-slate-500 text-sm">N/A</span>}
+                        </div>
+                      )}
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                        GitHub
+                      </label>
+                      {isEditing ? (
+                        <input
+                          type="url"
+                          name="githubUrl"
+                          value={formData.githubUrl}
+                          onChange={handleInputChange}
+                          className="block w-full px-4 py-2 text-sm bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:border-primary-500 dark:text-white"
+                        />
+                      ) : (
+                        <div className="flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 rounded-md">
+                          <GitHubIcon className="h-5 w-5 text-[#24292f] dark:text-white" />
+                          {user?.githubUrl ? (
+                            <a href={user.githubUrl} target="_blank" rel="noopener noreferrer" className="text-primary-600 dark:text-primary-400 hover:underline text-sm font-medium">
+                              {extractUsername(user.githubUrl)}
+                            </a>
+                          ) : <span className="text-slate-500 text-sm">N/A</span>}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
                 </div>
               </div>
             </div>
+
+            {/* 2. PROFESSIONAL PROFILE CARD (NEW SECTION) */}
+            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg shadow-sm">
+              <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-800">
+                <h2 className="text-base font-semibold text-slate-900 dark:text-white">Perfil Profissional</h2>
+              </div>
+              <div className="p-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                  {/* Tech Area */}
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                      Área de Atuação
+                    </label>
+                    {isEditing ? (
+                      <select
+                        name="techArea"
+                        value={formData.techArea}
+                        onChange={handleInputChange}
+                        className="block w-full px-4 py-2 text-sm bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:border-primary-500 dark:text-white"
+                      >
+                        <option value="">Selecione...</option>
+                        {techAreaOptions.map(opt => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
+                      </select>
+                    ) : (
+                      <div className="text-base font-medium text-slate-900 dark:text-white flex items-center gap-2">
+                        <AcademicCapIcon className="w-5 h-5 text-primary-500" />
+                        {techAreaOptions.find(opt => opt.value === user?.techArea)?.label || 'Não informado'}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Career Time */}
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                      Experiência
+                    </label>
+                    {isEditing ? (
+                      <select
+                        name="careerTime"
+                        value={formData.careerTime}
+                        onChange={handleInputChange}
+                        className="block w-full px-4 py-2 text-sm bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:border-primary-500 dark:text-white"
+                      >
+                        <option value="">Selecione...</option>
+                        {careerTimeOptions.map(opt => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
+                      </select>
+                    ) : (
+                      <div className="text-base font-medium text-slate-900 dark:text-white flex items-center gap-2">
+                        <BriefcaseIcon className="w-5 h-5 text-primary-500" />
+                        {careerTimeOptions.find(opt => opt.value === user?.careerTime)?.label || 'Não informado'}
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Tech Stack */}
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-3 flex items-center gap-2">
+                    <CpuChipIcon className="w-4 h-4" />
+                    Stack e Tecnologias
+                  </label>
+                  {isEditing ? (
+                    <input
+                      type="text"
+                      name="techStack"
+                      value={formData.techStack}
+                      onChange={handleInputChange}
+                      placeholder="Ex: React, Node, Python (separados por vírgula)"
+                      className="block w-full px-4 py-2 text-sm bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:border-primary-500 dark:text-white"
+                    />
+                  ) : (
+                    <div className="flex flex-wrap gap-2">
+                      {user?.techStack && user.techStack.length > 0 ? (
+                        user.techStack.map((tech, i) => (
+                          <span key={i} className="px-3 py-1 bg-primary-50 dark:bg-primary-900/40 text-primary-700 dark:text-primary-300 rounded-full text-xs font-semibold border border-primary-100 dark:border-primary-800">
+                            {tech}
+                          </span>
+                        ))
+                      ) : (
+                        <span className="text-slate-500 text-sm">Nenhuma tecnologia listada</span>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
           </div>
 
-          {/* Account Details */}
+          {/* Right Column Group (Account Details, etc) */}
           <div className="lg:col-span-1 space-y-6">
             <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg shadow-sm">
               <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-800">
@@ -201,19 +440,20 @@ const ProfilePage: React.FC = () => {
                 </div>
               </div>
 
-              <div className="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-100 dark:border-slate-700">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-amber-100 dark:bg-amber-900/30 rounded-lg text-amber-600 dark:text-amber-400">
-                    <TicketIcon className="h-5 w-5" />
+              <div className="px-6 pb-6">
+                <div className="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-100 dark:border-slate-700">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-amber-100 dark:bg-amber-900/30 rounded-lg text-amber-600 dark:text-amber-400">
+                      <TicketIcon className="h-5 w-5" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Tokens</p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Tokens Disponíveis</p>
-                    <p className="text-xs text-slate-400 dark:text-slate-500">Saldo atual</p>
-                  </div>
+                  <span className="text-xl font-bold text-slate-900 dark:text-white">
+                    {user?.tokens || 0}
+                  </span>
                 </div>
-                <span className="text-2xl font-bold text-slate-900 dark:text-white">
-                  {user?.tokens || 0}
-                </span>
               </div>
             </div>
 
@@ -226,6 +466,7 @@ const ProfilePage: React.FC = () => {
               Sair da Conta
             </button>
           </div>
+
         </div>
       </div>
     </>

@@ -20,6 +20,15 @@ export interface User {
   cellphone?: string | null;
   taxid?: string | null;
   tokens?: number;
+  // Campos de perfil
+  hasCompletedOnboarding?: boolean;
+  careerTime?: string;
+  techArea?: string;
+  techStack?: string[];
+  bio?: string;
+  location?: string;
+  linkedinUrl?: string;
+  githubUrl?: string;
 }
 
 export interface LoginResponse {
@@ -30,6 +39,28 @@ export interface LoginResponse {
 
 export interface RefreshTokenResponse {
   access_token: string;
+}
+
+export interface UserProfile {
+  hasCompletedOnboarding: boolean;
+  careerTime?: string;
+  techArea?: string;
+  techStack?: string[];
+  bio?: string;
+  location?: string;
+  linkedinUrl?: string;
+  githubUrl?: string;
+}
+
+export interface CompleteOnboardingData {
+  careerTime?: string;
+  techArea?: string;
+  techStack?: string[];
+  bio?: string;
+  location?: string;
+  linkedinUrl?: string;
+  githubUrl?: string;
+  hasCompletedOnboarding: boolean;
 }
 
 class ApiClient {
@@ -163,6 +194,14 @@ class ApiClient {
         console.warn('Failed to fetch tokens for user profile:', error);
       }
 
+      // Fetch user profile data
+      try {
+        const profileRes = await this.client.get('/users/me/profile');
+        Object.assign(user, profileRes.data);
+      } catch (error) {
+        console.warn('Failed to fetch profile data for user:', error);
+      }
+
       this._cachedUser = user;
       this._cachedUserAt = Date.now();
       return user;
@@ -241,6 +280,27 @@ class ApiClient {
 
   async deleteAddress(id: string): Promise<void> {
     await this.client.delete(`/users/addresses/${id}`);
+  }
+
+  // Profile methods
+  async getUserProfileData(): Promise<UserProfile> {
+    const res = await this.client.get('/users/me/profile');
+    return res.data;
+  }
+
+  async updateUserProfileData(profileData: Partial<UserProfile>): Promise<UserProfile> {
+    const res = await this.client.put('/users/me/profile', profileData);
+    return res.data;
+  }
+
+  async completeOnboarding(profileData: CompleteOnboardingData): Promise<UserProfile> {
+    const res = await this.client.post('/users/me/onboarding', profileData);
+    return res.data;
+  }
+
+  async getOnboardingStatus(): Promise<{ hasCompletedOnboarding: boolean }> {
+    const res = await this.client.get('/users/me/onboarding/status');
+    return res.data;
   }
 }
 

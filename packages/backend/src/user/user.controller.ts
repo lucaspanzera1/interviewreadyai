@@ -1,7 +1,7 @@
 import { Controller, Get, Put, Body, Param, UseGuards, Post, Delete } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiParam } from '@nestjs/swagger';
 import { UserService } from './user.service';
-import { UserDto, UpdateUserDto } from './dto';
+import { UserDto, UpdateUserDto, ProfileDto, CompleteOnboardingDto } from './dto';
 import { CurrentUser, Public, Roles } from '../auth/decorators';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { UserRole } from './schemas/user.schema';
@@ -194,15 +194,117 @@ export class UserController {
   }
 
   /**
+   * Busca perfil do usuário atual
+   * @returns Perfil do usuário
+   */
+  @Get('me/profile')
+  @ApiOperation({
+    summary: 'Buscar perfil do usuário',
+    description: 'Retorna os dados de perfil do usuário atual'
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Perfil retornado com sucesso'
+  })
+  async getMyProfile(@CurrentUser() user: any): Promise<any> {
+    const userId = user.userId || user.sub;
+    const userDoc = await this.userService.findById(userId);
+    return {
+      hasCompletedOnboarding: userDoc.hasCompletedOnboarding,
+      careerTime: userDoc.careerTime,
+      techArea: userDoc.techArea,
+      techStack: userDoc.techStack,
+      bio: userDoc.bio,
+      location: userDoc.location,
+      linkedinUrl: userDoc.linkedinUrl,
+      githubUrl: userDoc.githubUrl,
+    };
+  }
+
+  /**
+   * Atualiza perfil do usuário atual
+   * @param profileData Dados do perfil
+   */
+  @Put('me/profile')
+  @ApiOperation({
+    summary: 'Atualizar perfil do usuário',
+    description: 'Atualiza os dados de perfil do usuário atual'
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Perfil atualizado com sucesso'
+  })
+  async updateMyProfile(@CurrentUser() user: any, @Body() profileData: ProfileDto): Promise<any> {
+    const userId = user.userId || user.sub;
+    const updatedUser = await this.userService.updateProfile(userId, profileData);
+    return {
+      hasCompletedOnboarding: updatedUser.hasCompletedOnboarding,
+      careerTime: updatedUser.careerTime,
+      techArea: updatedUser.techArea,
+      techStack: updatedUser.techStack,
+      bio: updatedUser.bio,
+      location: updatedUser.location,
+      linkedinUrl: updatedUser.linkedinUrl,
+      githubUrl: updatedUser.githubUrl,
+    };
+  }
+
+  /**
+   * Completa o onboarding do usuário
+   * @param profileData Dados do perfil para completar onboarding
+   */
+  @Post('me/onboarding')
+  @ApiOperation({
+    summary: 'Completar onboarding',
+    description: 'Completa o processo de onboarding do usuário'
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Onboarding completado com sucesso'
+  })
+  async completeOnboarding(@CurrentUser() user: any, @Body() profileData: CompleteOnboardingDto): Promise<any> {
+    const userId = user.userId || user.sub;
+    const updatedUser = await this.userService.completeOnboarding(userId, profileData);
+    return {
+      hasCompletedOnboarding: updatedUser.hasCompletedOnboarding,
+      careerTime: updatedUser.careerTime,
+      techArea: updatedUser.techArea,
+      techStack: updatedUser.techStack,
+      bio: updatedUser.bio,
+      location: updatedUser.location,
+      linkedinUrl: updatedUser.linkedinUrl,
+      githubUrl: updatedUser.githubUrl,
+    };
+  }
+
+  /**
+   * Verifica se o usuário completou o onboarding
+   */
+  @Get('me/onboarding/status')
+  @ApiOperation({
+    summary: 'Status do onboarding',
+    description: 'Verifica se o usuário completou o onboarding'
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Status retornado com sucesso'
+  })
+  async getOnboardingStatus(@CurrentUser() user: any): Promise<{ hasCompletedOnboarding: boolean }> {
+    const userId = user.userId || user.sub;
+    const hasCompleted = await this.userService.hasCompletedOnboarding(userId);
+    return { hasCompletedOnboarding: hasCompleted };
+  }
+
+  /**
    * Endpoint temporário para testar o módulo de usuários
    * @returns Status do módulo de usuários
    */
   @Get('status')
   @Public()
   @ApiOperation({ summary: 'Status do módulo de usuários' })
-  @ApiResponse({ 
-    status: 200, 
-    description: 'Status retornado com sucesso' 
+  @ApiResponse({
+    status: 200,
+    description: 'Status retornado com sucesso'
   })
   getStatus(): object {
     return this.userService.getStatus();

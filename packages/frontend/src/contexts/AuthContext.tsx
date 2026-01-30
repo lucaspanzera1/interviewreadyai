@@ -5,11 +5,13 @@ interface AuthContextType {
   user: User | null;
   isLoading: boolean;
   isAuthenticated: boolean;
+  showOnboarding: boolean;
   login: () => Promise<void>;
   logout: () => Promise<void>;
   refreshUser: () => Promise<void>;
   updateProfile: (userData: Partial<User>) => Promise<void>;
   handleAuthCallback: (accessToken: string, refreshToken: string) => Promise<void>;
+  completeOnboarding: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -21,6 +23,7 @@ interface AuthProviderProps {
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [showOnboarding, setShowOnboarding] = useState(false);
 
   const isAuthenticated = !!user && apiClient.isAuthenticated();
 
@@ -64,6 +67,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
       const userData = await apiClient.getUserProfile();
       setUser(userData);
+
+      // Check if user needs to complete onboarding
+      if (!userData.hasCompletedOnboarding) {
+        setShowOnboarding(true);
+      }
     } catch (error) {
       console.error('Auth callback failed:', error);
       apiClient.clearTokens();
@@ -108,16 +116,23 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
+  const completeOnboarding = async () => {
+    setShowOnboarding(false);
+    // Refresh user data after onboarding completion
+    await refreshUser();
+  };
+
   const value: AuthContextType = {
     user,
     isLoading,
     isAuthenticated,
+    showOnboarding,
     login,
     logout,
     refreshUser,
     updateProfile,
     handleAuthCallback,
-
+    completeOnboarding,
   };
 
   return (

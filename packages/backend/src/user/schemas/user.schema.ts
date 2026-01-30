@@ -40,6 +40,31 @@ export class User {
   @Prop({ type: Number, default: 0 })
   tokens: number;
 
+  // Campos de perfil/onboarding
+  @Prop({ default: false })
+  hasCompletedOnboarding: boolean;
+
+  @Prop()
+  careerTime?: string; // '0-1', '1-3', '3-5', '5-10', '10+'
+
+  @Prop()
+  techArea?: string; // 'frontend', 'backend', 'fullstack', 'mobile', 'devops', 'data', 'other'
+
+  @Prop({ type: [String] })
+  techStack?: string[];
+
+  @Prop()
+  bio?: string;
+
+  @Prop()
+  location?: string;
+
+  @Prop()
+  linkedinUrl?: string;
+
+  @Prop()
+  githubUrl?: string;
+
   createdAt: Date;
   updatedAt: Date;
 }

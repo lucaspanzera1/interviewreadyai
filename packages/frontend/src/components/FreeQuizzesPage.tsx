@@ -4,9 +4,7 @@ import PageTitle from './PageTitle';
 import {
     AcademicCapIcon,
     ClockIcon,
-    CheckCircleIcon,
     PlayCircleIcon,
-    StarIcon,
     BoltIcon,
     FunnelIcon,
     MagnifyingGlassIcon
