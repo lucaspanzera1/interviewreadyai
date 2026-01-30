@@ -1,17 +1,22 @@
 import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
 import { firstValueFrom } from 'rxjs';
 import { GenerateQuizDto, GeneratedQuiz } from './dto';
+import { Quiz, QuizDocument, QuizAttempt, QuizAttemptDocument } from './schemas';
 
 @Injectable()
 export class QuizService {
   constructor(
     private readonly httpService: HttpService,
     private readonly configService: ConfigService,
+    @InjectModel(Quiz.name) private quizModel: Model<QuizDocument>,
+    @InjectModel(QuizAttempt.name) private quizAttemptModel: Model<QuizAttemptDocument>,
   ) {}
 
-  async generateQuiz(dto: GenerateQuizDto): Promise<GeneratedQuiz> {
+  async generateQuiz(dto: GenerateQuizDto, userId: string): Promise<GeneratedQuiz> {
     const apiKey = this.configService.get<string>('GROQ_API_KEY');
     if (!apiKey) {
       throw new HttpException('GROQ_API_KEY not configured', HttpStatus.INTERNAL_SERVER_ERROR);
@@ -35,8 +40,19 @@ export class QuizService {
       } else if (content.startsWith('```')) {
         content = content.replace(/^```\s*/, '').replace(/\s*```$/, '');
       }
-      const quiz: GeneratedQuiz = JSON.parse(content);
-      return quiz;
+      const generatedQuiz: GeneratedQuiz = JSON.parse(content);
+
+      // Save quiz to database
+      const savedQuiz = await this.quizModel.create({
+        ...dto,
+        questions: generatedQuiz.questions,
+        createdBy: userId,
+      });
+
+      return {
+        ...generatedQuiz,
+        quizId: savedQuiz._id.toString(),
+      };
     } catch (error) {
       console.error('JSON Parse Error:', error);
       console.error('Response content:', response);
@@ -187,5 +203,141 @@ Gere agora {quantidade_questoes} questões de nível {nivel} sobre "{titulo}" na
         HttpStatus.INTERNAL_SERVER_ERROR
       );
     }
+  }
+
+  // Admin methods
+  async getAllQuizzes(page: number = 1, limit: number = 10) {
+    const skip = (page - 1) * limit;
+    const quizzes = await this.quizModel
+      .find()
+      .populate('createdBy', 'name email')
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit)
+      .exec();
+
+    const total = await this.quizModel.countDocuments().exec();
+
+    return {
+      quizzes,
+      total,
+      page,
+      totalPages: Math.ceil(total / limit),
+    };
+  }
+
+  async getPublicQuizzes(page: number = 1, limit: number = 10, category?: string, level?: string, search?: string) {
+    const skip = (page - 1) * limit;
+    const filter: any = { isActive: true };
+
+    if (category && category !== 'Todas') {
+      filter.categoria = category;
+    }
+
+    if (level && level !== 'Todas') {
+      filter.nivel = level;
+    }
+
+    if (search && search.trim()) {
+      const searchRegex = new RegExp(search.trim(), 'i');
+      filter.$or = [
+        { titulo: searchRegex },
+        { descricao: searchRegex },
+        { tags: { $in: [searchRegex] } }
+      ];
+    }
+
+    const quizzes = await this.quizModel
+      .find(filter)
+      .populate('createdBy', 'name')
+      .select('titulo descricao categoria tags nivel quantidade_questoes totalAccess totalAttempts totalCompletions averageScore createdAt')
+      .sort({ totalAccess: -1, createdAt: -1 })
+      .skip(skip)
+      .limit(limit)
+      .exec();
+
+    const total = await this.quizModel.countDocuments(filter).exec();
+
+    return {
+      quizzes,
+      total,
+      page,
+      totalPages: Math.ceil(total / limit),
+    };
+  }
+
+  async getQuizById(id: string) {
+    return this.quizModel
+      .findById(id)
+      .populate('createdBy', 'name email')
+      .exec();
+  }
+
+  async updateQuizStatus(id: string, isActive: boolean) {
+    return this.quizModel
+      .findByIdAndUpdate(id, { isActive }, { new: true })
+      .exec();
+  }
+
+  async deleteQuiz(id: string) {
+    // Delete quiz and all its attempts
+    await this.quizAttemptModel.deleteMany({ quizId: id }).exec();
+    return this.quizModel.findByIdAndDelete(id).exec();
+  }
+
+  async getQuizStats(id: string) {
+    const quiz = await this.quizModel.findById(id).exec();
+    if (!quiz) return null;
+
+    const attempts = await this.quizAttemptModel
+      .find({ quizId: id })
+      .populate('userId', 'name email')
+      .sort({ createdAt: -1 })
+      .exec();
+
+    const stats = {
+      quiz,
+      attempts,
+      totalAttempts: attempts.length,
+      completedAttempts: attempts.filter(a => a.completed).length,
+      averageScore: attempts.length > 0
+        ? attempts.reduce((sum, a) => sum + a.percentage, 0) / attempts.length
+        : 0,
+    };
+
+    return stats;
+  }
+
+  // User methods
+  async recordQuizAttempt(quizId: string, userId: string, selectedAnswers: number[], score: number, totalQuestions: number, timeSpent: number = 0) {
+    const percentage = Math.round((score / totalQuestions) * 100);
+
+    const attempt = await this.quizAttemptModel.create({
+      quizId,
+      userId,
+      selectedAnswers,
+      score,
+      totalQuestions,
+      percentage,
+      timeSpent,
+      completed: true,
+      completedAt: new Date(),
+    });
+
+    // Update quiz statistics
+    await this.quizModel.findByIdAndUpdate(quizId, {
+      $inc: {
+        totalAttempts: 1,
+        totalCompletions: 1,
+      },
+    });
+
+    return attempt;
+  }
+
+  async incrementQuizAccess(quizId: string) {
+    return this.quizModel.findByIdAndUpdate(quizId, {
+      $inc: { totalAccess: 1 },
+    });
   }
 }

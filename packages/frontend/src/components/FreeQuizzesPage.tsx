@@ -1,101 +1,18 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import PageTitle from './PageTitle';
 import {
     AcademicCapIcon,
-    ClockIcon,
     PlayCircleIcon,
     BoltIcon,
     FunnelIcon,
     MagnifyingGlassIcon,
     PlusIcon,
-    XMarkIcon
+    XMarkIcon,
+    StarIcon
 } from '@heroicons/react/24/outline';
-import { StarIcon as StarIconSolid } from '@heroicons/react/24/solid';
-import { apiClient, GenerateQuizDto, QuizLevel, GeneratedQuiz } from '../lib/api';
+import { apiClient, QuizLevel } from '../lib/api';
 import { toast } from 'react-toastify';
-
-// Mock data for free quizzes
-const FREE_QUIZZES = [
-    {
-        id: 'free-1',
-        title: 'Lógica de Programação Básica',
-        description: 'Teste seus conhecimentos em algoritmos, variáveis e estruturas de controle.',
-        questions: 10,
-        time: '15 min',
-        difficulty: 'Iniciante',
-        rating: 4.8,
-        reviews: 124,
-        tags: ['Lógica', 'Algoritmos'],
-        category: 'Fundamentos',
-        completions: 1205
-    },
-    {
-        id: 'free-2',
-        title: 'Fundamentos do React',
-        description: 'Conceitos essenciais de React: Components, Props, State e Hooks básicos.',
-        questions: 15,
-        time: '20 min',
-        difficulty: 'Intermediário',
-        rating: 4.9,
-        reviews: 89,
-        tags: ['Frontend', 'React'],
-        category: 'Frontend',
-        completions: 850
-    },
-    {
-        id: 'free-3',
-        title: 'SQL para Iniciantes',
-        description: 'Aprenda e pratique comandos básicos de SQL: SELECT, WHERE, JOIN e mais.',
-        questions: 12,
-        time: '15 min',
-        difficulty: 'Iniciante',
-        rating: 4.7,
-        reviews: 56,
-        tags: ['Backend', 'Dados'],
-        category: 'Backend',
-        completions: 640
-    },
-    {
-        id: 'free-4',
-        title: 'JavaScript Moderno (ES6+)',
-        description: 'Domine as features modernas do JS: Arrow Functions, Destructuring, Spread e mais.',
-        questions: 20,
-        time: '25 min',
-        difficulty: 'Intermediário',
-        rating: 4.8,
-        reviews: 210,
-        tags: ['Frontend', 'JavaScript'],
-        category: 'Frontend',
-        completions: 1500
-    },
-    {
-        id: 'free-5',
-        title: 'Git & GitHub Essencial',
-        description: 'Comandos básicos de Git e fluxo de trabalho com GitHub para iniciantes.',
-        questions: 10,
-        time: '12 min',
-        difficulty: 'Iniciante',
-        rating: 4.9,
-        reviews: 340,
-        tags: ['DevOps', 'Ferramentas'],
-        category: 'DevOps',
-        completions: 2100
-    },
-    {
-        id: 'free-6',
-        title: 'Estruturas de Dados: Arrays e Listas',
-        description: 'Entenda como funcionam arrays, listas ligadas e operações básicas.',
-        questions: 15,
-        time: '20 min',
-        difficulty: 'Avançado',
-        rating: 4.6,
-        reviews: 45,
-        tags: ['CS', 'Algoritmos'],
-        category: 'Fundamentos',
-        completions: 320
-    }
-];
 
 const CATEGORIES = ['Todas', 'Fundamentos', 'Frontend', 'Backend', 'DevOps'];
 const DIFFICULTIES = ['Todas', 'Iniciante', 'Intermediário', 'Avançado'];
@@ -105,28 +22,54 @@ const FreeQuizzesPage: React.FC = () => {
     const [selectedCategory, setSelectedCategory] = useState('Todas');
     const [selectedDifficulty, setSelectedDifficulty] = useState('Todas');
     const [searchQuery, setSearchQuery] = useState('');
+    const [publicQuizzes, setPublicQuizzes] = useState<any[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
 
-    // Custom quiz generation
+    // Modal and form states
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isGenerating, setIsGenerating] = useState(false);
-    const [generatedQuiz, setGeneratedQuiz] = useState<GeneratedQuiz | null>(null);
-    const [formData, setFormData] = useState<GenerateQuizDto>({
+    const [generatedQuiz, setGeneratedQuiz] = useState<any>(null);
+    const [tagInput, setTagInput] = useState('');
+    const [formData, setFormData] = useState({
         categoria: '',
         titulo: '',
         descricao: '',
-        tags: [],
+        tags: [] as string[],
         quantidade_questoes: 10,
-        nivel: QuizLevel.INICIANTE,
+        nivel: QuizLevel.INICIANTE
     });
-    const [tagInput, setTagInput] = useState('');
 
-    const filteredQuizzes = FREE_QUIZZES.filter(quiz => {
-        const matchesCategory = selectedCategory === 'Todas' || quiz.category === selectedCategory;
-        const matchesDifficulty = selectedDifficulty === 'Todas' || quiz.difficulty === selectedDifficulty;
-        const matchesSearch = quiz.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            quiz.description.toLowerCase().includes(searchQuery.toLowerCase());
-        return matchesCategory && matchesDifficulty && matchesSearch;
-    });
+    // Load public quizzes
+    useEffect(() => {
+        loadPublicQuizzes();
+    }, [selectedCategory, selectedDifficulty, currentPage]);
+
+    useEffect(() => {
+        // Debounce search
+        const timer = setTimeout(() => {
+            loadPublicQuizzes();
+        }, 300);
+
+        return () => clearTimeout(timer);
+    }, [searchQuery]);
+
+    const loadPublicQuizzes = async () => {
+        try {
+            setLoading(true);
+            const response = await apiClient.getPublicQuizzes(currentPage, 12, selectedCategory, selectedDifficulty, searchQuery);
+            setPublicQuizzes(response.quizzes);
+            setTotalPages(response.totalPages);
+        } catch (error) {
+            toast.error('Erro ao carregar quizzes');
+            console.error(error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const filteredQuizzes = publicQuizzes;
 
     const handleGenerateQuiz = async () => {
         if (!formData.categoria || !formData.titulo || !formData.descricao) {
@@ -140,6 +83,12 @@ const FreeQuizzesPage: React.FC = () => {
             setGeneratedQuiz(quiz);
             setIsModalOpen(false);
             toast.success('Quiz gerado com sucesso!');
+
+            // Store quiz data for the quiz page
+            localStorage.setItem('generatedQuiz', JSON.stringify(quiz));
+            if (quiz.quizId) {
+                localStorage.setItem('currentQuizId', quiz.quizId);
+            }
         } catch (error) {
             toast.error('Erro ao gerar quiz. Tente novamente.');
             console.error(error);
@@ -165,10 +114,29 @@ const FreeQuizzesPage: React.FC = () => {
         }));
     };
 
+    const startPublicQuiz = async (quiz: any) => {
+        try {
+            // Record access
+            await apiClient.recordQuizAccess(quiz._id);
+
+            // Get full quiz data
+            const fullQuiz = await apiClient.getPublicQuizById(quiz._id);
+
+            // Store quiz data for the quiz page
+            localStorage.setItem('generatedQuiz', JSON.stringify({
+                questions: fullQuiz.questions,
+                quizId: fullQuiz._id
+            }));
+
+            navigate('/quiz/generated');
+        } catch (error) {
+            toast.error('Erro ao iniciar quiz');
+            console.error(error);
+        }
+    };
+
     const startGeneratedQuiz = () => {
         if (generatedQuiz) {
-            // Store the quiz in localStorage or pass via state
-            localStorage.setItem('generatedQuiz', JSON.stringify(generatedQuiz));
             navigate('/quiz/generated');
         }
     };
@@ -262,40 +230,45 @@ const FreeQuizzesPage: React.FC = () => {
             </div>
 
             {/* Grid of Quizzes */}
-            {filteredQuizzes.length > 0 ? (
+            {loading ? (
+                <div className="flex items-center justify-center py-20">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
+                </div>
+            ) : filteredQuizzes.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {filteredQuizzes.map((quiz) => (
                         <div
-                            key={quiz.id}
+                            key={quiz._id}
                             className="group bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 hover:border-primary-400 dark:hover:border-primary-500 shadow-sm hover:shadow-md transition-all duration-300 flex flex-col overflow-hidden cursor-pointer"
-                            onClick={() => navigate(`/simulados/novo?template=${quiz.id}`)}
+                            onClick={() => startPublicQuiz(quiz)}
                         >
                             {/* Card Header */}
                             <div className="p-5 flex-1">
                                 <div className="flex justify-between items-start mb-4">
-                                    <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border ${quiz.category === 'Frontend' ? 'bg-blue-50 text-blue-600 border-blue-100 dark:bg-blue-900/20 dark:text-blue-300 dark:border-blue-800' :
-                                            quiz.category === 'Backend' ? 'bg-emerald-50 text-emerald-600 border-emerald-100 dark:bg-emerald-900/20 dark:text-emerald-300 dark:border-emerald-800' :
-                                                quiz.category === 'DevOps' ? 'bg-orange-50 text-orange-600 border-orange-100 dark:bg-orange-900/20 dark:text-orange-300 dark:border-orange-800' :
+                                    <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border ${quiz.categoria === 'Frontend' ? 'bg-blue-50 text-blue-600 border-blue-100 dark:bg-blue-900/20 dark:text-blue-300 dark:border-blue-800' :
+                                            quiz.categoria === 'Backend' ? 'bg-emerald-50 text-emerald-600 border-emerald-100 dark:bg-emerald-900/20 dark:text-emerald-300 dark:border-emerald-800' :
+                                                quiz.categoria === 'DevOps' ? 'bg-orange-50 text-orange-600 border-orange-100 dark:bg-orange-900/20 dark:text-orange-300 dark:border-orange-800' :
                                                     'bg-slate-50 text-slate-600 border-slate-100 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700'
                                         }`}>
-                                        {quiz.category}
+                                        {quiz.categoria}
                                     </span>
                                     <div className="flex items-center gap-1 text-amber-500">
-                                        <StarIconSolid className="w-3.5 h-3.5" />
-                                        <span className="text-xs font-bold text-slate-700 dark:text-slate-300">{quiz.rating}</span>
-                                        <span className="text-[10px] text-slate-400">({quiz.reviews})</span>
+                                        <StarIcon className="w-3.5 h-3.5" />
+                                        <span className="text-xs font-bold text-slate-700 dark:text-slate-300">
+                                            {quiz.averageScore > 0 ? (quiz.averageScore / 10).toFixed(1) : 'N/A'}
+                                        </span>
                                     </div>
                                 </div>
 
                                 <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-2 group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">
-                                    {quiz.title}
+                                    {quiz.titulo}
                                 </h3>
                                 <p className="text-sm text-slate-500 dark:text-slate-400 line-clamp-2 mb-4">
-                                    {quiz.description}
+                                    {quiz.descricao}
                                 </p>
 
                                 <div className="flex flex-wrap gap-2 mb-4">
-                                    {quiz.tags.map(tag => (
+                                    {quiz.tags.map((tag: string) => (
                                         <span key={tag} className="text-[10px] font-medium px-2 py-1 bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-400 rounded-md border border-slate-100 dark:border-slate-700">
                                             #{tag}
                                         </span>
@@ -306,19 +279,21 @@ const FreeQuizzesPage: React.FC = () => {
                             {/* Card Footer */}
                             <div className="px-5 py-4 border-t border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/50 flex items-center justify-between">
                                 <div className="flex items-center gap-4 text-xs text-slate-500 dark:text-slate-400 font-medium">
-                                    <div className="flex items-center gap-1.5" title="Tempo estimado">
-                                        <ClockIcon className="w-4 h-4" />
-                                        {quiz.time}
-                                    </div>
                                     <div className="flex items-center gap-1.5" title="Questões">
                                         <AcademicCapIcon className="w-4 h-4" />
-                                        {quiz.questions}
+                                        {quiz.quantidade_questoes}
+                                    </div>
+                                    <div className="flex items-center gap-1.5" title="Tentativas">
+                                        <PlayCircleIcon className="w-4 h-4" />
+                                        {quiz.totalAttempts}
                                     </div>
                                     <div className="flex items-center gap-1.5" title="Dificuldade">
-                                        <span className={`w-2 h-2 rounded-full ${quiz.difficulty === 'Iniciante' ? 'bg-green-500' :
-                                                quiz.difficulty === 'Intermediário' ? 'bg-amber-500' : 'bg-red-500'
+                                        <span className={`w-2 h-2 rounded-full ${quiz.nivel === 'INICIANTE' ? 'bg-green-500' :
+                                                quiz.nivel === 'MEDIO' ? 'bg-amber-500' : 'bg-red-500'
                                             }`}></span>
-                                        {quiz.difficulty}
+                                        {quiz.nivel === 'INICIANTE' ? 'Iniciante' :
+                                         quiz.nivel === 'MEDIO' ? 'Médio' :
+                                         quiz.nivel === 'DIFÍCIL' ? 'Difícil' : 'Expert'}
                                     </div>
                                 </div>
                                 <div className="flex items-center gap-1 text-xs font-bold text-primary-600 dark:text-primary-400 opacity-0 group-hover:opacity-100 transition-opacity transform translate-x-2 group-hover:translate-x-0">
@@ -341,6 +316,31 @@ const FreeQuizzesPage: React.FC = () => {
                         className="mt-4 text-primary-600 font-medium text-sm hover:underline"
                     >
                         Limpar filtros
+                    </button>
+                </div>
+            )}
+
+            {/* Pagination */}
+            {totalPages > 1 && (
+                <div className="flex justify-center items-center gap-2 mt-8">
+                    <button
+                        onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                        disabled={currentPage === 1}
+                        className="px-3 py-2 text-sm font-medium text-slate-500 bg-white border border-slate-300 rounded-md hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                        Anterior
+                    </button>
+
+                    <span className="text-sm text-slate-700 dark:text-slate-300">
+                        Página {currentPage} de {totalPages}
+                    </span>
+
+                    <button
+                        onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                        disabled={currentPage === totalPages}
+                        className="px-3 py-2 text-sm font-medium text-slate-500 bg-white border border-slate-300 rounded-md hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                        Próxima
                     </button>
                 </div>
             )}

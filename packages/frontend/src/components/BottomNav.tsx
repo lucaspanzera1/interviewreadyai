@@ -2,7 +2,6 @@ import React, { useRef, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
     HomeIcon,
-    UsersIcon,
     SparklesIcon,
     DocumentTextIcon,
     ChartBarIcon,
@@ -24,6 +23,7 @@ import {
     TicketIcon as TicketIconSolid,
     AcademicCapIcon as AcademicCapIconSolid
 } from '@heroicons/react/24/solid';
+import { Users as UsersIconLucide, FileQuestion } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useSidebar } from '../contexts/SidebarContext';
 import { useTheme } from '../contexts/ThemeContext';
@@ -61,7 +61,8 @@ const Sidebar: React.FC = () => {
     ];
 
     const adminNavItems = [
-        { name: 'Usuários', path: '/users', icon: UsersIcon, activeIcon: UsersIcon },
+        { name: 'Usuários', path: '/users', icon: UsersIconLucide, activeIcon: UsersIconLucide },
+        { name: 'Quizzes', path: '/admin/quizzes', icon: FileQuestion, activeIcon: FileQuestion },
     ];
 
     const handleNavClick = (path: string) => {

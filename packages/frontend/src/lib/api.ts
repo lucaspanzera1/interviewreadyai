@@ -88,6 +88,7 @@ export interface QuizQuestion {
 
 export interface GeneratedQuiz {
   questions: QuizQuestion[];
+  quizId?: string;
 }
 
 class ApiClient {
@@ -335,6 +336,71 @@ class ApiClient {
   // Quiz methods
   async generateQuiz(dto: GenerateQuizDto): Promise<GeneratedQuiz> {
     const res = await this.client.post('/quiz/generate', dto);
+    return res.data;
+  }
+
+  async recordQuizAttempt(quizId: string, selectedAnswers: number[], score: number, totalQuestions: number, timeSpent?: number) {
+    const res = await this.client.post(`/quiz/${quizId}/attempt`, {
+      selectedAnswers,
+      score,
+      totalQuestions,
+      timeSpent,
+    });
+    return res.data;
+  }
+
+  // Admin Quiz methods
+  async getAllQuizzes(page: number = 1, limit: number = 10) {
+    const res = await this.client.get('/admin/quiz', {
+      params: { page, limit },
+    });
+    return res.data;
+  }
+
+  async getQuizById(id: string) {
+    const res = await this.client.get(`/admin/quiz/${id}`);
+    return res.data;
+  }
+
+  async getQuizStats(id: string) {
+    const res = await this.client.get(`/admin/quiz/${id}/stats`);
+    return res.data;
+  }
+
+  async updateQuizStatus(id: string, isActive: boolean) {
+    const res = await this.client.patch(`/admin/quiz/${id}/status`, null, {
+      params: { active: isActive },
+    });
+    return res.data;
+  }
+
+  async deleteQuiz(id: string) {
+    const res = await this.client.delete(`/admin/quiz/${id}`);
+    return res.data;
+  }
+
+  // Public quiz methods
+  async getPublicQuizzes(page: number = 1, limit: number = 12, category?: string, level?: string, search?: string) {
+    const params = new URLSearchParams({
+      page: page.toString(),
+      limit: limit.toString(),
+    });
+
+    if (category && category !== 'Todas') params.append('category', category);
+    if (level && level !== 'Todas') params.append('level', level);
+    if (search && search.trim()) params.append('search', search.trim());
+
+    const res = await this.client.get(`/quiz/public?${params.toString()}`);
+    return res.data;
+  }
+
+  async getPublicQuizById(id: string) {
+    const res = await this.client.get(`/quiz/public/${id}`);
+    return res.data;
+  }
+
+  async recordQuizAccess(quizId: string) {
+    const res = await this.client.post(`/quiz/${quizId}/access`);
     return res.data;
   }
 }

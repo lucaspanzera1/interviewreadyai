@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import PageTitle from './PageTitle';
 import { CheckCircleIcon, XCircleIcon, ArrowLeftIcon } from '@heroicons/react/24/outline';
-import { QuizQuestion } from '../lib/api';
+import { QuizQuestion, apiClient } from '../lib/api';
 
 const GeneratedQuizPage: React.FC = () => {
   const navigate = useNavigate();
@@ -11,12 +11,23 @@ const GeneratedQuizPage: React.FC = () => {
   const [selectedAnswers, setSelectedAnswers] = useState<number[]>([]);
   const [showResults, setShowResults] = useState(false);
   const [score, setScore] = useState(0);
+  const [startTime, setStartTime] = useState<number>(Date.now());
+  const [quizId, setQuizId] = useState<string>('');
 
   useEffect(() => {
     const storedQuiz = localStorage.getItem('generatedQuiz');
+    const storedQuizId = localStorage.getItem('currentQuizId');
+
     if (storedQuiz) {
       setQuiz(JSON.parse(storedQuiz));
       setSelectedAnswers(new Array(JSON.parse(storedQuiz).questions.length).fill(-1));
+      setStartTime(Date.now());
+
+      // Record access if we have a quiz ID
+      if (storedQuizId) {
+        setQuizId(storedQuizId);
+        apiClient.recordQuizAccess(storedQuizId).catch(console.error);
+      }
     } else {
       navigate('/free-quizzes');
     }
@@ -32,7 +43,7 @@ const GeneratedQuizPage: React.FC = () => {
     setSelectedAnswers(newAnswers);
   };
 
-  const nextQuestion = () => {
+  const nextQuestion = async () => {
     if (currentQuestion < quiz.questions.length - 1) {
       setCurrentQuestion(currentQuestion + 1);
     } else {
@@ -44,6 +55,23 @@ const GeneratedQuizPage: React.FC = () => {
         }
       });
       setScore(correct);
+
+      // Record attempt if we have a quiz ID
+      if (quizId) {
+        const timeSpent = Math.floor((Date.now() - startTime) / 1000);
+        try {
+          await apiClient.recordQuizAttempt(
+            quizId,
+            selectedAnswers,
+            correct,
+            quiz.questions.length,
+            timeSpent
+          );
+        } catch (error) {
+          console.error('Failed to record quiz attempt:', error);
+        }
+      }
+
       setShowResults(true);
     }
   };

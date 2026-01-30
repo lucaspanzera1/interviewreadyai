@@ -7,4 +7,5 @@ export interface QuizQuestion {
 
 export interface GeneratedQuiz {
   questions: QuizQuestion[];
+  quizId?: string;
 }

@@ -13,6 +13,8 @@ import FreeQuizzesPage from './components/FreeQuizzesPage'
 import OnboardingProvider from './components/OnboardingProvider'
 import ToastContainer from './components/ToastContainer'
 import GeneratedQuizPage from './components/GeneratedQuizPage'
+import AdminQuizzesPage from './components/AdminQuizzesPage'
+import AdminQuizStatsPage from './components/AdminQuizStatsPage'
 
 function App() {
   return (
@@ -92,6 +94,30 @@ function App() {
             <ProtectedRoute>
               <AppLayout>
                 <TokensPage />
+              </AppLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Admin Quizzes page */}
+        <Route
+          path="/admin/quizzes"
+          element={
+            <ProtectedRoute>
+              <AppLayout>
+                <AdminQuizzesPage />
+              </AppLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Admin Quiz Stats page */}
+        <Route
+          path="/admin/quizzes/:id/stats"
+          element={
+            <ProtectedRoute>
+              <AppLayout>
+                <AdminQuizStatsPage />
               </AppLayout>
             </ProtectedRoute>
           }
