@@ -1,14 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import PageTitle from './PageTitle';
 import {
     ArrowLeftIcon,
     UserIcon,
     ClockIcon,
-    CheckCircleIcon,
     ChartBarIcon,
-    AcademicCapIcon,
-    CalendarIcon
+    AcademicCapIcon
 } from '@heroicons/react/24/outline';
 import { apiClient } from '../lib/api';
 import { toast } from 'react-toastify';
@@ -220,7 +217,7 @@ const AdminQuizStatsPage: React.FC = () => {
                                                     <div className="flex-1 w-24 h-1.5 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
                                                         <div
                                                             className={`h-full rounded-full ${attempt.percentage >= 80 ? 'bg-green-500' :
-                                                                    attempt.percentage >= 60 ? 'bg-amber-500' : 'bg-red-500'
+                                                                attempt.percentage >= 60 ? 'bg-amber-500' : 'bg-red-500'
                                                                 }`}
                                                             style={{ width: `${attempt.percentage}%` }}
                                                         />

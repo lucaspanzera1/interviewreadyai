@@ -104,11 +104,7 @@ const UserQuizHistoryPage: React.FC = () => {
         });
     };
 
-    const getScoreColor = (percentage: number) => {
-        if (percentage >= 80) return 'text-green-600 dark:text-green-400';
-        if (percentage >= 60) return 'text-amber-600 dark:text-amber-400';
-        return 'text-red-600 dark:text-red-400';
-    };
+
 
     const getDifficultyColor = (nivel: string) => {
         switch (nivel) {
@@ -120,7 +116,7 @@ const UserQuizHistoryPage: React.FC = () => {
         }
     };
 
-    const StatCard = ({ icon: Icon, label, value, colorClass, gradient }: any) => (
+    const StatCard = ({ icon: Icon, label, value, colorClass }: any) => (
         <div className={`relative overflow-hidden bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-soft hover:shadow-lifted transition-all duration-300 border border-slate-100 dark:border-slate-700 group hover:-translate-y-1`}>
             {/* Background decoration */}
             <div className={`absolute top-0 right-0 p-4 -mr-4 -mt-4 opacity-5 group-hover:opacity-10 transition-opacity`}>

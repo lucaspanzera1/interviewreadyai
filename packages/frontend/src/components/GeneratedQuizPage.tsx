@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import PageTitle from './PageTitle';
-import { CheckCircleIcon, XCircleIcon, ArrowLeftIcon, PlayIcon, ArrowPathIcon } from '@heroicons/react/24/outline';
+import { CheckCircleIcon, XCircleIcon, ArrowLeftIcon, ArrowPathIcon } from '@heroicons/react/24/outline';
 import { QuizQuestion, apiClient } from '../lib/api';
 
 const GeneratedQuizPage: React.FC = () => {
@@ -13,7 +13,7 @@ const GeneratedQuizPage: React.FC = () => {
   const [score, setScore] = useState(0);
   const [startTime, setStartTime] = useState<number>(Date.now());
   const [quizId, setQuizId] = useState<string>('');
-  const [answerState, setAnswerState] = useState<'idle' | 'correct' | 'incorrect'>('idle');
+
 
   useEffect(() => {
     const storedQuiz = localStorage.getItem('generatedQuiz');
@@ -71,7 +71,6 @@ const GeneratedQuizPage: React.FC = () => {
   };
 
   const nextQuestion = async () => {
-    setAnswerState('idle'); // Reset state for animation if used
     if (currentQuestion < quiz.questions.length - 1) {
       setCurrentQuestion(currentQuestion + 1);
     } else {

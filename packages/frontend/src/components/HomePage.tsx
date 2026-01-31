@@ -15,40 +15,30 @@ import {
   PlusIcon,
   PlayIcon,
   ArrowRightOnRectangleIcon,
-  AcademicCapIcon,
-  BoltIcon
+  BoltIcon,
+  LockClosedIcon,
+  UserGroupIcon,
+  TrophyIcon
 } from '@heroicons/react/24/outline';
 
 const HomePage: React.FC = () => {
-  const { user } = useAuth();
+  const { user, isLoading } = useAuth();
   const navigate = useNavigate();
   const { isCollapsed } = useSidebar();
   const [userStats, setUserStats] = useState<any>(null);
-
-  // Real data for logged in users
-  const stats = userStats ? [
-    { label: 'Simulados Realizados', value: userStats.totalAttempts.toString(), icon: DocumentTextIcon, color: 'indigo' },
-    { label: 'Taxa de Acerto', value: `${userStats.averageScore.toFixed(0)}%`, icon: CheckCircleIcon, color: 'green' },
-    { label: 'Tempo Médio', value: `${Math.floor(userStats.averageTime / 60)}min`, icon: ClockIcon, color: 'amber' },
-    { label: 'Evolução', value: `${userStats.evolution >= 0 ? '+' : ''}${userStats.evolution.toFixed(0)}%`, icon: ArrowTrendingUpIcon, color: 'purple' },
-  ] : [
-    { label: 'Simulados Realizados', value: '0', icon: DocumentTextIcon, color: 'indigo' },
-    { label: 'Taxa de Acerto', value: '0%', icon: CheckCircleIcon, color: 'green' },
-    { label: 'Tempo Médio', value: '0min', icon: ClockIcon, color: 'amber' },
-    { label: 'Evolução', value: '0%', icon: ArrowTrendingUpIcon, color: 'purple' },
-  ];
-
-  const recentSimulados = userStats?.recentSimulados || [];
-
-  const quickActions = [
-    { label: 'Novo Simulado', icon: PlusIcon, action: () => navigate('/simulados/novo'), primary: true },
-    { label: 'Continuar Último', icon: PlayIcon, action: () => navigate('/simulados/continuar') },
-  ];
-
   const [suggestedQuizzes, setSuggestedQuizzes] = useState<any[]>([]);
   const [startingQuizId, setStartingQuizId] = useState<string | null>(null);
 
-  // Load user stats and suggested quizzes
+  // Initial Loading State
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
+      </div>
+    );
+  }
+
+  // Load data
   useEffect(() => {
     if (user) {
       loadUserStats();
@@ -67,8 +57,8 @@ const HomePage: React.FC = () => {
 
   const loadSuggestedQuizzes = async () => {
     try {
-      // Fetch 3 random/latest public quizzes
-      const response = await apiClient.getPublicQuizzes(1, 3);
+      // Guests get public quizzes too
+      const response = await apiClient.getPublicQuizzes(1, 4);
       setSuggestedQuizzes(response.quizzes);
     } catch (error) {
       console.error('Erro ao carregar quizzes sugeridos:', error);
@@ -78,7 +68,17 @@ const HomePage: React.FC = () => {
   const startSuggestedQuiz = async (quizId: string) => {
     setStartingQuizId(quizId);
     try {
-      await apiClient.recordQuizAccess(quizId);
+      // For guests, we might need a different flow or just allow access if API permits
+      // Assuming API handles guests or we catch 401
+      if (!user) {
+        navigate('/login');
+        return;
+      }
+
+      if (user) {
+        await apiClient.recordQuizAccess(quizId);
+      }
+
       const fullQuiz = await apiClient.getPublicQuizById(quizId);
 
       if (!fullQuiz || !fullQuiz.questions || fullQuiz.questions.length === 0) {
@@ -101,41 +101,168 @@ const HomePage: React.FC = () => {
     }
   };
 
+  // Configuration for Guest vs User
+  const isGuest = !user;
+
+  const statsConfig = isGuest ? [
+    // Demo/Preview Stats for Guests
+    { label: 'Estatísticas', value: 'Preview', icon: DocumentTextIcon, color: 'indigo', blur: true },
+    { label: 'Taxa de Acerto', value: '85%', icon: CheckCircleIcon, color: 'green', blur: true },
+    { label: 'Tempo Médio', value: '12min', icon: ClockIcon, color: 'amber', blur: true },
+    { label: 'Evolução', value: '+15%', icon: ArrowTrendingUpIcon, color: 'purple', blur: true },
+  ] : userStats ? [
+    // Real User Stats
+    { label: 'Simulados', value: userStats.totalAttempts.toString(), icon: DocumentTextIcon, color: 'indigo', blur: false },
+    { label: 'Taxa de Acerto', value: `${userStats.averageScore.toFixed(0)}%`, icon: CheckCircleIcon, color: 'green', blur: false },
+    { label: 'Tempo Médio', value: `${Math.floor(userStats.averageTime / 60)}min`, icon: ClockIcon, color: 'amber', blur: false },
+    { label: 'Evolução', value: `${userStats.evolution >= 0 ? '+' : ''}${userStats.evolution.toFixed(0)}%`, icon: ArrowTrendingUpIcon, color: 'purple', blur: false },
+  ] : [
+    // Empty User Stats
+    { label: 'Simulados', value: '0', icon: DocumentTextIcon, color: 'indigo', blur: false },
+    { label: 'Taxa de Acerto', value: '0%', icon: CheckCircleIcon, color: 'green', blur: false },
+    { label: 'Tempo Médio', value: '0min', icon: ClockIcon, color: 'amber', blur: false },
+    { label: 'Evolução', value: '0%', icon: ArrowTrendingUpIcon, color: 'purple', blur: false },
+  ];
+
+  const quickActions = isGuest ? [
+    {
+      label: 'Criar Conta Grátis',
+      desc: 'Salve seu progresso e evolua',
+      icon: SparklesIcon,
+      action: () => navigate('/register'),
+      primary: true,
+      bg: 'bg-primary-600',
+      text: 'text-white'
+    },
+    {
+      label: 'Quiz Gratuito',
+      desc: 'Teste seus conhecimentos',
+      icon: PlayIcon,
+      action: () => navigate('/free-quizzes'),
+      primary: false,
+      bg: 'bg-indigo-50 dark:bg-indigo-900/20',
+      text: 'text-indigo-600 dark:text-indigo-400'
+    },
+    {
+      label: 'Ver Planos',
+      desc: 'Desbloqueie todo potencial',
+      icon: TrophyIcon,
+      action: () => navigate('/pricing'),
+      primary: false,
+      bg: 'bg-amber-50 dark:bg-amber-900/20',
+      text: 'text-amber-600 dark:text-amber-400'
+    },
+  ] : [
+    {
+      label: 'Novo Simulado',
+      desc: 'Gerar quiz personalizado',
+      icon: PlusIcon,
+      action: () => navigate('/simulados/novo'),
+      primary: true,
+      bg: 'bg-primary-600',
+      text: 'text-white'
+    },
+    {
+      label: 'Continuar',
+      desc: 'Retomar último quiz',
+      icon: PlayIcon,
+      action: () => navigate('/simulados/continuar'),
+      primary: false,
+      bg: 'bg-indigo-50 dark:bg-indigo-900/20',
+      text: 'text-indigo-600 dark:text-indigo-400'
+    },
+    {
+      label: 'Ranking',
+      desc: 'Compare seu desempenho',
+      icon: UserGroupIcon,
+      action: () => navigate('/ranking'),
+      primary: false,
+      bg: 'bg-amber-50 dark:bg-amber-900/20',
+      text: 'text-amber-600 dark:text-amber-400'
+    },
+  ];
+
+  const recentSimulados = userStats?.recentSimulados || [];
+
   return (
-    <div className="min-h-screen bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-50 transition-colors duration-200">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-50 transition-colors duration-200">
       <Sidebar />
 
-      {/* Main Content */}
       <main className={`min-h-screen transition-all duration-300 ${isCollapsed ? 'lg:ml-16' : 'lg:ml-64'}`}>
         {/* Header */}
-        <header className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 sticky top-0 z-10 transition-colors duration-200">
+        <header className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 sticky top-0 z-20">
           <div className="px-6 lg:px-8 py-4">
             <div className="flex items-center justify-between">
-              <div className="ml-10 lg:ml-0">
-                <h1 className="text-xl font-bold text-slate-900 dark:text-white tracking-tight heading-gradient">Dashboard</h1>
-                <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
-                  Bem-vindo de volta, <span className="text-primary-600 dark:text-primary-400 font-medium">{user?.name?.split(' ')[0] || 'Usuário'}</span>
+              <div className="ml-12 lg:ml-0">
+                <h1 className="text-xl font-bold text-slate-900 dark:text-white tracking-tight">
+                  {isGuest ? (
+                    <span>Olá, <span className="text-primary-600 dark:text-primary-400">Visitante</span></span>
+                  ) : (
+                    <span>Olá, <span className="text-primary-600 dark:text-primary-400">{user?.name?.split(' ')[0]}</span></span>
+                  )}
+                </h1>
+                <p className="text-sm text-slate-500 dark:text-slate-400">
+                  {isGuest ? 'Experimente um pouco do que oferecemos.' : 'Vamos evoluir sua carreira hoje?'}
                 </p>
               </div>
               <div className="flex items-center gap-3">
-                <button
-                  onClick={() => navigate('/simulados/novo')}
-                  className="hidden sm:flex items-center justify-center px-4 py-2 bg-primary-600 text-white text-sm font-semibold hover:bg-primary-500 hover:shadow-lg hover:shadow-primary-500/30 transition-all rounded-xl shadow-sm active:scale-95"
-                >
-                  <PlusIcon className="w-4 h-4 mr-2" />
-                  Novo Simulado
-                </button>
+                {!isGuest && (
+                  <div className="hidden sm:flex items-center px-3 py-1.5 bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400 rounded-lg text-sm font-medium border border-amber-200 dark:border-amber-800">
+                    <SparklesIcon className="w-4 h-4 mr-2" />
+                    <span>{user.tokens} Tokens</span>
+                  </div>
+                )}
+                {isGuest && (
+                  <button
+                    onClick={() => navigate('/login')}
+                    className="text-sm font-semibold text-primary-600 dark:text-primary-400 hover:opacity-80 transition-opacity"
+                  >
+                    Efetuar Login
+                  </button>
+                )}
               </div>
             </div>
           </div>
         </header>
 
-        {/* Dashboard Content */}
-        <div className="p-6 lg:p-8 space-y-8">
-          {/* Stats Cards */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
-            {stats.map((stat, index) => (
-              <div key={index} className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-5 hover:border-primary-300 dark:hover:border-primary-600 transition-all duration-300 shadow-sm hover:shadow-md hover:-translate-y-1 group">
+        {/* Content */}
+        <div className="p-6 lg:p-8 space-y-8 max-w-7xl mx-auto relative">
+
+          {/* Guest Banner */}
+          {isGuest && (
+            <div className="bg-gradient-to-r from-primary-900 to-indigo-900 rounded-2xl p-6 text-white shadow-lg relative overflow-hidden">
+              <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6">
+                <div>
+                  <h2 className="text-xl font-bold mb-2">Modo Visualização</h2>
+                  <p className="text-primary-100 max-w-xl">
+                    Você está vendo uma prévia da plataforma. Acesso aos quizzes gratuitos está liberado!
+                    Crie sua conta para acompanhar seu progresso e métricas detalhadas.
+                  </p>
+                </div>
+                <div className="flex gap-3 shrink-0">
+                  <button
+                    onClick={() => navigate('/register')}
+                    className="px-5 py-2.5 bg-white text-primary-900 rounded-xl font-bold hover:bg-slate-100 transition-colors shadow-lg"
+                  >
+                    Criar Conta Grátis
+                  </button>
+                </div>
+              </div>
+              {/* Decorative circles */}
+              <div className="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-white/10 rounded-full blur-2xl"></div>
+              <div className="absolute bottom-0 left-0 -mb-10 -ml-10 w-40 h-40 bg-purple-500/20 rounded-full blur-2xl"></div>
+            </div>
+          )}
+
+          {/* Stats Grid */}
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            {statsConfig.map((stat, index) => (
+              <div key={index} className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 hover:border-primary-300 dark:hover:border-primary-600 transition-all duration-300 hover:shadow-md hover:-translate-y-1 group relative overflow-hidden">
+                {stat.blur && (
+                  <div className="absolute inset-0 backdrop-blur-[2px] bg-white/10 dark:bg-slate-900/10 z-10 flex items-center justify-center">
+                    <LockClosedIcon className="w-6 h-6 text-slate-400/80" />
+                  </div>
+                )}
                 <div className="flex items-center justify-between mb-4">
                   <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide">{stat.label}</p>
                   <div className={`p-2 rounded-lg ${stat.color === 'indigo' ? 'bg-indigo-50 text-indigo-600 dark:bg-indigo-900/20 dark:text-indigo-400' :
@@ -146,212 +273,161 @@ const HomePage: React.FC = () => {
                     <stat.icon className="w-5 h-5" />
                   </div>
                 </div>
-                <div className="flex items-baseline gap-2">
-                  <p className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight text-balance group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">{stat.value}</p>
-                </div>
+                <p className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">{stat.value}</p>
               </div>
             ))}
           </div>
 
           <div className="grid lg:grid-cols-3 gap-8">
-            {/* Quick Actions */}
+            {/* Left Column: Quick Actions & Tips */}
             <div className="lg:col-span-1 space-y-6">
-              <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-6 shadow-sm">
-                <h2 className="text-base font-semibold text-slate-900 dark:text-white mb-4">Ações Rápidas</h2>
+              {/* Quick Actions */}
+              <section>
+                <h2 className="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-wider mb-4">
+                  {isGuest ? 'Comece Agora' : 'Ações Rápidas'}
+                </h2>
                 <div className="space-y-3">
                   {quickActions.map((action, index) => (
                     <button
                       key={index}
                       onClick={action.action}
-                      className={`w-full flex items-center justify-between p-3 rounded-xl border text-sm font-semibold transition-all ${action.primary
-                        ? 'bg-primary-600 border-transparent text-white hover:bg-primary-500 shadow-md shadow-primary-500/20'
-                        : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-primary-500 dark:hover:border-primary-500 hover:text-primary-700 dark:hover:text-primary-400'
+                      className={`w-full p-4 rounded-xl border transition-all text-left group relative overflow-hidden ${action.primary
+                        ? 'bg-primary-600 border-primary-500 text-white shadow-lg shadow-primary-500/20 hover:bg-primary-500'
+                        : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:border-primary-400 dark:hover:border-primary-500'
                         }`}
                     >
-                      <div className="flex items-center gap-3">
-                        <action.icon className="w-5 h-5 opacity-80" />
-                        <span>{action.label}</span>
+                      <div className="relative z-10 flex items-center justify-between">
+                        <div className="flex items-center gap-4">
+                          <div className={`p-2 rounded-lg ${action.primary ? 'bg-white/20' : action.bg} ${action.primary ? 'text-white' : action.text}`}>
+                            <action.icon className="w-5 h-5" />
+                          </div>
+                          <div>
+                            <p className={`font-bold ${action.primary ? 'text-white' : 'text-slate-900 dark:text-white'}`}>{action.label}</p>
+                            <p className={`text-xs ${action.primary ? 'text-white/80' : 'text-slate-500 dark:text-slate-400'}`}>{action.desc}</p>
+                          </div>
+                        </div>
+                        <ArrowRightOnRectangleIcon className={`w-4 h-4 -rotate-45 transition-transform group-hover:translate-x-1 ${action.primary ? 'text-white/70' : 'text-slate-400'}`} />
                       </div>
-                      {action.primary && <ArrowRightOnRectangleIcon className="w-4 h-4 opacity-70 -rotate-45" />}
                     </button>
                   ))}
                 </div>
+              </section>
 
-                {/* Tip Card */}
-                <div className="mt-6 p-4 bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700 rounded-md">
-                  <div className="flex items-start gap-3">
-                    <SparklesIcon className="w-4 h-4 text-slate-600 dark:text-slate-400 mt-0.5" />
-                    <div>
-                      <p className="text-xs font-semibold text-slate-900 dark:text-slate-200 uppercase tracking-wide">Dica do dia</p>
-                      <p className="text-xs text-slate-600 dark:text-slate-400 mt-1 leading-relaxed">
-                        Pratique pelo menos 1 simulado por dia para melhorar suas chances em entrevistas.
-                      </p>
-                    </div>
+              {/* Tip Card */}
+              <div className="p-5 bg-gradient-to-br from-indigo-50 to-white dark:from-indigo-950/30 dark:to-slate-900 border border-indigo-100 dark:border-slate-800 rounded-2xl">
+                <div className="flex items-start gap-3">
+                  <SparklesIcon className="w-5 h-5 text-indigo-500 dark:text-indigo-400 mt-0.5" />
+                  <div>
+                    <p className="text-xs font-bold text-indigo-900 dark:text-indigo-300 uppercase tracking-wide mb-1">Dica Pro</p>
+                    <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+                      {isGuest
+                        ? 'Cadastre-se para acessar simulados completos e receber feedback detalhado de IA.'
+                        : 'Revise seus erros nos simulados anteriores. Usuários que revisam erros têm 40% mais chances de aprovação.'}
+                    </p>
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* Recent Simulados & Free Quizzes */}
-            <div className="lg:col-span-2 space-y-6">
-              {/* Recent Simulados */}
-              <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-6 shadow-sm">
-                <div className="flex items-center justify-between mb-6">
-                  <h2 className="text-base font-semibold text-slate-900 dark:text-white">Simulados Recentes</h2>
-                  <button
-                    onClick={() => navigate('/profile/quiz-history')}
-                    className="text-xs font-medium text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors"
-                  >
-                    Ver todos
-                  </button>
+            {/* Center/Right: Feed & Content */}
+            <div className="lg:col-span-2 space-y-8">
+              {/* Suggested Quizzes */}
+              <section>
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-wider">
+                    {isGuest ? 'Experimente (Gratuito)' : 'Recomendados para Você'}
+                  </h2>
+                  <button onClick={() => navigate('/free-quizzes')} className="text-xs font-medium text-primary-600 dark:text-primary-400 hover:underline">Ver todos</button>
                 </div>
-
-                <div className="space-y-3">
-                  {recentSimulados.map((simulado: any) => (
+                <div className="grid sm:grid-cols-2 gap-4">
+                  {suggestedQuizzes.map((quiz) => (
                     <div
-                      key={simulado.id}
-                      className="group flex items-center justify-between p-4 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-600 rounded-md transition-all cursor-pointer hover:shadow-sm"
-                      onClick={() => navigate(`/profile/quiz-history/${simulado.id}`)}
+                      key={quiz._id}
+                      onClick={() => !startingQuizId && startSuggestedQuiz(quiz._id)}
+                      className={`group bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 cursor-pointer hover:border-primary-400 dark:hover:border-primary-500 transition-all hover:shadow-md relative ${startingQuizId === quiz._id ? 'opacity-70 pointer-events-none' : ''}`}
                     >
-                      <div className="flex items-center gap-4">
-                        <div className="w-10 h-10 bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 flex items-center justify-center rounded-md text-slate-500 dark:text-slate-400">
-                          <DocumentTextIcon className="w-5 h-5" />
+                      {startingQuizId === quiz._id && (
+                        <div className="absolute inset-0 flex items-center justify-center bg-white/50 dark:bg-slate-900/50 rounded-xl z-20">
+                          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary-600"></div>
                         </div>
-                        <div>
-                          <p className="text-sm font-medium text-slate-900 dark:text-white">{simulado.title}</p>
-                          <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                            {new Date(simulado.date).toLocaleDateString('pt-BR', {
-                              day: '2-digit',
-                              month: 'short',
-                              year: 'numeric'
-                            })}
-                          </p>
+                      )}
+                      <div className="flex items-start justify-between mb-3">
+                        <div className="p-2 rounded-lg bg-slate-50 dark:bg-slate-800 text-slate-500 dark:text-slate-400 group-hover:bg-primary-50 dark:group-hover:bg-primary-900/20 group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">
+                          <BoltIcon className="w-5 h-5" />
                         </div>
+                        <span className="text-[10px] font-bold px-2 py-1 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
+                          {quiz.categoria}
+                        </span>
                       </div>
-                      <div className="flex items-center gap-4">
-                        <div className="text-right">
-                          <span className="block text-xs text-slate-400 dark:text-slate-500 uppercase">Score</span>
-                          <span className={`text-sm font-mono font-medium ${simulado.score >= 80 ? 'text-emerald-700 dark:text-emerald-400' :
-                            simulado.score >= 60 ? 'text-amber-700 dark:text-amber-400' : 'text-red-700 dark:text-red-400'
-                            }`}>
-                            {simulado.score.toFixed(0)}%
-                          </span>
-                        </div>
-                        <ArrowRightOnRectangleIcon className="w-4 h-4 text-slate-300 dark:text-slate-600 group-hover:text-slate-600 dark:group-hover:text-slate-300 transition-colors -rotate-45" />
+                      <h3 className="font-bold text-slate-900 dark:text-white mb-1 line-clamp-1">{quiz.titulo}</h3>
+                      <div className="flex items-center gap-3 text-xs text-slate-500 dark:text-slate-400 mt-2">
+                        <span className="flex items-center gap-1"><ClockIcon className="w-3 h-3" /> {quiz.nivel}</span>
+                        <span>•</span>
+                        <span className="flex items-center gap-1"><DocumentTextIcon className="w-3 h-3" /> {quiz.quantidade_questoes} questões</span>
                       </div>
                     </div>
                   ))}
+                  {suggestedQuizzes.length === 0 && (
+                    <div className="col-span-2 text-center py-8 bg-slate-50 dark:bg-slate-900 rounded-xl border border-dashed border-slate-200 dark:border-slate-800">
+                      <p className="text-slate-500 text-sm">Carregando sugestões...</p>
+                    </div>
+                  )}
+                </div>
+              </section>
+
+              {/* Recent Grid */}
+              <section>
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-wider">Atividades Recentes</h2>
+                  {!isGuest && (
+                    <button onClick={() => navigate('/profile/quiz-history')} className="text-xs font-medium text-primary-600 dark:text-primary-400 hover:underline">Histórico completo</button>
+                  )}
                 </div>
 
-                {recentSimulados.length === 0 && (
-                  <div className="text-center py-12 border border-dashed border-slate-200 dark:border-slate-800 rounded-lg bg-slate-50/50 dark:bg-slate-900/50">
-                    <DocumentTextIcon className="w-10 h-10 text-slate-300 dark:text-slate-700 mx-auto mb-3" />
-                    <p className="text-sm text-slate-500 dark:text-slate-400">Nenhum simulado realizado ainda</p>
+                {isGuest ? (
+                  <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-8 text-center">
+                    <ChartBarIcon className="w-12 h-12 text-slate-200 dark:text-slate-700 mx-auto mb-3" />
+                    <p className="text-slate-900 dark:text-white font-semibold mb-1">Seu histórico aparecerá aqui</p>
+                    <p className="text-sm text-slate-500 dark:text-slate-400 max-w-sm mx-auto mb-4">
+                      Acompanhe seu desempenho detalhado em cada quiz realizado ao criar uma conta.
+                    </p>
                     <button
-                      onClick={() => navigate('/free-quizzes')}
-                      className="mt-4 text-slate-900 dark:text-white border-b border-slate-900 dark:border-white text-xs font-semibold hover:opacity-70 pb-0.5 transition-opacity"
+                      onClick={() => navigate('/register')}
+                      className="text-primary-600 dark:text-primary-400 font-bold text-sm hover:underline"
                     >
-                      Começar com quizzes gratuitos
+                      Começar agora
                     </button>
                   </div>
-                )}
-              </div>
-
-              {/* Free Quizzes Section */}
-              <div className="bg-gradient-to-br from-primary-900 to-primary-700 dark:from-primary-950 dark:to-primary-800 rounded-2xl p-6 text-white shadow-lg shadow-primary-900/20 relative overflow-hidden">
-                {/* Decorative background elements */}
-                <div className="absolute top-0 right-0 p-8 opacity-20">
-                  <AcademicCapIcon className="w-32 h-32 -mr-10 -mt-10 transform rotate-12" />
-                </div>
-
-                <div className="relative z-10">
-                  <div
-                    className="flex items-center gap-2 mb-6 cursor-pointer hover:opacity-90 transition-opacity"
-                    onClick={() => navigate('/free-quizzes')}
-                  >
-                    <SparklesIcon className="w-5 h-5 text-yellow-300" />
-                    <h2 className="text-base font-bold text-white">Sugestões para Você (Grátis)</h2>
-                    <ArrowRightOnRectangleIcon className="w-4 h-4 text-white/70 -rotate-45" />
-                  </div>
-
-                  <div className="grid sm:grid-cols-3 gap-4">
-                    {suggestedQuizzes.map((quiz) => (
+                ) : recentSimulados.length > 0 ? (
+                  <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden">
+                    {recentSimulados.slice(0, 3).map((simulado: any, i: number) => (
                       <div
-                        key={quiz._id}
-                        className="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl p-4 hover:bg-white/20 transition-all cursor-pointer group hover:-translate-y-1 flex flex-col"
-                        onClick={() => startSuggestedQuiz(quiz._id)}
+                        key={simulado.id}
+                        onClick={() => navigate(`/profile/quiz-history/${simulado.id}`)}
+                        className={`p-4 flex items-center justify-between cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors ${i !== recentSimulados.length - 1 ? 'border-b border-slate-100 dark:border-slate-800' : ''}`}
                       >
-                        <div className="flex justify-between items-start mb-3">
-                          <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center text-white shrink-0">
-                            <BoltIcon className="w-4 h-4" />
+                        <div className="flex items-center gap-4">
+                          <div className="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500 dark:text-slate-400 font-bold text-xs">
+                            {simulado.score.toFixed(0)}%
                           </div>
-                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/30 text-emerald-100 border border-emerald-400/50 shrink-0">
-                            {quiz.categoria}
-                          </span>
-                        </div>
-
-                        <h3 className="text-sm font-semibold text-white mb-1 line-clamp-1" title={quiz.titulo}>{quiz.titulo}</h3>
-
-                        <div className="flex items-center gap-3 text-xs text-white/70 mb-4 mt-auto">
-                          <div className="flex items-center gap-1">
-                            <ClockIcon className="w-3 h-3" />
-                            <span>{quiz.nivel}</span>
+                          <div>
+                            <p className="font-semibold text-slate-900 dark:text-white text-sm">{simulado.title}</p>
+                            <p className="text-xs text-slate-500 dark:text-slate-400">
+                              {new Date(simulado.date).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })} • {simulado.questionsCount} questões
+                            </p>
                           </div>
-                          <span>•</span>
-                          <span>{quiz.quantidade_questoes} qtd</span>
                         </div>
-
-                        <button
-                          className="w-full py-2 text-xs font-bold bg-white text-primary-700 rounded-lg hover:bg-slate-50 transition-colors flex items-center justify-center gap-1 group-hover:shadow-lg disabled:opacity-70 disabled:cursor-wait"
-                          disabled={startingQuizId === quiz._id}
-                        >
-                          {startingQuizId === quiz._id ? (
-                            <div className="animate-spin rounded-full h-3 w-3 border-2 border-primary-600 border-t-transparent"></div>
-                          ) : (
-                            <>
-                              <span>Praticar</span>
-                              <ArrowRightOnRectangleIcon className="w-3 h-3 -rotate-45" />
-                            </>
-                          )}
-                        </button>
+                        <ArrowRightOnRectangleIcon className="w-4 h-4 text-slate-300 -rotate-45" />
                       </div>
                     ))}
-
-                    {suggestedQuizzes.length === 0 && (
-                      <div className="col-span-3 text-center py-8 text-white/70">
-                        <p className="text-sm">Nenhum quiz sugerido no momento.</p>
-                        <button
-                          onClick={(e) => { e.stopPropagation(); navigate('/free-quizzes'); }}
-                          className="mt-2 text-xs hover:text-white underline"
-                        >
-                          Ver todos os quizzes
-                        </button>
-                      </div>
-                    )}
                   </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Performance Chart Placeholder */}
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-6 shadow-sm">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-base font-semibold text-slate-900 dark:text-white">Evolução do Desempenho</h2>
-              <select className="text-xs border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-2 py-1.5 rounded-md text-slate-600 dark:text-slate-300 focus:outline-none focus:border-slate-400 dark:focus:border-slate-500 transition-colors">
-                <option>Últimos 7 dias</option>
-                <option>Últimos 30 dias</option>
-                <option>Últimos 90 dias</option>
-              </select>
-            </div>
-
-            <div className="h-64 bg-slate-50 dark:bg-slate-950/50 rounded-md border border-dashed border-slate-200 dark:border-slate-800 flex items-center justify-center relative overflow-hidden">
-              <div className="absolute inset-0 opacity-[0.03] dark:opacity-[0.05] bg-[linear-gradient(45deg,transparent_25%,#000_25%,#000_50%,transparent_50%,transparent_75%,#000_75%,#000_100%)] dark:bg-[linear-gradient(45deg,transparent_25%,#fff_25%,#fff_50%,transparent_50%,transparent_75%,#fff_75%,#fff_100%)] bg-[length:10px_10px]"></div>
-              <div className="text-center relative z-10">
-                <ChartBarIcon className="w-10 h-10 text-slate-300 dark:text-slate-600 mx-auto mb-2" />
-                <p className="text-sm text-slate-500 dark:text-slate-400 font-medium">Gráfico de evolução</p>
-                <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">Complete mais simulados para visualizar dados</p>
-              </div>
+                ) : (
+                  <div className="text-center py-10 bg-slate-50 dark:bg-slate-900 rounded-xl border border-dashed border-slate-200 dark:border-slate-800">
+                    <p className="text-sm text-slate-500">Nenhuma atividade recente.</p>
+                    <button onClick={() => navigate('/simulados/novo')} className="text-xs text-primary-600 font-semibold mt-1">Começar agora</button>
+                  </div>
+                )}
+              </section>
             </div>
           </div>
         </div>

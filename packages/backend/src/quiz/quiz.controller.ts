@@ -8,9 +8,11 @@ import { Roles } from '../auth/decorators/roles.decorator';
 import { UserRole } from '../user/schemas/user.schema';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
+import { Public } from '../auth/decorators/public.decorator';
+
 @Controller('quiz')
 export class QuizController {
-  constructor(private readonly quizService: QuizService) {}
+  constructor(private readonly quizService: QuizService) { }
 
   @Post('generate')
   @UseGuards(JwtAuthGuard)
@@ -43,6 +45,7 @@ export class QuizController {
     return this.quizService.incrementQuizAccess(quizId);
   }
 
+  @Public()
   @Get('public')
   async getPublicQuizzes(
     @Query('page') page: string = '1',
@@ -60,6 +63,7 @@ export class QuizController {
     );
   }
 
+  @Public()
   @Get('public/:id')
   async getPublicQuizById(@Param('id') id: string) {
     const quiz = await this.quizService.getPublicQuizById(id);

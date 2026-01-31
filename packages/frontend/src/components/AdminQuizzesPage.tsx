@@ -4,12 +4,9 @@ import PageTitle from './PageTitle';
 import {
     TrashIcon,
     ChartBarIcon,
-    CheckCircleIcon,
-    XCircleIcon,
     MagnifyingGlassIcon,
     FunnelIcon,
     EyeIcon,
-    EllipsisHorizontalIcon,
     PlusIcon,
     XMarkIcon
 } from '@heroicons/react/24/outline';
@@ -259,7 +256,7 @@ const AdminQuizzesPage: React.FC = () => {
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-slate-100 dark:divide-slate-700/50">
-                                {filteredQuizzes.map((quiz, index) => (
+                                {filteredQuizzes.map((quiz) => (
                                     <tr
                                         key={quiz._id}
                                         onClick={() => navigate(`/admin/quizzes/${quiz._id}/details`)}

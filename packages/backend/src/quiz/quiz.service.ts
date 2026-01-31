@@ -14,7 +14,7 @@ export class QuizService {
     private readonly configService: ConfigService,
     @InjectModel(Quiz.name) private quizModel: Model<QuizDocument>,
     @InjectModel(QuizAttempt.name) private quizAttemptModel: Model<QuizAttemptDocument>,
-  ) {}
+  ) { }
 
   async generateQuiz(dto: GenerateQuizDto, userId: string): Promise<GeneratedQuiz> {
     const apiKey = this.configService.get<string>('GROQ_API_KEY');
@@ -277,7 +277,7 @@ Gere agora {quantidade_questoes} questões de nível {nivel} sobre "{titulo}" na
     return this.quizModel
       .findOne({ _id: id, isActive: true })
       .populate('createdBy', 'name')
-      .select('titulo descricao categoria tags nivel quantidade_questoes questions totalAccess totalAttempts totalCompletions averageScore createdAt')
+      .select('titulo descricao categoria tags nivel quantidade_questoes totalAccess totalAttempts totalCompletions averageScore createdAt -questions -explanation')
       .exec();
   }
 
