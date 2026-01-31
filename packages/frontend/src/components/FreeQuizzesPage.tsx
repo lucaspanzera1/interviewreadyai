@@ -9,12 +9,18 @@ import {
     FunnelIcon
 } from '@heroicons/react/24/outline';
 import { StarIcon as StarIconSolid } from '@heroicons/react/24/solid';
-import { apiClient } from '../lib/api';
+import { apiClient, QuizLevel } from '../lib/api';
 import { toast } from 'react-toastify';
 import { useAuth } from '../contexts/AuthContext';
 
 const CATEGORIES = ['Todas', 'Fundamentos', 'Frontend', 'Backend', 'DevOps'];
 const DIFFICULTIES = ['Todas', 'Iniciante', 'Intermediário', 'Avançado'];
+
+const DIFFICULTY_MAP: Record<string, string> = {
+    'Iniciante': QuizLevel.INICIANTE,
+    'Intermediário': QuizLevel.MEDIO,
+    'Avançado': QuizLevel.DIFICIL
+};
 
 const FreeQuizzesPage: React.FC = () => {
     const navigate = useNavigate();
@@ -30,9 +36,14 @@ const FreeQuizzesPage: React.FC = () => {
     const [highlightQuiz, setHighlightQuiz] = useState<any>(null);
 
     // Load public quizzes
+    // Load highlight quiz only once on mount
+    useEffect(() => {
+        loadHighlightQuiz();
+    }, []);
+
+    // Load public quizzes when filters change
     useEffect(() => {
         loadPublicQuizzes();
-        loadHighlightQuiz();
     }, [selectedCategory, selectedDifficulty, currentPage]);
 
     useEffect(() => {
@@ -63,7 +74,11 @@ const FreeQuizzesPage: React.FC = () => {
     const loadPublicQuizzes = async () => {
         try {
             setLoading(true);
-            const response = await apiClient.getPublicQuizzes(currentPage, 12, selectedCategory, selectedDifficulty, searchQuery);
+            const difficultyParam = selectedDifficulty === 'Todas'
+                ? 'Todas'
+                : (DIFFICULTY_MAP[selectedDifficulty] || selectedDifficulty);
+
+            const response = await apiClient.getPublicQuizzes(currentPage, 12, selectedCategory, difficultyParam, searchQuery);
             setPublicQuizzes(response.quizzes);
             setTotalPages(response.totalPages);
         } catch (error) {
@@ -186,7 +201,10 @@ const FreeQuizzesPage: React.FC = () => {
                         type="text"
                         placeholder="Buscar quiz..."
                         value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
+                        onChange={(e) => {
+                            setSearchQuery(e.target.value);
+                            setCurrentPage(1);
+                        }}
                         className="block w-full pl-10 pr-3 py-2 border border-slate-200 dark:border-slate-700 rounded-lg leading-5 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 sm:text-sm transition-colors"
                     />
                 </div>
@@ -200,7 +218,10 @@ const FreeQuizzesPage: React.FC = () => {
 
                     <select
                         value={selectedCategory}
-                        onChange={(e) => setSelectedCategory(e.target.value)}
+                        onChange={(e) => {
+                            setSelectedCategory(e.target.value);
+                            setCurrentPage(1);
+                        }}
                         className="text-sm border-slate-200 dark:border-slate-700 rounded-lg bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-200 focus:ring-primary-500 focus:border-primary-500"
                     >
                         {CATEGORIES.map(cat => <option key={cat} value={cat}>{cat}</option>)}
@@ -208,7 +229,10 @@ const FreeQuizzesPage: React.FC = () => {
 
                     <select
                         value={selectedDifficulty}
-                        onChange={(e) => setSelectedDifficulty(e.target.value)}
+                        onChange={(e) => {
+                            setSelectedDifficulty(e.target.value);
+                            setCurrentPage(1);
+                        }}
                         className="text-sm border-slate-200 dark:border-slate-700 rounded-lg bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-200 focus:ring-primary-500 focus:border-primary-500"
                     >
                         {DIFFICULTIES.map(diff => <option key={diff} value={diff}>{diff}</option>)}

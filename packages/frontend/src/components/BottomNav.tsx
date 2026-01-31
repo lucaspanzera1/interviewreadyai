@@ -21,7 +21,8 @@ import {
     DocumentTextIcon as DocumentTextIconSolid,
     ChartBarIcon as ChartBarIconSolid,
     TicketIcon as TicketIconSolid,
-    AcademicCapIcon as AcademicCapIconSolid
+    AcademicCapIcon as AcademicCapIconSolid,
+    PlusCircleIcon as PlusCircleIconSolid
 } from '@heroicons/react/24/solid';
 import { Users as UsersIconLucide, FileQuestion } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
@@ -53,10 +54,11 @@ const Sidebar: React.FC = () => {
     }, [isMobileOpen, setIsMobileOpen]);
 
     const mainNavItems = [
-        { name: 'Dashboard', path: '/', icon: HomeIcon, activeIcon: HomeIconSolid },
-        { name: 'Simulados', path: '/simulados', icon: DocumentTextIcon, activeIcon: DocumentTextIconSolid },
-        { name: 'Gratuitos', path: '/free-quizzes', icon: AcademicCapIcon, activeIcon: AcademicCapIconSolid },
-        { name: 'Desempenho', path: '/desempenho', icon: ChartBarIcon, activeIcon: ChartBarIconSolid },
+        { name: 'Início', path: '/', icon: HomeIcon, activeIcon: HomeIconSolid },
+        { name: 'Meus Quizzes', path: '/my-quizzes', icon: DocumentTextIcon, activeIcon: DocumentTextIconSolid },
+        { name: 'Criar', path: '/create-quiz', icon: PlusCircleIcon, activeIcon: PlusCircleIconSolid },
+        { name: 'Explorar', path: '/free-quizzes', icon: AcademicCapIcon, activeIcon: AcademicCapIconSolid },
+        { name: 'Evolução', path: '/desempenho', icon: ChartBarIcon, activeIcon: ChartBarIconSolid },
         { name: 'Tokens', path: '/tokens', icon: TicketIcon, activeIcon: TicketIconSolid },
     ];
 

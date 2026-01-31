@@ -18,6 +18,8 @@ import AdminQuizzesPage from './components/AdminQuizzesPage'
 import AdminQuizStatsPage from './components/AdminQuizStatsPage'
 import AdminQuizDetailsPage from './components/AdminQuizDetailsPage'
 import UserQuizAttemptDetailsPage from './components/UserQuizAttemptDetailsPage'
+import CreateQuizByLinkPage from './components/CreateQuizByLinkPage'
+import MyQuizzesPage from './components/MyQuizzesPage'
 import SettingsPage from './components/SettingsPage'
 
 function App() {
@@ -134,6 +136,30 @@ function App() {
             <ProtectedRoute>
               <AppLayout>
                 <TokensPage />
+              </AppLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Create Quiz by Link page */}
+        <Route
+          path="/create-quiz"
+          element={
+            <ProtectedRoute>
+              <AppLayout>
+                <CreateQuizByLinkPage />
+              </AppLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        {/* My Quizzes page */}
+        <Route
+          path="/my-quizzes"
+          element={
+            <ProtectedRoute>
+              <AppLayout>
+                <MyQuizzesPage />
               </AppLayout>
             </ProtectedRoute>
           }
