@@ -18,8 +18,10 @@ import {
   BoltIcon,
   LockClosedIcon,
   UserGroupIcon,
-  TrophyIcon
+  TrophyIcon,
+  QuestionMarkCircleIcon
 } from '@heroicons/react/24/outline';
+import OnboardingGuide from './OnboardingGuide';
 
 const HomePage: React.FC = () => {
   const { user, isLoading } = useAuth();
@@ -28,6 +30,7 @@ const HomePage: React.FC = () => {
   const [userStats, setUserStats] = useState<any>(null);
   const [suggestedQuizzes, setSuggestedQuizzes] = useState<any[]>([]);
   const [startingQuizId, setStartingQuizId] = useState<string | null>(null);
+  const [isOnboardingOpen, setIsOnboardingOpen] = useState(false);
 
   // Initial Loading State
   if (isLoading) {
@@ -432,6 +435,23 @@ const HomePage: React.FC = () => {
           </div>
         </div>
       </main>
+
+      {/* Onboarding Guide & Help Button */}
+      <OnboardingGuide
+        isOpen={isOnboardingOpen}
+        onClose={() => setIsOnboardingOpen(false)}
+      />
+
+      <button
+        onClick={() => setIsOnboardingOpen(true)}
+        className="fixed bottom-6 right-6 z-40 p-3 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 hover:text-primary-600 dark:hover:text-primary-400 rounded-full shadow-lg shadow-slate-200/50 dark:shadow-slate-900/50 hover:shadow-xl hover:scale-105 active:scale-95 transition-all duration-300 group"
+        aria-label="Ajuda e Tutorial"
+      >
+        <QuestionMarkCircleIcon className="w-6 h-6" />
+        <span className="absolute right-full mr-4 top-1/2 -translate-y-1/2 px-3 py-1.5 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-xs font-semibold rounded-lg shadow-xl border border-slate-100 dark:border-slate-700 opacity-0 transform translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300 pointer-events-none whitespace-nowrap">
+          Ajuda
+        </span>
+      </button>
     </div>
   );
 };
