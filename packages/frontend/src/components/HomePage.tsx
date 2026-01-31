@@ -79,7 +79,7 @@ const HomePage: React.FC = () => {
         await apiClient.recordQuizAccess(quizId);
       }
 
-      const fullQuiz = await apiClient.getPublicQuizById(quizId);
+      const fullQuiz = await apiClient.getQuizForPlaying(quizId);
 
       if (!fullQuiz || !fullQuiz.questions || fullQuiz.questions.length === 0) {
         toast.error('Quiz indísponivel no momento');

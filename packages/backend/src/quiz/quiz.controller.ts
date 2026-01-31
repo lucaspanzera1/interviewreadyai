@@ -73,6 +73,16 @@ export class QuizController {
     return quiz;
   }
 
+  @Get(':id/play')
+  @UseGuards(JwtAuthGuard)
+  async getQuizForPlaying(@Param('id') id: string) {
+    const quiz = await this.quizService.getQuizById(id);
+    if (!quiz) {
+      throw new NotFoundException('Quiz not found');
+    }
+    return quiz;
+  }
+
   @Get('my-attempts')
   @UseGuards(JwtAuthGuard)
   async getUserAttempts(

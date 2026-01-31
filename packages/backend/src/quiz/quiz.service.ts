@@ -277,7 +277,7 @@ Gere agora {quantidade_questoes} questões de nível {nivel} sobre "{titulo}" na
     return this.quizModel
       .findOne({ _id: id, isActive: true })
       .populate('createdBy', 'name')
-      .select('titulo descricao categoria tags nivel quantidade_questoes totalAccess totalAttempts totalCompletions averageScore createdAt -questions -explanation')
+      .select('titulo descricao categoria tags nivel quantidade_questoes totalAccess totalAttempts totalCompletions averageScore createdAt')
       .exec();
   }
 

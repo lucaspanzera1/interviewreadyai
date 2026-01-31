@@ -389,6 +389,11 @@ class ApiClient {
     return res.data;
   }
 
+  async getQuizForPlaying(id: string) {
+    const res = await this.client.get(`/quiz/${id}/play`);
+    return res.data;
+  }
+
   async recordQuizAccess(quizId: string) {
     const res = await this.client.post(`/quiz/${quizId}/access`);
     return res.data;

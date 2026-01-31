@@ -11,12 +11,14 @@ import {
 import { StarIcon as StarIconSolid } from '@heroicons/react/24/solid';
 import { apiClient } from '../lib/api';
 import { toast } from 'react-toastify';
+import { useAuth } from '../contexts/AuthContext';
 
 const CATEGORIES = ['Todas', 'Fundamentos', 'Frontend', 'Backend', 'DevOps'];
 const DIFFICULTIES = ['Todas', 'Iniciante', 'Intermediário', 'Avançado'];
 
 const FreeQuizzesPage: React.FC = () => {
     const navigate = useNavigate();
+    const { user } = useAuth();
     const [selectedCategory, setSelectedCategory] = useState('Todas');
     const [selectedDifficulty, setSelectedDifficulty] = useState('Todas');
     const [searchQuery, setSearchQuery] = useState('');
@@ -77,11 +79,16 @@ const FreeQuizzesPage: React.FC = () => {
     const startPublicQuiz = async (quiz: any) => {
         setStartingQuiz(quiz._id);
         try {
+            if (!user) {
+                navigate('/login');
+                return;
+            }
+
             // Record access
             await apiClient.recordQuizAccess(quiz._id);
 
-            // Get full quiz data
-            const fullQuiz = await apiClient.getPublicQuizById(quiz._id);
+            // Get full quiz data (authenticated)
+            const fullQuiz = await apiClient.getQuizForPlaying(quiz._id);
 
             if (!fullQuiz) {
                 toast.error('Quiz não encontrado');
