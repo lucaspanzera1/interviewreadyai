@@ -19,7 +19,8 @@ import {
   DocumentTextIcon,
   CpuChipIcon,
   AcademicCapIcon,
-  ChartBarIcon
+  ChartBarIcon,
+  Cog6ToothIcon
 } from '@heroicons/react/24/outline';
 
 const LinkedInIcon = (props: React.ComponentProps<'svg'>) => (
@@ -588,13 +589,24 @@ const ProfilePage: React.FC = () => {
             </div>
 
             {/* Logout Button */}
-            <button
-              onClick={handleLogout}
-              className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-white dark:bg-slate-900 border border-red-200 dark:border-red-900/50 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/10 hover:border-red-300 dark:hover:border-red-800 rounded-lg transition-all text-sm font-medium shadow-sm"
-            >
-              <ArrowRightOnRectangleIcon className="h-4 w-4" />
-              Sair da Conta
-            </button>
+            {/* Account Actions */}
+            <div className="space-y-3">
+              <button
+                onClick={() => navigate('/settings')}
+                className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 hover:border-slate-300 dark:hover:border-slate-700 rounded-lg transition-all text-sm font-medium shadow-sm"
+              >
+                <Cog6ToothIcon className="h-4 w-4" />
+                Configurações
+              </button>
+
+              <button
+                onClick={handleLogout}
+                className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-white dark:bg-slate-900 border border-red-200 dark:border-red-900/50 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/10 hover:border-red-300 dark:hover:border-red-800 rounded-lg transition-all text-sm font-medium shadow-sm"
+              >
+                <ArrowRightOnRectangleIcon className="h-4 w-4" />
+                Sair da Conta
+              </button>
+            </div>
           </div>
 
         </div>

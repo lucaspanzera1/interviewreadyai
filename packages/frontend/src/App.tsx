@@ -18,6 +18,7 @@ import AdminQuizzesPage from './components/AdminQuizzesPage'
 import AdminQuizStatsPage from './components/AdminQuizStatsPage'
 import AdminQuizDetailsPage from './components/AdminQuizDetailsPage'
 import UserQuizAttemptDetailsPage from './components/UserQuizAttemptDetailsPage'
+import SettingsPage from './components/SettingsPage'
 
 function App() {
   return (
@@ -133,6 +134,18 @@ function App() {
             <ProtectedRoute>
               <AppLayout>
                 <TokensPage />
+              </AppLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Settings page */}
+        <Route
+          path="/settings"
+          element={
+            <ProtectedRoute>
+              <AppLayout>
+                <SettingsPage />
               </AppLayout>
             </ProtectedRoute>
           }
