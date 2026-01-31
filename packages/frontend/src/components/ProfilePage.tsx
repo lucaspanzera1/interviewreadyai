@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import PageTitle from './PageTitle';
 import { useAuth } from '../contexts/AuthContext';
 import { useToast } from '../contexts/ToastContext';
+import { apiClient } from '../lib/api';
 import {
   UserCircleIcon,
   PencilIcon,
@@ -83,6 +84,31 @@ const ProfilePage: React.FC = () => {
     linkedinUrl: user?.linkedinUrl || '',
     githubUrl: user?.githubUrl || '',
   });
+
+  const [stats, setStats] = useState({
+    totalAttempts: 0,
+    averageScore: 0
+  });
+
+  useEffect(() => {
+    const loadStats = async () => {
+      try {
+        const data = await apiClient.getUserStats();
+        if (data) {
+          setStats({
+            totalAttempts: data.totalAttempts || 0,
+            averageScore: data.averageScore || 0
+          });
+        }
+      } catch (error) {
+        console.error('Erro ao carregar estatísticas:', error);
+      }
+    };
+
+    if (user) {
+      loadStats();
+    }
+  }, [user]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -550,12 +576,12 @@ const ProfilePage: React.FC = () => {
                   <div className="text-center p-3 bg-slate-50 dark:bg-slate-800/50 rounded-lg border border-slate-100 dark:border-slate-700">
                     <AcademicCapIcon className="h-6 w-6 text-primary-500 mx-auto mb-2" />
                     <p className="text-xs text-slate-500 dark:text-slate-400">Quizzes Feitos</p>
-                    <p className="text-lg font-bold text-slate-900 dark:text-white">-</p>
+                    <p className="text-lg font-bold text-slate-900 dark:text-white">{stats.totalAttempts}</p>
                   </div>
                   <div className="text-center p-3 bg-slate-50 dark:bg-slate-800/50 rounded-lg border border-slate-100 dark:border-slate-700">
                     <ShieldCheckIcon className="h-6 w-6 text-green-500 mx-auto mb-2" />
                     <p className="text-xs text-slate-500 dark:text-slate-400">Média Geral</p>
-                    <p className="text-lg font-bold text-slate-900 dark:text-white">-</p>
+                    <p className="text-lg font-bold text-slate-900 dark:text-white">{stats.averageScore.toFixed(0)}%</p>
                   </div>
                 </div>
               </div>

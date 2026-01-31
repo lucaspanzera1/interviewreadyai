@@ -156,7 +156,7 @@ const UserQuizHistoryPage: React.FC = () => {
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div className="flex items-center gap-4">
                         <button
-                            onClick={() => navigate('/profile')}
+                            onClick={() => navigate(-1)}
                             className="group p-3 rounded-xl bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-slate-50 dark:hover:bg-slate-700 transition-all shadow-sm border border-slate-200 dark:border-slate-700"
                         >
                             <ArrowLeftIcon className="h-5 w-5 group-hover:-translate-x-1 transition-transform" />
@@ -238,8 +238,8 @@ const UserQuizHistoryPage: React.FC = () => {
                                                         <StarIconSolid
                                                             key={i}
                                                             className={`h-3 w-3 ${i < Math.round(attempt.percentage / 33)
-                                                                    ? 'opacity-100'
-                                                                    : 'opacity-20'
+                                                                ? 'opacity-100'
+                                                                : 'opacity-20'
                                                                 }`}
                                                         />
                                                     ))}

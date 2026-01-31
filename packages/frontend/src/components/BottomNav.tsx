@@ -81,6 +81,9 @@ const Sidebar: React.FC = () => {
 
     const isActive = (path: string) => {
         if (path === '/') return location.pathname === '/';
+        if (path === '/desempenho') {
+            return location.pathname.startsWith(path) || location.pathname.startsWith('/profile/quiz-history');
+        }
         return location.pathname.startsWith(path);
     };
 
