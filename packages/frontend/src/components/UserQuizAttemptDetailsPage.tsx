@@ -56,16 +56,7 @@ const UserQuizAttemptDetailsPage: React.FC = () => {
         try {
             setLoading(true);
             const attemptData = await apiClient.getUserAttemptDetails(attemptId!);
-
-            // Get full quiz data to include questions
-            const quizData = await apiClient.getQuizStats(attemptData.quizId._id);
-            setAttempt({
-                ...attemptData,
-                quizId: {
-                    ...attemptData.quizId,
-                    questions: quizData.quiz.questions
-                }
-            });
+            setAttempt(attemptData);
         } catch (error) {
             toast.error('Erro ao carregar detalhes da tentativa');
             console.error(error);

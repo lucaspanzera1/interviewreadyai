@@ -420,6 +420,22 @@ IMPORTANTE: Sempre formate código adequadamente usando as marcações especific
     };
   }
 
+  async getUserAttemptDetails(attemptId: string, userId: string) {
+    const attempt = await this.quizAttemptModel
+      .findOne({ _id: attemptId, userId })
+      .populate({
+        path: 'quizId',
+        select: 'titulo categoria nivel quantidade_questoes questions tags'
+      })
+      .exec();
+
+    if (!attempt) {
+      throw new NotFoundException('Attempt not found or does not belong to user');
+    }
+
+    return attempt;
+  }
+
   async incrementQuizAccess(quizId: string, userId: string) {
     // Verificar se o quiz existe e é gratuito
     const quiz = await this.quizModel.findById(quizId);
