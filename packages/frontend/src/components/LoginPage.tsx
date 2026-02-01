@@ -1,5 +1,5 @@
 import React from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, Link } from 'react-router-dom';
 import PageTitle from './PageTitle';
 import { useAuth } from '../contexts/AuthContext';
 import { SparklesIcon } from '@heroicons/react/24/outline';
@@ -95,20 +95,20 @@ const LoginPage: React.FC = () => {
               <div className="pt-6">
                 <p className="text-xs text-slate-500 dark:text-slate-500 leading-relaxed text-center">
                   Ao continuar, você concorda com nossos{' '}
-                  <a href="#" className="text-slate-900 dark:text-slate-300 font-medium hover:underline hover:text-slate-700 dark:hover:text-white transition-colors">
+                  <Link to="/terms" className="text-slate-900 dark:text-slate-300 font-medium hover:underline hover:text-slate-700 dark:hover:text-white transition-colors">
                     Termos de Uso
-                  </a>{' '}
+                  </Link>{' '}
                   e{' '}
-                  <a href="#" className="text-slate-900 dark:text-slate-300 font-medium hover:underline hover:text-slate-700 dark:hover:text-white transition-colors">
+                  <Link to="/privacy" className="text-slate-900 dark:text-slate-300 font-medium hover:underline hover:text-slate-700 dark:hover:text-white transition-colors">
                     Política de Privacidade
-                  </a>.
+                  </Link>.
                 </p>
               </div>
             </div>
 
             <div className="absolute bottom-8 left-0 right-0">
               <p className="text-xs text-slate-400 text-center">
-                © 2026 TreinaVagaAI v1.0
+                © 2026 TreinaVagaAI v{import.meta.env.VITE_APP_VERSION}
               </p>
             </div>
           </div>

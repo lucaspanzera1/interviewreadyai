@@ -19,7 +19,7 @@ async function bootstrap() {
 
   // Configuração de CORS
   app.enableCors({
-    origin: process.env.CORS_ORIGIN || 'http://localhost:3000',
+    origin: process.env.CORS_ORIGIN || 'http://localhost:8080',
     credentials: true,
   });
 
@@ -44,7 +44,7 @@ async function bootstrap() {
   SwaggerModule.setup('api/docs', app, document);
 
   // Porta do servidor
-  const port = process.env.BACKEND_PORT || 3001;
+  const port = process.env.BACKEND_PORT || 8081;
   
   await app.listen(port);
   console.log(`🚀 MarketDelivery API running on: http://localhost:${port}`);

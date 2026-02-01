@@ -21,6 +21,8 @@ import UserQuizAttemptDetailsPage from './components/UserQuizAttemptDetailsPage'
 import CreateQuizByLinkPage from './components/CreateQuizByLinkPage'
 import MyQuizzesPage from './components/MyQuizzesPage'
 import SettingsPage from './components/SettingsPage'
+import TermsOfUsePage from './components/TermsOfUsePage'
+import PrivacyPolicyPage from './components/PrivacyPolicyPage'
 
 function App() {
   return (
@@ -32,6 +34,26 @@ function App() {
           element={
             <ProtectedRoute requireAuth={false}>
               <LoginPage />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Terms of Use */}
+        <Route
+          path="/terms"
+          element={
+            <ProtectedRoute requireAuth={false}>
+              <TermsOfUsePage />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Privacy Policy */}
+        <Route
+          path="/privacy"
+          element={
+            <ProtectedRoute requireAuth={false}>
+              <PrivacyPolicyPage />
             </ProtectedRoute>
           }
         />
