@@ -15,6 +15,7 @@ export { default as Toast } from './Toast';
 export { default as ToastContainer } from './ToastContainer';
 export { default as ErrorBoundary } from './ErrorBoundary';
 export { default as ProtectedRoute } from './ProtectedRoute';
+export { default as FormattedText } from './FormattedText';
 
 // Re-export types
 export type { ToastType } from './Toast';

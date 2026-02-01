@@ -47,9 +47,26 @@ Você é um especialista em criar quizzes educacionais de alta qualidade. Sua fu
 
 Use o contexto adicional fornecido acima para enriquecer e direcionar a criação das questões, focando em aspectos específicos mencionados, exemplos práticos ou ênfases particulares.
 
-## Formato de Resposta Obrigatório (JSON):
+## Formatação de Código
 
-Retorne APENAS um JSON válido, sem texto adicional, seguindo exatamente esta estrutura:
+Quando incluir código em perguntas, alternativas ou explicações:
+- Use blocos de código delimitados por \`\`\`linguagem para trechos de código
+- Use \`código\` para referências inline a funções, variáveis ou comandos
+- Especifique sempre a linguagem do código (javascript, typescript, python, java, etc.)
+- Mantenha exemplos concisos mas completos
+- Inclua comentários quando necessário para esclarecer conceitos
+
+Exemplo de formatação:
+\`\`\`javascript
+function exemplo(parametro) {
+  // Comentário explicativo
+  return parametro * 2;
+}
+\`\`\`
+
+Ou para código inline: Use a função \`map()\` para transformar arrays.
+
+IMPORTANTE: Sempre use formatação adequada para código. Nunca coloque código sem as marcações apropriadas.
 ```json
 {
   "questions": [

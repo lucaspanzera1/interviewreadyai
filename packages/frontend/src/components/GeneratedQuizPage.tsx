@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import PageTitle from './PageTitle';
+import FormattedText from './FormattedText';
 import { CheckCircleIcon, XCircleIcon, ArrowLeftIcon, ArrowPathIcon, EyeIcon } from '@heroicons/react/24/outline';
 import { StarIcon as StarIconSolid } from '@heroicons/react/24/solid';
 import { QuizQuestion, apiClient } from '../lib/api';
@@ -211,7 +212,7 @@ const GeneratedQuizPage: React.FC = () => {
                   </div>
                   <div className="flex-1">
                     <h3 className="font-semibold text-slate-900 dark:text-white mb-4 text-lg">
-                      {question.question}
+                      <FormattedText text={question.question} />
                     </h3>
                     <div className="space-y-2">
                       {question.options.map((option, optionIndex) => (
@@ -224,7 +225,7 @@ const GeneratedQuizPage: React.FC = () => {
                               : 'bg-white dark:bg-slate-800/50 border-slate-100 dark:border-slate-700 text-slate-500 dark:text-slate-400'
                             }`}
                         >
-                          <span>{option}</span>
+                          <FormattedText text={option} />
                           {optionIndex === question.correct_answer && <CheckCircleIcon className="w-4 h-4" />}
                         </div>
                       ))}
@@ -232,7 +233,7 @@ const GeneratedQuizPage: React.FC = () => {
                     {question.explanation && (
                       <div className="mt-4 p-4 bg-indigo-50 dark:bg-indigo-900/20 rounded-xl text-sm text-indigo-800 dark:text-indigo-300 border border-indigo-100 dark:border-indigo-800/50">
                         <strong className="block mb-1 font-semibold">Explicação:</strong>
-                        {question.explanation}
+                        <FormattedText text={question.explanation} />
                       </div>
                     )}
                   </div>
@@ -323,7 +324,7 @@ const GeneratedQuizPage: React.FC = () => {
         {/* Question Card */}
         <div className="bg-white dark:bg-slate-800 rounded-3xl p-8 md:p-10 shadow-lifted border border-slate-100 dark:border-slate-700 animate-slide-up">
           <h2 className="text-2xl md:text-3xl font-bold text-slate-900 dark:text-white mb-8 leading-tight">
-            {question.question}
+            <FormattedText text={question.question} />
           </h2>
 
           <div className="space-y-4">
@@ -352,7 +353,7 @@ const GeneratedQuizPage: React.FC = () => {
                     ? 'text-primary-900 dark:text-primary-100'
                     : 'text-slate-700 dark:text-slate-300'
                     }`}>
-                    {option}
+                    <FormattedText text={option} />
                   </span>
                 </div>
               </button>
