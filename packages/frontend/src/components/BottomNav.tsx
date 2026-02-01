@@ -91,13 +91,13 @@ const Sidebar: React.FC = () => {
     const SidebarContent = () => (
         <div className="flex flex-col h-full">
             {/* Logo */}
-            <div className={`flex items-center gap-3 px-4 py-6 border-b border-subtle dark:border-slate-800 ${isCollapsed ? 'justify-center' : ''}`}>
-                <img src="/logo.png" alt="TreinaVaga" className="h-12 w-12 object-contain" />
-                {!isCollapsed && (
-                    <span className="text-base font-bold bg-clip-text text-transparent bg-gradient-to-r from-slate-900 to-slate-600 dark:from-white dark:to-slate-300 tracking-tight">
+            <div className={`flex items-center py-6 border-b border-subtle dark:border-slate-800 transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] ${isCollapsed ? 'justify-center px-2' : 'px-4'}`}>
+                <img src="/logo.png" alt="TreinaVaga" className="h-12 w-12 object-contain shrink-0" />
+                <div className={`overflow-hidden whitespace-nowrap transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] ${isCollapsed ? 'max-w-0 opacity-0' : 'max-w-[200px] opacity-100'}`}>
+                    <span className="text-base font-bold bg-clip-text text-transparent bg-gradient-to-r from-slate-900 to-slate-600 dark:from-white dark:to-slate-300 tracking-tight pl-3 block">
                         TreinaVaga<span className="text-primary-600 dark:text-primary-400">AI</span>
                     </span>
-                )}
+                </div>
             </div>
 
             {/* Main Navigation */}
@@ -110,16 +110,16 @@ const Sidebar: React.FC = () => {
                         <button
                             key={item.name}
                             onClick={() => handleNavClick(item.path)}
-                            className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 border-l-4 ${active
+                            className={`w-full flex items-center px-3 py-2.5 rounded-xl transition-all duration-200 border-l-4 ${active
                                 ? 'bg-primary-50 dark:bg-primary-900/10 text-primary-700 dark:text-primary-300 font-semibold border-primary-600'
                                 : 'text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white border-transparent'
                                 } ${isCollapsed ? 'justify-center px-0' : ''}`}
                             title={isCollapsed ? item.name : undefined}
                         >
                             <Icon className={`w-5 h-5 flex-shrink-0 transition-colors ${active ? 'text-primary-600 dark:text-primary-400' : 'text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-300'}`} />
-                            {!isCollapsed && (
-                                <span className="text-sm">{item.name}</span>
-                            )}
+                            <div className={`overflow-hidden whitespace-nowrap transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] ${isCollapsed ? 'max-w-0 opacity-0' : 'max-w-[200px] opacity-100'}`}>
+                                <span className="text-sm pl-3 block">{item.name}</span>
+                            </div>
                         </button>
                     );
                 })}
@@ -143,16 +143,16 @@ const Sidebar: React.FC = () => {
                                 <button
                                     key={item.name}
                                     onClick={() => handleNavClick(item.path)}
-                                    className={`w-full flex items-center gap-3 px-3 py-2 rounded-md transition-all duration-200 ${active
+                                    className={`w-full flex items-center px-3 py-2 rounded-md transition-all duration-200 ${active
                                         ? 'bg-slate-100 text-slate-900 font-medium'
                                         : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900'
                                         } ${isCollapsed ? 'justify-center' : ''}`}
                                     title={isCollapsed ? item.name : undefined}
                                 >
                                     <Icon className={`w-4 h-4 flex-shrink-0 ${active ? 'text-slate-900' : 'text-slate-400'}`} />
-                                    {!isCollapsed && (
-                                        <span className="text-sm">{item.name}</span>
-                                    )}
+                                    <div className={`overflow-hidden whitespace-nowrap transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] ${isCollapsed ? 'max-w-0 opacity-0' : 'max-w-[200px] opacity-100'}`}>
+                                        <span className="text-sm pl-3 block">{item.name}</span>
+                                    </div>
                                 </button>
                             );
                         })}
@@ -167,28 +167,28 @@ const Sidebar: React.FC = () => {
                 {user && (
                     <div className={`mb-2 ${isCollapsed ? 'flex justify-center' : ''}`}>
                         <div
-                            className={`group flex items-center ${isCollapsed ? 'justify-center w-10 h-10' : 'justify-between w-full px-3 py-2'} bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg hover:border-amber-400 dark:hover:border-amber-500 transition-colors cursor-pointer`}
+                            className={`group flex items-center ${isCollapsed ? 'justify-center w-10 h-10' : 'w-full px-3 py-2'} bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg hover:border-amber-400 dark:hover:border-amber-500 transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] cursor-pointer`}
                             onClick={() => handleNavClick('/tokens')}
                             title={`${user.tokens || 0} Tokens Disponíveis`}
                         >
-                            <div className="flex items-center gap-2.5">
-                                <TicketIcon className={`w-4 h-4 ${isCollapsed ? 'text-amber-500' : 'text-slate-400 group-hover:text-amber-500'} transition-colors`} />
-                                {!isCollapsed && (
-                                    <span className="text-sm font-medium text-slate-600 dark:text-slate-300 group-hover:text-slate-900 dark:group-hover:text-white transition-colors">
+                            <div className="flex items-center">
+                                <TicketIcon className={`w-4 h-4 ${isCollapsed ? 'text-amber-500' : 'text-slate-400 group-hover:text-amber-500'} transition-colors flex-shrink-0`} />
+                                <div className={`overflow-hidden whitespace-nowrap transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] ${isCollapsed ? 'max-w-0 opacity-0' : 'max-w-[200px] opacity-100'}`}>
+                                    <span className="text-sm font-medium text-slate-600 dark:text-slate-300 group-hover:text-slate-900 dark:group-hover:text-white transition-colors pl-2.5">
                                         {user.tokens || 0} Tokens
                                     </span>
-                                )}
+                                </div>
                             </div>
-                            {!isCollapsed && (
+                            <div className={`overflow-hidden whitespace-nowrap transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] ml-auto ${isCollapsed ? 'max-w-0 opacity-0' : 'max-w-[24px] opacity-100'}`}>
                                 <PlusCircleIcon className="w-4 h-4 text-slate-300 group-hover:text-amber-500 transition-colors" />
-                            )}
+                            </div>
                         </div>
                     </div>
                 )}
                 {/* Theme Toggle */}
                 <button
                     onClick={toggleTheme}
-                    className={`w-full flex items-center gap-3 px-3 py-2 rounded-md text-slate-500 hover:bg-slate-50 hover:text-slate-900 transition-colors ${isCollapsed ? 'justify-center' : ''}`}
+                    className={`w-full flex items-center px-3 py-2 rounded-md text-slate-500 hover:bg-slate-50 hover:text-slate-900 transition-colors ${isCollapsed ? 'justify-center' : ''}`}
                     title={isCollapsed ? (resolvedTheme === 'dark' ? 'Modo Claro' : 'Modo Escuro') : undefined}
                 >
                     {resolvedTheme === 'dark' ? (
@@ -196,18 +196,22 @@ const Sidebar: React.FC = () => {
                     ) : (
                         <MoonIcon className="w-4 h-4 flex-shrink-0" />
                     )}
-                    {!isCollapsed && <span className="text-sm font-medium">{resolvedTheme === 'dark' ? 'Modo Claro' : 'Modo Escuro'}</span>}
+                    <div className={`overflow-hidden whitespace-nowrap transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] ${isCollapsed ? 'max-w-0 opacity-0' : 'max-w-[200px] opacity-100'}`}>
+                        <span className="text-sm font-medium pl-3 block">{resolvedTheme === 'dark' ? 'Modo Claro' : 'Modo Escuro'}</span>
+                    </div>
                 </button>
 
                 {/* Configurações - só para usuários logados */}
                 {user && (
                     <button
                         onClick={() => handleNavClick('/settings')}
-                        className={`w-full flex items-center gap-3 px-3 py-2 rounded-md text-slate-500 hover:bg-slate-50 hover:text-slate-900 transition-colors ${isCollapsed ? 'justify-center' : ''}`}
+                        className={`w-full flex items-center px-3 py-2 rounded-md text-slate-500 hover:bg-slate-50 hover:text-slate-900 transition-colors ${isCollapsed ? 'justify-center' : ''}`}
                         title={isCollapsed ? 'Configurações' : undefined}
                     >
                         <Cog6ToothIcon className="w-4 h-4 flex-shrink-0" />
-                        {!isCollapsed && <span className="text-sm font-medium">Configurações</span>}
+                        <div className={`overflow-hidden whitespace-nowrap transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] ${isCollapsed ? 'max-w-0 opacity-0' : 'max-w-[200px] opacity-100'}`}>
+                            <span className="text-sm font-medium pl-3 block">Configurações</span>
+                        </div>
                     </button>
                 )}
 
@@ -215,11 +219,13 @@ const Sidebar: React.FC = () => {
                 {user && (
                     <button
                         onClick={handleLogout}
-                        className={`w-full flex items-center gap-3 px-3 py-2 rounded-md text-slate-500 hover:text-red-600 hover:bg-red-50 transition-colors ${isCollapsed ? 'justify-center' : ''}`}
+                        className={`w-full flex items-center px-3 py-2 rounded-md text-slate-500 hover:text-red-600 hover:bg-red-50 transition-colors ${isCollapsed ? 'justify-center' : ''}`}
                         title={isCollapsed ? 'Sair' : undefined}
                     >
                         <ArrowRightOnRectangleIcon className="w-4 h-4 flex-shrink-0" />
-                        {!isCollapsed && <span className="text-sm font-medium">Sair</span>}
+                        <div className={`overflow-hidden whitespace-nowrap transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] ${isCollapsed ? 'max-w-0 opacity-0' : 'max-w-[200px] opacity-100'}`}>
+                            <span className="text-sm font-medium pl-3 block">Sair</span>
+                        </div>
                     </button>
                 )}
 
@@ -227,12 +233,12 @@ const Sidebar: React.FC = () => {
                 {!isCollapsed && user && (
                     <button
                         onClick={() => handleNavClick('/profile')}
-                        className="w-full flex items-center gap-3 px-2 py-2 mt-2 border border-slate-200 dark:border-slate-700 rounded-md hover:border-slate-300 dark:hover:border-slate-600 transition-colors cursor-pointer text-left"
+                        className={`w-full flex items-center gap-3 px-2 py-2 mt-2 border border-slate-200 dark:border-slate-700 rounded-md hover:border-slate-300 dark:hover:border-slate-600 transition-colors cursor-pointer text-left overflow-hidden animate-fade-in`}
                     >
                         {user.picture ? (
-                            <img src={user.picture} alt={user.name} className="w-8 h-8 rounded-full object-cover bg-slate-100" />
+                            <img src={user.picture} alt={user.name} className="w-8 h-8 rounded-full object-cover bg-slate-100 flex-shrink-0" />
                         ) : (
-                            <div className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center border border-slate-200 dark:border-slate-700">
+                            <div className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center border border-slate-200 dark:border-slate-700 flex-shrink-0">
                                 <span className="text-slate-600 dark:text-slate-400 font-semibold text-xs">
                                     {user.name?.charAt(0).toUpperCase()}
                                 </span>
@@ -268,10 +274,10 @@ const Sidebar: React.FC = () => {
                 {!user && !isCollapsed && (
                     <button
                         onClick={() => handleNavClick('/login')}
-                        className="w-full flex items-center gap-3 px-3 py-2 mt-2 bg-slate-900 text-white rounded-md hover:bg-slate-800 transition-colors shadow-sm"
+                        className="w-full flex items-center px-3 py-2 mt-2 bg-slate-900 text-white rounded-md hover:bg-slate-800 transition-colors shadow-sm"
                     >
                         <ArrowLeftOnRectangleIcon className="w-4 h-4 flex-shrink-0" />
-                        <span className="text-sm font-medium">Entrar</span>
+                        <span className="text-sm font-medium pl-3 animate-fade-in">Entrar</span>
                     </button>
                 )}
 
@@ -302,17 +308,18 @@ const Sidebar: React.FC = () => {
             </button>
 
             {/* Mobile Overlay */}
-            {isMobileOpen && (
-                <div
-                    className="lg:hidden fixed inset-0 bg-slate-900/50 z-40"
-                    onClick={() => setIsMobileOpen(false)}
-                />
-            )}
+            {/* Mobile Overlay */}
+            <div
+                className={`lg:hidden fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-40 transition-opacity duration-300 ease-in-out ${isMobileOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
+                    }`}
+                onClick={() => setIsMobileOpen(false)}
+                aria-hidden="true"
+            />
 
             {/* Mobile Sidebar */}
             <aside
                 ref={sidebarRef}
-                className={`lg:hidden fixed left-0 top-0 h-full w-64 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-700 z-50 transform transition-transform duration-300 ${isMobileOpen ? 'translate-x-0' : '-translate-x-full'}`}
+                className={`lg:hidden fixed left-0 top-0 h-full w-64 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-700 z-50 transform transition-transform duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] ${isMobileOpen ? 'translate-x-0' : '-translate-x-full'}`}
             >
                 <button
                     onClick={() => setIsMobileOpen(false)}
@@ -324,7 +331,7 @@ const Sidebar: React.FC = () => {
             </aside>
 
             {/* Desktop Sidebar */}
-            <aside className={`hidden lg:flex flex-col fixed left-0 top-0 h-full bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-700 transition-all duration-300 z-30 ${isCollapsed ? 'w-16' : 'w-64'}`}>
+            <aside className={`hidden lg:flex flex-col fixed left-0 top-0 h-full bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-700 transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] z-30 ${isCollapsed ? 'w-16' : 'w-64'}`}>
                 <SidebarContent />
 
                 {/* Collapse Toggle */}
