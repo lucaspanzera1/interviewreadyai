@@ -54,8 +54,8 @@ const Sidebar: React.FC = () => {
 
     const mainNavItems = [
         { name: 'Início', path: '/', icon: HomeIcon, activeIcon: HomeIconSolid },
-        { name: 'Meus Quizzes', path: '/my-quizzes', icon: DocumentTextIcon, activeIcon: DocumentTextIconSolid },
-        { name: 'Criar', path: '/create-quiz', icon: PlusCircleIcon, activeIcon: PlusCircleIconSolid },
+        { name: 'Meus Quizzes', path: '/my-quizzes', icon: DocumentTextIcon, activeIcon: DocumentTextIconSolid, badge: 'Beta' },
+        { name: 'Criar', path: '/create-quiz', icon: PlusCircleIcon, activeIcon: PlusCircleIconSolid, badge: 'Beta' },
         { name: 'Explorar', path: '/free-quizzes', icon: AcademicCapIcon, activeIcon: AcademicCapIconSolid },
         { name: 'Evolução', path: '/desempenho', icon: ChartBarIcon, activeIcon: ChartBarIconSolid },
         { name: 'Tokens', path: '/tokens', icon: TicketIcon, activeIcon: TicketIconSolid },
@@ -117,8 +117,17 @@ const Sidebar: React.FC = () => {
                             title={isCollapsed ? item.name : undefined}
                         >
                             <Icon className={`w-5 h-5 flex-shrink-0 transition-colors ${active ? 'text-primary-600 dark:text-primary-400' : 'text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-300'}`} />
-                            <div className={`overflow-hidden whitespace-nowrap transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] ${isCollapsed ? 'max-w-0 opacity-0' : 'max-w-[200px] opacity-100'}`}>
-                                <span className="text-sm pl-3 block">{item.name}</span>
+                            <div className={`overflow-hidden whitespace-nowrap transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] ${isCollapsed ? 'max-w-0 opacity-0' : 'max-w-[200px] opacity-100'} w-full`}>
+                                <div className="flex items-center justify-between">
+                                    <span className="text-sm pl-3">{item.name}</span>
+                                    {/* @ts-ignore */}
+                                    {item.badge && (
+                                        <span className="ml-2 text-[10px] px-1.5 py-0.5 rounded shadow-sm font-bold bg-amber-100 text-amber-700 dark:bg-amber-900/50 dark:text-amber-400 border border-amber-200 dark:border-amber-700/50 uppercase tracking-wide">
+                                            {/* @ts-ignore */}
+                                            {item.badge}
+                                        </span>
+                                    )}
+                                </div>
                             </div>
                         </button>
                     );

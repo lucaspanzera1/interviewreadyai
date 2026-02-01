@@ -41,8 +41,9 @@ export class QuizController {
   }
 
   @Post(':id/access')
-  async recordAccess(@Param('id') quizId: string) {
-    return this.quizService.incrementQuizAccess(quizId);
+  @UseGuards(JwtAuthGuard)
+  async recordAccess(@Param('id') quizId: string, @CurrentUser() user: any) {
+    return this.quizService.incrementQuizAccess(quizId, user.userId);
   }
 
   @Public()
@@ -87,20 +88,5 @@ export class QuizController {
     @CurrentUser() user: any,
   ) {
     return this.quizService.getUserAttempts(user.userId, parseInt(page), parseInt(limit));
-  }
-
-  @Get('my-attempts/:attemptId')
-  @UseGuards(JwtAuthGuard)
-  async getUserAttemptDetails(
-    @Param('attemptId') attemptId: string,
-    @CurrentUser() user: any,
-  ) {
-    return this.quizService.getUserAttemptDetails(attemptId, user.userId);
-  }
-
-  @Get('my-stats')
-  @UseGuards(JwtAuthGuard)
-  async getUserStats(@CurrentUser() user: any) {
-    return this.quizService.getUserStats(user.userId);
   }
 }

@@ -10,8 +10,8 @@ import {
 } from '@heroicons/react/24/outline';
 import { StarIcon as StarIconSolid } from '@heroicons/react/24/solid';
 import { apiClient, QuizLevel } from '../lib/api';
-import { toast } from 'react-toastify';
 import { useAuth } from '../contexts/AuthContext';
+import { useToast } from '../contexts/ToastContext';
 
 const CATEGORIES = ['Todas', 'Fundamentos', 'Frontend', 'Backend', 'DevOps'];
 const DIFFICULTIES = ['Todas', 'Iniciante', 'Intermediário', 'Avançado'];
@@ -25,6 +25,7 @@ const DIFFICULTY_MAP: Record<string, string> = {
 const FreeQuizzesPage: React.FC = () => {
     const navigate = useNavigate();
     const { user } = useAuth();
+    const { showToast } = useToast();
     const [selectedCategory, setSelectedCategory] = useState('Todas');
     const [selectedDifficulty, setSelectedDifficulty] = useState('Todas');
     const [searchQuery, setSearchQuery] = useState('');
@@ -69,7 +70,8 @@ const FreeQuizzesPage: React.FC = () => {
                 setHighlightQuiz(sorted[0]);
             }
         } catch (error) {
-            console.error('Erro ao carregar destaque:', error);
+            console.error('Erro ao carregar quiz em destaque:', error);
+            // Não mostra toast para não incomodar o usuário
         }
     };
 
@@ -79,6 +81,7 @@ const FreeQuizzesPage: React.FC = () => {
             setFreeQuizLimit(limit);
         } catch (error) {
             console.error('Erro ao carregar limite de quizzes gratuitos:', error);
+            // Não mostra toast para não incomodar o usuário, apenas log no console
         }
     };
 
@@ -92,9 +95,20 @@ const FreeQuizzesPage: React.FC = () => {
             const response = await apiClient.getPublicQuizzes(currentPage, 12, selectedCategory, difficultyParam, searchQuery);
             setPublicQuizzes(response.quizzes);
             setTotalPages(response.totalPages);
-        } catch (error) {
-            toast.error('Erro ao carregar quizzes');
-            console.error(error);
+        } catch (error: any) {
+            console.error('Erro ao carregar quizzes:', error);
+
+            // Handle specific HTTP status codes
+            const statusCode = error.response?.status || error.statusCode || error.status;
+
+            if (statusCode === 403) {
+                const message = error.response?.data?.message || error.message || 'Acesso negado. Você pode não ter permissão para ver estes quizzes.';
+                showToast(message, 'error');
+            } else if (statusCode === 429) {
+                showToast('Muitas requisições! Aguarde um momento antes de tentar novamente.', 'error');
+            } else {
+                showToast('Não foi possível carregar os quizzes. Verifique sua conexão e tente novamente.', 'error');
+            }
         } finally {
             setLoading(false);
         }
@@ -106,6 +120,7 @@ const FreeQuizzesPage: React.FC = () => {
         setStartingQuiz(quiz._id);
         try {
             if (!user) {
+                showToast('Faça login para jogar os quizzes gratuitos! 🚀', 'info');
                 navigate('/login');
                 return;
             }
@@ -117,12 +132,12 @@ const FreeQuizzesPage: React.FC = () => {
             const fullQuiz = await apiClient.getQuizForPlaying(quiz._id);
 
             if (!fullQuiz) {
-                toast.error('Quiz não encontrado');
+                showToast('Este quiz não está disponível no momento. Tente outro quiz.', 'error');
                 return;
             }
 
             if (!fullQuiz.questions || fullQuiz.questions.length === 0) {
-                toast.error('Este quiz não possui questões disponíveis');
+                showToast('Este quiz ainda não tem questões configuradas. Volte mais tarde!', 'error');
                 return;
             }
 
@@ -130,10 +145,25 @@ const FreeQuizzesPage: React.FC = () => {
             localStorage.setItem('generatedQuiz', JSON.stringify(fullQuiz));
             localStorage.setItem('currentQuizId', fullQuiz._id);
 
+            showToast('Quiz iniciado! Boa sorte! 🎯', 'success');
             navigate('/quiz/generated');
-        } catch (error) {
-            toast.error('Erro ao iniciar quiz');
+        } catch (error: any) {
             console.error('Erro ao iniciar quiz público:', error);
+
+            // Handle specific HTTP status codes
+            const statusCode = error.response?.status || error.statusCode || error.status;
+
+            if (statusCode === 403) {
+                // Use the custom message from backend if available, otherwise use default
+                const message = error.response?.data?.message || error.message || 'Você não tem permissão para acessar este quiz. Verifique seu plano ou limite de quizzes gratuitos.';
+                showToast(message, 'error');
+            } else if (statusCode === 404) {
+                showToast('Este quiz não foi encontrado. Ele pode ter sido removido.', 'error');
+            } else if (statusCode === 429) {
+                showToast('Muitas tentativas! Aguarde um pouco antes de tentar novamente.', 'error');
+            } else {
+                showToast('Ops! Não conseguimos iniciar o quiz. Tente novamente em alguns instantes.', 'error');
+            }
         } finally {
             setStartingQuiz(null);
         }

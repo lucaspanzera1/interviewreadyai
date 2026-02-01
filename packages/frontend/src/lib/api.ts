@@ -168,6 +168,13 @@ class ApiClient {
           }
           return Promise.reject(error);
         }
+
+        // Handle 403 Forbidden errors
+        if (error.response?.status === 403) {
+          console.error('Acesso proibido (403):', error.response.data);
+          // Don't redirect, just let the component handle the error
+        }
+
         return Promise.reject(error);
       }
     );

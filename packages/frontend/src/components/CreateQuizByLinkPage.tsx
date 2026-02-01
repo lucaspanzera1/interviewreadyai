@@ -46,7 +46,24 @@ const CreateQuizByLinkPage: React.FC = () => {
 
                         <div className="relative z-10">
                             <form onSubmit={handleSubmit} className="space-y-6">
-                                <div className="space-y-2">
+                                {/* Development Notice Card */}
+                                <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700/50 rounded-xl p-4 mb-6 flex items-start gap-4">
+                                    <div className="p-2 bg-amber-100 dark:bg-amber-900/30 rounded-lg text-amber-600 dark:text-amber-400 shrink-0">
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <h3 className="text-lg font-bold text-amber-800 dark:text-amber-200">
+                                            Em Desenvolvimento
+                                        </h3>
+                                        <p className="text-amber-700 dark:text-amber-300 mt-1">
+                                            Estamos na versão beta, essa feature vai ser liberada no lançamento da 1.0.0.
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <div className="space-y-2 opacity-60 pointer-events-none select-none">
                                     <label htmlFor="job-link" className="block text-sm font-medium text-slate-700 dark:text-slate-300">
                                         Link da Vaga (LinkedIn, Gupy, etc)
                                     </label>
@@ -58,6 +75,7 @@ const CreateQuizByLinkPage: React.FC = () => {
                                             type="url"
                                             name="job-link"
                                             id="job-link"
+                                            disabled
                                             className="block w-full pl-11 pr-4 py-4 sm:text-lg border-slate-200 dark:border-slate-600 rounded-xl bg-slate-50 dark:bg-slate-900/50 text-slate-900 dark:text-white placeholder-slate-400 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all duration-200"
                                             placeholder="https://www.linkedin.com/jobs/view/..."
                                             value={jobLink}
@@ -69,9 +87,8 @@ const CreateQuizByLinkPage: React.FC = () => {
 
                                 <button
                                     type="submit"
-                                    disabled={isLoading || !jobLink}
-                                    className={`w-full flex items-center justify-center gap-3 px-8 py-4 border border-transparent text-lg font-bold rounded-xl text-white bg-gradient-to-r from-primary-600 to-indigo-600 hover:from-primary-700 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 shadow-lg hover:shadow-primary-500/30 transition-all duration-300 transform hover:-translate-y-1 ${(isLoading || !jobLink) ? 'opacity-70 cursor-not-allowed transform-none' : ''
-                                        }`}
+                                    disabled={true}
+                                    className={`w-full flex items-center justify-center gap-3 px-8 py-4 border border-transparent text-lg font-bold rounded-xl text-white bg-slate-400 dark:bg-slate-600 cursor-not-allowed shadow-none transition-all duration-300`}
                                 >
                                     {isLoading ? (
                                         <>

@@ -304,23 +304,6 @@ IMPORTANTE: Sempre formate código adequadamente usando as marcações especific
       .exec();
   }
 
-  async getQuizForPlaying(id: string, userId: string) {
-    const quiz = await this.getQuizById(id);
-    if (!quiz) {
-      throw new NotFoundException('Quiz not found');
-    }
-
-    // Verificar limite para quizzes gratuitos
-    if (quiz.isFree) {
-      const canDo = await this.userService.canDoFreeQuiz(userId);
-      if (!canDo) {
-        throw new HttpException('Você atingiu o limite diário de 3 quizzes gratuitos. Tente novamente amanhã ou use tokens para quizzes premium.', HttpStatus.FORBIDDEN);
-      }
-    }
-
-    return quiz;
-  }
-
   async getPublicQuizById(id: string) {
     return this.quizModel
       .findOne({ _id: id, isActive: true })
@@ -437,70 +420,80 @@ IMPORTANTE: Sempre formate código adequadamente usando as marcações especific
     };
   }
 
-  async incrementQuizAccess(quizId: string) {
-    return this.quizModel.findByIdAndUpdate(quizId, {
-      $inc: { totalAccess: 1 },
-    });
-  }
-
-  async getUserAttemptDetails(attemptId: string, userId: string) {
-    const attempt = await this.quizAttemptModel
-      .findOne({ _id: attemptId, userId })
-      .populate({
-        path: 'quizId',
-        select: 'titulo categoria nivel quantidade_questoes questions tags'
-      })
-      .exec();
-
-    if (!attempt) {
-      throw new NotFoundException('Attempt not found or does not belong to user');
+  async incrementQuizAccess(quizId: string, userId: string) {
+    // Verificar se o quiz existe e é gratuito
+    const quiz = await this.quizModel.findById(quizId);
+    if (!quiz) {
+      throw new NotFoundException('Quiz not found');
     }
 
-    return attempt;
+    if (!quiz.isFree) {
+      // Se não é gratuito, não há limite de acesso
+      return { success: true };
+    }
+
+    // Verificar se o usuário ainda tem acesso aos quizzes gratuitos
+    const hasAccess = await this.userService.canDoFreeQuiz(userId);
+    if (!hasAccess) {
+      throw new HttpException(
+        'Você atingiu o limite diário de 3 quizzes gratuitos. Aguarde até amanhã ou compre tokens para continuar jogando.',
+        HttpStatus.FORBIDDEN
+      );
+    }
+
+    // Incrementar contador de acesso
+    await this.quizModel.findByIdAndUpdate(quizId, {
+      $inc: { totalAccess: 1 }
+    });
+
+    return { success: true };
   }
 
-  async getUserStats(userId: string) {
-    const attempts = await this.quizAttemptModel
-      .find({ userId })
-      .populate('quizId', 'titulo categoria')
-      .sort({ createdAt: -1 })
-      .exec();
+  async getQuizForPlaying(quizId: string, userId: string) {
+    // Verificar se o quiz existe
+    const quiz = await this.quizModel.findById(quizId);
+    if (!quiz) {
+      throw new NotFoundException('Quiz not found');
+    }
 
-    const totalAttempts = attempts.length;
-    const completedAttempts = attempts.filter(a => a.completed).length;
-    const averageScore = completedAttempts > 0
-      ? attempts.filter(a => a.completed).reduce((sum, a) => sum + a.percentage, 0) / completedAttempts
-      : 0;
+    if (!quiz.isActive) {
+      throw new HttpException('Este quiz não está disponível no momento.', HttpStatus.FORBIDDEN);
+    }
 
-    const totalTime = attempts.reduce((sum, a) => sum + a.timeSpent, 0);
-    const averageTime = totalAttempts > 0 ? totalTime / totalAttempts : 0;
+    if (!quiz.isFree) {
+      // Se não é gratuito, verificar se o usuário tem tokens suficientes
+      const userTokens = await this.userService.getUserTokens(userId);
+      if (userTokens < 1) {
+        throw new HttpException(
+          'Você não tem tokens suficientes para jogar este quiz. Compre tokens para continuar.',
+          HttpStatus.FORBIDDEN
+        );
+      }
 
-    // Calculate evolution (compare last 5 vs first 5 attempts)
-    const recentAttempts = attempts.slice(0, 5);
-    const olderAttempts = attempts.slice(-5);
-    const recentAvg = recentAttempts.length > 0
-      ? recentAttempts.reduce((sum, a) => sum + a.percentage, 0) / recentAttempts.length
-      : 0;
-    const olderAvg = olderAttempts.length > 0
-      ? olderAttempts.reduce((sum, a) => sum + a.percentage, 0) / olderAttempts.length
-      : 0;
-    const evolution = olderAvg > 0 ? ((recentAvg - olderAvg) / olderAvg) * 100 : 0;
+      // Debitar 1 token
+      await this.userService.removeTokensFromUser(userId, 1);
+    } else {
+      // Se é gratuito, verificar limite diário
+      const hasAccess = await this.userService.canDoFreeQuiz(userId);
+      if (!hasAccess) {
+        throw new HttpException(
+          'Você atingiu o limite diário de 3 quizzes gratuitos. Aguarde até amanhã ou compre tokens para continuar jogando.',
+          HttpStatus.FORBIDDEN
+        );
+      }
+    }
 
-    // Get recent attempts (last 3)
-    const recentSimulados = attempts.slice(0, 3).map(attempt => ({
-      id: attempt._id,
-      title: (attempt.quizId as any).titulo,
-      score: attempt.percentage,
-      date: (attempt as any).createdAt.toISOString(),
-      status: attempt.completed ? 'completed' : 'in_progress'
-    }));
-
+    // Retornar quiz completo com questões
     return {
-      totalAttempts,
-      averageScore,
-      averageTime,
-      evolution,
-      recentSimulados
+      _id: quiz._id,
+      titulo: quiz.titulo,
+      descricao: quiz.descricao,
+      categoria: quiz.categoria,
+      tags: quiz.tags,
+      nivel: quiz.nivel,
+      quantidade_questoes: quiz.quantidade_questoes,
+      questions: quiz.questions,
+      isFree: quiz.isFree,
     };
   }
 }
