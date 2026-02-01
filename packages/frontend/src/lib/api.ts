@@ -293,6 +293,11 @@ class ApiClient {
     return res.data;
   }
 
+  async getFreeQuizLimit(): Promise<{ used: number; remaining: number }> {
+    const res = await this.client.get('/users/me/free-quiz-limit');
+    return res.data;
+  }
+
   // Address methods
   async getAddresses(): Promise<any[]> {
     const res = await this.client.get('/users/addresses');

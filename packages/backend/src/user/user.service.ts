@@ -269,4 +269,53 @@ export class UserService {
     const user = await this.findById(userId);
     return user.hasCompletedOnboarding || false;
   }
+
+  /**
+   * Verifica se o usuário pode fazer um quiz gratuito hoje
+   * @param userId ID do usuário
+   * @returns true se pode, false se atingiu o limite
+   */
+  async canDoFreeQuiz(userId: string): Promise<boolean> {
+    const user = await this.findById(userId);
+    this.resetDailyLimitIfNeeded(user);
+    return user.dailyFreeQuizzesUsed < 3;
+  }
+
+  /**
+   * Incrementa o contador de quizzes gratuitos feitos hoje
+   * @param userId ID do usuário
+   */
+  async incrementFreeQuizCount(userId: string): Promise<void> {
+    const user = await this.findById(userId);
+    this.resetDailyLimitIfNeeded(user);
+    user.dailyFreeQuizzesUsed += 1;
+    await user.save();
+  }
+
+  /**
+   * Obtém o status do limite diário
+   * @param userId ID do usuário
+   * @returns objeto com used e remaining
+   */
+  async getDailyFreeQuizStatus(userId: string): Promise<{ used: number; remaining: number }> {
+    const user = await this.findById(userId);
+    this.resetDailyLimitIfNeeded(user);
+    const used = user.dailyFreeQuizzesUsed;
+    const remaining = Math.max(0, 3 - used);
+    return { used, remaining };
+  }
+
+  /**
+   * Reseta o limite diário se necessário (se passou um dia)
+   * @param user Usuário
+   */
+  private resetDailyLimitIfNeeded(user: UserDocument): void {
+    const now = new Date();
+    const lastReset = user.lastFreeQuizReset;
+
+    if (!lastReset || now.toDateString() !== lastReset.toDateString()) {
+      user.dailyFreeQuizzesUsed = 0;
+      user.lastFreeQuizReset = now;
+    }
+  }
 }

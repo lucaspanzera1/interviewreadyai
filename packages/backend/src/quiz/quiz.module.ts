@@ -5,10 +5,12 @@ import { QuizController } from './quiz.controller';
 import { QuizAdminController } from './quiz-admin.controller';
 import { QuizService } from './quiz.service';
 import { Quiz, QuizSchema, QuizAttempt, QuizAttemptSchema } from './schemas';
+import { UserModule } from '../user/user.module';
 
 @Module({
   imports: [
     HttpModule,
+    UserModule,
     MongooseModule.forFeature([
       { name: Quiz.name, schema: QuizSchema },
       { name: QuizAttempt.name, schema: QuizAttemptSchema },

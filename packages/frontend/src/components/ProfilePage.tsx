@@ -22,6 +22,7 @@ import {
   ChartBarIcon,
   Cog6ToothIcon
 } from '@heroicons/react/24/outline';
+import ActivityHeatmap from './ActivityHeatmap';
 
 const LinkedInIcon = (props: React.ComponentProps<'svg'>) => (
   <svg fill="currentColor" viewBox="0 0 24 24" {...props}>
@@ -91,6 +92,9 @@ const ProfilePage: React.FC = () => {
     averageScore: 0
   });
 
+  const [activityData, setActivityData] = useState<{ date: string; count: number }[]>([]);
+
+
   useEffect(() => {
     const loadStats = async () => {
       try {
@@ -106,8 +110,29 @@ const ProfilePage: React.FC = () => {
       }
     };
 
+    const loadActivity = async () => {
+      try {
+        // Fetch up to 1000 last attempts for the heatmap
+        const result = await apiClient.getUserAttempts(1, 1000);
+        if (result && result.attempts) {
+          const counts: Record<string, number> = {};
+          result.attempts.forEach((a: any) => {
+            // Assuming createdAt is ISO string
+            const date = new Date(a.createdAt).toISOString().split('T')[0];
+            counts[date] = (counts[date] || 0) + 1;
+          });
+
+          const data = Object.entries(counts).map(([date, count]) => ({ date, count }));
+          setActivityData(data);
+        }
+      } catch (error) {
+        console.error('Error loading activity:', error);
+      }
+    };
+
     if (user) {
       loadStats();
+      loadActivity();
     }
   }, [user]);
 
@@ -573,6 +598,15 @@ const ProfilePage: React.FC = () => {
                   <ArrowRightOnRectangleIcon className="h-5 w-5 text-slate-400 dark:text-slate-500 group-hover:text-slate-600 dark:group-hover:text-slate-300 transition-colors" />
                 </button>
 
+                <div className="py-4">
+                  <ActivityHeatmap
+                    data={activityData}
+                    totalActivities={activityData.reduce((acc, curr) => acc + curr.count, 0)}
+                    startDate={new Date(2026, 1, 1)}
+                    endDate={new Date(2027, 1, 1)}
+                  />
+                </div>
+
                 <div className="grid grid-cols-2 gap-4 pt-2">
                   <div className="text-center p-3 bg-slate-50 dark:bg-slate-800/50 rounded-lg border border-slate-100 dark:border-slate-700">
                     <AcademicCapIcon className="h-6 w-6 text-primary-500 mx-auto mb-2" />
@@ -589,6 +623,7 @@ const ProfilePage: React.FC = () => {
             </div>
 
             {/* Logout Button */}
+            {/* ... previous code ... */}
             {/* Account Actions */}
             <div className="space-y-3">
               <button
@@ -610,6 +645,8 @@ const ProfilePage: React.FC = () => {
           </div>
 
         </div>
+
+
       </div>
     </>
   );

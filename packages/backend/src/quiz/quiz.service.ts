@@ -6,6 +6,7 @@ import { Model } from 'mongoose';
 import { firstValueFrom } from 'rxjs';
 import { GenerateQuizDto, GeneratedQuiz } from './dto';
 import { Quiz, QuizDocument, QuizAttempt, QuizAttemptDocument } from './schemas';
+import { UserService } from '../user/user.service';
 
 @Injectable()
 export class QuizService {
@@ -14,6 +15,7 @@ export class QuizService {
     private readonly configService: ConfigService,
     @InjectModel(Quiz.name) private quizModel: Model<QuizDocument>,
     @InjectModel(QuizAttempt.name) private quizAttemptModel: Model<QuizAttemptDocument>,
+    private readonly userService: UserService,
   ) { }
 
   async generateQuiz(dto: GenerateQuizDto, userId: string): Promise<GeneratedQuiz> {
@@ -302,6 +304,23 @@ IMPORTANTE: Sempre formate código adequadamente usando as marcações especific
       .exec();
   }
 
+  async getQuizForPlaying(id: string, userId: string) {
+    const quiz = await this.getQuizById(id);
+    if (!quiz) {
+      throw new NotFoundException('Quiz not found');
+    }
+
+    // Verificar limite para quizzes gratuitos
+    if (quiz.isFree) {
+      const canDo = await this.userService.canDoFreeQuiz(userId);
+      if (!canDo) {
+        throw new HttpException('Você atingiu o limite diário de 3 quizzes gratuitos. Tente novamente amanhã ou use tokens para quizzes premium.', HttpStatus.FORBIDDEN);
+      }
+    }
+
+    return quiz;
+  }
+
   async getPublicQuizById(id: string) {
     return this.quizModel
       .findOne({ _id: id, isActive: true })
@@ -351,6 +370,12 @@ IMPORTANTE: Sempre formate código adequadamente usando as marcações especific
   // User methods
   async recordQuizAttempt(quizId: string, userId: string, selectedAnswers: number[], score: number, totalQuestions: number, timeSpent: number = 0) {
     const percentage = Math.round((score / totalQuestions) * 100);
+
+    // Verificar se o quiz é gratuito e incrementar contador
+    const quiz = await this.quizModel.findById(quizId);
+    if (quiz && quiz.isFree) {
+      await this.userService.incrementFreeQuizCount(userId);
+    }
 
     const attempt = await this.quizAttemptModel.create({
       quizId,

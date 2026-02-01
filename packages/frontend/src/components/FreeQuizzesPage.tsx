@@ -34,11 +34,13 @@ const FreeQuizzesPage: React.FC = () => {
     const [totalPages, setTotalPages] = useState(1);
     const [startingQuiz, setStartingQuiz] = useState<string | null>(null);
     const [highlightQuiz, setHighlightQuiz] = useState<any>(null);
+    const [freeQuizLimit, setFreeQuizLimit] = useState<{ used: number; remaining: number } | null>(null);
 
     // Load public quizzes
     // Load highlight quiz only once on mount
     useEffect(() => {
         loadHighlightQuiz();
+        loadFreeQuizLimit();
     }, []);
 
     // Load public quizzes when filters change
@@ -68,6 +70,15 @@ const FreeQuizzesPage: React.FC = () => {
             }
         } catch (error) {
             console.error('Erro ao carregar destaque:', error);
+        }
+    };
+
+    const loadFreeQuizLimit = async () => {
+        try {
+            const limit = await apiClient.getFreeQuizLimit();
+            setFreeQuizLimit(limit);
+        } catch (error) {
+            console.error('Erro ao carregar limite de quizzes gratuitos:', error);
         }
     };
 
@@ -135,7 +146,21 @@ const FreeQuizzesPage: React.FC = () => {
                 <div className="flex flex-col items-end gap-2">
                     <p className="text-sm text-slate-500 dark:text-slate-400 hidden md:block">
                         Pratique sem gastar tokens. <br />
-                        <span className="text-xs text-amber-600 dark:text-amber-400 font-medium">Ganhe 1 token ao completar 3 quizzes.</span>
+                        {freeQuizLimit ? (
+                            <span className="text-xs font-medium">
+                                {freeQuizLimit.remaining > 0 ? (
+                                    <span className="text-green-600 dark:text-green-400">
+                                        Você pode fazer mais {freeQuizLimit.remaining} quiz{freeQuizLimit.remaining !== 1 ? 'zes' : ''} gratuito{freeQuizLimit.remaining !== 1 ? 's' : ''} hoje.
+                                    </span>
+                                ) : (
+                                    <span className="text-red-600 dark:text-red-400">
+                                        Você atingiu o limite diário de 3 quizzes gratuitos.
+                                    </span>
+                                )}
+                            </span>
+                        ) : (
+                            <span className="text-xs text-amber-600 dark:text-amber-400 font-medium">Ganhe 1 token ao completar 3 quizzes.</span>
+                        )}
                     </p>
                 </div>
             </div>

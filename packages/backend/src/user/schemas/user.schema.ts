@@ -65,6 +65,13 @@ export class User {
   @Prop()
   githubUrl?: string;
 
+  // Limite diário de quizzes gratuitos
+  @Prop({ type: Number, default: 0 })
+  dailyFreeQuizzesUsed: number;
+
+  @Prop()
+  lastFreeQuizReset?: Date;
+
   createdAt: Date;
   updatedAt: Date;
 }

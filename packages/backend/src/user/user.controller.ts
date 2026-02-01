@@ -173,6 +173,31 @@ export class UserController {
   }
 
   /**
+   * Busca status do limite diário de quizzes gratuitos
+   * @returns Status do limite diário
+   */
+  @Get('me/free-quiz-limit')
+  @ApiOperation({
+    summary: 'Buscar status do limite diário de quizzes gratuitos',
+    description: 'Retorna quantos quizzes gratuitos o usuário já fez hoje e quantos ainda pode fazer'
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Status do limite retornado com sucesso',
+    schema: {
+      type: 'object',
+      properties: {
+        used: { type: 'number', example: 1 },
+        remaining: { type: 'number', example: 2 }
+      }
+    }
+  })
+  async getMyFreeQuizLimit(@CurrentUser() user: any): Promise<{ used: number; remaining: number }> {
+    const userId = user.userId || user.sub;
+    return this.userService.getDailyFreeQuizStatus(userId);
+  }
+
+  /**
    * Adiciona tokens ao usuário atual
    * @param body Dados com quantidade a adicionar
    */
