@@ -166,7 +166,8 @@ Gere agora {quantidade_questoes} questões de nível {nivel} sobre "{titulo}" na
       .replace(/{descricao}/g, dto.descricao)
       .replace(/{tags}/g, dto.tags.join(', '))
       .replace(/{quantidade_questoes}/g, dto.quantidade_questoes.toString())
-      .replace(/{nivel}/g, dto.nivel);
+      .replace(/{nivel}/g, dto.nivel)
+      .replace(/{contexto}/g, dto.contexto || 'Nenhum contexto adicional fornecido');
   }
 
   private async callGroqAPI(prompt: string, apiKey: string): Promise<string> {

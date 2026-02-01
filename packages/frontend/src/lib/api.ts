@@ -77,6 +77,7 @@ export interface GenerateQuizDto {
   tags: string[];
   quantidade_questoes: number;
   nivel: QuizLevel;
+  contexto?: string;
 }
 
 export interface QuizQuestion {

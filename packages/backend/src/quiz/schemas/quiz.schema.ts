@@ -47,6 +47,9 @@ export class Quiz {
   @Prop({ type: [Object], required: true })
   questions: QuizQuestion[];
 
+  @Prop({ type: String })
+  contexto?: string;
+
   @Prop({ type: Types.ObjectId, ref: 'User', required: true })
   createdBy: Types.ObjectId;
 

@@ -1,4 +1,4 @@
-import { IsString, IsNumber, IsArray, IsEnum, Min, Max } from 'class-validator';
+import { IsString, IsNumber, IsArray, IsEnum, Min, Max, IsOptional } from 'class-validator';
 
 export enum QuizLevel {
   INICIANTE = 'INICIANTE',
@@ -28,4 +28,8 @@ export class GenerateQuizDto {
 
   @IsEnum(QuizLevel)
   nivel: QuizLevel;
+
+  @IsOptional()
+  @IsString()
+  contexto?: string;
 }

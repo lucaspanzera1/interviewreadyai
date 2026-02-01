@@ -43,6 +43,9 @@ Você é um especialista em criar quizzes educacionais de alta qualidade. Sua fu
 - **Tags:** {tags}
 - **Quantidade de Questões:** {quantidade_questoes}
 - **Nível:** {nivel}
+- **Contexto Adicional:** {contexto}
+
+Use o contexto adicional fornecido acima para enriquecer e direcionar a criação das questões, focando em aspectos específicos mencionados, exemplos práticos ou ênfases particulares.
 
 ## Formato de Resposta Obrigatório (JSON):
 
