@@ -171,8 +171,12 @@ const Sidebar: React.FC = () => {
                             onClick={() => handleNavClick('/tokens')}
                             title={`${user.tokens || 0} Tokens Disponíveis`}
                         >
-                            <div className="flex items-center">
-                                <TicketIcon className={`w-4 h-4 ${isCollapsed ? 'text-amber-500' : 'text-slate-400 group-hover:text-amber-500'} transition-colors flex-shrink-0`} />
+                            <div className={`flex items-center ${isCollapsed ? 'justify-center w-full' : ''}`}>
+                                {isCollapsed ? (
+                                    <span className="text-xs font-bold text-slate-700 dark:text-slate-200">{user.tokens || 0}</span>
+                                ) : (
+                                    <TicketIcon className="w-4 h-4 text-slate-400 group-hover:text-amber-500 transition-colors flex-shrink-0" />
+                                )}
                                 <div className={`overflow-hidden whitespace-nowrap transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] ${isCollapsed ? 'max-w-0 opacity-0' : 'max-w-[200px] opacity-100'}`}>
                                     <span className="text-sm font-medium text-slate-600 dark:text-slate-300 group-hover:text-slate-900 dark:group-hover:text-white transition-colors pl-2.5">
                                         {user.tokens || 0} Tokens

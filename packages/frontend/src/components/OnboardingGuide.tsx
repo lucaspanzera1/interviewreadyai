@@ -87,7 +87,11 @@ const OnboardingGuide: React.FC<OnboardingGuideProps> = ({ isOpen, onClose }) =>
                     </div>
 
                     <div className="relative z-10 bg-white/20 backdrop-blur-md p-4 rounded-2xl shadow-lg ring-1 ring-white/30 mb-2 transform transition-all duration-500 hover:scale-105">
-                        <stepData.icon className="w-10 h-10 text-white" />
+                        {currentStep === 0 ? (
+                            <img src="/logo.png" alt="TreinaVaga" className="w-12 h-12 object-contain" />
+                        ) : (
+                            <stepData.icon className="w-10 h-10 text-white" />
+                        )}
                     </div>
 
                     <button
@@ -128,8 +132,8 @@ const OnboardingGuide: React.FC<OnboardingGuideProps> = ({ isOpen, onClose }) =>
                             onClick={handlePrev}
                             disabled={currentStep === 0}
                             className={`flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-xl transition-colors ${currentStep === 0
-                                    ? 'text-slate-300 cursor-not-allowed'
-                                    : 'text-slate-500 hover:bg-slate-50 dark:text-slate-400 dark:hover:bg-slate-800'
+                                ? 'text-slate-300 cursor-not-allowed'
+                                : 'text-slate-500 hover:bg-slate-50 dark:text-slate-400 dark:hover:bg-slate-800'
                                 }`}
                         >
                             <ChevronLeftIcon className="w-4 h-4" />

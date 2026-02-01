@@ -116,10 +116,7 @@ const FreeQuizzesPage: React.FC = () => {
             }
 
             // Store quiz data for the quiz page
-            localStorage.setItem('generatedQuiz', JSON.stringify({
-                questions: fullQuiz.questions,
-                quizId: fullQuiz._id
-            }));
+            localStorage.setItem('generatedQuiz', JSON.stringify(fullQuiz));
             localStorage.setItem('currentQuizId', fullQuiz._id);
 
             navigate('/quiz/generated');

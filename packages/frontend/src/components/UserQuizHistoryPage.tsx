@@ -144,7 +144,7 @@ const UserQuizHistoryPage: React.FC = () => {
     }
 
     return (
-        <div className="min-h-screen bg-slate-50 dark:bg-slate-900 pb-20 animate-fade-in">
+        <div className="min-h-screen bg-slate-50 dark:bg-slate-900 pb-20">
             <PageTitle title="Meu Histórico - TreinaVagaAI" />
 
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
@@ -169,7 +169,7 @@ const UserQuizHistoryPage: React.FC = () => {
                 </div>
 
                 {/* Stats Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 animate-slide-up">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                     <StatCard
                         icon={AcademicCapIcon}
                         label="Total de Quizzes"
@@ -197,7 +197,7 @@ const UserQuizHistoryPage: React.FC = () => {
                 </div>
 
                 {/* Attempts List */}
-                <div className="space-y-6 animate-slide-up" style={{ animationDelay: '0.1s' }}>
+                <div className="space-y-6">
                     <div className="flex items-center justify-between px-2">
                         <h2 className="text-xl font-bold text-slate-900 dark:text-white font-sans">
                             Atividades Recentes
@@ -206,11 +206,10 @@ const UserQuizHistoryPage: React.FC = () => {
 
                     <div className="space-y-4">
                         {attempts.length > 0 ? (
-                            attempts.map((attempt, index) => (
+                            attempts.map((attempt) => (
                                 <div
                                     key={attempt._id}
                                     className="group relative bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-soft hover:shadow-lifted border border-slate-100 dark:border-slate-700 transition-all duration-300 overflow-hidden hover:border-primary-100 dark:hover:border-primary-900/50"
-                                    style={{ animationDelay: `${index * 0.05}s` }}
                                 >
                                     <div className="absolute top-0 right-0 p-6 opacity-0 group-hover:opacity-5 transition-opacity duration-500">
                                         <AcademicCapIcon className="h-32 w-32 text-primary-600 transform rotate-12" />

@@ -1,12 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import PageTitle from './PageTitle';
-import { CheckCircleIcon, XCircleIcon, ArrowLeftIcon, ArrowPathIcon } from '@heroicons/react/24/outline';
+import { CheckCircleIcon, XCircleIcon, ArrowLeftIcon, ArrowPathIcon, EyeIcon } from '@heroicons/react/24/outline';
+import { StarIcon as StarIconSolid } from '@heroicons/react/24/solid';
 import { QuizQuestion, apiClient } from '../lib/api';
 
 const GeneratedQuizPage: React.FC = () => {
   const navigate = useNavigate();
-  const [quiz, setQuiz] = useState<{ questions: (QuizQuestion & { originalIndex?: number })[] } | null>(null);
+  const [quiz, setQuiz] = useState<{
+    questions: (QuizQuestion & { originalIndex?: number })[];
+    titulo?: string;
+    categoria?: string;
+    descricao?: string;
+    totalAccess?: number;
+    averageScore?: number;
+  } | null>(null);
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [selectedAnswers, setSelectedAnswers] = useState<number[]>([]);
   const [showResults, setShowResults] = useState(false);
@@ -262,6 +270,47 @@ const GeneratedQuizPage: React.FC = () => {
           </div>
           <div className="w-10" /> {/* Spacer for centering */}
         </div>
+
+        {/* Quiz Info Header */}
+        {(quiz.titulo || quiz.categoria) && (
+          <div className="text-center space-y-2 animate-fade-in">
+            <div className="flex items-center justify-center gap-2 flex-wrap">
+              {quiz.categoria && (
+                <span className="px-2.5 py-0.5 rounded-full text-xs font-bold uppercase tracking-wider bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700">
+                  {quiz.categoria}
+                </span>
+              )}
+              {quiz.averageScore !== undefined && (
+                <div className="flex items-center gap-1 bg-amber-50 dark:bg-amber-900/20 px-2 py-0.5 rounded-full border border-amber-100 dark:border-amber-800/50">
+                  <StarIconSolid className="w-3.5 h-3.5 text-amber-500" />
+                  <span className="text-xs font-bold text-amber-700 dark:text-amber-400">
+                    {((quiz.averageScore / 100) * 5).toFixed(1)}
+                  </span>
+                </div>
+              )}
+              {quiz.totalAccess !== undefined && (
+                <div className="flex items-center gap-1 bg-blue-50 dark:bg-blue-900/20 px-2 py-0.5 rounded-full border border-blue-100 dark:border-blue-800/50">
+                  <EyeIcon className="w-3.5 h-3.5 text-blue-500" />
+                  <span className="text-xs font-bold text-blue-700 dark:text-blue-400">
+                    {quiz.totalAccess}
+                  </span>
+                </div>
+              )}
+            </div>
+
+            {quiz.titulo && (
+              <h1 className="text-2xl md:text-3xl font-bold text-slate-900 dark:text-white">
+                {quiz.titulo}
+              </h1>
+            )}
+
+            {quiz.descricao && (
+              <p className="text-slate-500 dark:text-slate-400 max-w-2xl mx-auto text-sm leading-relaxed">
+                {quiz.descricao}
+              </p>
+            )}
+          </div>
+        )}
 
         {/* Progress Bar */}
         <div className="h-2 w-full bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden">

@@ -132,7 +132,7 @@ const HomePage: React.FC = () => {
       label: 'Criar Conta Grátis',
       desc: 'Salve seu progresso e evolua',
       icon: SparklesIcon,
-      action: () => navigate('/register'),
+      action: () => navigate('/login'),
       primary: true,
       bg: 'bg-primary-600',
       text: 'text-white'
@@ -244,7 +244,7 @@ const HomePage: React.FC = () => {
                 </div>
                 <div className="flex gap-3 shrink-0">
                   <button
-                    onClick={() => navigate('/register')}
+                    onClick={() => navigate('/login')}
                     className="px-5 py-2.5 bg-white text-primary-900 rounded-xl font-bold hover:bg-slate-100 transition-colors shadow-lg"
                   >
                     Criar Conta Grátis
@@ -395,7 +395,7 @@ const HomePage: React.FC = () => {
                       Acompanhe seu desempenho detalhado em cada quiz realizado ao criar uma conta.
                     </p>
                     <button
-                      onClick={() => navigate('/register')}
+                      onClick={() => navigate('/login')}
                       className="text-primary-600 dark:text-primary-400 font-bold text-sm hover:underline"
                     >
                       Começar agora
