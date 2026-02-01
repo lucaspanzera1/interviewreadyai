@@ -2,7 +2,7 @@ import React from 'react';
 import { useLocation, Link } from 'react-router-dom';
 import PageTitle from './PageTitle';
 import { useAuth } from '../contexts/AuthContext';
-import { SparklesIcon } from '@heroicons/react/24/outline';
+
 import AIVisualization3D from './ui/AIVisualization3D';
 
 /**
@@ -34,9 +34,7 @@ const LoginPage: React.FC = () => {
           <div className="w-full max-w-[380px] space-y-8">
             {/* Logo */}
             <div className="flex flex-col items-start gap-4">
-              <div className="h-12 w-12 bg-primary-600 dark:bg-primary-500 rounded-xl flex items-center justify-center shadow-lg shadow-primary-600/20 dark:shadow-primary-500/20">
-                <SparklesIcon className="w-6 h-6 text-white" />
-              </div>
+              <img src="/logo.png" alt="TreinaVaga" className="h-20 w-20 object-contain" />
               <div>
                 <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-slate-900 to-slate-600 dark:from-white dark:to-slate-300 tracking-tight">
                   TreinaVaga<span className="text-primary-600 dark:text-primary-400">AI</span>

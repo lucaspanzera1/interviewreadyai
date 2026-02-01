@@ -2,7 +2,6 @@ import React, { useRef, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
     HomeIcon,
-    SparklesIcon,
     DocumentTextIcon,
     ChartBarIcon,
     Cog6ToothIcon,
@@ -93,9 +92,7 @@ const Sidebar: React.FC = () => {
         <div className="flex flex-col h-full">
             {/* Logo */}
             <div className={`flex items-center gap-3 px-4 py-6 border-b border-subtle dark:border-slate-800 ${isCollapsed ? 'justify-center' : ''}`}>
-                <div className="h-8 w-8 bg-primary-600 rounded-lg flex items-center justify-center flex-shrink-0 shadow-lg shadow-primary-500/20">
-                    <SparklesIcon className="w-4 h-4 text-white" />
-                </div>
+                <img src="/logo.png" alt="TreinaVaga" className="h-12 w-12 object-contain" />
                 {!isCollapsed && (
                     <span className="text-base font-bold bg-clip-text text-transparent bg-gradient-to-r from-slate-900 to-slate-600 dark:from-white dark:to-slate-300 tracking-tight">
                         TreinaVaga<span className="text-primary-600 dark:text-primary-400">AI</span>

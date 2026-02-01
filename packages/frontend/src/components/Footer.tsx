@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { SparklesIcon } from '@heroicons/react/24/outline';
+
 
 const Footer: React.FC = () => {
     const currentYear = new Date().getFullYear();
@@ -30,9 +30,7 @@ const Footer: React.FC = () => {
                     {/* Brand Section - Wider */}
                     <div className="lg:col-span-2">
                         <Link to="/" className="inline-flex items-center gap-2.5 mb-6 group">
-                            <div className="p-2 bg-gradient-to-br from-primary-600 to-indigo-600 dark:from-primary-500 dark:to-indigo-500 rounded-xl shadow-lg shadow-primary-500/30 group-hover:scale-110 transition-transform duration-300">
-                                <SparklesIcon className="w-5 h-5 text-white" />
-                            </div>
+                            <img src="/logo.png" alt="TreinaVaga" className="h-16 w-16 object-contain group-hover:scale-110 transition-transform duration-300" />
                             <span className="text-2xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-slate-900 via-slate-700 to-slate-900 dark:from-white dark:via-slate-200 dark:to-white">
                                 TreinaVaga<span className="text-primary-600 dark:text-primary-400">AI</span>
                             </span>

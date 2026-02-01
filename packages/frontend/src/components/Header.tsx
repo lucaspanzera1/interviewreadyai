@@ -39,11 +39,7 @@ const Header: React.FC = () => {
           <div className="flex items-center gap-4">
             {/* Logo */}
             <div className="flex items-center gap-3 group cursor-pointer" onClick={() => navigate('/')}>
-              <div className="h-9 w-9 bg-primary-600 dark:bg-primary-500 rounded-xl flex items-center justify-center shadow-lg shadow-primary-500/30 group-hover:scale-110 transition-transform duration-200">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5 text-white">
-                  <path fillRule="evenodd" d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25ZM11.375 8.25a.75.75 0 0 1 1.5 0v1.5H14.25a.75.75 0 0 1 0 1.5H12.875v1.5a.75.75 0 0 1-1.5 0v-1.5H10.5a.75.75 0 0 1 0-1.5h.875v-1.5ZM9.75 12a.75.75 0 0 0-1.5 0 .75.75 0 0 0 1.5 0Zm6 0a.75.75 0 0 0-1.5 0 .75.75 0 0 0 1.5 0Z" clipRule="evenodd" />
-                </svg>
-              </div>
+              <img src="/logo.png" alt="TreinaVaga" className="h-11 w-11 object-contain group-hover:scale-110 transition-transform duration-200" />
               <h1 className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-slate-900 to-slate-600 dark:from-white dark:to-slate-300 tracking-tight">
                 TreinaVaga<span className="text-primary-600 dark:text-primary-400">AI</span>
               </h1>
