@@ -27,7 +27,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
       {/* Conteúdo principal - margem dinâmica baseada no estado do sidebar */}
       <main className={`min-h-screen transition-all duration-300 ${isCollapsed ? 'lg:ml-16' : 'lg:ml-64'}`}>
         <div className="flex flex-col min-h-screen">
-          <div className="flex-grow p-4 lg:p-8 min-h-screen">
+          <div className="flex-grow p-4 lg:p-8 pb-32 lg:pb-8 min-h-screen">
             {children || <Outlet />}
           </div>
           <Footer />

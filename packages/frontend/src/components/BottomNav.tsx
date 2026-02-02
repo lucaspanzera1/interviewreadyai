@@ -374,7 +374,7 @@ const Sidebar: React.FC = () => {
 
             {/* Mobile Bottom Nav */}
             <nav
-                className="lg:hidden fixed bottom-0 left-0 right-0 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 z-40 px-2 pb-1"
+                className="lg:hidden fixed bottom-0 left-0 right-0 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 z-40 px-2"
                 style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
             >
                 <div className="flex justify-around items-center h-16">
