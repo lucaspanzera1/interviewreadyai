@@ -395,6 +395,11 @@ class ApiClient {
     return res.data;
   }
 
+  async getPublicFilters() {
+    const res = await this.client.get('/quiz/public/filters');
+    return res.data;
+  }
+
   async getPublicQuizById(id: string) {
     const res = await this.client.get(`/quiz/public/${id}`);
     return res.data;

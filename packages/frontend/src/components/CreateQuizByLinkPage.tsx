@@ -25,7 +25,7 @@ const CreateQuizByLinkPage: React.FC = () => {
             {/* Header */}
             <div className="px-8 py-8 border-b border-subtle dark:border-slate-800 bg-white dark:bg-slate-900 sticky top-0 z-10">
                 <div className="max-w-4xl mx-auto">
-                    <h1 className="text-3xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-primary-600 to-indigo-600 dark:from-primary-400 dark:to-indigo-400">
+                    <h1 className="text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white">
                         Criar Quiz com IA
                     </h1>
                     <p className="mt-2 text-lg text-slate-600 dark:text-slate-400">

@@ -65,6 +65,12 @@ export class QuizController {
   }
 
   @Public()
+  @Get('public/filters')
+  async getPublicFilters() {
+    return this.quizService.getPublicFilters();
+  }
+
+  @Public()
   @Get('public/:id')
   async getPublicQuizById(@Param('id') id: string) {
     const quiz = await this.quizService.getPublicQuizById(id);

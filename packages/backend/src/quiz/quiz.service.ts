@@ -297,6 +297,12 @@ IMPORTANTE: Sempre formate código adequadamente usando as marcações especific
     };
   }
 
+  async getPublicFilters() {
+    const categories = await this.quizModel.distinct('categoria', { isActive: true, isFree: true }).exec();
+    const levels = await this.quizModel.distinct('nivel', { isActive: true, isFree: true }).exec();
+    return { categories, levels };
+  }
+
   async getQuizById(id: string) {
     return this.quizModel
       .findById(id)
@@ -533,8 +539,8 @@ IMPORTANTE: Sempre formate código adequadamente usando as marcações especific
       .exec();
 
     const totalAttempts = attempts.length;
-    const averageScore = totalAttempts > 0 
-      ? attempts.reduce((sum, attempt) => sum + attempt.score, 0) / totalAttempts 
+    const averageScore = totalAttempts > 0
+      ? attempts.reduce((sum, attempt) => sum + attempt.score, 0) / totalAttempts
       : 0;
 
     return {
