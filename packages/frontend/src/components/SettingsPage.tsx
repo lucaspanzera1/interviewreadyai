@@ -9,7 +9,8 @@ import {
     BellIcon,
     ShieldCheckIcon,
     TrashIcon,
-    ComputerDesktopIcon
+    ComputerDesktopIcon,
+    ClockIcon
 } from '@heroicons/react/24/outline';
 
 const SettingsPage: React.FC = () => {
@@ -21,6 +22,17 @@ const SettingsPage: React.FC = () => {
     const [emailNotifications, setEmailNotifications] = useState(true);
     const [marketingEmails, setMarketingEmails] = useState(false);
     const [securityAlerts, setSecurityAlerts] = useState(true);
+
+    // Quiz Settings
+    const [showTimer, setShowTimer] = useState(() => {
+        const stored = localStorage.getItem('settings_show_quiz_timer');
+        return stored !== null ? stored === 'true' : true;
+    });
+
+    const handleTimerChange = (checked: boolean) => {
+        setShowTimer(checked);
+        localStorage.setItem('settings_show_quiz_timer', String(checked));
+    };
 
     const handleThemeChange = (newTheme: 'light' | 'dark' | 'system') => {
         setTheme(newTheme);
@@ -121,6 +133,8 @@ const SettingsPage: React.FC = () => {
                                 <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600"></div>
                             </label>
                         </div>
+
+
                         <div className="flex items-center justify-between pt-4 border-t border-slate-100 dark:border-slate-800">
                             <div>
                                 <label className="text-sm font-medium text-slate-900 dark:text-white">Alertas de Segurança</label>
@@ -128,6 +142,36 @@ const SettingsPage: React.FC = () => {
                             </div>
                             <label className="relative inline-flex items-center cursor-pointer">
                                 <input type="checkbox" checked={securityAlerts} onChange={(e) => setSecurityAlerts(e.target.checked)} className="sr-only peer" />
+                                <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600"></div>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Quiz Settings */}
+                <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg shadow-sm">
+                    <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-800">
+                        <h2 className="text-base font-semibold text-slate-900 dark:text-white flex items-center gap-2">
+                            <ClockIcon className="w-5 h-5 text-purple-500" />
+                            Preferências de Quiz
+                        </h2>
+                        <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
+                            Personalize sua experiência durante a resolução de questões.
+                        </p>
+                    </div>
+                    <div className="p-6">
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <label className="text-sm font-medium text-slate-900 dark:text-white">Cronômetro em tempo real</label>
+                                <p className="text-xs text-slate-500 dark:text-slate-400">Exibir o tempo decorrido no canto da tela durante o quiz.</p>
+                            </div>
+                            <label className="relative inline-flex items-center cursor-pointer">
+                                <input
+                                    type="checkbox"
+                                    checked={showTimer}
+                                    onChange={(e) => handleTimerChange(e.target.checked)}
+                                    className="sr-only peer"
+                                />
                                 <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600"></div>
                             </label>
                         </div>

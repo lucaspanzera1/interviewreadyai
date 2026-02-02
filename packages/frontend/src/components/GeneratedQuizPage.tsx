@@ -6,6 +6,30 @@ import { CheckCircleIcon, XCircleIcon, ArrowLeftIcon, ArrowPathIcon } from '@her
 import { QuizQuestion, apiClient } from '../lib/api';
 import { useToast } from '../contexts/ToastContext';
 
+const QuizTimer: React.FC<{ startTime: number }> = ({ startTime }) => {
+  const [elapsed, setElapsed] = useState(0);
+
+  useEffect(() => {
+    // Initial update
+    setElapsed(Math.floor((Date.now() - startTime) / 1000));
+
+    const timer = setInterval(() => {
+      setElapsed(Math.floor((Date.now() - startTime) / 1000));
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [startTime]);
+
+  const mins = Math.floor(elapsed / 60).toString().padStart(2, '0');
+  const secs = (elapsed % 60).toString().padStart(2, '0');
+
+  return (
+    <div className="text-sm font-mono font-bold text-slate-700 dark:text-slate-300 bg-white/50 dark:bg-slate-800/50 px-3 py-1 rounded-full border border-slate-200 dark:border-slate-700 backdrop-blur-sm flex items-center gap-2 shadow-sm min-w-[80px] justify-center">
+      <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
+      {mins}:{secs}
+    </div>
+  );
+};
+
 const GeneratedQuizPage: React.FC = () => {
   const navigate = useNavigate();
   const { showToast } = useToast();
@@ -23,6 +47,14 @@ const GeneratedQuizPage: React.FC = () => {
   const [score, setScore] = useState(0);
   const [startTime, setStartTime] = useState<number>(Date.now());
   const [quizId, setQuizId] = useState<string>('');
+  const [showTimer, setShowTimer] = useState(true);
+
+  useEffect(() => {
+    const storedHelper = localStorage.getItem('settings_show_quiz_timer');
+    if (storedHelper !== null) {
+      setShowTimer(storedHelper === 'true');
+    }
+  }, []);
 
 
   useEffect(() => {
@@ -303,7 +335,9 @@ const GeneratedQuizPage: React.FC = () => {
               </div>
             </div>
 
-            <div className="w-10" /> {/* Spacer */}
+            <div className="w-24 flex justify-end">
+              {showTimer ? <QuizTimer startTime={startTime} /> : <div className="w-10" />}
+            </div>
           </div>
 
           {/* Progress Bar */}
