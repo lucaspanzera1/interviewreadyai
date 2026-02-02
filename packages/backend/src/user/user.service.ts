@@ -293,9 +293,9 @@ export class UserService {
     user.dailyFreeQuizzesUsed += 1;
     user.totalFreeQuizzesCompleted += 1;
 
-    // Verificar se ganhou recompensa (a cada 2 quizzes)
-    const newMilestone = Math.floor(user.totalFreeQuizzesCompleted / 2);
-    const lastMilestone = Math.floor(user.lastTokenRewardMilestone / 2);
+    // Verificar se ganhou recompensa (a cada 5 quizzes)
+    const newMilestone = Math.floor(user.totalFreeQuizzesCompleted / 5);
+    const lastMilestone = Math.floor(user.lastTokenRewardMilestone / 5);
 
     let tokenReward = false;
     if (newMilestone > lastMilestone) {

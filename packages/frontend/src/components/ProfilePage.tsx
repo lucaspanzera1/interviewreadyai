@@ -660,12 +660,12 @@ const ProfilePage: React.FC = () => {
                     <div className="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-2 mb-2">
                       <div
                         className="bg-primary-500 h-2 rounded-full transition-all duration-300"
-                        style={{ width: `${((user?.totalFreeQuizzesCompleted || 0) % 2) * 50}%` }}
+                        style={{ width: `${((user?.totalFreeQuizzesCompleted || 0) % 5) * 20}%` }}
                       ></div>
                     </div>
                     <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
-                      <span>Próximo token em {2 - ((user?.totalFreeQuizzesCompleted || 0) % 2)} quizzes</span>
-                      <span>{(user?.totalFreeQuizzesCompleted || 0) % 2}/2</span>
+                      <span>Próximo token em {5 - ((user?.totalFreeQuizzesCompleted || 0) % 5)} quizzes</span>
+                      <span>{(user?.totalFreeQuizzesCompleted || 0) % 5}/5</span>
                     </div>
                   </div>
 
