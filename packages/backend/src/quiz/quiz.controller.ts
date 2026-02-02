@@ -18,9 +18,9 @@ export class QuizController {
   @UseGuards(JwtAuthGuard)
   async generateQuiz(
     @Body() dto: GenerateQuizDto,
-    @CurrentUser() user: any, // JWT payload, not UserDocument
+    @CurrentUser() user: UserDocument,
   ): Promise<GeneratedQuiz> {
-    return this.quizService.generateQuiz(dto, user.userId);
+    return this.quizService.generateQuiz(dto, user._id.toString());
   }
 
   @Post(':id/attempt')
@@ -28,11 +28,11 @@ export class QuizController {
   async recordAttempt(
     @Param('id') quizId: string,
     @Body() body: { selectedAnswers: number[]; score: number; totalQuestions: number; timeSpent?: number },
-    @CurrentUser() user: any, // JWT payload, not UserDocument
+    @CurrentUser() user: UserDocument,
   ) {
     return this.quizService.recordQuizAttempt(
       quizId,
-      user.userId,
+      user._id.toString(),
       body.selectedAnswers,
       body.score,
       body.totalQuestions,
@@ -42,8 +42,8 @@ export class QuizController {
 
   @Post(':id/access')
   @UseGuards(JwtAuthGuard)
-  async recordAccess(@Param('id') quizId: string, @CurrentUser() user: any) {
-    return this.quizService.incrementQuizAccess(quizId, user.userId);
+  async recordAccess(@Param('id') quizId: string, @CurrentUser() user: UserDocument) {
+    return this.quizService.incrementQuizAccess(quizId, user._id.toString());
   }
 
   @Public()
@@ -82,8 +82,8 @@ export class QuizController {
 
   @Get(':id/play')
   @UseGuards(JwtAuthGuard)
-  async getQuizForPlaying(@Param('id') id: string, @CurrentUser() user: any) {
-    return this.quizService.getQuizForPlaying(id, user.userId);
+  async getQuizForPlaying(@Param('id') id: string, @CurrentUser() user: UserDocument) {
+    return this.quizService.getQuizForPlaying(id, user._id.toString());
   }
 
   @Get('my-attempts')
@@ -91,23 +91,23 @@ export class QuizController {
   async getUserAttempts(
     @Query('page') page: string = '1',
     @Query('limit') limit: string = '10',
-    @CurrentUser() user: any,
+    @CurrentUser() user: UserDocument,
   ) {
-    return this.quizService.getUserAttempts(user.userId, parseInt(page), parseInt(limit));
+    return this.quizService.getUserAttempts(user._id.toString(), parseInt(page), parseInt(limit));
   }
 
   @Get('my-attempts/:attemptId')
   @UseGuards(JwtAuthGuard)
   async getUserAttemptDetails(
     @Param('attemptId') attemptId: string,
-    @CurrentUser() user: any,
+    @CurrentUser() user: UserDocument,
   ) {
-    return this.quizService.getUserAttemptDetails(attemptId, user.userId);
+    return this.quizService.getUserAttemptDetails(attemptId, user._id.toString());
   }
 
   @Get('my-stats')
   @UseGuards(JwtAuthGuard)
-  async getUserStats(@CurrentUser() user: any) {
-    return this.quizService.getUserStats(user.userId);
+  async getUserStats(@CurrentUser() user: UserDocument) {
+    return this.quizService.getUserStats(user._id.toString());
   }
 }

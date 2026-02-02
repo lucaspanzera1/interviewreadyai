@@ -24,6 +24,10 @@ export class QuizService {
       throw new HttpException('GROQ_API_KEY not configured', HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
+    if (!userId) {
+      throw new HttpException('User ID is required', HttpStatus.BAD_REQUEST);
+    }
+
     // Read the prompt template
     const promptTemplate = await this.getPromptTemplate();
 
@@ -36,28 +40,42 @@ export class QuizService {
     // Parse the JSON response
     try {
       // Remove markdown code blocks if present
-      let content = response;
-      if (content.startsWith('```json')) {
+      let content = response.trim();
+      
+      // Try to find JSON content between ```json and ``` or just between ```
+      const jsonCodeBlockMatch = content.match(/```(?:json)?\s*(\{[\s\S]*\})\s*```/);
+      if (jsonCodeBlockMatch) {
+        content = jsonCodeBlockMatch[1];
+      } else if (content.startsWith('```json')) {
         content = content.replace(/^```json\s*/, '').replace(/\s*```$/, '');
       } else if (content.startsWith('```')) {
         content = content.replace(/^```\s*/, '').replace(/\s*```$/, '');
       }
+      
+      // Try to extract JSON if there's text before/after
+      const jsonMatch = content.match(/\{[\s\S]*\}/);
+      if (jsonMatch && !content.trim().startsWith('{')) {
+        content = jsonMatch[0];
+      }
+      
+      content = content.trim();
       const generatedQuiz: GeneratedQuiz = JSON.parse(content);
 
-      // Save quiz to database
+      // Save quiz to database - Convert userId string to ObjectId
+      const { Types } = require('mongoose');
+      const userObjectId = new Types.ObjectId(userId);
+      
       const savedQuiz = await this.quizModel.create({
         ...dto,
         questions: generatedQuiz.questions,
-        createdBy: userId,
+        createdBy: userObjectId,
       });
-
+      
       return {
         ...generatedQuiz,
         quizId: savedQuiz._id.toString(),
       };
     } catch (error) {
-      console.error('JSON Parse Error:', error);
-      console.error('Response content:', response);
       throw new HttpException('Failed to parse quiz response', HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
@@ -68,7 +86,6 @@ export class QuizService {
     const promptPath = path.join(__dirname, '../../../../prompt/free-quiz.md');
     try {
       const template = fs.readFileSync(promptPath, 'utf-8');
-      console.log('Prompt template loaded, length:', template.length);
       return template;
     } catch (error) {
       // Fallback to hardcoded template
@@ -175,7 +192,7 @@ Gere agora {quantidade_questoes} questões de nível {nivel} sobre "{titulo}" na
   private async callGroqAPI(prompt: string, apiKey: string): Promise<string> {
     const url = 'https://api.groq.com/openai/v1/chat/completions';
     const payload = {
-      model: 'openai/gpt-oss-120b', // Using Mixtral 8x7B model
+      model: 'llama-3.3-70b-versatile', // Using Llama 3.3 70B model
       messages: [
         {
           role: 'system',
@@ -203,7 +220,10 @@ Para questões sobre código:
 - Use formatação adequada para destacar código inline com \`código\`
 - Garanta que as alternativas também sigam as convenções de formatação
 
-IMPORTANTE: Sempre formate código adequadamente usando as marcações especificadas.`,
+IMPORTANTE: 
+1. Sempre formate código adequadamente usando as marcações especificadas.
+2. Retorne APENAS JSON válido, sem texto adicional antes ou depois.
+3. NÃO inclua explicações, comentários ou texto fora do JSON.`,
         },
         {
           role: 'user',
@@ -212,9 +232,6 @@ IMPORTANTE: Sempre formate código adequadamente usando as marcações especific
       ],
       temperature: 0.7,
     };
-
-    console.log('Calling Groq API with model:', payload.model);
-    console.log('Prompt length:', prompt.length);
 
     try {
       const response = await firstValueFrom(
@@ -225,7 +242,6 @@ IMPORTANTE: Sempre formate código adequadamente usando as marcações especific
           },
         }),
       );
-      console.log('Groq API response received');
       return response.data.choices[0].message.content;
     } catch (error) {
       console.error('Groq API Error:', error.response?.data || error.message);
