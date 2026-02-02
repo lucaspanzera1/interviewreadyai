@@ -332,19 +332,7 @@ class ApiClient {
     return res.data.tokens || 0;
   }
 
-  async setUserTokenBalance(tokens: number): Promise<void> {
-    await this.client.put('/users/me/tokens', { tokens });
-  }
 
-  async addTokensToUser(amount: number): Promise<{ message: string }> {
-    const res = await this.client.post('/users/me/tokens/add', { amount });
-    return res.data;
-  }
-
-  async removeTokensFromUser(amount: number): Promise<{ message: string }> {
-    const res = await this.client.post('/users/me/tokens/remove', { amount });
-    return res.data;
-  }
 
   // Address methods
   async getAddresses(): Promise<any[]> {

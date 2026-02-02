@@ -12,8 +12,7 @@ import {
 const TokensPage: React.FC = () => {
   const { showToast } = useToast();
   const { user, refreshUser, isLoading } = useAuth();
-  const [editing, setEditing] = useState(false);
-  const [newBalance, setNewBalance] = useState<string>('');
+
 
   const [packages, setPackages] = useState<TokenPackage[]>([]);
   const [loadingPackages, setLoadingPackages] = useState(true);
@@ -50,42 +49,7 @@ const TokensPage: React.FC = () => {
   };
 
   // Admin functions
-  const handleEditBalance = () => {
-    setNewBalance(user?.tokens?.toString() || '0');
-    setEditing(true);
-  };
 
-  const handleSaveBalance = async () => {
-    const amount = parseInt(newBalance);
-    if (isNaN(amount) || amount < 0) {
-      showToast('Valor inválido', 'error');
-      return;
-    }
-
-    try {
-      await apiClient.setUserTokenBalance(amount);
-      await refreshUser();
-      setEditing(false);
-      showToast('Saldo de tokens atualizado com sucesso', 'success');
-    } catch (error) {
-      showToast('Erro ao atualizar saldo de tokens', 'error');
-    }
-  };
-
-  const handleUpdateTokens = async (amount: number, type: 'add' | 'remove') => {
-    try {
-      let result;
-      if (type === 'add') {
-        result = await apiClient.addTokensToUser(amount);
-      } else {
-        result = await apiClient.removeTokensFromUser(amount);
-      }
-      showToast(result.message, 'success');
-      await refreshUser();
-    } catch (error) {
-      showToast(`Erro ao ${type === 'add' ? 'adicionar' : 'remover'} tokens`, 'error');
-    }
-  };
 
   if (isLoading) {
     return <Loading />;
@@ -109,9 +73,7 @@ const TokensPage: React.FC = () => {
               <TicketIcon className="w-5 h-5 text-amber-500" />
             </div>
           </div>
-          <button className="h-12 px-8 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-2xl font-bold text-sm hover:scale-105 active:scale-95 transition-all shadow-lg shadow-slate-200 dark:shadow-none">
-            Resgatar
-          </button>
+
         </div>
       </div>
 
@@ -155,6 +117,22 @@ const TokensPage: React.FC = () => {
 
         {loadingPackages ? (
           <div className="flex justify-center py-12"><Loading /></div>
+        ) : packages.length === 0 ? (
+          <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700/50 rounded-xl p-4 mb-6 flex items-start gap-4">
+            <div className="p-2 bg-amber-100 dark:bg-amber-900/30 rounded-lg text-amber-600 dark:text-amber-400 shrink-0">
+              <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+              </svg>
+            </div>
+            <div>
+              <h3 className="text-lg font-bold text-amber-800 dark:text-amber-200">
+                Em Desenvolvimento
+              </h3>
+              <p className="text-amber-700 dark:text-amber-300 mt-1">
+                Estamos na versão beta, essa feature vai ser liberada no lançamento da 1.0.0.
+              </p>
+            </div>
+          </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {packages.map((pkg) => {
@@ -231,35 +209,7 @@ const TokensPage: React.FC = () => {
       </div>
 
       {/* Admin Section - Ultra Hidden style */}
-      {user?.role === 'admin' && (
-        <div className="pt-20 px-4">
-          <div className="p-4 rounded-2xl border border-dashed border-slate-200 dark:border-slate-800 flex items-center justify-between">
-            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em]">Developer Console</span>
-            <div className="flex gap-4">
-              {!editing ? (
-                <button onClick={handleEditBalance} className="text-[10px] font-bold text-slate-400 hover:text-slate-900 transition-colors underline decoration-dotted">
-                  EDIT BALANCE
-                </button>
-              ) : (
-                <div className="flex items-center gap-2">
-                  <input
-                    type="number"
-                    value={newBalance}
-                    onChange={(e) => setNewBalance(e.target.value)}
-                    className="w-20 bg-transparent text-[10px] font-bold border-b border-slate-900 focus:outline-none"
-                  />
-                  <button onClick={handleSaveBalance} className="text-[10px] font-bold text-green-600">SAVE</button>
-                  <button onClick={() => setEditing(false)} className="text-[10px] font-bold text-red-600">ESC</button>
-                </div>
-              )}
-              <div className="flex gap-2">
-                <button onClick={() => handleUpdateTokens(50, 'add')} className="text-[10px] font-bold text-slate-400 hover:text-green-600">+50</button>
-                <button onClick={() => handleUpdateTokens(50, 'remove')} className="text-[10px] font-bold text-slate-400 hover:text-red-600">-50</button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+
     </div>
   );
 };

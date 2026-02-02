@@ -5,11 +5,11 @@ import { UserDto, UpdateUserDto, ProfileDto, CompleteOnboardingDto } from './dto
 import { CurrentUser, Public, Roles } from '../auth/decorators';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { UserRole } from './schemas/user.schema';
-import { 
-  UnauthorizedErrorDto, 
-  NotFoundErrorDto, 
+import {
+  UnauthorizedErrorDto,
+  NotFoundErrorDto,
   ValidationErrorDto,
-  ForbiddenErrorDto 
+  ForbiddenErrorDto
 } from '../common/dto';
 
 /**
@@ -22,7 +22,7 @@ import {
 export class UserController {
   constructor(
     private readonly userService: UserService,
-  ) {}
+  ) { }
 
   /**
    * Helper para extrair o ID do usuário do objeto retornado pelo JWT strategy
@@ -37,22 +37,22 @@ export class UserController {
    */
   @Get()
   @Roles(UserRole.ADMIN)
-  @ApiOperation({ 
+  @ApiOperation({
     summary: 'Listar todos os usuários',
     description: 'Retorna uma lista com todos os usuários do sistema (apenas admins)'
   })
-  @ApiResponse({ 
-    status: 200, 
+  @ApiResponse({
+    status: 200,
     description: 'Lista de usuários retornada com sucesso',
     type: [UserDto]
   })
-  @ApiResponse({ 
-    status: 401, 
+  @ApiResponse({
+    status: 401,
     description: 'Token de acesso inválido ou expirado',
     type: UnauthorizedErrorDto
   })
-  @ApiResponse({ 
-    status: 403, 
+  @ApiResponse({
+    status: 403,
     description: 'Acesso negado - requer role admin',
     type: ForbiddenErrorDto
   })
@@ -68,18 +68,18 @@ export class UserController {
    */
   @Get('profile')
   @ApiOperation({ summary: 'Obter perfil do usuário autenticado' })
-  @ApiResponse({ 
-    status: 200, 
+  @ApiResponse({
+    status: 200,
     description: 'Perfil retornado com sucesso',
     type: UserDto
   })
-  @ApiResponse({ 
-    status: 401, 
+  @ApiResponse({
+    status: 401,
     description: 'Token de acesso inválido ou expirado',
     type: UnauthorizedErrorDto
   })
-  @ApiResponse({ 
-    status: 404, 
+  @ApiResponse({
+    status: 404,
     description: 'Usuário não encontrado',
     type: NotFoundErrorDto
   })
@@ -97,8 +97,8 @@ export class UserController {
    */
   @Put('profile')
   @ApiOperation({ summary: 'Atualizar perfil do usuário autenticado' })
-  @ApiResponse({ 
-    status: 200, 
+  @ApiResponse({
+    status: 200,
     description: 'Perfil atualizado com sucesso',
     schema: {
       type: 'object',
@@ -109,18 +109,18 @@ export class UserController {
       }
     }
   })
-  @ApiResponse({ 
-    status: 400, 
+  @ApiResponse({
+    status: 400,
     description: 'Dados de entrada inválidos',
     type: ValidationErrorDto
   })
-  @ApiResponse({ 
-    status: 401, 
+  @ApiResponse({
+    status: 401,
     description: 'Token de acesso inválido ou expirado',
     type: UnauthorizedErrorDto
   })
-  @ApiResponse({ 
-    status: 404, 
+  @ApiResponse({
+    status: 404,
     description: 'Usuário não encontrado',
     type: NotFoundErrorDto
   })
@@ -153,31 +153,7 @@ export class UserController {
     return { tokens };
   }
 
-  /**
-   * Define quantidade de tokens do usuário atual
-   * @param body Dados com quantidade de tokens
-   */
-  @Put('me/tokens')
-  @ApiOperation({
-    summary: 'Definir quantidade de tokens do usuário',
-    description: 'Define a quantidade de tokens do usuário atual'
-  })
-  @ApiResponse({
-    status: 200,
-    description: 'Quantidade de tokens definida com sucesso',
-    schema: {
-      type: 'object',
-      properties: {
-        success: { type: 'boolean', example: true },
-        message: { type: 'string', example: 'Quantidade de tokens definida com sucesso!' }
-      }
-    }
-  })
-  async setTokens(@CurrentUser() user: any, @Body() body: { tokens: number }): Promise<{ success: boolean; message: string }> {
-    const userId = this.getUserId(user);
-    await this.userService.setUserTokens(userId, body.tokens);
-    return { success: true, message: "Quantidade de tokens definida com sucesso!" };
-  }
+
 
   /**
    * Busca status do limite diário de quizzes gratuitos
@@ -260,57 +236,9 @@ export class UserController {
     return this.userService.getRewardHistory(userId);
   }
 
-  /**
-   * Adiciona tokens ao usuário atual
-   * @param body Dados com quantidade a adicionar
-   */
-  @Post('me/tokens/add')
-  @ApiOperation({
-    summary: 'Adicionar tokens ao usuário',
-    description: 'Adiciona tokens ao saldo do usuário atual'
-  })
-  @ApiResponse({
-    status: 200,
-    description: 'Tokens adicionados com sucesso',
-    schema: {
-      type: 'object',
-      properties: {
-        success: { type: 'boolean', example: true },
-        message: { type: 'string', example: '10 tokens adicionados com sucesso!' }
-      }
-    }
-  })
-  async addTokens(@CurrentUser() user: any, @Body() body: { amount: number }): Promise<{ success: boolean; message: string }> {
-    const userId = this.getUserId(user);
-    await this.userService.addTokensToUser(userId, body.amount);
-    return { success: true, message: `${body.amount} tokens adicionados com sucesso!` };
-  }
 
-  /**
-   * Remove tokens do usuário atual
-   * @param body Dados com quantidade a remover
-   */
-  @Post('me/tokens/remove')
-  @ApiOperation({
-    summary: 'Remover tokens do usuário',
-    description: 'Remove tokens do saldo do usuário atual'
-  })
-  @ApiResponse({
-    status: 200,
-    description: 'Tokens removidos com sucesso',
-    schema: {
-      type: 'object',
-      properties: {
-        success: { type: 'boolean', example: true },
-        message: { type: 'string', example: '10 tokens removidos com sucesso!' }
-      }
-    }
-  })
-  async removeTokens(@CurrentUser() user: any, @Body() body: { amount: number }): Promise<{ success: boolean; message: string }> {
-    const userId = this.getUserId(user);
-    await this.userService.removeTokensFromUser(userId, body.amount);
-    return { success: true, message: `${body.amount} tokens removidos com sucesso!` };
-  }
+
+
 
   /**
    * Busca perfil do usuário atual
@@ -404,7 +332,8 @@ export class UserController {
   async completeOnboarding(@CurrentUser() user: any, @Body() profileData: CompleteOnboardingDto): Promise<{ success: boolean; data: any; message: string }> {
     const userId = this.getUserId(user);
     const updatedUser = await this.userService.completeOnboarding(userId, profileData);
-    return {      success: true,      data: {
+    return {
+      success: true, data: {
         hasCompletedOnboarding: updatedUser.hasCompletedOnboarding,
         careerTime: updatedUser.careerTime,
         techArea: updatedUser.techArea,
