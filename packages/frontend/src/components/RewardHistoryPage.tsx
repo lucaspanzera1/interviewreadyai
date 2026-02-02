@@ -25,6 +25,10 @@ const RewardHistoryPage: React.FC = () => {
   const navigate = useNavigate();
   const [rewards, setRewards] = useState<Reward[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [stats, setStats] = useState({
+    totalAttempts: 0,
+    averageScore: 0
+  });
 
   useEffect(() => {
     const loadRewardHistory = async () => {
@@ -39,8 +43,23 @@ const RewardHistoryPage: React.FC = () => {
       }
     };
 
+    const loadStats = async () => {
+      try {
+        const data = await apiClient.getUserStats();
+        if (data) {
+          setStats({
+            totalAttempts: data.totalAttempts || 0,
+            averageScore: data.averageScore || 0
+          });
+        }
+      } catch (error) {
+        console.error('Erro ao carregar estatísticas:', error);
+      }
+    };
+
     if (user) {
       loadRewardHistory();
+      loadStats();
     }
   }, [user, showToast]);
 
@@ -145,6 +164,29 @@ const RewardHistoryPage: React.FC = () => {
                 {rewards.filter(r => r.type === 'token').reduce((sum, r) => sum + r.amount, 0)}
               </p>
               <p className="text-sm text-slate-500 dark:text-slate-400">Tokens Ganhos</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Progress to Next Reward */}
+        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg shadow-sm p-6">
+          <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">Progresso para Próxima Recompensa</h3>
+          <div className="space-y-4">
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-slate-600 dark:text-slate-400">Quizzes feitos</span>
+              <span className="font-medium text-slate-900 dark:text-white">
+                {stats.totalAttempts}
+              </span>
+            </div>
+            <div className="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-3">
+              <div
+                className="bg-primary-500 h-3 rounded-full transition-all duration-300"
+                style={{ width: `${(stats.totalAttempts % 5) * 20}%` }}
+              ></div>
+            </div>
+            <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
+              <span>Próximo token em {5 - (stats.totalAttempts % 5)} quizzes</span>
+              <span>{stats.totalAttempts % 5}/5</span>
             </div>
           </div>
         </div>
