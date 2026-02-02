@@ -34,7 +34,7 @@ export const ToastProvider: React.FC<ToastProviderProps> = ({ children }) => {
       duration: 5000,
     };
 
-    setToasts(prev => [...prev, newToast]);
+    setToasts([newToast]);
     return id;
   }, []);
 
