@@ -2,20 +2,26 @@ import React, { useEffect, useState } from 'react';
 import PageTitle from './PageTitle';
 import { apiClient, Role } from '../lib/api';
 import { useToast } from '../contexts/ToastContext';
-import Loading from './Loading';
+import {
+  TrashIcon,
+  PlusIcon,
+  XMarkIcon,
+  PencilSquareIcon,
+  MagnifyingGlassIcon,
+} from '@heroicons/react/24/outline';
 
 const AdminRolesPage: React.FC = () => {
   const [roles, setRoles] = useState<Role[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [showCreateForm, setShowCreateForm] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingRole, setEditingRole] = useState<Role | null>(null);
   const { showToast } = useToast();
 
   const [formData, setFormData] = useState({
     name: '',
     description: '',
-    color: '#3B82F6',
+    color: '#8a2be2', // Matching primary branding
   });
 
   useEffect(() => {
@@ -24,22 +30,25 @@ const AdminRolesPage: React.FC = () => {
 
   const fetchRoles = async () => {
     setLoading(true);
-    setError(null);
     try {
       const data = await apiClient.getRoles();
       setRoles(data);
     } catch (err: any) {
-      setError('Erro ao buscar roles.');
+      showToast('Erro ao buscar cargos.', 'error');
     } finally {
       setLoading(false);
     }
   };
 
   const handleCreate = async () => {
+    if (!formData.name) {
+      showToast('O nome do cargo é obrigatório.', 'error');
+      return;
+    }
     try {
       await apiClient.createRole(formData);
       showToast('Cargo criado com sucesso!', 'success');
-      setShowCreateForm(false);
+      setIsModalOpen(false);
       resetForm();
       fetchRoles();
     } catch (err: any) {
@@ -49,9 +58,14 @@ const AdminRolesPage: React.FC = () => {
 
   const handleUpdate = async () => {
     if (!editingRole) return;
+    if (!formData.name) {
+      showToast('O nome do cargo é obrigatório.', 'error');
+      return;
+    }
     try {
       await apiClient.updateRole(editingRole.id, formData);
       showToast('Cargo atualizado com sucesso!', 'success');
+      setIsModalOpen(false);
       setEditingRole(null);
       resetForm();
       fetchRoles();
@@ -75,8 +89,9 @@ const AdminRolesPage: React.FC = () => {
     setFormData({
       name: '',
       description: '',
-      color: '#3B82F6',
+      color: '#8a2be2',
     });
+    setEditingRole(null);
   };
 
   const startEdit = (role: Role) => {
@@ -86,151 +101,229 @@ const AdminRolesPage: React.FC = () => {
       description: role.description || '',
       color: role.color,
     });
+    setIsModalOpen(true);
   };
 
-  const cancelEdit = () => {
-    setEditingRole(null);
-    setShowCreateForm(false);
-    resetForm();
-  };
+  const filteredRoles = roles.filter(role =>
+    role.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    (role.description && role.description.toLowerCase().includes(searchQuery.toLowerCase()))
+  );
+
+  if (loading && roles.length === 0) {
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary-600"></div>
+      </div>
+    );
+  }
 
   return (
-    <>
-      <PageTitle title="Cargos - TreinaVagaAI" />
-      <div className="space-y-6">
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg shadow-sm">
-          <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center">
-            <div>
-              <h1 className="text-lg font-semibold text-slate-900 dark:text-white">Cargos</h1>
-              <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
-                Gerencie os cargos disponíveis no sistema
-              </p>
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-900 pb-20 animate-fade-in">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+        {/* Header Section */}
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+          <div>
+            <PageTitle title="Gerenciar Cargos" />
+            <p className="text-slate-500 dark:text-slate-400 mt-1">
+              Administre os cargos e níveis de acesso disponíveis no sistema
+            </p>
+          </div>
+          <div className="flex items-center gap-3">
+            <div className="text-sm font-medium bg-white dark:bg-slate-800 px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm text-slate-600 dark:text-slate-300">
+              Total: <span className="text-primary-600 dark:text-primary-400 font-bold">{roles.length}</span> cargos
             </div>
             <button
-              onClick={() => setShowCreateForm(true)}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium"
+              onClick={() => { resetForm(); setIsModalOpen(true); }}
+              className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors flex items-center gap-2"
             >
-              Novo Cargo
+              <PlusIcon className="w-5 h-5" />
+              <span className="hidden sm:inline">Novo Cargo</span>
             </button>
           </div>
         </div>
 
-        {(showCreateForm || editingRole) && (
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg shadow-sm p-6">
-            <h2 className="text-lg font-semibold mb-4">
-              {editingRole ? 'Editar Cargo' : 'Criar Novo Cargo'}
-            </h2>
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">Nome</label>
-                <input
-                  type="text"
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className="mt-1 block w-full border border-slate-300 dark:border-slate-600 rounded-md px-3 py-2 bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">Descrição</label>
-                <textarea
-                  value={formData.description}
-                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  className="mt-1 block w-full border border-slate-300 dark:border-slate-600 rounded-md px-3 py-2 bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
-                  rows={3}
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">Cor</label>
-                <div className="flex items-center space-x-2">
-                  <input
-                    type="color"
-                    value={formData.color}
-                    onChange={(e) => setFormData({ ...formData, color: e.target.value })}
-                    className="w-12 h-10 border border-slate-300 dark:border-slate-600 rounded"
-                  />
-                  <input
-                    type="text"
-                    value={formData.color}
-                    onChange={(e) => setFormData({ ...formData, color: e.target.value })}
-                    className="flex-1 border border-slate-300 dark:border-slate-600 rounded-md px-3 py-2 bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-mono"
-                  />
-                </div>
-              </div>
-              <div className="flex space-x-2">
-                <button
-                  onClick={editingRole ? handleUpdate : handleCreate}
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium"
-                >
-                  {editingRole ? 'Atualizar' : 'Criar'}
-                </button>
-                <button
-                  onClick={cancelEdit}
-                  className="bg-slate-600 hover:bg-slate-700 text-white px-4 py-2 rounded-md text-sm font-medium"
-                >
-                  Cancelar
-                </button>
-              </div>
+        {/* Filters Toolbar */}
+        <div className="bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
+          <div className="relative w-full md:w-96 group">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <MagnifyingGlassIcon className="h-5 w-5 text-slate-400 group-focus-within:text-primary-500 transition-colors" />
             </div>
+            <input
+              type="text"
+              placeholder="Buscar por nome ou descrição..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="block w-full pl-10 pr-3 py-2.5 border border-slate-200 dark:border-slate-600 rounded-lg bg-slate-50 dark:bg-slate-900/50 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all"
+            />
           </div>
-        )}
+        </div>
 
-        {loading && <Loading />}
-
-        {error && (
-          <div className="bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-400 px-4 py-3 rounded-md text-sm">
-            {error}
-          </div>
-        )}
-
-        {!loading && !error && (
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg shadow-sm overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-slate-100 dark:divide-slate-800">
-                <thead className="bg-slate-50 dark:bg-slate-800/50 text-slate-500 dark:text-slate-400">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Nome</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Descrição</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Cor</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Ações</th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white dark:bg-slate-900 divide-y divide-slate-100 dark:divide-slate-800">
-                  {roles.map((role) => (
-                    <tr key={role.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-900 dark:text-white">{role.name}</td>
-                      <td className="px-6 py-4 text-sm text-slate-500 dark:text-slate-400">{role.description || '-'}</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm">
-                        <div className="flex items-center space-x-2">
-                          <div 
-                            className="w-4 h-4 rounded border"
-                            style={{ backgroundColor: role.color }}
-                          />
-                          <span className="font-mono text-xs">{role.color}</span>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
+        {/* Roles Table */}
+        <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-lg shadow-slate-200/50 dark:shadow-none overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-slate-200 dark:divide-slate-700/50">
+              <thead className="bg-slate-50 dark:bg-slate-900/50">
+                <tr>
+                  <th className="px-6 py-4 text-left text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                    Cargo
+                  </th>
+                  <th className="px-6 py-4 text-left text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                    Descrição
+                  </th>
+                  <th className="px-6 py-4 text-left text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                    Cor de Identificação
+                  </th>
+                  <th className="px-6 py-4 text-right text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                    Ações
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100 dark:divide-slate-700/50">
+                {filteredRoles.map((role) => (
+                  <tr key={role.id} className="hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors group">
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm font-bold text-slate-900 dark:text-white">
+                        {role.name}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="text-sm text-slate-500 dark:text-slate-400">
+                        {role.description || '-'}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="flex items-center gap-2">
+                        <div
+                          className="w-4 h-4 rounded-full border border-slate-200 dark:border-slate-600 shadow-sm"
+                          style={{ backgroundColor: role.color }}
+                        />
+                        <span className="font-mono text-xs text-slate-400">{role.color}</span>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-right">
+                      <div className="flex items-center justify-end gap-2">
                         <button
                           onClick={() => startEdit(role)}
-                          className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300"
+                          className="p-2 text-slate-400 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-lg transition-all"
+                          title="Editar"
                         >
-                          Editar
+                          <PencilSquareIcon className="w-5 h-5" />
                         </button>
                         <button
                           onClick={() => handleDelete(role.id)}
-                          className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300"
+                          className="p-2 text-slate-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-all"
+                          title="Desativar"
                         >
-                          Desativar
+                          <TrashIcon className="w-5 h-5" />
                         </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {filteredRoles.length === 0 && (
+            <div className="text-center py-20">
+              <div className="mx-auto h-12 w-12 text-slate-400 bg-slate-100 dark:bg-slate-700 rounded-full flex items-center justify-center mb-4">
+                <MagnifyingGlassIcon className="h-6 w-6" />
+              </div>
+              <h3 className="text-lg font-medium text-slate-900 dark:text-white">
+                Nenhum cargo encontrado
+              </h3>
+              <p className="mt-1 text-slate-500 dark:text-slate-400">
+                Tente ajustar sua busca ou crie um novo cargo.
+              </p>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Create/Edit Modal */}
+      {isModalOpen && (
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fade-in">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 w-full max-w-md shadow-2xl border border-slate-200 dark:border-slate-800 transform animate-slide-in">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl font-bold text-slate-900 dark:text-white">
+                {editingRole ? 'Editar Cargo' : 'Criar Novo Cargo'}
+              </h2>
+              <button
+                onClick={() => setIsModalOpen(false)}
+                className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 p-1 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg"
+              >
+                <XMarkIcon className="w-6 h-6" />
+              </button>
+            </div>
+
+            <div className="space-y-5">
+              <div>
+                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
+                  Nome do Cargo *
+                </label>
+                <input
+                  type="text"
+                  value={formData.name}
+                  onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+                  className="w-full px-4 py-2.5 border border-slate-300 dark:border-slate-600 rounded-xl bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-primary-500"
+                  placeholder="Ex: Premium, Master, Admin"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
+                  Descrição
+                </label>
+                <textarea
+                  value={formData.description}
+                  onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+                  className="w-full px-4 py-2.5 border border-slate-300 dark:border-slate-600 rounded-xl bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-primary-500"
+                  rows={3}
+                  placeholder="Uma breve descrição sobre este cargo"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
+                  Cor de Destaque
+                </label>
+                <div className="flex items-center gap-4">
+                  <div className="relative">
+                    <input
+                      type="color"
+                      value={formData.color}
+                      onChange={(e) => setFormData(prev => ({ ...prev, color: e.target.value }))}
+                      className="w-12 h-12 rounded-xl cursor-pointer border-0 p-0 overflow-hidden"
+                    />
+                  </div>
+                  <input
+                    type="text"
+                    value={formData.color}
+                    onChange={(e) => setFormData(prev => ({ ...prev, color: e.target.value }))}
+                    className="flex-1 px-4 py-2.5 font-mono text-sm border border-slate-300 dark:border-slate-600 rounded-xl bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="flex gap-3 mt-8">
+              <button
+                onClick={() => setIsModalOpen(false)}
+                className="flex-1 px-4 py-2.5 border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors font-medium"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={editingRole ? handleUpdate : handleCreate}
+                className="flex-1 px-4 py-2.5 bg-primary-600 text-white rounded-xl hover:bg-primary-700 shadow-lg shadow-primary-500/30 transition-all font-medium"
+              >
+                {editingRole ? 'Salvar Alterações' : 'Criar Cargo'}
+              </button>
             </div>
           </div>
-        )}
-      </div>
-    </>
+        </div>
+      )}
+    </div>
   );
 };
 

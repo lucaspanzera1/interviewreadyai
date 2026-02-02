@@ -14,7 +14,8 @@ import {
     TicketIcon,
     PlusCircleIcon,
     AcademicCapIcon,
-    TrophyIcon
+    TrophyIcon,
+    ShieldCheckIcon
 } from '@heroicons/react/24/outline';
 import {
     HomeIcon as HomeIconSolid,
@@ -23,7 +24,8 @@ import {
     TicketIcon as TicketIconSolid,
     AcademicCapIcon as AcademicCapIconSolid,
     PlusCircleIcon as PlusCircleIconSolid,
-    TrophyIcon as TrophyIconSolid
+    TrophyIcon as TrophyIconSolid,
+    ShieldCheckIcon as ShieldCheckIconSolid
 } from '@heroicons/react/24/solid';
 import { Users as UsersIconLucide, FileQuestion, Gift } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
@@ -67,7 +69,7 @@ const Sidebar: React.FC = () => {
     const adminNavItems = [
         { name: 'Usuários', path: '/users', icon: UsersIconLucide, activeIcon: UsersIconLucide },
         { name: 'Quizzes', path: '/admin/quizzes', icon: FileQuestion, activeIcon: FileQuestion },
-        { name: 'Cargos', path: '/roles', icon: Gift, activeIcon: Gift },
+        { name: 'Cargos', path: '/roles', icon: ShieldCheckIcon, activeIcon: ShieldCheckIconSolid },
         { name: 'Pacotes de Tokens', path: '/token-packages', icon: Gift, activeIcon: Gift },
     ];
 
