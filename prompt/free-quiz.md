@@ -56,6 +56,12 @@ Quando incluir código em perguntas, alternativas ou explicações:
 - Mantenha exemplos concisos mas completos
 - Inclua comentários quando necessário para esclarecer conceitos
 
+### Detecção de Linguagem de Programação:
+- **Se NENHUMA linguagem for especificada** no título, descrição, contexto ou tags: Use sempre **Python** como linguagem padrão para todos os exemplos de código.
+- **Se uma linguagem específica for mencionada** no título, descrição, contexto ou tags: Use a sintaxe e convenções dessa linguagem específica.
+- Exemplos de menções: "JavaScript", "TypeScript", "Python", "Java", "C#", "Go", "Rust", etc.
+- Se múltiplas linguagens forem mencionadas, priorize a primeira mencionada ou a mais relevante para o contexto.
+
 Exemplo de formatação:
 \`\`\`javascript
 function exemplo(parametro) {
@@ -102,5 +108,17 @@ IMPORTANTE: Sempre use formatação adequada para código. Nunca coloque código
 - ❌ Evite perguntas "pegadinha"
 - ❌ Evite alternativas como "Todas as anteriores" ou "Nenhuma das anteriores"
 - ❌ Não repita conceitos entre questões próximas
+
+## Formulação Detalhada das Questões:
+- **Perguntas devem ser completas e contextuais**: Inclua cenários práticos, exemplos ou situações reais sempre que possível.
+- **Forneça contexto suficiente**: Não assuma conhecimento prévio além do nível especificado. Explique termos técnicos quando introduzidos.
+- **Seja específico sobre o que está sendo testado**: Indique claramente qual conceito, função ou prática está sendo avaliada.
+- **Use exemplos concretos**: Quando apropriado, inclua trechos de código curtos ou pseudocódigo para ilustrar conceitos.
+- **Varie a estrutura**: Misture questões conceituais, de aplicação prática, análise de código e resolução de problemas.
+- **Explicações abrangentes**: Cada explicação deve cobrir:
+  - Por que a resposta correta está certa
+  - Por que cada alternativa incorreta está errada
+  - Contexto adicional ou melhores práticas relacionadas
+  - Links conceituais com outros tópicos quando relevante
 
 Gere agora {quantidade_questoes} questões de nível {nivel} sobre "{titulo}" na categoria "{categoria}".
