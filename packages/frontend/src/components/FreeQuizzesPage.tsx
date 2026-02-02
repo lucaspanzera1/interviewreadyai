@@ -171,7 +171,6 @@ const FreeQuizzesPage: React.FC = () => {
             navigate('/quiz/generated');
         } catch (error: any) {
             console.error('Erro ao iniciar quiz público:', error);
-            const statusCode = error.response?.status || error.statusCode || error.status;
             const message = error.response?.data?.message || 'Erro ao iniciar o quiz.';
             showToast(message, 'error');
         } finally {

@@ -25,7 +25,7 @@ import {
     PlusCircleIcon as PlusCircleIconSolid,
     TrophyIcon as TrophyIconSolid
 } from '@heroicons/react/24/solid';
-import { Users as UsersIconLucide, FileQuestion } from 'lucide-react';
+import { Users as UsersIconLucide, FileQuestion, Gift } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useSidebar } from '../contexts/SidebarContext';
 import { useTheme } from '../contexts/ThemeContext';
@@ -67,6 +67,8 @@ const Sidebar: React.FC = () => {
     const adminNavItems = [
         { name: 'Usuários', path: '/users', icon: UsersIconLucide, activeIcon: UsersIconLucide },
         { name: 'Quizzes', path: '/admin/quizzes', icon: FileQuestion, activeIcon: FileQuestion },
+        { name: 'Cargos', path: '/roles', icon: Gift, activeIcon: Gift },
+        { name: 'Pacotes de Tokens', path: '/token-packages', icon: Gift, activeIcon: Gift },
     ];
 
     const handleNavClick = (path: string) => {

@@ -102,6 +102,16 @@ export class User {
 
 export const UserSchema = SchemaFactory.createForClass(User);
 
+// Transform toJSON to include id and exclude _id and __v
+UserSchema.set('toJSON', {
+  virtuals: true,
+  transform: (doc, ret) => {
+    (ret as any).id = ret._id.toString();
+    delete ret._id;
+    delete ret.__v;
+  }
+});
+
 // Índices para buscas frequentes
 UserSchema.index({ googleId: 1 });
 UserSchema.index({ email: 1 });

@@ -6,6 +6,45 @@ export enum UserRole {
   CLIENT = 'client'
 }
 
+export interface Role {
+  id: string;
+  name: string;
+  description?: string;
+  color: string;
+  active: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface TokenPackage {
+  id: string;
+  name: string;
+  description?: string;
+  tokenAmount: number;
+  role: Role;
+  features: string[];
+  active: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreateTokenPackage {
+  name: string;
+  description?: string;
+  tokenAmount: number;
+  role: string;
+  features: string[];
+}
+
+export interface UpdateTokenPackage {
+  name?: string;
+  description?: string;
+  tokenAmount?: number;
+  role?: string;
+  features?: string[];
+  active?: boolean;
+}
+
 export interface User {
   id: string;
   googleId: string;
@@ -454,6 +493,58 @@ class ApiClient {
 
   async getRewardHistory() {
     const res = await this.client.get('/users/me/reward-history');
+    return res.data;
+  }
+
+  // Role methods
+  async getRoles(): Promise<Role[]> {
+    const res = await this.client.get('/roles');
+    return res.data;
+  }
+
+  async createRole(data: Omit<Role, 'id' | 'createdAt' | 'updatedAt' | 'active'>): Promise<Role> {
+    const res = await this.client.post('/roles', data);
+    return res.data;
+  }
+
+  async updateRole(id: string, data: Partial<Role>): Promise<Role> {
+    const res = await this.client.patch(`/roles/${id}`, data);
+    return res.data;
+  }
+
+  async deleteRole(id: string): Promise<Role> {
+    const res = await this.client.delete(`/roles/${id}`);
+    return res.data;
+  }
+
+  // Token Package methods
+  async getTokenPackages(): Promise<TokenPackage[]> {
+    const res = await this.client.get('/token-packages');
+    return res.data;
+  }
+
+  async getAvailableTokenPackages(): Promise<TokenPackage[]> {
+    const res = await this.client.get('/token-packages/available');
+    return res.data;
+  }
+
+  async createTokenPackage(data: CreateTokenPackage): Promise<TokenPackage> {
+    const res = await this.client.post('/token-packages', data);
+    return res.data;
+  }
+
+  async updateTokenPackage(id: string, data: UpdateTokenPackage): Promise<TokenPackage> {
+    const res = await this.client.patch(`/token-packages/${id}`, data);
+    return res.data;
+  }
+
+  async deleteTokenPackage(id: string): Promise<TokenPackage> {
+    const res = await this.client.delete(`/token-packages/${id}`);
+    return res.data;
+  }
+
+  async redeemTokenPackage(id: string): Promise<{ message: string }> {
+    const res = await this.client.post(`/token-packages/${id}/redeem`);
     return res.data;
   }
 }

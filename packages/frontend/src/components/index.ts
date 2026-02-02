@@ -8,6 +8,8 @@ export { default as LoginPage } from './LoginPage';
 export { default as ProfilePage } from './ProfilePage';
 export { default as UserQuizHistoryPage } from './UserQuizHistoryPage';
 export { default as AuthCallback } from './AuthCallback';
+export { default as AdminTokenPackagesPage } from './AdminTokenPackagesPage';
+export { default as AdminRolesPage } from './AdminRolesPage';
 
 // Utility Components
 export { default as Loading } from './Loading';

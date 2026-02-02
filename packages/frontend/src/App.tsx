@@ -24,6 +24,8 @@ import SettingsPage from './components/SettingsPage'
 import TermsOfUsePage from './components/TermsOfUsePage'
 import PrivacyPolicyPage from './components/PrivacyPolicyPage'
 import RewardHistoryPage from './components/RewardHistoryPage'
+import AdminTokenPackagesPage from './components/AdminTokenPackagesPage'
+import AdminRolesPage from './components/AdminRolesPage'
 
 function App() {
   return (
@@ -135,6 +137,30 @@ function App() {
             <ProtectedRoute>
               <AppLayout>
                 <AdminUsers />
+              </AppLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Token Packages page - only for admins */}
+        <Route
+          path="/token-packages"
+          element={
+            <ProtectedRoute>
+              <AppLayout>
+                <AdminTokenPackagesPage />
+              </AppLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Roles page - only for admins */}
+        <Route
+          path="/roles"
+          element={
+            <ProtectedRoute>
+              <AppLayout>
+                <AdminRolesPage />
               </AppLayout>
             </ProtectedRoute>
           }
