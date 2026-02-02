@@ -35,7 +35,23 @@ const FreeQuizzesPage: React.FC = () => {
     const [totalPages, setTotalPages] = useState(1);
     const [startingQuiz, setStartingQuiz] = useState<string | null>(null);
     const [highlightQuiz, setHighlightQuiz] = useState<any>(null);
-    const [freeQuizLimit, setFreeQuizLimit] = useState<{ used: number; remaining: number } | null>(null);
+    const [freeQuizLimit, setFreeQuizLimit] = useState<{ used: number; remaining: number; resetTime?: Date } | null>(null);
+
+    const formatResetTime = (resetTime: Date) => {
+        const now = new Date();
+        const reset = new Date(resetTime);
+        const diffMs = reset.getTime() - now.getTime();
+        const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+        const diffMinutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+
+        if (diffHours > 0) {
+            return `${diffHours}h ${diffMinutes}min`;
+        } else if (diffMinutes > 0) {
+            return `${diffMinutes}min`;
+        } else {
+            return 'menos de 1min';
+        }
+    };
 
     // Load public quizzes
     // Load highlight quiz only once on mount
@@ -185,6 +201,11 @@ const FreeQuizzesPage: React.FC = () => {
                                 ) : (
                                     <span className="text-red-600 dark:text-red-400">
                                         Você atingiu o limite diário de 3 quizzes gratuitos.
+                                        {freeQuizLimit.resetTime && (
+                                            <span className="block text-xs mt-1 text-slate-500 dark:text-slate-400">
+                                                O limite reseta em {formatResetTime(freeQuizLimit.resetTime)}.
+                                            </span>
+                                        )}
                                     </span>
                                 )}
                             </span>

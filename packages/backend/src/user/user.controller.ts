@@ -179,7 +179,7 @@ export class UserController {
   @Get('me/free-quiz-limit')
   @ApiOperation({
     summary: 'Buscar status do limite diário de quizzes gratuitos',
-    description: 'Retorna quantos quizzes gratuitos o usuário já fez hoje e quantos ainda pode fazer'
+    description: 'Retorna quantos quizzes gratuitos o usuário já fez hoje e quantos ainda pode fazer, além da data de reset'
   })
   @ApiResponse({
     status: 200,
@@ -188,11 +188,12 @@ export class UserController {
       type: 'object',
       properties: {
         used: { type: 'number', example: 1 },
-        remaining: { type: 'number', example: 2 }
+        remaining: { type: 'number', example: 2 },
+        resetTime: { type: 'string', format: 'date-time', example: '2026-02-02T00:00:00.000Z' }
       }
     }
   })
-  async getMyFreeQuizLimit(@CurrentUser() user: any): Promise<{ used: number; remaining: number }> {
+  async getMyFreeQuizLimit(@CurrentUser() user: any): Promise<{ used: number; remaining: number; resetTime: Date }> {
     const userId = user.userId || user.sub;
     return this.userService.getDailyFreeQuizStatus(userId);
   }

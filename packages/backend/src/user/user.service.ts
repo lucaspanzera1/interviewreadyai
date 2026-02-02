@@ -295,14 +295,21 @@ export class UserService {
   /**
    * Obtém o status do limite diário
    * @param userId ID do usuário
-   * @returns objeto com used e remaining
+   * @returns objeto com used, remaining e resetTime
    */
-  async getDailyFreeQuizStatus(userId: string): Promise<{ used: number; remaining: number }> {
+  async getDailyFreeQuizStatus(userId: string): Promise<{ used: number; remaining: number; resetTime: Date }> {
     const user = await this.findById(userId);
     this.resetDailyLimitIfNeeded(user);
     const used = user.dailyFreeQuizzesUsed;
     const remaining = Math.max(0, 3 - used);
-    return { used, remaining };
+
+    // Calcula quando o limite reseta (amanhã à meia-noite)
+    const now = new Date();
+    const tomorrow = new Date(now);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    tomorrow.setHours(0, 0, 0, 0);
+
+    return { used, remaining, resetTime: tomorrow };
   }
 
   /**

@@ -300,11 +300,6 @@ class ApiClient {
     return res.data;
   }
 
-  async getFreeQuizLimit(): Promise<{ used: number; remaining: number }> {
-    const res = await this.client.get('/users/me/free-quiz-limit');
-    return res.data;
-  }
-
   // Address methods
   async getAddresses(): Promise<any[]> {
     const res = await this.client.get('/users/addresses');
@@ -436,6 +431,11 @@ class ApiClient {
 
   async getUserStats() {
     const res = await this.client.get('/quiz/my-stats');
+    return res.data;
+  }
+
+  async getFreeQuizLimit() {
+    const res = await this.client.get('/users/me/free-quiz-limit');
     return res.data;
   }
 }
