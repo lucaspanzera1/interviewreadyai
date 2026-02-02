@@ -80,6 +80,14 @@ export class TokenPackageService {
     const updateData: any = {
       tokens: newTokenBalance,
       role: newRole,
+      $push: {
+        rewardHistory: {
+          type: 'package',
+          amount: tokenPackage.tokenAmount,
+          reason: `package_redemption:${tokenPackage.name}`,
+          createdAt: new Date(),
+        }
+      }
     };
     
     // Adicionar roleExpiresAt apenas se definido
