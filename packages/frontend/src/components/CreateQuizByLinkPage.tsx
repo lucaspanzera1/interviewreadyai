@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import PageTitle from './PageTitle';
 import { SparklesIcon, LinkIcon } from '@heroicons/react/24/outline';
 
 
@@ -21,21 +22,22 @@ const CreateQuizByLinkPage: React.FC = () => {
     };
 
     return (
-        <div className="flex flex-col h-full bg-slate-50 dark:bg-slate-900 transition-colors duration-300">
+        <div className="flex flex-col min-h-full transition-colors duration-300">
+            <PageTitle title="Criar Quiz com IA - TreinaVagaAI" />
             {/* Header */}
-            <div className="px-8 py-8 border-b border-subtle dark:border-slate-800 bg-white dark:bg-slate-900 sticky top-0 z-10">
+            <header className="sticky top-0 z-20 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 -mx-4 -mt-4 lg:-mx-8 lg:-mt-8 px-4 lg:px-8 py-4 mb-8">
                 <div className="max-w-4xl mx-auto">
-                    <h1 className="text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white">
+                    <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 dark:text-white">
                         Criar Quiz com IA
                     </h1>
-                    <p className="mt-2 text-lg text-slate-600 dark:text-slate-400">
+                    <p className="mt-1 text-sm sm:text-base text-slate-600 dark:text-slate-400">
                         Transforme qualquer vaga de emprego em um simulado personalizado em segundos.
                     </p>
                 </div>
-            </div>
+            </header>
 
             {/* Main Content */}
-            <main className="flex-1 overflow-y-auto p-4 sm:p-8">
+            <main className="flex-1 w-full max-w-4xl mx-auto">
                 <div className="max-w-4xl mx-auto space-y-8">
 
                     {/* Input Section */}

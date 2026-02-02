@@ -181,7 +181,7 @@ const FreeQuizzesPage: React.FC = () => {
     return (
         <div className="max-w-6xl mx-auto space-y-8">
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
-                <PageTitle title="Quizzes Gratuitos" />
+                <PageTitle title="Quizzes Gratuitos - TreinaVagaAI" />
                 <div className="flex flex-col items-end gap-2">
                     <p className="text-sm text-slate-500 dark:text-slate-400 hidden md:block">
                         Pratique sem gastar tokens. <br />
@@ -324,9 +324,9 @@ const FreeQuizzesPage: React.FC = () => {
                             <div className="p-5 flex-1">
                                 <div className="flex justify-between items-start mb-4">
                                     <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border ${quiz.categoria === 'Frontend' ? 'bg-blue-50 text-blue-600 border-blue-100 dark:bg-blue-900/20 dark:text-blue-300 dark:border-blue-800' :
-                                            quiz.categoria === 'Backend' ? 'bg-emerald-50 text-emerald-600 border-emerald-100 dark:bg-emerald-900/20 dark:text-emerald-300 dark:border-emerald-800' :
-                                                quiz.categoria === 'DevOps' ? 'bg-orange-50 text-orange-600 border-orange-100 dark:bg-orange-900/20 dark:text-orange-300 dark:border-orange-800' :
-                                                    'bg-slate-50 text-slate-600 border-slate-100 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700'
+                                        quiz.categoria === 'Backend' ? 'bg-emerald-50 text-emerald-600 border-emerald-100 dark:bg-emerald-900/20 dark:text-emerald-300 dark:border-emerald-800' :
+                                            quiz.categoria === 'DevOps' ? 'bg-orange-50 text-orange-600 border-orange-100 dark:bg-orange-900/20 dark:text-orange-300 dark:border-orange-800' :
+                                                'bg-slate-50 text-slate-600 border-slate-100 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700'
                                         }`}>
                                         {quiz.categoria}
                                     </span>
@@ -369,7 +369,7 @@ const FreeQuizzesPage: React.FC = () => {
                                     </div>
                                     <div className="flex items-center gap-1.5">
                                         <span className={`w-2 h-2 rounded-full ${quiz.nivel === 'INICIANTE' ? 'bg-green-500' :
-                                                quiz.nivel === 'MEDIO' ? 'bg-amber-500' : 'bg-red-500'
+                                            quiz.nivel === 'MEDIO' ? 'bg-amber-500' : 'bg-red-500'
                                             }`}></span>
                                         {DISPLAY_DIFFICULTY[quiz.nivel] || quiz.nivel}
                                     </div>

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import PageTitle from './PageTitle';
 import { toast } from 'react-toastify';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
@@ -212,6 +213,7 @@ const HomePage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-50 transition-colors duration-200">
+      <PageTitle title="Início - TreinaVagaAI" />
       <Sidebar />
 
       <main className={`min-h-screen transition-all duration-300 ${isCollapsed ? 'lg:ml-16' : 'lg:ml-64'}`}>

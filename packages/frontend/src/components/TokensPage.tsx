@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import PageTitle from './PageTitle';
 import { apiClient, TokenPackage } from '../lib/api';
 import { useToast } from '../contexts/ToastContext';
 import { useAuth } from '../contexts/AuthContext';
@@ -57,25 +58,26 @@ const TokensPage: React.FC = () => {
 
   return (
     <div className="max-w-4xl mx-auto space-y-12 sm:space-y-16 py-6 sm:py-8 pb-32 sm:pb-8">
-      <div className="flex flex-col md:flex-row items-start md:items-end justify-between gap-8 px-4">
-        <div>
-          <h1 className="text-3xl sm:text-4xl font-bold text-slate-900 dark:text-white tracking-tight">Créditos</h1>
-          <p className="text-slate-500 dark:text-slate-400 mt-2 font-medium text-sm sm:text-base">Gerencie seu saldo e desbloqueie recursos.</p>
-        </div>
+      <PageTitle title="Créditos - TreinaVagaAI" />
+      {/* Sticky Header */}
+      <header className="sticky top-0 z-20 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 -mx-4 -mt-4 lg:-mx-8 lg:-mt-8 px-4 lg:px-8 py-4 mb-8 transition-all duration-300">
+        <div className="max-w-4xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+          <div>
+            <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white tracking-tight">Créditos</h1>
+            <p className="text-slate-500 dark:text-slate-400 font-medium text-sm">Gerencie seu saldo e desbloqueie recursos.</p>
+          </div>
 
-        <div className="w-full md:w-auto flex flex-row items-center justify-between md:justify-end gap-6 pb-2 pt-6 md:pt-0 border-t md:border-t-0 border-slate-100 dark:border-slate-800 md:border-none">
-          <div className="text-left md:text-right">
-            <span className="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Saldo Atual</span>
-            <div className="flex items-center md:justify-end gap-2">
-              <span className="text-3xl font-black text-slate-900 dark:text-white leading-none">
+          <div className="flex items-center gap-3 bg-amber-50 dark:bg-amber-900/20 px-4 py-2 rounded-xl border border-amber-100 dark:border-amber-800/50">
+            <span className="text-xs font-bold text-amber-600 dark:text-amber-400 uppercase tracking-wider">Saldo</span>
+            <div className="flex items-center gap-2">
+              <span className="text-2xl font-black text-slate-900 dark:text-white leading-none">
                 {user?.tokens || 0}
               </span>
               <TicketIcon className="w-5 h-5 text-amber-500" />
             </div>
           </div>
-
         </div>
-      </div>
+      </header>
 
       {/* Simplified Info Grid */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 px-4">
