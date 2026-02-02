@@ -23,6 +23,7 @@ import MyQuizzesPage from './components/MyQuizzesPage'
 import SettingsPage from './components/SettingsPage'
 import TermsOfUsePage from './components/TermsOfUsePage'
 import PrivacyPolicyPage from './components/PrivacyPolicyPage'
+import RewardHistoryPage from './components/RewardHistoryPage'
 
 function App() {
   return (
@@ -79,6 +80,18 @@ function App() {
             <ProtectedRoute>
               <AppLayout>
                 <UserQuizHistoryPage />
+              </AppLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Reward History page */}
+        <Route
+          path="/profile/reward-history"
+          element={
+            <ProtectedRoute>
+              <AppLayout>
+                <RewardHistoryPage />
               </AppLayout>
             </ProtectedRoute>
           }
@@ -144,9 +157,7 @@ function App() {
           path="/quiz/generated"
           element={
             <ProtectedRoute>
-              <AppLayout>
-                <GeneratedQuizPage />
-              </AppLayout>
+              <GeneratedQuizPage />
             </ProtectedRoute>
           }
         />

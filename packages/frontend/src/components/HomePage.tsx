@@ -115,10 +115,10 @@ const HomePage: React.FC = () => {
     { label: 'Evolução', value: '+15%', icon: ArrowTrendingUpIcon, color: 'purple', blur: true },
   ] : userStats ? [
     // Real User Stats
-    { label: 'Simulados', value: userStats.totalAttempts.toString(), icon: DocumentTextIcon, color: 'indigo', blur: false },
-    { label: 'Taxa de Acerto', value: `${userStats.averageScore.toFixed(0)}%`, icon: CheckCircleIcon, color: 'green', blur: false },
-    { label: 'Tempo Médio', value: `${Math.floor(userStats.averageTime / 60)}min`, icon: ClockIcon, color: 'amber', blur: false },
-    { label: 'Evolução', value: `${userStats.evolution >= 0 ? '+' : ''}${userStats.evolution.toFixed(0)}%`, icon: ArrowTrendingUpIcon, color: 'purple', blur: false },
+    { label: 'Simulados', value: (userStats.totalAttempts ?? 0).toString(), icon: DocumentTextIcon, color: 'indigo', blur: false },
+    { label: 'Taxa de Acerto', value: `${((userStats.averageScore ?? 0)).toFixed(0)}%`, icon: CheckCircleIcon, color: 'green', blur: false },
+    { label: 'Tempo Médio', value: `${Math.floor((userStats.averageTime ?? 0) / 60)}min`, icon: ClockIcon, color: 'amber', blur: false },
+    { label: 'Evolução', value: `${(userStats.evolution ?? 0) >= 0 ? '+' : ''}${(userStats.evolution ?? 0).toFixed(0)}%`, icon: ArrowTrendingUpIcon, color: 'purple', blur: false },
   ] : [
     // Empty User Stats
     { label: 'Simulados', value: '0', icon: DocumentTextIcon, color: 'indigo', blur: false },
@@ -411,7 +411,7 @@ const HomePage: React.FC = () => {
                       >
                         <div className="flex items-center gap-4">
                           <div className="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500 dark:text-slate-400 font-bold text-xs">
-                            {simulado.score.toFixed(0)}%
+                            {(simulado.score ?? 0).toFixed(0)}%
                           </div>
                           <div>
                             <p className="font-semibold text-slate-900 dark:text-white text-sm">{simulado.title}</p>

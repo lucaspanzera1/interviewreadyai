@@ -29,6 +29,9 @@ export interface User {
   location?: string;
   linkedinUrl?: string;
   githubUrl?: string;
+  // Reward system fields
+  totalFreeQuizzesCompleted?: number;
+  lastTokenRewardAt?: string;
 }
 
 export interface LoginResponse {
@@ -436,6 +439,16 @@ class ApiClient {
 
   async getFreeQuizLimit() {
     const res = await this.client.get('/users/me/free-quiz-limit');
+    return res.data;
+  }
+
+  async checkRecentReward() {
+    const res = await this.client.get('/users/me/recent-reward');
+    return res.data;
+  }
+
+  async getRewardHistory() {
+    const res = await this.client.get('/users/me/reward-history');
     return res.data;
   }
 }

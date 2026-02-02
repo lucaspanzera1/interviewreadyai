@@ -13,7 +13,8 @@ import {
     MoonIcon,
     TicketIcon,
     PlusCircleIcon,
-    AcademicCapIcon
+    AcademicCapIcon,
+    TrophyIcon
 } from '@heroicons/react/24/outline';
 import {
     HomeIcon as HomeIconSolid,
@@ -21,7 +22,8 @@ import {
     ChartBarIcon as ChartBarIconSolid,
     TicketIcon as TicketIconSolid,
     AcademicCapIcon as AcademicCapIconSolid,
-    PlusCircleIcon as PlusCircleIconSolid
+    PlusCircleIcon as PlusCircleIconSolid,
+    TrophyIcon as TrophyIconSolid
 } from '@heroicons/react/24/solid';
 import { Users as UsersIconLucide, FileQuestion } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
@@ -58,6 +60,7 @@ const Sidebar: React.FC = () => {
         { name: 'Criar', path: '/create-quiz', icon: PlusCircleIcon, activeIcon: PlusCircleIconSolid, badge: 'Beta' },
         { name: 'Explorar', path: '/free-quizzes', icon: AcademicCapIcon, activeIcon: AcademicCapIconSolid },
         { name: 'Evolução', path: '/desempenho', icon: ChartBarIcon, activeIcon: ChartBarIconSolid },
+        { name: 'Recompensas', path: '/profile/reward-history', icon: TrophyIcon, activeIcon: TrophyIconSolid },
         { name: 'Tokens', path: '/tokens', icon: TicketIcon, activeIcon: TicketIconSolid },
     ];
 
@@ -84,6 +87,9 @@ const Sidebar: React.FC = () => {
         if (path === '/') return location.pathname === '/';
         if (path === '/desempenho') {
             return location.pathname.startsWith(path) || location.pathname.startsWith('/profile/quiz-history');
+        }
+        if (path === '/profile/reward-history') {
+            return location.pathname === path;
         }
         return location.pathname.startsWith(path);
     };

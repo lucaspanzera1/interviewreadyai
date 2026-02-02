@@ -72,6 +72,30 @@ export class User {
   @Prop()
   lastFreeQuizReset?: Date;
 
+  // Sistema de recompensas por quizzes gratuitos
+  @Prop({ type: Number, default: 0 })
+  totalFreeQuizzesCompleted: number;
+
+  @Prop({ type: Number, default: 0 })
+  lastTokenRewardMilestone: number; // Último milestone (5, 10, 15, etc.) onde ganhou token
+
+  @Prop()
+  lastTokenRewardAt?: Date; // Quando ganhou o último token
+
+  // Histórico completo de recompensas
+  @Prop({ type: [{
+    type: { type: String, required: true }, // 'token', 'badge', etc.
+    amount: { type: Number, required: true },
+    reason: { type: String, required: true }, // 'quiz_completion', 'referral', etc.
+    createdAt: { type: Date, default: Date.now }
+  }], default: [] })
+  rewardHistory: {
+    type: string;
+    amount: number;
+    reason: string;
+    createdAt: Date;
+  }[];
+
   createdAt: Date;
   updatedAt: Date;
 }

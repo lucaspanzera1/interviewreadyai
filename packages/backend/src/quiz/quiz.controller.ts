@@ -98,4 +98,10 @@ export class QuizController {
   ) {
     return this.quizService.getUserAttemptDetails(attemptId, user.userId);
   }
+
+  @Get('my-stats')
+  @UseGuards(JwtAuthGuard)
+  async getUserStats(@CurrentUser() user: any) {
+    return this.quizService.getUserStats(user.userId);
+  }
 }

@@ -356,8 +356,18 @@ IMPORTANTE: Sempre formate código adequadamente usando as marcações especific
 
     // Verificar se o quiz é gratuito e incrementar contador
     const quiz = await this.quizModel.findById(quizId);
+    let tokenReward = false;
     if (quiz && quiz.isFree) {
-      await this.userService.incrementFreeQuizCount(userId);
+      // Check limit before incrementing
+      const hasAccess = await this.userService.canDoFreeQuiz(userId);
+      if (!hasAccess) {
+        throw new HttpException(
+          'Você atingiu o limite diário de 3 quizzes gratuitos. Aguarde até amanhã ou compre tokens para continuar jogando.',
+          HttpStatus.FORBIDDEN
+        );
+      }
+      const result = await this.userService.incrementFreeQuizCount(userId);
+      tokenReward = result.tokenReward;
     }
 
     const attempt = await this.quizAttemptModel.create({
@@ -386,7 +396,10 @@ IMPORTANTE: Sempre formate código adequadamente usando as marcações especific
       averageScore: Math.round(averageScore * 100) / 100, // Round to 2 decimal places
     });
 
-    return attempt;
+    return {
+      ...attempt.toObject(),
+      tokenReward
+    };
   }
 
   async getUserAttempts(userId: string, page: number = 1, limit: number = 10) {
@@ -510,6 +523,23 @@ IMPORTANTE: Sempre formate código adequadamente usando as marcações especific
       quantidade_questoes: quiz.quantidade_questoes,
       questions: quiz.questions,
       isFree: quiz.isFree,
+    };
+  }
+
+  async getUserStats(userId: string) {
+    const attempts = await this.quizAttemptModel
+      .find({ userId })
+      .select('score')
+      .exec();
+
+    const totalAttempts = attempts.length;
+    const averageScore = totalAttempts > 0 
+      ? attempts.reduce((sum, attempt) => sum + attempt.score, 0) / totalAttempts 
+      : 0;
+
+    return {
+      totalAttempts,
+      averageScore,
     };
   }
 }

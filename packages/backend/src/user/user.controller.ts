@@ -199,6 +199,61 @@ export class UserController {
   }
 
   /**
+   * Verifica se o usuário ganhou uma recompensa recentemente
+   * @returns Status da recompensa recente
+   */
+  @Get('me/recent-reward')
+  @ApiOperation({
+    summary: 'Verificar recompensa recente',
+    description: 'Verifica se o usuário ganhou um token recentemente por completar quizzes gratuitos'
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Status da recompensa retornado com sucesso',
+    schema: {
+      type: 'object',
+      properties: {
+        hasRecentReward: { type: 'boolean', example: true },
+        rewardTime: { type: 'string', format: 'date-time', example: '2026-02-01T12:00:00.000Z' }
+      }
+    }
+  })
+  async checkRecentReward(@CurrentUser() user: any): Promise<{ hasRecentReward: boolean; rewardTime?: Date }> {
+    const userId = user.userId || user.sub;
+    return this.userService.checkRecentTokenReward(userId);
+  }
+
+  /**
+   * Obtém o histórico completo de recompensas do usuário
+   * @returns Histórico de recompensas ordenado por data (mais recente primeiro)
+   */
+  @Get('me/reward-history')
+  @ApiOperation({
+    summary: 'Histórico de recompensas',
+    description: 'Retorna o histórico completo de recompensas recebidas pelo usuário'
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Histórico de recompensas retornado com sucesso',
+    schema: {
+      type: 'array',
+      items: {
+        type: 'object',
+        properties: {
+          type: { type: 'string', example: 'token' },
+          amount: { type: 'number', example: 1 },
+          reason: { type: 'string', example: 'quiz_completion' },
+          createdAt: { type: 'string', format: 'date-time', example: '2026-02-01T12:00:00.000Z' }
+        }
+      }
+    }
+  })
+  async getRewardHistory(@CurrentUser() user: any) {
+    const userId = user.userId || user.sub;
+    return this.userService.getRewardHistory(userId);
+  }
+
+  /**
    * Adiciona tokens ao usuário atual
    * @param body Dados com quantidade a adicionar
    */

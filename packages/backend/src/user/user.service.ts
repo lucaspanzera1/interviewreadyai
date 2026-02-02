@@ -282,14 +282,41 @@ export class UserService {
   }
 
   /**
-   * Incrementa o contador de quizzes gratuitos feitos hoje
+   * Incrementa o contador de quizzes gratuitos feitos hoje e total
    * @param userId ID do usuário
+   * @returns objeto com informação se ganhou token
    */
-  async incrementFreeQuizCount(userId: string): Promise<void> {
+  async incrementFreeQuizCount(userId: string): Promise<{ tokenReward: boolean }> {
     const user = await this.findById(userId);
     this.resetDailyLimitIfNeeded(user);
+
     user.dailyFreeQuizzesUsed += 1;
+    user.totalFreeQuizzesCompleted += 1;
+
+    // Verificar se ganhou recompensa (a cada 2 quizzes)
+    const newMilestone = Math.floor(user.totalFreeQuizzesCompleted / 2);
+    const lastMilestone = Math.floor(user.lastTokenRewardMilestone / 2);
+
+    let tokenReward = false;
+    if (newMilestone > lastMilestone) {
+      // Ganhou token!
+      user.tokens = (user.tokens || 0) + 1;
+      user.lastTokenRewardMilestone = user.totalFreeQuizzesCompleted;
+      user.lastTokenRewardAt = new Date();
+      
+      // Adicionar ao histórico de recompensas
+      user.rewardHistory.push({
+        type: 'token',
+        amount: 1,
+        reason: 'quiz_completion',
+        createdAt: new Date()
+      });
+      
+      tokenReward = true;
+    }
+
     await user.save();
+    return { tokenReward };
   }
 
   /**
@@ -313,10 +340,42 @@ export class UserService {
   }
 
   /**
+   * Verifica se o usuário ganhou uma recompensa recentemente
+   * @param userId ID do usuário
+   * @returns objeto com informação sobre recompensa recente
+   */
+  async checkRecentTokenReward(userId: string): Promise<{ hasRecentReward: boolean; rewardTime?: Date }> {
+    const user = await this.findById(userId);
+
+    if (!user.lastTokenRewardAt) {
+      return { hasRecentReward: false };
+    }
+
+    // Considera "recente" se foi nos últimos 5 minutos
+    const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
+    const hasRecentReward = user.lastTokenRewardAt > fiveMinutesAgo;
+
+    return {
+      hasRecentReward,
+      rewardTime: hasRecentReward ? user.lastTokenRewardAt : undefined
+    };
+  }
+
+  /**
+   * Obtém o histórico completo de recompensas do usuário
+   * @param userId ID do usuário
+   * @returns array de recompensas ordenadas por data (mais recente primeiro)
+   */
+  async getRewardHistory(userId: string) {
+    const user = await this.findById(userId);
+    return user.rewardHistory.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  }
+
+  /**
    * Reseta o limite diário se necessário (se passou um dia)
    * @param user Usuário
    */
-  private resetDailyLimitIfNeeded(user: UserDocument): void {
+  resetDailyLimitIfNeeded(user: UserDocument): void {
     const now = new Date();
     const lastReset = user.lastFreeQuizReset;
 

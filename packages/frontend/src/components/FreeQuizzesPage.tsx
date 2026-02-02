@@ -24,7 +24,7 @@ const DIFFICULTY_MAP: Record<string, string> = {
 
 const FreeQuizzesPage: React.FC = () => {
     const navigate = useNavigate();
-    const { user } = useAuth();
+    const { user, refreshUser } = useAuth();
     const { showToast } = useToast();
     const [selectedCategory, setSelectedCategory] = useState('Todas');
     const [selectedDifficulty, setSelectedDifficulty] = useState('Todas');
@@ -95,6 +95,17 @@ const FreeQuizzesPage: React.FC = () => {
         try {
             const limit = await apiClient.getFreeQuizLimit();
             setFreeQuizLimit(limit);
+
+            // Verificar se ganhou recompensa recentemente (apenas uma vez por sessão)
+            const lastRewardShown = localStorage.getItem('lastRewardShown');
+            const rewardCheck = await apiClient.checkRecentReward();
+
+            if (rewardCheck.hasRecentReward && lastRewardShown !== rewardCheck.rewardTime?.toString()) {
+                showToast('🎉 Parabéns! Você ganhou 1 token por completar 2 quizzes gratuitos!', 'success');
+                localStorage.setItem('lastRewardShown', rewardCheck.rewardTime?.toString() || '');
+                // Atualizar dados do usuário para refletir o novo saldo de tokens
+                await refreshUser();
+            }
         } catch (error) {
             console.error('Erro ao carregar limite de quizzes gratuitos:', error);
             // Não mostra toast para não incomodar o usuário, apenas log no console
@@ -192,6 +203,8 @@ const FreeQuizzesPage: React.FC = () => {
                 <div className="flex flex-col items-end gap-2">
                     <p className="text-sm text-slate-500 dark:text-slate-400 hidden md:block">
                         Pratique sem gastar tokens. <br />
+                        Ganhe 1 token a cada 2 quizzes gratuitos completados!
+                        <br />
                         {freeQuizLimit ? (
                             <span className="text-xs font-medium">
                                 {freeQuizLimit.remaining > 0 ? (

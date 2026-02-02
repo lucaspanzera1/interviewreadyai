@@ -20,7 +20,9 @@ import {
   CpuChipIcon,
   AcademicCapIcon,
   ChartBarIcon,
-  Cog6ToothIcon
+  Cog6ToothIcon,
+  GiftIcon,
+  TrophyIcon
 } from '@heroicons/react/24/outline';
 import ActivityHeatmap from './ActivityHeatmap';
 
@@ -67,6 +69,13 @@ interface FormData {
   githubUrl: string;
 }
 
+interface Reward {
+  type: string;
+  amount: number;
+  reason: string;
+  createdAt: string;
+}
+
 /**
  * Página de perfil do usuário
  */
@@ -93,6 +102,7 @@ const ProfilePage: React.FC = () => {
   });
 
   const [activityData, setActivityData] = useState<{ date: string; count: number }[]>([]);
+  const [recentRewards, setRecentRewards] = useState<Reward[]>([]);
 
 
   useEffect(() => {
@@ -130,9 +140,21 @@ const ProfilePage: React.FC = () => {
       }
     };
 
+    const loadRewards = async () => {
+      try {
+        const data = await apiClient.getRewardHistory();
+        if (data) {
+          setRecentRewards(data);
+        }
+      } catch (error) {
+        console.error('Erro ao carregar recompensas:', error);
+      }
+    };
+
     if (user) {
       loadStats();
       loadActivity();
+      loadRewards();
     }
   }, [user]);
 
@@ -617,6 +639,75 @@ const ProfilePage: React.FC = () => {
                     <ShieldCheckIcon className="h-6 w-6 text-green-500 mx-auto mb-2" />
                     <p className="text-xs text-slate-500 dark:text-slate-400">Média Geral</p>
                     <p className="text-lg font-bold text-slate-900 dark:text-white">{stats.averageScore.toFixed(0)}%</p>
+                  </div>
+                </div>
+
+                {/* Rewards Section */}
+                <div className="pt-4 border-t border-slate-100 dark:border-slate-700">
+                  <h3 className="text-sm font-semibold text-slate-900 dark:text-white mb-3 flex items-center gap-2">
+                    <TicketIcon className="h-4 w-4 text-amber-500" />
+                    Recompensas
+                  </h3>
+
+                  {/* Progress to next reward */}
+                  <div className="mb-4">
+                    <div className="flex items-center justify-between text-sm mb-2">
+                      <span className="text-slate-600 dark:text-slate-400">Quizzes gratuitos feitos</span>
+                      <span className="font-medium text-slate-900 dark:text-white">
+                        {user?.totalFreeQuizzesCompleted || 0}
+                      </span>
+                    </div>
+                    <div className="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-2 mb-2">
+                      <div
+                        className="bg-primary-500 h-2 rounded-full transition-all duration-300"
+                        style={{ width: `${((user?.totalFreeQuizzesCompleted || 0) % 2) * 50}%` }}
+                      ></div>
+                    </div>
+                    <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
+                      <span>Próximo token em {2 - ((user?.totalFreeQuizzesCompleted || 0) % 2)} quizzes</span>
+                      <span>{(user?.totalFreeQuizzesCompleted || 0) % 2}/2</span>
+                    </div>
+                  </div>
+
+                  {/* Reward History */}
+                  <div>
+                    <div className="flex items-center justify-between mb-2">
+                      <h4 className="text-xs font-medium text-slate-700 dark:text-slate-300">Histórico de Recompensas</h4>
+                      <button
+                        onClick={() => navigate('/profile/reward-history')}
+                        className="text-xs text-primary-600 dark:text-primary-400 hover:underline"
+                      >
+                        Ver completo
+                      </button>
+                    </div>
+                    <div className="space-y-2 max-h-32 overflow-y-auto">
+                      {recentRewards.length > 0 ? (
+                        recentRewards.slice(0, 3).map((reward, index) => (
+                          <div key={index} className="flex items-center justify-between p-2 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg">
+                            <div className="flex items-center gap-2">
+                              {reward.type === 'token' ? (
+                                <TicketIcon className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+                              ) : reward.type === 'badge' ? (
+                                <TrophyIcon className="h-4 w-4 text-purple-600 dark:text-purple-400" />
+                              ) : (
+                                <GiftIcon className="h-4 w-4 text-green-600 dark:text-green-400" />
+                              )}
+                              <span className="text-sm font-medium text-slate-900 dark:text-white">
+                                {reward.type === 'token' ? `+${reward.amount} Token${reward.amount > 1 ? 's' : ''}` :
+                                  reward.type === 'badge' ? 'Nova Conquista' : 'Recompensa'}
+                              </span>
+                            </div>
+                            <span className="text-xs text-slate-500 dark:text-slate-400">
+                              {new Date(reward.createdAt).toLocaleDateString('pt-BR')}
+                            </span>
+                          </div>
+                        ))
+                      ) : (
+                        <div className="text-center py-4 text-slate-500 dark:text-slate-400 text-sm">
+                          Nenhuma recompensa recebida ainda
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>

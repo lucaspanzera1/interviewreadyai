@@ -2,12 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import PageTitle from './PageTitle';
 import FormattedText from './FormattedText';
-import { CheckCircleIcon, XCircleIcon, ArrowLeftIcon, ArrowPathIcon, EyeIcon } from '@heroicons/react/24/outline';
-import { StarIcon as StarIconSolid } from '@heroicons/react/24/solid';
+import { CheckCircleIcon, XCircleIcon, ArrowLeftIcon, ArrowPathIcon } from '@heroicons/react/24/outline';
 import { QuizQuestion, apiClient } from '../lib/api';
+import { useToast } from '../contexts/ToastContext';
 
 const GeneratedQuizPage: React.FC = () => {
   const navigate = useNavigate();
+  const { showToast } = useToast();
   const [quiz, setQuiz] = useState<{
     questions: (QuizQuestion & { originalIndex?: number })[];
     titulo?: string;
@@ -111,8 +112,14 @@ const GeneratedQuizPage: React.FC = () => {
             quiz.questions.length,
             timeSpent
           );
-        } catch (error) {
+        } catch (error: any) {
           console.error('Failed to record quiz attempt:', error);
+          // Check if it's a limit error
+          if (error.response?.status === 403 && error.response?.data?.message?.includes('limite')) {
+            showToast(error.response.data.message, 'error');
+            return; // Don't show results
+          }
+          // For other errors, still show results but log
         }
       }
 
@@ -126,12 +133,29 @@ const GeneratedQuizPage: React.FC = () => {
     }
   };
 
-  const restartQuiz = () => {
-    setCurrentQuestion(0);
-    setSelectedAnswers(new Array(quiz.questions.length).fill(-1));
-    setShowResults(false);
-    setScore(0);
-    setStartTime(Date.now());
+  const restartQuiz = async () => {
+    try {
+      // Check free quiz limit before restarting
+      const limit = await apiClient.getFreeQuizLimit();
+      if (limit.remaining <= 0) {
+        showToast('Você atingiu o limite diário de 3 quizzes gratuitos. Aguarde até amanhã ou compre tokens para continuar jogando.', 'error');
+        return;
+      }
+
+      // Record access for the restart
+      if (quizId) {
+        await apiClient.recordQuizAccess(quizId);
+      }
+
+      setCurrentQuestion(0);
+      setSelectedAnswers(new Array(quiz.questions.length).fill(-1));
+      setShowResults(false);
+      setScore(0);
+      setStartTime(Date.now());
+    } catch (error) {
+      console.error('Erro ao verificar limite de quizzes:', error);
+      showToast('Erro ao verificar limite de quizzes. Tente novamente.', 'error');
+    }
   };
 
   if (showResults) {
@@ -250,133 +274,124 @@ const GeneratedQuizPage: React.FC = () => {
   const progress = ((currentQuestion + 1) / quiz.questions.length) * 100;
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-900 py-8 px-4 flex flex-col items-center justify-center">
+    <div className="h-screen bg-slate-50 dark:bg-slate-900 flex flex-col overflow-hidden relative font-sans">
       {/* Background elements */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-0 right-0 w-1/3 h-1/3 bg-primary-100/50 dark:bg-primary-900/10 blur-3xl rounded-full" />
         <div className="absolute bottom-0 left-0 w-1/4 h-1/4 bg-blue-100/50 dark:bg-blue-900/10 blur-3xl rounded-full" />
       </div>
 
-      <div className="w-full max-w-3xl relative z-10 space-y-8">
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <button
-            onClick={() => navigate('/free-quizzes')}
-            className="p-2.5 rounded-xl bg-white dark:bg-slate-800 text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white shadow-sm border border-slate-200 dark:border-slate-700 transition-all hover:scale-105"
-          >
-            <ArrowLeftIcon className="w-5 h-5" />
-          </button>
-          <div className="text-sm font-medium text-slate-500 dark:text-slate-400 bg-white dark:bg-slate-800 px-4 py-2 rounded-full border border-slate-200 dark:border-slate-700 shadow-sm">
-            Questão {currentQuestion + 1} de {quiz.questions.length}
-          </div>
-          <div className="w-10" /> {/* Spacer for centering */}
-        </div>
+      <div className="flex-none pt-4 pb-2 px-4 z-20">
+        <div className="w-full max-w-3xl mx-auto space-y-4">
+          {/* Header */}
+          <div className="flex items-center justify-between">
+            <button
+              onClick={() => navigate('/free-quizzes')}
+              className="p-2.5 rounded-xl bg-white dark:bg-slate-800 text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white shadow-sm border border-slate-200 dark:border-slate-700 transition-all hover:scale-105"
+            >
+              <ArrowLeftIcon className="w-5 h-5" />
+            </button>
 
-        {/* Quiz Info Header */}
-        {(quiz.titulo || quiz.categoria) && (
-          <div className="text-center space-y-2 animate-fade-in">
-            <div className="flex items-center justify-center gap-2 flex-wrap">
+            <div className="flex flex-col items-center">
               {quiz.categoria && (
-                <span className="px-2.5 py-0.5 rounded-full text-xs font-bold uppercase tracking-wider bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700">
+                <div className="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-1">
                   {quiz.categoria}
-                </span>
-              )}
-              {quiz.averageScore !== undefined && (
-                <div className="flex items-center gap-1 bg-amber-50 dark:bg-amber-900/20 px-2 py-0.5 rounded-full border border-amber-100 dark:border-amber-800/50">
-                  <StarIconSolid className="w-3.5 h-3.5 text-amber-500" />
-                  <span className="text-xs font-bold text-amber-700 dark:text-amber-400">
-                    {((quiz.averageScore / 100) * 5).toFixed(1)}
-                  </span>
                 </div>
               )}
-              {quiz.totalAccess !== undefined && (
-                <div className="flex items-center gap-1 bg-blue-50 dark:bg-blue-900/20 px-2 py-0.5 rounded-full border border-blue-100 dark:border-blue-800/50">
-                  <EyeIcon className="w-3.5 h-3.5 text-blue-500" />
-                  <span className="text-xs font-bold text-blue-700 dark:text-blue-400">
-                    {quiz.totalAccess}
-                  </span>
-                </div>
-              )}
+              <div className="text-sm font-bold text-slate-700 dark:text-slate-300 bg-white/50 dark:bg-slate-800/50 px-3 py-1 rounded-full border border-slate-200 dark:border-slate-700 backdrop-blur-sm">
+                Questão {currentQuestion + 1} <span className="text-slate-400 mx-1">/</span> {quiz.questions.length}
+              </div>
             </div>
 
-            {quiz.titulo && (
-              <h1 className="text-2xl md:text-3xl font-bold text-slate-900 dark:text-white">
-                {quiz.titulo}
-              </h1>
-            )}
-
-            {quiz.descricao && (
-              <p className="text-slate-500 dark:text-slate-400 max-w-2xl mx-auto text-sm leading-relaxed">
-                {quiz.descricao}
-              </p>
-            )}
+            <div className="w-10" /> {/* Spacer */}
           </div>
-        )}
 
-        {/* Progress Bar */}
-        <div className="h-2 w-full bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden">
-          <div
-            className="h-full bg-primary-600 transition-all duration-500 ease-out"
-            style={{ width: `${progress}%` }}
-          />
+          {/* Progress Bar */}
+          <div className="h-2 w-full bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden">
+            <div
+              className="h-full bg-primary-600 transition-all duration-500 ease-out shadow-[0_0_10px_rgba(37,99,235,0.5)]"
+              style={{ width: `${progress}%` }}
+            />
+          </div>
         </div>
+      </div>
 
-        {/* Question Card */}
-        <div className="bg-white dark:bg-slate-800 rounded-3xl p-8 md:p-10 shadow-lifted border border-slate-100 dark:border-slate-700 animate-slide-up">
-          <h2 className="text-2xl md:text-3xl font-bold text-slate-900 dark:text-white mb-8 leading-tight">
-            <FormattedText text={question.question} />
-          </h2>
+      <div className="flex-1 flex flex-col min-h-0 px-4 pb-4 z-10 transition-all duration-300">
+        <div className="w-full max-w-3xl mx-auto h-full flex flex-col">
+          <div className="flex-1 flex flex-col bg-white dark:bg-slate-800 rounded-3xl shadow-xl border border-slate-100 dark:border-slate-700 overflow-hidden relative animate-slide-up">
 
-          <div className="space-y-4">
-            {question.options.map((option, index) => (
-              <button
-                key={index}
-                onClick={() => handleAnswerSelect(index)}
-                className={`
-                                    w-full text-left p-6 rounded-2xl border-2 transition-all duration-200 group relative overflow-hidden
-                                    ${selectedAnswers[currentQuestion] === index
-                    ? 'border-primary-600 bg-primary-50 dark:bg-primary-900/20'
-                    : 'border-slate-100 dark:border-slate-700 bg-white dark:bg-slate-800/50 hover:border-primary-300 dark:hover:border-primary-700 hover:bg-slate-50 dark:hover:bg-slate-800'
-                  }
-                                `}
-              >
-                <div className="flex items-center gap-4 relative z-10">
-                  <div className={`
-                                        w-8 h-8 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-colors
-                                        ${selectedAnswers[currentQuestion] === index
-                      ? 'border-primary-600 bg-primary-600 text-white'
-                      : 'border-slate-300 dark:border-slate-600 text-slate-400 group-hover:border-primary-400 group-hover:text-primary-400'}
-                                    `}>
-                    <span className="text-sm font-bold">{String.fromCharCode(65 + index)}</span>
-                  </div>
-                  <span className={`text-lg font-medium ${selectedAnswers[currentQuestion] === index
-                    ? 'text-primary-900 dark:text-primary-100'
-                    : 'text-slate-700 dark:text-slate-300'
-                    }`}>
-                    <FormattedText text={option} />
-                  </span>
-                </div>
-              </button>
-            ))}
-          </div>
+            {/* Scrollable Content */}
+            <div className="flex-1 overflow-y-auto px-6 py-6 md:px-10 md:py-8">
+              <h2 className="text-xl md:text-2xl lg:text-3xl font-bold text-slate-900 dark:text-white mb-8 leading-tight">
+                <FormattedText text={question.question} />
+              </h2>
 
-          <div className="mt-10 flex items-center justify-between pt-6 border-t border-slate-100 dark:border-slate-700">
-            <button
-              onClick={previousQuestion}
-              disabled={currentQuestion === 0}
-              className="px-6 py-2.5 rounded-xl text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 font-medium transition-colors disabled:opacity-0"
-            >
-              Anterior
-            </button>
+              <div className="space-y-3">
+                {question.options.map((option, index) => (
+                  <button
+                    key={index}
+                    onClick={() => handleAnswerSelect(index)}
+                    className={`
+                      w-full text-left p-5 rounded-2xl border-2 transition-all duration-200 group relative overflow-hidden
+                      ${selectedAnswers[currentQuestion] === index
+                        ? 'border-primary-600 bg-primary-50 dark:bg-primary-900/20 shadow-md transform scale-[1.01]'
+                        : 'border-slate-100 dark:border-slate-700 bg-white dark:bg-slate-800/50 hover:border-primary-300 dark:hover:border-primary-700 hover:bg-slate-50 dark:hover:bg-slate-800 hover:shadow-sm'
+                      }
+                    `}
+                  >
+                    <div className="flex items-start gap-4 relative z-10">
+                      <div className={`
+                        w-8 h-8 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-colors mt-0.5
+                        ${selectedAnswers[currentQuestion] === index
+                          ? 'border-primary-600 bg-primary-600 text-white shadow-sm'
+                          : 'border-slate-300 dark:border-slate-600 text-slate-400 group-hover:border-primary-400 group-hover:text-primary-400 bg-white dark:bg-slate-900'}
+                      `}>
+                        <span className="text-sm font-bold">{String.fromCharCode(65 + index)}</span>
+                      </div>
+                      <div className={`text-base md:text-lg font-medium leading-relaxed ${selectedAnswers[currentQuestion] === index
+                        ? 'text-primary-900 dark:text-primary-100'
+                        : 'text-slate-700 dark:text-slate-300'
+                        }`}>
+                        <FormattedText text={option} />
+                      </div>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
 
-            <button
-              onClick={nextQuestion}
-              disabled={selectedAnswers[currentQuestion] === -1}
-              className="px-8 py-3 bg-primary-600 text-white rounded-xl hover:bg-primary-700 transition-all shadow-lg shadow-primary-600/20 font-bold flex items-center gap-2 hover:scale-105 disabled:opacity-50 disabled:hover:scale-100 disabled:shadow-none"
-            >
-              {currentQuestion === quiz.questions.length - 1 ? 'Finalizar' : 'Próxima'}
-              <ArrowLeftIcon className="w-4 h-4 rotate-180" />
-            </button>
+            {/* Footer Actions - Sticky Bottom */}
+            <div className="flex-none p-4 md:p-6 border-t border-slate-100 dark:border-slate-700 bg-white/90 dark:bg-slate-800/90 backdrop-blur-md z-10">
+              <div className="flex items-center justify-between gap-4">
+                <button
+                  onClick={previousQuestion}
+                  disabled={currentQuestion === 0}
+                  className={`
+                    px-6 py-3 rounded-xl font-medium transition-all flex items-center gap-2
+                    ${currentQuestion === 0
+                      ? 'opacity-0 pointer-events-none'
+                      : 'text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700'}
+                  `}
+                >
+                  <ArrowLeftIcon className="w-4 h-4" />
+                  Anterior
+                </button>
+
+                <button
+                  onClick={nextQuestion}
+                  disabled={selectedAnswers[currentQuestion] === -1}
+                  className={`
+                    px-10 py-3.5 rounded-xl font-bold flex items-center gap-2 transition-all shadow-lg
+                    ${selectedAnswers[currentQuestion] === -1
+                      ? 'bg-slate-200 dark:bg-slate-700 text-slate-400 dark:text-slate-500 cursor-not-allowed shadow-none'
+                      : 'bg-primary-600 hover:bg-primary-700 text-white shadow-primary-600/30 hover:scale-[1.02] hover:shadow-primary-600/40 active:scale-[0.98]'}
+                  `}
+                >
+                  {currentQuestion === quiz.questions.length - 1 ? 'Finalizar Quiz' : 'Próxima Questão'}
+                  <ArrowLeftIcon className="w-4 h-4 rotate-180" />
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
