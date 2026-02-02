@@ -26,6 +26,7 @@ const AdminTokenPackagesPage: React.FC = () => {
     tokenAmount: 0,
     role: '',
     features: [] as string[],
+    validityDays: undefined as number | undefined,
   });
 
   useEffect(() => {
@@ -106,6 +107,7 @@ const AdminTokenPackagesPage: React.FC = () => {
       tokenAmount: 0,
       role: '',
       features: [],
+      validityDays: undefined,
     });
     setEditingPackage(null);
   };
@@ -118,6 +120,7 @@ const AdminTokenPackagesPage: React.FC = () => {
       tokenAmount: pkg.tokenAmount,
       role: pkg.role.id,
       features: pkg.features || [],
+      validityDays: pkg.validityDays,
     });
     setIsModalOpen(true);
   };
@@ -352,6 +355,21 @@ const AdminTokenPackagesPage: React.FC = () => {
               </div>
 
               <div>
+                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
+                  Validade (dias)
+                </label>
+                <input
+                  type="number"
+                  value={formData.validityDays || ''}
+                  onChange={(e) => setFormData(prev => ({ ...prev, validityDays: e.target.value ? parseInt(e.target.value) : undefined }))}
+                  className="w-full px-4 py-2.5 border border-slate-300 dark:border-slate-600 rounded-xl bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-primary-500"
+                  min="1"
+                  placeholder="Vazio = Vitalício"
+                />
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Deixe vazio para vitalício</p>
+              </div>
+
+              <div className="md:col-span-2">
                 <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
                   Cargo Associado *
                 </label>

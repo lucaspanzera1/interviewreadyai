@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { UserController } from './user.controller';
 import { UserService } from './user.service';
+import { UserExpirationService } from './user-expiration.service';
 import { User, UserSchema } from './schemas/user.schema';
 /**
  * Módulo de usuários
@@ -14,7 +15,7 @@ import { User, UserSchema } from './schemas/user.schema';
     ]),
   ],
   controllers: [UserController],
-  providers: [UserService],
+  providers: [UserService, UserExpirationService],
   exports: [UserService, MongooseModule],
 })
 export class UserModule {}

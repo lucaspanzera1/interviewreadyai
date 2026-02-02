@@ -19,4 +19,9 @@ export class CreateTokenPackageDto {
   @IsArray()
   @IsString({ each: true })
   features?: string[];
+
+  @IsOptional()
+  @IsNumber()
+  @Min(1)
+  validityDays?: number; // Número de dias de validade (opcional, null = vitalício)
 }

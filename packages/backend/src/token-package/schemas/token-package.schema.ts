@@ -24,6 +24,9 @@ export class TokenPackage {
   @Prop({ default: true })
   active: boolean;
 
+  @Prop({ type: Number })
+  validityDays?: number; // Número de dias de validade (null/undefined = vitalício)
+
   createdAt: Date;
   updatedAt: Date;
 }

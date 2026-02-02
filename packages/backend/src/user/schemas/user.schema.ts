@@ -28,6 +28,9 @@ export class User {
   @Prop({ type: String, enum: UserRole, default: UserRole.CLIENT })
   role: UserRole;
 
+  @Prop()
+  roleExpiresAt?: Date; // Data de expiração da role atual (null = vitalício)
+
   @Prop({ default: true })
   active: boolean;
 

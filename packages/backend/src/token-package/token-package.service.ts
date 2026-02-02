@@ -48,18 +48,63 @@ export class TokenPackageService {
       throw new NotFoundException('Pacote não encontrado ou inativo');
     }
 
-    if (user.tokens < tokenPackage.tokenAmount) {
-      throw new BadRequestException('Tokens insuficientes');
+    const userId = user.id || user._id;
+    const currentUser = await this.userModel.findById(userId);
+    
+    if (!currentUser) {
+      throw new NotFoundException('Usuário não encontrado');
     }
 
-    // Deduzir tokens e atualizar role
-    user.tokens -= tokenPackage.tokenAmount;
-    user.role = (tokenPackage.role as any).name; // Assuming role is populated
-    await this.userModel.findByIdAndUpdate(user._id, {
-      tokens: user.tokens,
-      role: user.role,
-    });
+    const newRole = (tokenPackage.role as any).name;
 
-    return { message: 'Pacote resgatado com sucesso!' };
+    // Verificar se o usuário já tem este plano ativo
+    if (currentUser.role === newRole && currentUser.roleExpiresAt) {
+      const now = new Date();
+      if (currentUser.roleExpiresAt > now) {
+        throw new BadRequestException(
+          `Você já possui o plano ${newRole}. Válido até ${currentUser.roleExpiresAt.toLocaleDateString('pt-BR')}.`
+        );
+      }
+    }
+
+    // Adicionar tokens e atualizar role
+    const newTokenBalance = (currentUser.tokens || 0) + tokenPackage.tokenAmount;
+    
+    // Calcular data de expiração se o pacote tiver validade definida
+    let roleExpiresAt: Date | undefined = undefined;
+    if (tokenPackage.validityDays && tokenPackage.validityDays > 0) {
+      roleExpiresAt = new Date();
+      roleExpiresAt.setDate(roleExpiresAt.getDate() + tokenPackage.validityDays);
+    }
+    
+    const updateData: any = {
+      tokens: newTokenBalance,
+      role: newRole,
+    };
+    
+    // Adicionar roleExpiresAt apenas se definido
+    if (roleExpiresAt) {
+      updateData.roleExpiresAt = roleExpiresAt;
+    } else {
+      // Remover roleExpiresAt se o plano for vitalício
+      updateData.$unset = { roleExpiresAt: '' };
+    }
+    
+    const updatedUser = await this.userModel.findByIdAndUpdate(
+      userId,
+      updateData,
+      { new: true }
+    );
+
+    if (!updatedUser) {
+      throw new NotFoundException('Usuário não encontrado');
+    }
+
+    let message = `Pacote resgatado com sucesso! Você recebeu ${tokenPackage.tokenAmount} tokens e o cargo ${newRole}.`;
+    if (roleExpiresAt) {
+      message += ` Válido até ${roleExpiresAt.toLocaleDateString('pt-BR')}.`;
+    }
+
+    return { message };
   }
 }

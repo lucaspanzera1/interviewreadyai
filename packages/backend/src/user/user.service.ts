@@ -175,6 +175,7 @@ export class UserService {
       name: user.name,
       picture: user.picture,
       role: user.role,
+      roleExpiresAt: user.roleExpiresAt,
       active: user.active,
       createdAt: user.createdAt,
       updatedAt: user.updatedAt,

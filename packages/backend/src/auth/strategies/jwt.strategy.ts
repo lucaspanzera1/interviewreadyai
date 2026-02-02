@@ -43,12 +43,8 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       throw new UnauthorizedException('User not found or inactive');
     }
 
-    return {
-      userId: payload.sub,  // Adicionado para compatibilidade com controllers
-      sub: payload.sub,
-      email: payload.email,
-      name: payload.name,
-      role: payload.role,
-    };
+    // Retorna o objeto user completo do banco de dados
+    // para que controllers possam acessar todos os campos incluindo _id
+    return user;
   }
 }

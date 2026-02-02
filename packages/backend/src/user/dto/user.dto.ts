@@ -26,6 +26,11 @@ export class UserDto {
   @ApiProperty({ description: 'Role do usuário no sistema', required: false })
   role?: string;
 
+  @ApiProperty({ description: 'Data de expiração da role/plano', required: false })
+  @IsOptional()
+  @IsDateString()
+  roleExpiresAt?: Date;
+
   @ApiProperty({ description: 'Indica se o perfil do usuário está ativo', required: true })
   active: boolean;
 

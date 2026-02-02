@@ -570,15 +570,29 @@ const ProfilePage: React.FC = () => {
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <ShieldCheckIcon className="h-4 w-4 text-slate-400 dark:text-slate-500" />
-                    <span className="text-sm font-medium text-slate-500 dark:text-slate-400">Tipo de conta</span>
+                    <span className="text-sm font-medium text-slate-500 dark:text-slate-400">Plano</span>
                   </div>
                   <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium border ${user?.role === 'admin'
                     ? 'bg-purple-50 dark:bg-purple-900/20 border-purple-100 dark:border-purple-800 text-purple-700 dark:text-purple-300'
-                    : 'bg-emerald-50 dark:bg-emerald-900/20 border-emerald-100 dark:border-emerald-800 text-emerald-700 dark:text-emerald-300'
+                    : user?.role === 'client'
+                    ? 'bg-emerald-50 dark:bg-emerald-900/20 border-emerald-100 dark:border-emerald-800 text-emerald-700 dark:text-emerald-300'
+                    : 'bg-blue-50 dark:bg-blue-900/20 border-blue-100 dark:border-blue-800 text-blue-700 dark:text-blue-300'
                     }`}>
-                    {user?.role === 'admin' ? 'Administrador' : 'Usuário'}
+                    {user?.role === 'admin' ? 'Administrador' : user?.role === 'client' ? 'Gratuito' : user?.role || 'Usuário'}
                   </span>
                 </div>
+
+                {user?.roleExpiresAt && (
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <CalendarIcon className="h-4 w-4 text-slate-400 dark:text-slate-500" />
+                      <span className="text-sm font-medium text-slate-500 dark:text-slate-400">Plano expira em</span>
+                    </div>
+                    <span className="text-sm font-medium text-slate-900 dark:text-white">
+                      {formatDate(user.roleExpiresAt)}
+                    </span>
+                  </div>
+                )}
               </div>
 
               <div className="px-6 pb-6">

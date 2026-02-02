@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { ScheduleModule } from '@nestjs/schedule';
 import { APP_GUARD } from '@nestjs/core';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -23,6 +24,9 @@ import { RoleModule } from './role/role.module';
       isGlobal: true,
       envFilePath: ['.env.local', '.env'],
     }),
+    
+    // Módulo de agendamento de tarefas
+    ScheduleModule.forRoot(),
     
     // Módulo de banco de dados (MongoDB)
     DatabaseModule,

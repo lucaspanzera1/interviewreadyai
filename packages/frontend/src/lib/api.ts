@@ -24,6 +24,7 @@ export interface TokenPackage {
   role: Role;
   features: string[];
   active: boolean;
+  validityDays?: number;
   createdAt: string;
   updatedAt: string;
 }
@@ -34,6 +35,7 @@ export interface CreateTokenPackage {
   tokenAmount: number;
   role: string;
   features: string[];
+  validityDays?: number;
 }
 
 export interface UpdateTokenPackage {
@@ -43,6 +45,7 @@ export interface UpdateTokenPackage {
   role?: string;
   features?: string[];
   active?: boolean;
+  validityDays?: number;
 }
 
 export interface User {
@@ -52,6 +55,7 @@ export interface User {
   name: string;
   picture?: string;
   role: UserRole;
+  roleExpiresAt?: string;
   active: boolean;
   createdAt: string;
   updatedAt: string;

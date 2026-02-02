@@ -47,6 +47,7 @@
     "pnpm": ">=8.0.0"
   },
   "dependencies": {
+    "@nestjs/schedule": "^6.1.0",
     "aos": "^2.3.4",
     "axios": "^1.12.2",
     "body-parser": "^2.2.0",

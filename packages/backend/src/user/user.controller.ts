@@ -25,6 +25,13 @@ export class UserController {
   ) {}
 
   /**
+   * Helper para extrair o ID do usuário do objeto retornado pelo JWT strategy
+   */
+  private getUserId(user: any): string {
+    return user._id?.toString() || user.id || user.userId || user.sub;
+  }
+
+  /**
    * Lista todos os usuários do sistema (admin only)
    * @returns Array com todos os usuários
    */
@@ -77,7 +84,7 @@ export class UserController {
     type: NotFoundErrorDto
   })
   async getProfile(@CurrentUser() user: any): Promise<UserDto> {
-    const userId = user.userId || user.sub;
+    const userId = this.getUserId(user);
     const userEntity = await this.userService.findById(userId);
     return this.userService.toDto(userEntity);
   }
@@ -121,7 +128,7 @@ export class UserController {
     @CurrentUser() user: any,
     @Body() updateData: UpdateUserDto,
   ): Promise<{ success: boolean; data: UserDto; message: string }> {
-    const userId = user.userId || user.sub;
+    const userId = this.getUserId(user);
     const updatedUser = await this.userService.updateUser(userId, updateData);
     return { success: true, data: this.userService.toDto(updatedUser), message: "Perfil atualizado com sucesso!" };
   }
@@ -141,7 +148,7 @@ export class UserController {
     description: 'Quantidade de tokens retornada com sucesso'
   })
   async getMyTokens(@CurrentUser() user: any): Promise<{ tokens: number }> {
-    const userId = user.userId || user.sub;
+    const userId = this.getUserId(user);
     const tokens = await this.userService.getUserTokens(userId);
     return { tokens };
   }
@@ -167,7 +174,7 @@ export class UserController {
     }
   })
   async setTokens(@CurrentUser() user: any, @Body() body: { tokens: number }): Promise<{ success: boolean; message: string }> {
-    const userId = user.userId || user.sub;
+    const userId = this.getUserId(user);
     await this.userService.setUserTokens(userId, body.tokens);
     return { success: true, message: "Quantidade de tokens definida com sucesso!" };
   }
@@ -194,7 +201,7 @@ export class UserController {
     }
   })
   async getMyFreeQuizLimit(@CurrentUser() user: any): Promise<{ used: number; remaining: number; resetTime: Date }> {
-    const userId = user.userId || user.sub;
+    const userId = this.getUserId(user);
     return this.userService.getDailyFreeQuizStatus(userId);
   }
 
@@ -219,7 +226,7 @@ export class UserController {
     }
   })
   async checkRecentReward(@CurrentUser() user: any): Promise<{ hasRecentReward: boolean; rewardTime?: Date }> {
-    const userId = user.userId || user.sub;
+    const userId = this.getUserId(user);
     return this.userService.checkRecentTokenReward(userId);
   }
 
@@ -249,7 +256,7 @@ export class UserController {
     }
   })
   async getRewardHistory(@CurrentUser() user: any) {
-    const userId = user.userId || user.sub;
+    const userId = this.getUserId(user);
     return this.userService.getRewardHistory(userId);
   }
 
@@ -274,7 +281,7 @@ export class UserController {
     }
   })
   async addTokens(@CurrentUser() user: any, @Body() body: { amount: number }): Promise<{ success: boolean; message: string }> {
-    const userId = user.userId || user.sub;
+    const userId = this.getUserId(user);
     await this.userService.addTokensToUser(userId, body.amount);
     return { success: true, message: `${body.amount} tokens adicionados com sucesso!` };
   }
@@ -300,7 +307,7 @@ export class UserController {
     }
   })
   async removeTokens(@CurrentUser() user: any, @Body() body: { amount: number }): Promise<{ success: boolean; message: string }> {
-    const userId = user.userId || user.sub;
+    const userId = this.getUserId(user);
     await this.userService.removeTokensFromUser(userId, body.amount);
     return { success: true, message: `${body.amount} tokens removidos com sucesso!` };
   }
@@ -319,7 +326,7 @@ export class UserController {
     description: 'Perfil retornado com sucesso'
   })
   async getMyProfile(@CurrentUser() user: any): Promise<any> {
-    const userId = user.userId || user.sub;
+    const userId = this.getUserId(user);
     const userDoc = await this.userService.findById(userId);
     return {
       hasCompletedOnboarding: userDoc.hasCompletedOnboarding,
@@ -355,7 +362,7 @@ export class UserController {
     }
   })
   async updateMyProfile(@CurrentUser() user: any, @Body() profileData: ProfileDto): Promise<{ success: boolean; data: any; message: string }> {
-    const userId = user.userId || user.sub;
+    const userId = this.getUserId(user);
     const updatedUser = await this.userService.updateProfile(userId, profileData);
     return {
       success: true,
@@ -395,7 +402,7 @@ export class UserController {
     }
   })
   async completeOnboarding(@CurrentUser() user: any, @Body() profileData: CompleteOnboardingDto): Promise<{ success: boolean; data: any; message: string }> {
-    const userId = user.userId || user.sub;
+    const userId = this.getUserId(user);
     const updatedUser = await this.userService.completeOnboarding(userId, profileData);
     return {      success: true,      data: {
         hasCompletedOnboarding: updatedUser.hasCompletedOnboarding,
@@ -424,7 +431,7 @@ export class UserController {
     description: 'Status retornado com sucesso'
   })
   async getOnboardingStatus(@CurrentUser() user: any): Promise<{ hasCompletedOnboarding: boolean }> {
-    const userId = user.userId || user.sub;
+    const userId = this.getUserId(user);
     const hasCompleted = await this.userService.hasCompletedOnboarding(userId);
     return { hasCompletedOnboarding: hasCompleted };
   }

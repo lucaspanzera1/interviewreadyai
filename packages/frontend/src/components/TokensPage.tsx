@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { apiClient } from '../lib/api';
+import React, { useState, useEffect } from 'react';
+import { apiClient, TokenPackage } from '../lib/api';
 import { useToast } from '../contexts/ToastContext';
 import { useAuth } from '../contexts/AuthContext';
 import PageTitle from './PageTitle';
@@ -24,6 +24,39 @@ const TokensPage: React.FC = () => {
   const [editing, setEditing] = useState(false);
   const [newBalance, setNewBalance] = useState<string>('');
   const [isUpdating, setIsUpdating] = useState(false);
+  const [packages, setPackages] = useState<TokenPackage[]>([]);
+  const [loadingPackages, setLoadingPackages] = useState(true);
+  const [redeeming, setRedeeming] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetchPackages();
+  }, []);
+
+  const fetchPackages = async () => {
+    try {
+      setLoadingPackages(true);
+      const data = await apiClient.getAvailableTokenPackages();
+      setPackages(data);
+    } catch (error) {
+      console.error('Erro ao buscar pacotes:', error);
+    } finally {
+      setLoadingPackages(false);
+    }
+  };
+
+  const handleRedeemPackage = async (packageId: string) => {
+    try {
+      setRedeeming(packageId);
+      const result = await apiClient.redeemTokenPackage(packageId);
+      showToast(result.message, 'success');
+      await refreshUser();
+    } catch (error: any) {
+      const errorMessage = error?.response?.data?.message || 'Erro ao resgatar pacote';
+      showToast(errorMessage, 'error');
+    } finally {
+      setRedeeming(null);
+    }
+  };
 
   // Admin functions
   const handleEditBalance = () => {
@@ -146,27 +179,119 @@ const TokensPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Buy Tokens (Coming Soon) */}
+      {/* Token Packages */}
       <div className="mt-12">
         <div className="flex items-center gap-3 mb-6">
-          <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Loja de Tokens</h2>
-          <span className="px-3 py-1 bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 text-xs font-bold uppercase tracking-wider rounded-full">
-            Em Breve
+          <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Pacotes Disponíveis</h2>
+          <span className="px-3 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 text-xs font-bold uppercase tracking-wider rounded-full">
+            {packages.length} {packages.length === 1 ? 'Pacote' : 'Pacotes'}
           </span>
         </div>
 
-        <div className="bg-slate-50 dark:bg-slate-800/50 rounded-2xl p-8 border border-dashed border-slate-300 dark:border-slate-700 flex flex-col items-center justify-center text-center">
-          <div className="w-16 h-16 bg-slate-200 dark:bg-slate-700 rounded-full flex items-center justify-center mb-4">
-            <BanknotesIcon className="w-8 h-8 text-slate-400 dark:text-slate-500" />
+        {loadingPackages ? (
+          <div className="flex justify-center py-12">
+            <Loading />
           </div>
-          <h3 className="text-xl font-semibold text-slate-700 dark:text-slate-300">Pacotes de Tokens</h3>
-          <p className="text-slate-500 dark:text-slate-400 max-w-lg mt-2 mb-6">
-            Estamos finalizando os melhores pacotes para você impulsionar seus estudos. Em breve você poderá adquirir tokens diretamente por aqui.
-          </p>
-          <button disabled className="px-6 py-2 bg-slate-200 dark:bg-slate-700 text-slate-400 dark:text-slate-500 rounded-lg font-medium cursor-not-allowed">
-            Aguarde Novidades
-          </button>
-        </div>
+        ) : packages.length === 0 ? (
+          <div className="bg-slate-50 dark:bg-slate-800/50 rounded-2xl p-8 border border-dashed border-slate-300 dark:border-slate-700 flex flex-col items-center justify-center text-center">
+            <div className="w-16 h-16 bg-slate-200 dark:bg-slate-700 rounded-full flex items-center justify-center mb-4">
+              <BanknotesIcon className="w-8 h-8 text-slate-400 dark:text-slate-500" />
+            </div>
+            <h3 className="text-xl font-semibold text-slate-700 dark:text-slate-300">Nenhum Pacote Disponível</h3>
+            <p className="text-slate-500 dark:text-slate-400 max-w-lg mt-2">
+              Estamos preparando os melhores pacotes para você. Volte em breve!
+            </p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {packages.map((pkg) => {
+              const isRedeeming = redeeming === pkg.id;
+              const hasActivePlan = !!(user?.role === pkg.role.name && user?.roleExpiresAt && new Date(user.roleExpiresAt) > new Date());
+              const isDisabled = isRedeeming || hasActivePlan;
+              
+              return (
+                <div
+                  key={pkg.id}
+                  className="bg-white dark:bg-slate-900 rounded-2xl border-2 border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-lg transition-all overflow-hidden"
+                >
+                  {/* Header with Role Badge */}
+                  <div className="p-6 pb-4 border-b border-slate-100 dark:border-slate-800">
+                    <div className="flex items-start justify-between mb-3">
+                      <h3 className="text-xl font-bold text-slate-900 dark:text-white">
+                        {pkg.name}
+                      </h3>
+                      <span
+                        className="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider"
+                        style={{
+                          backgroundColor: pkg.role.color + '20',
+                          color: pkg.role.color,
+                        }}
+                      >
+                        {pkg.role.name}
+                      </span>
+                    </div>
+                    {pkg.description && (
+                      <p className="text-sm text-slate-600 dark:text-slate-400">
+                        {pkg.description}
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Features */}
+                  {pkg.features && pkg.features.length > 0 && (
+                    <div className="px-6 py-4">
+                      <ul className="space-y-2">
+                        {pkg.features.map((feature, idx) => (
+                          <li key={idx} className="flex items-start gap-2 text-sm">
+                            <CheckIcon className="w-4 h-4 text-green-500 shrink-0 mt-0.5" />
+                            <span className="text-slate-700 dark:text-slate-300">{feature}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+
+                  {/* Footer with Reward and Action */}
+                  <div className="px-6 py-4 bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20">
+                    <div className="flex items-center justify-between mb-3">
+                      <div>
+                        <div className="text-xs text-slate-600 dark:text-slate-400 uppercase tracking-wider font-semibold mb-1">Você Recebe</div>
+                        <div className="flex items-center gap-2">
+                          <TicketIcon className="w-5 h-5 text-amber-500" />
+                          <span className="text-2xl font-bold text-slate-900 dark:text-white">
+                            {pkg.tokenAmount}
+                          </span>
+                          <span className="text-sm text-slate-500 dark:text-slate-400">tokens</span>
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => handleRedeemPackage(pkg.id)}
+                        disabled={isDisabled}
+                        className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                      >
+                        {isRedeeming ? (
+                          'Resgatando...'
+                        ) : hasActivePlan ? (
+                          'Plano Ativo'
+                        ) : (
+                          <>
+                            <SparklesIcon className="w-4 h-4" />
+                            Resgatar Pacote
+                          </>
+                        )}
+                      </button>
+                    </div>
+                    {hasActivePlan && user?.roleExpiresAt && (
+                      <div className="text-xs text-slate-600 dark:text-slate-400 bg-white/50 dark:bg-slate-800/50 rounded-lg px-3 py-2">
+                        Você já possui este plano. Válido até {new Date(user.roleExpiresAt).toLocaleDateString('pt-BR')}.
+                      </div>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
       </div>
 
       {/* Admin / Dev Tools */}
