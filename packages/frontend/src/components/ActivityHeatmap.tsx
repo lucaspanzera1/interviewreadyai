@@ -153,8 +153,16 @@ const ActivityHeatmap: React.FC<ActivityHeatmapProps> = ({ data, totalActivities
         });
     };
 
+    const scrollContainerRef = React.useRef<HTMLDivElement>(null);
+
+    React.useEffect(() => {
+        if (scrollContainerRef.current) {
+            scrollContainerRef.current.scrollLeft = scrollContainerRef.current.scrollWidth;
+        }
+    }, [weeks]);
+
     return (
-        <div className="relative">
+        <div className="relative w-full max-w-full">
             {/* Fixed Tooltip - escapes overflow */}
             {tooltip && (
                 <div
@@ -167,8 +175,11 @@ const ActivityHeatmap: React.FC<ActivityHeatmapProps> = ({ data, totalActivities
                 </div>
             )}
 
-            <div className="w-full overflow-x-auto pb-4">
-                <div className="min-w-[700px] px-1">
+            <div
+                ref={scrollContainerRef}
+                className="w-full overflow-x-auto pb-4 scrollbar-thin scrollbar-thumb-slate-200 dark:scrollbar-thumb-slate-700 scrollbar-track-transparent"
+            >
+                <div className="min-w-max px-1">
                     {/* Month labels - restoring simpler layout since padding isn't needed for tooltip anymore */}
                     <div className="flex mb-2 text-xs text-slate-400 dark:text-slate-500 relative h-4">
                         {monthLabels.map((month, i) => (
@@ -183,7 +194,7 @@ const ActivityHeatmap: React.FC<ActivityHeatmapProps> = ({ data, totalActivities
 
                     <div className="flex gap-[3px]">
                         {/* Day labels */}
-                        <div className="flex flex-col gap-[3px] text-[10px] text-slate-400 dark:text-slate-500 pr-2 pt-2">
+                        <div className="flex flex-col gap-[3px] text-[10px] text-slate-400 dark:text-slate-500 pr-2 pt-2 sticky left-0 bg-white dark:bg-slate-900 z-10">
                             <div className="h-[10px]"></div>
                             <div className="h-[10px]">Seg</div>
                             <div className="h-[10px]"></div>
@@ -199,7 +210,7 @@ const ActivityHeatmap: React.FC<ActivityHeatmapProps> = ({ data, totalActivities
                                 {week.map((day, dIndex) => (
                                     <div
                                         key={`${wIndex}-${dIndex}`}
-                                        className={`w-[10px] h-[10px] rounded-[2px] ${getColor(day.level)} transition-colors cursor-pointer hover:ring-1 hover:ring-slate-400 dark:hover:ring-slate-500 hover:z-10`}
+                                        className={`w-[10px] h-[10px] rounded-[2px] ${getColor(day.level)} transition-colors cursor-pointer hover:scale-125 hover:z-20`}
                                         onMouseEnter={(e) => handleMouseEnter(e, day.count, day.date)}
                                         onMouseLeave={() => setTooltip(null)}
                                     />
@@ -208,7 +219,7 @@ const ActivityHeatmap: React.FC<ActivityHeatmapProps> = ({ data, totalActivities
                         ))}
                     </div>
 
-                    <div className="mt-4 flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
+                    <div className="mt-4 flex items-center justify-between text-xs text-slate-500 dark:text-slate-400 sticky left-0">
                         <div>
                             {totalActivities !== undefined && (
                                 <span>Total de {totalActivities} atividades no último ano</span>

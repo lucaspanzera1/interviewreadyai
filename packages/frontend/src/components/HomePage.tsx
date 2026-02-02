@@ -217,9 +217,9 @@ const HomePage: React.FC = () => {
       <main className={`min-h-screen transition-all duration-300 ${isCollapsed ? 'lg:ml-16' : 'lg:ml-64'}`}>
         {/* Header */}
         <header className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 sticky top-0 z-20">
-          <div className="px-6 lg:px-8 py-4">
+          <div className="px-4 lg:px-8 py-3 lg:py-4">
             <div className="flex items-center justify-between">
-              <div className="ml-12 lg:ml-0">
+              <div>
                 <h1 className="text-xl font-bold text-slate-900 dark:text-white tracking-tight">
                   {isGuest ? (
                     <span>Olá, <span className="text-primary-600 dark:text-primary-400">Visitante</span></span>
@@ -252,23 +252,24 @@ const HomePage: React.FC = () => {
         </header>
 
         {/* Content */}
-        <div className="p-6 lg:p-8 space-y-8 max-w-7xl mx-auto relative">
+        {/* Content */}
+        <div className="p-4 lg:p-8 pb-24 lg:pb-8 space-y-6 lg:space-y-8 max-w-7xl mx-auto relative">
 
           {/* Guest Banner */}
           {isGuest && (
-            <div className="bg-gradient-to-r from-primary-900 to-indigo-900 rounded-2xl p-6 text-white shadow-lg relative overflow-hidden">
+            <div className="bg-gradient-to-r from-primary-900 to-indigo-900 rounded-2xl p-5 lg:p-6 text-white shadow-lg relative overflow-hidden">
               <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6">
                 <div>
                   <h2 className="text-xl font-bold mb-2">Modo Visualização</h2>
-                  <p className="text-primary-100 max-w-xl">
+                  <p className="text-primary-100 max-w-xl text-sm lg:text-base">
                     Você está vendo uma prévia da plataforma. Acesso aos quizzes gratuitos está liberado!
                     Crie sua conta para acompanhar seu progresso e métricas detalhadas.
                   </p>
                 </div>
-                <div className="flex gap-3 shrink-0">
+                <div className="flex gap-3 shrink-0 w-full md:w-auto">
                   <button
                     onClick={() => navigate('/login')}
-                    className="px-5 py-2.5 bg-white text-primary-900 rounded-xl font-bold hover:bg-slate-100 transition-colors shadow-lg"
+                    className="w-full md:w-auto px-5 py-2.5 bg-white text-primary-900 rounded-xl font-bold hover:bg-slate-100 transition-colors shadow-lg"
                   >
                     Criar Conta Grátis
                   </button>
@@ -281,32 +282,32 @@ const HomePage: React.FC = () => {
           )}
 
           {/* Stats Grid */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4">
             {statsConfig.map((stat, index) => (
-              <div key={index} className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 hover:border-primary-300 dark:hover:border-primary-600 transition-all duration-300 hover:shadow-md hover:-translate-y-1 group relative overflow-hidden">
+              <div key={index} className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 lg:p-5 hover:border-primary-300 dark:hover:border-primary-600 transition-all duration-300 hover:shadow-md hover:-translate-y-1 group relative overflow-hidden">
                 {stat.blur && (
                   <div className="absolute inset-0 backdrop-blur-[2px] bg-white/10 dark:bg-slate-900/10 z-10 flex items-center justify-center">
                     <LockClosedIcon className="w-6 h-6 text-slate-400/80" />
                   </div>
                 )}
-                <div className="flex items-center justify-between mb-4">
-                  <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide">{stat.label}</p>
-                  <div className={`p-2 rounded-lg ${stat.color === 'indigo' ? 'bg-indigo-50 text-indigo-600 dark:bg-indigo-900/20 dark:text-indigo-400' :
+                <div className="flex items-center justify-between mb-3 lg:mb-4">
+                  <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide truncate pr-2">{stat.label}</p>
+                  <div className={`p-1.5 lg:p-2 rounded-lg shrink-0 ${stat.color === 'indigo' ? 'bg-indigo-50 text-indigo-600 dark:bg-indigo-900/20 dark:text-indigo-400' :
                     stat.color === 'green' ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-900/20 dark:text-emerald-400' :
                       stat.color === 'amber' ? 'bg-amber-50 text-amber-600 dark:bg-amber-900/20 dark:text-amber-400' :
                         'bg-primary-50 text-primary-600 dark:bg-primary-900/20 dark:text-primary-400'
                     }`}>
-                    <stat.icon className="w-5 h-5" />
+                    <stat.icon className="w-4 h-4 lg:w-5 lg:h-5" />
                   </div>
                 </div>
-                <p className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">{stat.value}</p>
+                <p className="text-xl lg:text-2xl font-bold text-slate-900 dark:text-white tracking-tight truncate" title={stat.value}>{stat.value}</p>
               </div>
             ))}
           </div>
 
-          <div className="grid lg:grid-cols-3 gap-8">
+          <div className="grid lg:grid-cols-3 gap-6 lg:gap-8">
             {/* Left Column: Quick Actions & Tips */}
-            <div className="lg:col-span-1 space-y-6">
+            <div className="lg:col-span-1 space-y-6 min-w-0">
               {/* Quick Actions */}
               <section>
                 <h2 className="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-wider mb-4">
@@ -323,16 +324,16 @@ const HomePage: React.FC = () => {
                         }`}
                     >
                       <div className="relative z-10 flex items-center justify-between">
-                        <div className="flex items-center gap-4">
-                          <div className={`p-2 rounded-lg ${action.primary ? 'bg-white/20' : action.bg} ${action.primary ? 'text-white' : action.text}`}>
+                        <div className="flex items-center gap-4 min-w-0">
+                          <div className={`p-2 rounded-lg shrink-0 ${action.primary ? 'bg-white/20' : action.bg} ${action.primary ? 'text-white' : action.text}`}>
                             <action.icon className="w-5 h-5" />
                           </div>
-                          <div>
-                            <p className={`font-bold ${action.primary ? 'text-white' : 'text-slate-900 dark:text-white'}`}>{action.label}</p>
-                            <p className={`text-xs ${action.primary ? 'text-white/80' : 'text-slate-500 dark:text-slate-400'}`}>{action.desc}</p>
+                          <div className="min-w-0">
+                            <p className={`font-bold truncate ${action.primary ? 'text-white' : 'text-slate-900 dark:text-white'}`}>{action.label}</p>
+                            <p className={`text-xs truncate ${action.primary ? 'text-white/80' : 'text-slate-500 dark:text-slate-400'}`}>{action.desc}</p>
                           </div>
                         </div>
-                        <ArrowRightOnRectangleIcon className={`w-4 h-4 -rotate-45 transition-transform group-hover:translate-x-1 ${action.primary ? 'text-white/70' : 'text-slate-400'}`} />
+                        <ArrowRightOnRectangleIcon className={`w-4 h-4 shrink-0 -rotate-45 transition-transform group-hover:translate-x-1 ${action.primary ? 'text-white/70' : 'text-slate-400'}`} />
                       </div>
                     </button>
                   ))}
@@ -342,7 +343,7 @@ const HomePage: React.FC = () => {
               {/* Tip Card */}
               <div className="p-5 bg-gradient-to-br from-indigo-50 to-white dark:from-indigo-950/30 dark:to-slate-900 border border-indigo-100 dark:border-slate-800 rounded-2xl">
                 <div className="flex items-start gap-3">
-                  <SparklesIcon className="w-5 h-5 text-indigo-500 dark:text-indigo-400 mt-0.5" />
+                  <SparklesIcon className="w-5 h-5 text-indigo-500 dark:text-indigo-400 mt-0.5 shrink-0" />
                   <div>
                     <p className="text-xs font-bold text-indigo-900 dark:text-indigo-300 uppercase tracking-wide mb-1">Dica Pro</p>
                     <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
@@ -356,7 +357,7 @@ const HomePage: React.FC = () => {
             </div>
 
             {/* Center/Right: Feed & Content */}
-            <div className="lg:col-span-2 space-y-8">
+            <div className="lg:col-span-2 space-y-6 lg:space-y-8 min-w-0">
               {/* Suggested Quizzes */}
               <section>
                 <div className="flex items-center justify-between mb-4">
@@ -394,7 +395,7 @@ const HomePage: React.FC = () => {
                     </div>
                   ))}
                   {suggestedQuizzes.length === 0 && (
-                    <div className="col-span-2 text-center py-8 bg-slate-50 dark:bg-slate-900 rounded-xl border border-dashed border-slate-200 dark:border-slate-800">
+                    <div className="col-span-1 sm:col-span-2 text-center py-8 bg-slate-50 dark:bg-slate-900 rounded-xl border border-dashed border-slate-200 dark:border-slate-800">
                       <p className="text-slate-500 text-sm">Carregando sugestões...</p>
                     </div>
                   )}
@@ -426,7 +427,7 @@ const HomePage: React.FC = () => {
                   </div>
                 ) : (
                   <>
-                    <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 mb-4 overflow-x-auto">
+                    <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 mb-4 overflow-hidden w-full max-w-full">
                       <ActivityHeatmap
                         data={activityData}
                         totalActivities={activityData.reduce((acc, curr) => acc + curr.count, 0)}
@@ -442,18 +443,18 @@ const HomePage: React.FC = () => {
                             onClick={() => navigate(`/profile/quiz-history/${simulado.id}`)}
                             className={`p-4 flex items-center justify-between cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors ${i !== recentSimulados.length - 1 ? 'border-b border-slate-100 dark:border-slate-800' : ''}`}
                           >
-                            <div className="flex items-center gap-4">
-                              <div className="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500 dark:text-slate-400 font-bold text-xs">
+                            <div className="flex items-center gap-3 lg:gap-4 min-w-0">
+                              <div className="w-10 h-10 shrink-0 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500 dark:text-slate-400 font-bold text-xs">
                                 {(simulado.score ?? 0).toFixed(0)}%
                               </div>
-                              <div>
-                                <p className="font-semibold text-slate-900 dark:text-white text-sm">{simulado.title}</p>
-                                <p className="text-xs text-slate-500 dark:text-slate-400">
+                              <div className="min-w-0 flex-1">
+                                <p className="font-semibold text-slate-900 dark:text-white text-sm truncate">{simulado.title}</p>
+                                <p className="text-xs text-slate-500 dark:text-slate-400 truncate">
                                   {new Date(simulado.date).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })} • {simulado.questionsCount} questões
                                 </p>
                               </div>
                             </div>
-                            <ArrowRightOnRectangleIcon className="w-4 h-4 text-slate-300 -rotate-45" />
+                            <ArrowRightOnRectangleIcon className="w-4 h-4 text-slate-300 -rotate-45 shrink-0" />
                           </div>
                         ))}
                       </div>
