@@ -117,19 +117,19 @@ const UserQuizHistoryPage: React.FC = () => {
     };
 
     const StatCard = ({ icon: Icon, label, value, colorClass }: any) => (
-        <div className={`relative overflow-hidden bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-soft hover:shadow-lifted transition-all duration-300 border border-slate-100 dark:border-slate-700 group hover:-translate-y-1`}>
+        <div className={`relative overflow-hidden bg-white dark:bg-slate-800 rounded-2xl p-4 sm:p-6 shadow-soft hover:shadow-lifted transition-all duration-300 border border-slate-100 dark:border-slate-700 group hover:-translate-y-1`}>
             {/* Background decoration */}
             <div className={`absolute top-0 right-0 p-4 -mr-4 -mt-4 opacity-5 group-hover:opacity-10 transition-opacity`}>
-                <Icon className="w-32 h-32 transform rotate-12" />
+                <Icon className="w-24 h-24 sm:w-32 sm:h-32 transform rotate-12" />
             </div>
 
-            <div className="relative z-10 flex items-center gap-4">
-                <div className={`p-4 rounded-xl ${colorClass} bg-opacity-10 backdrop-blur-sm ring-1 ring-inset ring-black/5 dark:ring-white/5`}>
-                    <Icon className="h-6 w-6" />
+            <div className="relative z-10 flex items-center gap-3 sm:gap-4">
+                <div className={`p-3 sm:p-4 rounded-xl ${colorClass} bg-opacity-10 backdrop-blur-sm ring-1 ring-inset ring-black/5 dark:ring-white/5`}>
+                    <Icon className="h-5 w-5 sm:h-6 sm:w-6" />
                 </div>
                 <div>
-                    <p className="text-sm font-medium text-slate-500 dark:text-slate-400">{label}</p>
-                    <p className="text-3xl font-bold text-slate-900 dark:text-white font-sans tracking-tight mt-0.5">{value}</p>
+                    <p className="text-xs sm:text-sm font-medium text-slate-500 dark:text-slate-400">{label}</p>
+                    <p className="text-xl sm:text-3xl font-bold text-slate-900 dark:text-white font-sans tracking-tight mt-0.5">{value}</p>
                 </div>
             </div>
         </div>
@@ -169,7 +169,7 @@ const UserQuizHistoryPage: React.FC = () => {
                 </div>
 
                 {/* Stats Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
                     <StatCard
                         icon={AcademicCapIcon}
                         label="Total de Quizzes"
@@ -209,13 +209,13 @@ const UserQuizHistoryPage: React.FC = () => {
                             attempts.map((attempt) => (
                                 <div
                                     key={attempt._id}
-                                    className="group relative bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-soft hover:shadow-lifted border border-slate-100 dark:border-slate-700 transition-all duration-300 overflow-hidden hover:border-primary-100 dark:hover:border-primary-900/50"
+                                    className="group relative bg-white dark:bg-slate-800 rounded-2xl p-4 sm:p-6 shadow-soft hover:shadow-lifted border border-slate-100 dark:border-slate-700 transition-all duration-300 overflow-hidden hover:border-primary-100 dark:hover:border-primary-900/50"
                                 >
                                     <div className="absolute top-0 right-0 p-6 opacity-0 group-hover:opacity-5 transition-opacity duration-500">
                                         <AcademicCapIcon className="h-32 w-32 text-primary-600 transform rotate-12" />
                                     </div>
 
-                                    <div className="relative z-10 flex flex-col sm:flex-row gap-6">
+                                    <div className="relative z-10 flex flex-col sm:flex-row gap-4 sm:gap-6">
                                         {/* Score Badge */}
                                         <div className="flex-shrink-0 flex items-center justify-center sm:block">
                                             <div className={`

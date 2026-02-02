@@ -320,37 +320,41 @@ const Sidebar: React.FC = () => {
         </div>
     );
 
+    const bottomNavItems = [
+        { name: 'Início', path: '/', icon: HomeIcon, activeIcon: HomeIconSolid },
+        { name: 'Explorar', path: '/free-quizzes', icon: AcademicCapIcon, activeIcon: AcademicCapIconSolid },
+        { name: 'Meus Quizzes', path: '/my-quizzes', icon: DocumentTextIcon, activeIcon: DocumentTextIconSolid },
+        { name: 'Evolução', path: '/desempenho', icon: ChartBarIcon, activeIcon: ChartBarIconSolid },
+        { name: 'Menu', path: '#menu', icon: Bars3Icon, activeIcon: Bars3Icon, action: () => setIsMobileOpen(true) },
+    ];
+
     return (
         <>
-            {/* Mobile Menu Button */}
-            <button
-                onClick={() => setIsMobileOpen(true)}
-                className="lg:hidden fixed top-4 left-4 z-50 p-2 bg-white dark:bg-slate-800 rounded-lg shadow-md border border-slate-200 dark:border-slate-700"
-            >
-                <Bars3Icon className="w-6 h-6 text-slate-600 dark:text-slate-300" />
-            </button>
-
-            {/* Mobile Overlay */}
             {/* Mobile Overlay */}
             <div
-                className={`lg:hidden fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-40 transition-opacity duration-300 ease-in-out ${isMobileOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
+                className={`lg:hidden fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 transition-opacity duration-300 ease-in-out ${isMobileOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
                     }`}
                 onClick={() => setIsMobileOpen(false)}
                 aria-hidden="true"
             />
 
-            {/* Mobile Sidebar */}
+            {/* Mobile Sidebar (Drawer) */}
             <aside
                 ref={sidebarRef}
-                className={`lg:hidden fixed left-0 top-0 h-full w-64 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-700 z-50 transform transition-transform duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] ${isMobileOpen ? 'translate-x-0' : '-translate-x-full'}`}
+                className={`lg:hidden fixed left-0 top-0 h-full w-72 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-700 z-50 transform transition-transform duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] ${isMobileOpen ? 'translate-x-0' : '-translate-x-full'}`}
             >
-                <button
-                    onClick={() => setIsMobileOpen(false)}
-                    className="absolute top-4 right-4 p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
-                >
-                    <XMarkIcon className="w-6 h-6" />
-                </button>
-                <SidebarContent />
+                <div className="flex items-center justify-between p-4 border-b border-slate-100 dark:border-slate-800">
+                    <span className="font-bold text-lg text-slate-900 dark:text-white">Menu</span>
+                    <button
+                        onClick={() => setIsMobileOpen(false)}
+                        className="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800"
+                    >
+                        <XMarkIcon className="w-6 h-6" />
+                    </button>
+                </div>
+                <div className="h-[calc(100%-65px)] overflow-y-auto">
+                    <SidebarContent />
+                </div>
             </aside>
 
             {/* Desktop Sidebar */}
@@ -367,6 +371,40 @@ const Sidebar: React.FC = () => {
                     </svg>
                 </button>
             </aside>
+
+            {/* Mobile Bottom Nav */}
+            <nav
+                className="lg:hidden fixed bottom-0 left-0 right-0 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 z-40 px-2 pb-1"
+                style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
+            >
+                <div className="flex justify-around items-center h-16">
+                    {bottomNavItems.map((item) => {
+                        const active = isActive(item.path);
+                        const Icon = active ? item.activeIcon : item.icon;
+
+                        return (
+                            <button
+                                key={item.name}
+                                onClick={(e) => {
+                                    if (item.action) {
+                                        e.preventDefault();
+                                        item.action();
+                                    } else {
+                                        handleNavClick(item.path);
+                                    }
+                                }}
+                                className={`flex flex-col items-center justify-center w-full h-full space-y-1 ${active
+                                    ? 'text-primary-600 dark:text-primary-400'
+                                    : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'
+                                    }`}
+                            >
+                                <Icon className={`w-6 h-6 transition-transform duration-200 ${active ? 'scale-110' : ''}`} />
+                                <span className="text-[10px] font-medium">{item.name}</span>
+                            </button>
+                        );
+                    })}
+                </div>
+            </nav>
         </>
     );
 };

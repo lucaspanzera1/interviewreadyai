@@ -1,7 +1,10 @@
 import React from 'react';
 import { PlusCircleIcon, DocumentTextIcon } from '@heroicons/react/24/outline';
 
+import { useNavigate } from 'react-router-dom';
+
 const MyQuizzesPage: React.FC = () => {
+    const navigate = useNavigate();
 
     return (
         <div className="flex flex-col h-full bg-slate-50 dark:bg-slate-900 transition-colors duration-300">
@@ -17,11 +20,12 @@ const MyQuizzesPage: React.FC = () => {
                         </p>
                     </div>
                     <button
-                        disabled
-                        className="hidden sm:flex items-center gap-2 px-4 py-2 bg-slate-400 cursor-not-allowed text-white rounded-lg font-medium transition-colors shadow-none"
+                        onClick={() => navigate('/create-quiz')}
+                        className="flex items-center gap-2 px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg font-medium transition-colors shadow-sm"
                     >
                         <PlusCircleIcon className="w-5 h-5" />
-                        Criar Novo Quiz
+                        <span className="hidden sm:inline">Criar Novo Quiz</span>
+                        <span className="sm:hidden">Criar</span>
                     </button>
                 </div>
             </div>
@@ -58,8 +62,8 @@ const MyQuizzesPage: React.FC = () => {
                             Você ainda não criou nenhum quiz. Crie quizzes personalizados a partir de vagas ou tópicos específicos baseados em IA.
                         </p>
                         <button
-                            disabled
-                            className="flex items-center gap-2 px-6 py-3 bg-slate-400 cursor-not-allowed text-white rounded-xl font-bold transition-all shadow-none"
+                            onClick={() => navigate('/create-quiz')}
+                            className="flex items-center gap-2 px-6 py-3 bg-primary-600 hover:bg-primary-700 text-white rounded-xl font-bold transition-all shadow-lg hover:shadow-primary-600/20 hover:-translate-y-1"
                         >
                             <PlusCircleIcon className="w-5 h-5" />
                             Começar Agora

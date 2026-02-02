@@ -91,6 +91,17 @@ const Footer: React.FC = () => {
                                         <span className="transform group-hover:translate-x-1 transition-transform duration-200">Funcionalidades</span>
                                     </a>
                                 </li>
+                                <li>
+                                    <a
+                                        href="https://www.treinavaga.tech/roadmap"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="text-slate-500 dark:text-slate-400 hover:text-primary-600 dark:hover:text-primary-400 text-sm font-medium transition-colors duration-200 flex items-center gap-1 group"
+                                    >
+                                        <span className="w-0 group-hover:w-1.5 h-1.5 bg-primary-500 rounded-full transition-all duration-200 opacity-0 group-hover:opacity-100"></span>
+                                        <span className="transform group-hover:translate-x-1 transition-transform duration-200">Roadmap</span>
+                                    </a>
+                                </li>
                             </ul>
                         </div>
                         <div>

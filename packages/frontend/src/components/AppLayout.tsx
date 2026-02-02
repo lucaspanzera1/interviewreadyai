@@ -1,5 +1,5 @@
-import React from 'react';
-import { Outlet } from 'react-router-dom';
+import React, { useEffect } from 'react';
+import { Outlet, useLocation } from 'react-router-dom';
 import Sidebar from './BottomNav';
 import Footer from './Footer';
 import { useSidebar } from '../contexts/SidebarContext';
@@ -14,6 +14,11 @@ interface AppLayoutProps {
  */
 const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
   const { isCollapsed } = useSidebar();
+  const { pathname } = useLocation();
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-900">

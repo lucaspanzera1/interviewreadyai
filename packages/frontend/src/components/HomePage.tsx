@@ -22,6 +22,7 @@ import {
   QuestionMarkCircleIcon
 } from '@heroicons/react/24/outline';
 import OnboardingGuide from './OnboardingGuide';
+import ActivityHeatmap from './ActivityHeatmap';
 
 const HomePage: React.FC = () => {
   const { user, isLoading } = useAuth();
@@ -41,13 +42,35 @@ const HomePage: React.FC = () => {
     );
   }
 
+  const [activityData, setActivityData] = useState<{ date: string; count: number }[]>([]);
+
   // Load data
   useEffect(() => {
     if (user) {
       loadUserStats();
+      loadActivity();
     }
     loadSuggestedQuizzes();
   }, [user]);
+
+  const loadActivity = async () => {
+    try {
+      // Fetch up to 1000 last attempts for the heatmap
+      const result = await apiClient.getUserAttempts(1, 1000);
+      if (result && result.attempts) {
+        const counts: Record<string, number> = {};
+        result.attempts.forEach((a: any) => {
+          const date = new Date(a.createdAt).toISOString().split('T')[0];
+          counts[date] = (counts[date] || 0) + 1;
+        });
+
+        const data = Object.entries(counts).map(([date, count]) => ({ date, count }));
+        setActivityData(data);
+      }
+    } catch (error) {
+      console.error('Error loading activity:', error);
+    }
+  };
 
   const loadUserStats = async () => {
     try {
@@ -401,38 +424,53 @@ const HomePage: React.FC = () => {
                       Começar agora
                     </button>
                   </div>
-                ) : recentSimulados.length > 0 ? (
-                  <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden">
-                    {recentSimulados.slice(0, 3).map((simulado: any, i: number) => (
-                      <div
-                        key={simulado.id}
-                        onClick={() => navigate(`/profile/quiz-history/${simulado.id}`)}
-                        className={`p-4 flex items-center justify-between cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors ${i !== recentSimulados.length - 1 ? 'border-b border-slate-100 dark:border-slate-800' : ''}`}
-                      >
-                        <div className="flex items-center gap-4">
-                          <div className="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500 dark:text-slate-400 font-bold text-xs">
-                            {(simulado.score ?? 0).toFixed(0)}%
-                          </div>
-                          <div>
-                            <p className="font-semibold text-slate-900 dark:text-white text-sm">{simulado.title}</p>
-                            <p className="text-xs text-slate-500 dark:text-slate-400">
-                              {new Date(simulado.date).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })} • {simulado.questionsCount} questões
-                            </p>
-                          </div>
-                        </div>
-                        <ArrowRightOnRectangleIcon className="w-4 h-4 text-slate-300 -rotate-45" />
-                      </div>
-                    ))}
-                  </div>
                 ) : (
-                  <div className="text-center py-10 bg-slate-50 dark:bg-slate-900 rounded-xl border border-dashed border-slate-200 dark:border-slate-800">
-                    <p className="text-sm text-slate-500">Nenhuma atividade recente.</p>
-                    <button onClick={() => navigate('/simulados/novo')} className="text-xs text-primary-600 font-semibold mt-1">Começar agora</button>
-                  </div>
+                  <>
+                    <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 mb-4 overflow-x-auto">
+                      <ActivityHeatmap
+                        data={activityData}
+                        totalActivities={activityData.reduce((acc, curr) => acc + curr.count, 0)}
+                        startDate={new Date(2026, 1, 1)}
+                        endDate={new Date(2027, 1, 1)}
+                      />
+                    </div>
+                    {recentSimulados.length > 0 ? (
+                      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden">
+                        {recentSimulados.slice(0, 3).map((simulado: any, i: number) => (
+                          <div
+                            key={simulado.id}
+                            onClick={() => navigate(`/profile/quiz-history/${simulado.id}`)}
+                            className={`p-4 flex items-center justify-between cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors ${i !== recentSimulados.length - 1 ? 'border-b border-slate-100 dark:border-slate-800' : ''}`}
+                          >
+                            <div className="flex items-center gap-4">
+                              <div className="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500 dark:text-slate-400 font-bold text-xs">
+                                {(simulado.score ?? 0).toFixed(0)}%
+                              </div>
+                              <div>
+                                <p className="font-semibold text-slate-900 dark:text-white text-sm">{simulado.title}</p>
+                                <p className="text-xs text-slate-500 dark:text-slate-400">
+                                  {new Date(simulado.date).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })} • {simulado.questionsCount} questões
+                                </p>
+                              </div>
+                            </div>
+                            <ArrowRightOnRectangleIcon className="w-4 h-4 text-slate-300 -rotate-45" />
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-center py-10 bg-slate-50 dark:bg-slate-900 rounded-xl border border-dashed border-slate-200 dark:border-slate-800">
+                        <p className="text-sm text-slate-500">Nenhuma atividade recente.</p>
+                        <button onClick={() => navigate('/simulados/novo')} className="text-xs text-primary-600 font-semibold mt-1">Começar agora</button>
+                      </div>
+                    )}
+                  </>
                 )}
               </section>
             </div>
           </div>
+
+          {/* Activity Heatmap Section */}
+
         </div>
       </main>
 
@@ -444,7 +482,7 @@ const HomePage: React.FC = () => {
 
       <button
         onClick={() => setIsOnboardingOpen(true)}
-        className="fixed bottom-6 right-6 z-40 p-3 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 hover:text-primary-600 dark:hover:text-primary-400 rounded-full shadow-lg shadow-slate-200/50 dark:shadow-slate-900/50 hover:shadow-xl hover:scale-105 active:scale-95 transition-all duration-300 group"
+        className="fixed bottom-24 lg:bottom-6 right-6 z-40 p-3 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 hover:text-primary-600 dark:hover:text-primary-400 rounded-full shadow-lg shadow-slate-200/50 dark:shadow-slate-900/50 hover:shadow-xl hover:scale-105 active:scale-95 transition-all duration-300 group"
         aria-label="Ajuda e Tutorial"
       >
         <QuestionMarkCircleIcon className="w-6 h-6" />

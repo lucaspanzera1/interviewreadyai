@@ -133,9 +133,9 @@ const RewardHistoryPage: React.FC = () => {
   }
 
   return (
-    <div className="max-w-4xl mx-auto space-y-16 py-8">
+    <div className="max-w-4xl mx-auto space-y-8 sm:space-y-16 py-6 sm:py-8 pb-24 sm:pb-8">
       {/* Header */}
-      <div className="flex flex-col md:flex-row items-end justify-between gap-6 px-4">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 px-4">
         <div>
           <div className="flex items-center gap-3 mb-4">
             <button
@@ -146,14 +146,14 @@ const RewardHistoryPage: React.FC = () => {
             </button>
             <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Minha Jornada</span>
           </div>
-          <h1 className="text-4xl font-bold text-slate-900 dark:text-white tracking-tight">Recompensas</h1>
-          <p className="text-slate-500 dark:text-slate-400 mt-2 font-medium">Seu progresso e conquistas acumuladas.</p>
+          <h1 className="text-3xl sm:text-4xl font-bold text-slate-900 dark:text-white tracking-tight">Recompensas</h1>
+          <p className="text-slate-500 dark:text-slate-400 mt-2 font-medium text-sm sm:text-base">Seu progresso e conquistas acumuladas.</p>
         </div>
 
-        <div className="flex items-center gap-8 pb-2">
-          <div className="text-right">
+        <div className="w-full md:w-auto flex items-center justify-between md:justify-end gap-8 pt-6 md:pt-0 border-t md:border-t-0 border-slate-100 dark:border-slate-800 md:border-none">
+          <div className="text-left md:text-right">
             <span className="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Ganhos Totais</span>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center md:justify-end gap-2">
               <span className="text-3xl font-black text-slate-900 dark:text-white leading-none">
                 {rewards.filter(r => r.type === 'token').reduce((sum, r) => sum + r.amount, 0)}
               </span>
@@ -174,7 +174,7 @@ const RewardHistoryPage: React.FC = () => {
 
       {/* Progress Section */}
       <div className="px-4">
-        <div className="bg-slate-50/50 dark:bg-slate-800/30 rounded-3xl p-8 border border-slate-100 dark:border-slate-800">
+        <div className="bg-slate-50/50 dark:bg-slate-800/30 rounded-3xl p-6 sm:p-8 border border-slate-100 dark:border-slate-800">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
             <div className="space-y-1">
               <h3 className="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-wider">Meta Semanal</h3>
@@ -209,27 +209,27 @@ const RewardHistoryPage: React.FC = () => {
             rewards.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()).map((reward, index) => (
               <div
                 key={index}
-                className="group flex items-center justify-between p-6 bg-white dark:bg-slate-900 rounded-[2rem] border border-slate-100 dark:border-slate-800 transition-all hover:bg-slate-50 dark:hover:bg-slate-800/50"
+                className="group flex flex-col sm:flex-row sm:items-center justify-between p-5 sm:p-6 bg-white dark:bg-slate-900 rounded-3xl sm:rounded-[2rem] border border-slate-100 dark:border-slate-800 transition-all hover:bg-slate-50 dark:hover:bg-slate-800/50 gap-4 sm:gap-6"
               >
-                <div className="flex items-center gap-6">
-                  <div className="w-12 h-12 rounded-2xl bg-slate-50 dark:bg-slate-800 flex items-center justify-center border border-slate-100 dark:border-slate-700 transition-transform group-hover:scale-105 group-hover:-rotate-3">
+                <div className="flex items-start sm:items-center gap-4 sm:gap-6">
+                  <div className="w-12 h-12 flex-shrink-0 rounded-2xl bg-slate-50 dark:bg-slate-800 flex items-center justify-center border border-slate-100 dark:border-slate-700 transition-transform group-hover:scale-105 group-hover:-rotate-3">
                     {getRewardIcon(reward.type)}
                   </div>
                   <div>
                     <h3 className="text-sm font-bold text-slate-900 dark:text-white capitalize leading-none mb-2">
                       {getRewardTitle(reward).toLowerCase()}
                     </h3>
-                    <p className="text-xs text-slate-500 font-medium lowercase first-letter:uppercase">
+                    <p className="text-xs text-slate-500 font-medium lowercase first-letter:uppercase leading-relaxed">
                       {getRewardDescription(reward).toLowerCase()}
                     </p>
                   </div>
                 </div>
 
-                <div className="text-right">
+                <div className="flex sm:block items-center justify-between w-full sm:w-auto text-right pl-[4rem] sm:pl-0">
                   <span className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest">
                     {new Date(reward.createdAt).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })}
                   </span>
-                  <span className="block text-[10px] text-slate-300 dark:text-slate-600 font-medium uppercase mt-1">
+                  <span className="block text-[10px] text-slate-300 dark:text-slate-600 font-medium uppercase mt-0 sm:mt-1">
                     {new Date(reward.createdAt).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
                   </span>
                 </div>

@@ -112,7 +112,7 @@ const UserQuizAttemptDetailsPage: React.FC = () => {
     const isCorrect = userAnswer === currentQuestion.correct_answer;
 
     return (
-        <div className="max-w-4xl mx-auto space-y-8">
+        <div className="max-w-4xl mx-auto space-y-6 sm:space-y-8 pb-24 sm:pb-0">
             <div className="flex items-center gap-4">
                 <button
                     onClick={() => navigate('/profile/quiz-history')}
@@ -124,18 +124,18 @@ const UserQuizAttemptDetailsPage: React.FC = () => {
             </div>
 
             {/* Attempt Summary */}
-            <div className="bg-white dark:bg-slate-900 rounded-xl p-6 border border-slate-200 dark:border-slate-800">
-                <div className="flex items-start justify-between mb-6">
+            <div className="bg-white dark:bg-slate-900 rounded-xl p-4 sm:p-6 border border-slate-200 dark:border-slate-800">
+                <div className="flex flex-col sm:flex-row items-start justify-between mb-6 gap-4 sm:gap-0">
                     <div>
                         <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-2">
                             {attempt.quizId.titulo}
                         </h2>
-                        <div className="flex items-center gap-4 text-sm text-slate-500 dark:text-slate-400">
+                        <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-slate-500 dark:text-slate-400">
                             <span>{attempt.quizId.categoria}</span>
                             <span>•</span>
                             <span>{attempt.quizId.nivel === 'INICIANTE' ? 'Iniciante' :
-                                   attempt.quizId.nivel === 'MEDIO' ? 'Médio' :
-                                   attempt.quizId.nivel === 'DIFÍCIL' ? 'Difícil' : 'Expert'}</span>
+                                attempt.quizId.nivel === 'MEDIO' ? 'Médio' :
+                                    attempt.quizId.nivel === 'DIFÍCIL' ? 'Difícil' : 'Expert'}</span>
                             <span>•</span>
                             <div className="flex items-center gap-1">
                                 <CalendarIcon className="w-4 h-4" />
@@ -149,7 +149,7 @@ const UserQuizAttemptDetailsPage: React.FC = () => {
                         </div>
                     </div>
 
-                    <div className="text-right">
+                    <div className="text-left sm:text-right w-full sm:w-auto flex flex-row sm:flex-col justify-between sm:justify-end items-center sm:items-end border-t sm:border-t-0 border-slate-100 dark:border-slate-800 pt-4 sm:pt-0 mt-2 sm:mt-0">
                         <div className={`text-3xl font-bold ${getScoreColor(attempt.percentage)}`}>
                             {attempt.percentage.toFixed(1)}%
                         </div>
@@ -184,7 +184,7 @@ const UserQuizAttemptDetailsPage: React.FC = () => {
                     </div>
 
                     {/* Question Display */}
-                    <div className="bg-slate-50 dark:bg-slate-800 rounded-lg p-6">
+                    <div className="bg-slate-50 dark:bg-slate-800 rounded-lg p-4 sm:p-6">
                         <h4 className="text-xl font-semibold text-slate-900 dark:text-white mb-4">
                             {currentQuestion.question}
                         </h4>
@@ -193,31 +193,28 @@ const UserQuizAttemptDetailsPage: React.FC = () => {
                             {currentQuestion.options.map((option, optionIndex) => (
                                 <div
                                     key={optionIndex}
-                                    className={`p-3 rounded-lg border ${
-                                        optionIndex === currentQuestion.correct_answer
+                                    className={`p-3 rounded-lg border ${optionIndex === currentQuestion.correct_answer
                                             ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800'
                                             : optionIndex === userAnswer && optionIndex !== currentQuestion.correct_answer
-                                            ? 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800'
-                                            : 'bg-white dark:bg-slate-700 border-slate-200 dark:border-slate-600'
-                                    }`}
+                                                ? 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800'
+                                                : 'bg-white dark:bg-slate-700 border-slate-200 dark:border-slate-600'
+                                        }`}
                                 >
                                     <div className="flex items-center justify-between">
-                                        <span className={`text-sm ${
-                                            optionIndex === currentQuestion.correct_answer
+                                        <span className={`text-sm ${optionIndex === currentQuestion.correct_answer
                                                 ? 'text-green-800 dark:text-green-200 font-semibold'
                                                 : optionIndex === userAnswer && optionIndex !== currentQuestion.correct_answer
-                                                ? 'text-red-800 dark:text-red-200 font-semibold'
-                                                : 'text-slate-700 dark:text-slate-300'
-                                        }`}>
+                                                    ? 'text-red-800 dark:text-red-200 font-semibold'
+                                                    : 'text-slate-700 dark:text-slate-300'
+                                            }`}>
                                             {String.fromCharCode(65 + optionIndex)}. {option}
                                         </span>
                                         <div className="flex items-center gap-2">
                                             {optionIndex === userAnswer && (
-                                                <span className={`text-xs font-medium px-2 py-1 rounded ${
-                                                    isCorrect
+                                                <span className={`text-xs font-medium px-2 py-1 rounded ${isCorrect
                                                         ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
                                                         : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
-                                                }`}>
+                                                    }`}>
                                                     Sua resposta
                                                 </span>
                                             )}
@@ -231,22 +228,20 @@ const UserQuizAttemptDetailsPage: React.FC = () => {
                         </div>
 
                         {/* Question Result */}
-                        <div className={`p-4 rounded-lg ${
-                            isCorrect
+                        <div className={`p-4 rounded-lg ${isCorrect
                                 ? 'bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800'
                                 : 'bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800'
-                        }`}>
+                            }`}>
                             <div className="flex items-center gap-2 mb-2">
                                 {isCorrect ? (
                                     <CheckCircleIcon className="w-5 h-5 text-green-600" />
                                 ) : (
                                     <XCircleIcon className="w-5 h-5 text-red-600" />
                                 )}
-                                <span className={`font-semibold ${
-                                    isCorrect
+                                <span className={`font-semibold ${isCorrect
                                         ? 'text-green-800 dark:text-green-200'
                                         : 'text-red-800 dark:text-red-200'
-                                }`}>
+                                    }`}>
                                     {isCorrect ? 'Resposta Correta!' : 'Resposta Incorreta'}
                                 </span>
                             </div>
