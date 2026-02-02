@@ -5,10 +5,11 @@ import { useToast } from '../contexts/ToastContext';
 import { apiClient } from '../lib/api';
 import {
   TicketIcon,
-  CalendarIcon,
   TrophyIcon,
   GiftIcon,
-  ArrowLeftIcon
+  ArrowLeftIcon,
+  ShieldCheckIcon,
+  ShoppingBagIcon
 } from '@heroicons/react/24/outline';
 import { useNavigate } from 'react-router-dom';
 
@@ -69,44 +70,56 @@ const RewardHistoryPage: React.FC = () => {
         return <TicketIcon className="w-5 h-5 text-amber-500" />;
       case 'badge':
         return <TrophyIcon className="w-5 h-5 text-purple-500" />;
+      case 'plan':
+      case 'role':
+        return <ShieldCheckIcon className="w-5 h-5 text-primary-500" />;
+      case 'package':
+        return <ShoppingBagIcon className="w-5 h-5 text-rose-500" />;
       default:
         return <GiftIcon className="w-5 h-5 text-green-500" />;
     }
   };
 
   const getRewardTitle = (reward: Reward) => {
+    if (reward.type === 'package' && reward.reason.includes(':')) {
+      return reward.reason.split(':')[1];
+    }
+
     switch (reward.type) {
       case 'token':
         return `+${reward.amount} Token${reward.amount > 1 ? 's' : ''}`;
       case 'badge':
         return `Nova Conquista`;
+      case 'plan':
+      case 'role':
+        return `Plano Ativado`;
+      case 'package':
+        return `Pacote Adquirido`;
       default:
         return `Recompensa`;
     }
   };
 
-  const getRewardDescription = (reason: string) => {
-    switch (reason) {
+  const getRewardDescription = (reward: Reward) => {
+    if (reward.type === 'package') {
+      return `Upgrade de conta + ${reward.amount} tokens`;
+    }
+
+    switch (reward.reason) {
       case 'quiz_completion':
         return 'Completou quizzes gratuitos';
       case 'referral':
         return 'Indicação de amigo';
       case 'achievement':
         return 'Conquista desbloqueada';
+      case 'package_redemption':
+        return 'Resgate de pacote promocional';
       default:
-        return reason;
+        return reward.reason;
     }
   };
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('pt-BR', {
-      day: '2-digit',
-      month: 'long',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    });
-  };
+
 
   if (isLoading) {
     return (
@@ -120,129 +133,128 @@ const RewardHistoryPage: React.FC = () => {
   }
 
   return (
-    <>
-      <PageTitle title="Histórico de Recompensas - TreinaVagaAI" />
-
-      <div className="space-y-6">
-        {/* Header */}
-        <div className="flex items-center gap-4">
-          <button
-            onClick={() => navigate('/profile')}
-            className="flex items-center gap-2 px-3 py-2 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg transition-colors"
-          >
-            <ArrowLeftIcon className="w-4 h-4" />
-            Voltar ao Perfil
-          </button>
-          <div>
-            <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Histórico de Recompensas</h1>
-            <p className="text-slate-600 dark:text-slate-400">Veja todas as recompensas que você ganhou</p>
+    <div className="max-w-4xl mx-auto space-y-16 py-8">
+      {/* Header */}
+      <div className="flex flex-col md:flex-row items-end justify-between gap-6 px-4">
+        <div>
+          <div className="flex items-center gap-3 mb-4">
+            <button
+              onClick={() => navigate('/profile')}
+              className="p-2 border border-slate-100 dark:border-slate-800 rounded-full hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
+            >
+              <ArrowLeftIcon className="w-4 h-4 text-slate-400" />
+            </button>
+            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Minha Jornada</span>
           </div>
+          <h1 className="text-4xl font-bold text-slate-900 dark:text-white tracking-tight">Recompensas</h1>
+          <p className="text-slate-500 dark:text-slate-400 mt-2 font-medium">Seu progresso e conquistas acumuladas.</p>
         </div>
 
-        {/* Stats Card */}
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg shadow-sm p-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="text-center">
-              <div className="flex items-center justify-center w-12 h-12 bg-amber-100 dark:bg-amber-900/30 rounded-lg mx-auto mb-3">
-                <TicketIcon className="w-6 h-6 text-amber-600 dark:text-amber-400" />
-              </div>
-              <p className="text-2xl font-bold text-slate-900 dark:text-white">{user?.tokens || 0}</p>
-              <p className="text-sm text-slate-500 dark:text-slate-400">Tokens Atuais</p>
-            </div>
-            <div className="text-center">
-              <div className="flex items-center justify-center w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-lg mx-auto mb-3">
-                <TrophyIcon className="w-6 h-6 text-blue-600 dark:text-blue-400" />
-              </div>
-              <p className="text-2xl font-bold text-slate-900 dark:text-white">{rewards.length}</p>
-              <p className="text-sm text-slate-500 dark:text-slate-400">Recompensas Totais</p>
-            </div>
-            <div className="text-center">
-              <div className="flex items-center justify-center w-12 h-12 bg-green-100 dark:bg-green-900/30 rounded-lg mx-auto mb-3">
-                <GiftIcon className="w-6 h-6 text-green-600 dark:text-green-400" />
-              </div>
-              <p className="text-2xl font-bold text-slate-900 dark:text-white">
+        <div className="flex items-center gap-8 pb-2">
+          <div className="text-right">
+            <span className="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Ganhos Totais</span>
+            <div className="flex items-center gap-2">
+              <span className="text-3xl font-black text-slate-900 dark:text-white leading-none">
                 {rewards.filter(r => r.type === 'token').reduce((sum, r) => sum + r.amount, 0)}
-              </p>
-              <p className="text-sm text-slate-500 dark:text-slate-400">Tokens Ganhos</p>
-            </div>
-          </div>
-        </div>
-
-        {/* Progress to Next Reward */}
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg shadow-sm p-6">
-          <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">Progresso para Próxima Recompensa</h3>
-          <div className="space-y-4">
-            <div className="flex items-center justify-between text-sm">
-              <span className="text-slate-600 dark:text-slate-400">Quizzes feitos</span>
-              <span className="font-medium text-slate-900 dark:text-white">
-                {stats.totalAttempts}
               </span>
-            </div>
-            <div className="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-3">
-              <div
-                className="bg-primary-500 h-3 rounded-full transition-all duration-300"
-                style={{ width: `${(stats.totalAttempts % 5) * 20}%` }}
-              ></div>
-            </div>
-            <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
-              <span>Próximo token em {5 - (stats.totalAttempts % 5)} quizzes</span>
-              <span>{stats.totalAttempts % 5}/5</span>
+              <TicketIcon className="w-5 h-5 text-amber-500" />
             </div>
           </div>
-        </div>
-
-        {/* Rewards List */}
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg shadow-sm">
-          <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-800">
-            <h2 className="text-lg font-semibold text-slate-900 dark:text-white">Histórico Detalhado</h2>
-          </div>
-
-          <div className="divide-y divide-slate-100 dark:divide-slate-800">
-            {rewards.length > 0 ? (
-              rewards.map((reward, index) => (
-                <div key={index} className="px-6 py-4 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-4">
-                      <div className="flex-shrink-0">
-                        {getRewardIcon(reward.type)}
-                      </div>
-                      <div>
-                        <h3 className="text-sm font-semibold text-slate-900 dark:text-white">
-                          {getRewardTitle(reward)}
-                        </h3>
-                        <p className="text-sm text-slate-500 dark:text-slate-400">
-                          {getRewardDescription(reward.reason)}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
-                      <CalendarIcon className="w-4 h-4" />
-                      {formatDate(reward.createdAt)}
-                    </div>
-                  </div>
-                </div>
-              ))
-            ) : (
-              <div className="px-6 py-12 text-center">
-                <GiftIcon className="w-12 h-12 text-slate-300 dark:text-slate-600 mx-auto mb-4" />
-                <h3 className="text-lg font-medium text-slate-900 dark:text-white mb-2">
-                  Nenhuma recompensa ainda
-                </h3>
-                <p className="text-slate-500 dark:text-slate-400 mb-4">
-                  Complete quizzes gratuitos para começar a ganhar recompensas!
-                </p>
-                <button
-                  onClick={() => navigate('/free-quizzes')}
-                  className="inline-flex items-center px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-500 transition-colors"
-                >
-                  Explorar Quizzes Gratuitos
-                </button>
-              </div>
-            )}
+          <div className="text-right">
+            <span className="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Conquistas</span>
+            <div className="flex items-center justify-end gap-2">
+              <span className="text-3xl font-black text-slate-900 dark:text-white leading-none">
+                {rewards.length}
+              </span>
+              <TrophyIcon className="w-5 h-5 text-purple-500" />
+            </div>
           </div>
         </div>
       </div>
-    </>
+
+      {/* Progress Section */}
+      <div className="px-4">
+        <div className="bg-slate-50/50 dark:bg-slate-800/30 rounded-3xl p-8 border border-slate-100 dark:border-slate-800">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+            <div className="space-y-1">
+              <h3 className="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-wider">Meta Semanal</h3>
+              <p className="text-xs text-slate-500 font-medium">Continue completando simulados para desbloquear mais bônus.</p>
+            </div>
+
+            <div className="flex-1 max-w-md space-y-3">
+              <div className="flex justify-between text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                <span>{stats.totalAttempts % 5}/5 para o próximo bônus</span>
+                <span className="text-primary-500">{(stats.totalAttempts % 5) * 20}%</span>
+              </div>
+              <div className="w-full bg-slate-200 dark:bg-slate-700/50 rounded-full h-1.5 overflow-hidden">
+                <div
+                  className="bg-primary-500 h-full rounded-full transition-all duration-700"
+                  style={{ width: `${(stats.totalAttempts % 5) * 20}%` }}
+                ></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* History List */}
+      <div className="space-y-8 px-4">
+        <div className="flex items-center justify-between">
+          <h2 className="text-xl font-bold text-slate-900 dark:text-white">Linha do Tempo</h2>
+          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{rewards.length} Eventos</span>
+        </div>
+
+        <div className="space-y-4">
+          {rewards.length > 0 ? (
+            rewards.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()).map((reward, index) => (
+              <div
+                key={index}
+                className="group flex items-center justify-between p-6 bg-white dark:bg-slate-900 rounded-[2rem] border border-slate-100 dark:border-slate-800 transition-all hover:bg-slate-50 dark:hover:bg-slate-800/50"
+              >
+                <div className="flex items-center gap-6">
+                  <div className="w-12 h-12 rounded-2xl bg-slate-50 dark:bg-slate-800 flex items-center justify-center border border-slate-100 dark:border-slate-700 transition-transform group-hover:scale-105 group-hover:-rotate-3">
+                    {getRewardIcon(reward.type)}
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-bold text-slate-900 dark:text-white capitalize leading-none mb-2">
+                      {getRewardTitle(reward).toLowerCase()}
+                    </h3>
+                    <p className="text-xs text-slate-500 font-medium lowercase first-letter:uppercase">
+                      {getRewardDescription(reward).toLowerCase()}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="text-right">
+                  <span className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                    {new Date(reward.createdAt).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })}
+                  </span>
+                  <span className="block text-[10px] text-slate-300 dark:text-slate-600 font-medium uppercase mt-1">
+                    {new Date(reward.createdAt).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                  </span>
+                </div>
+              </div>
+            ))
+          ) : (
+            <div className="py-20 text-center space-y-4">
+              <div className="w-16 h-16 bg-slate-50 dark:bg-slate-800 rounded-full flex items-center justify-center mx-auto border border-dashed border-slate-200 dark:border-slate-700">
+                <GiftIcon className="w-6 h-6 text-slate-300" />
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-slate-900 dark:text-white">Sem registros ainda</h3>
+                <p className="text-xs text-slate-500 font-medium mt-1">Seus ganhos aparecerão aqui assim que completar simulados.</p>
+              </div>
+              <button
+                onClick={() => navigate('/free-quizzes')}
+                className="inline-flex h-10 items-center px-6 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-full text-xs font-bold hover:scale-105 transition-all mt-4"
+              >
+                COMEÇAR AGORA
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
   );
 };
 

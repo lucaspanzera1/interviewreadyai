@@ -22,7 +22,8 @@ import {
   ChartBarIcon,
   Cog6ToothIcon,
   GiftIcon,
-  TrophyIcon
+  TrophyIcon,
+  ShoppingBagIcon
 } from '@heroicons/react/24/outline';
 import ActivityHeatmap from './ActivityHeatmap';
 
@@ -575,8 +576,8 @@ const ProfilePage: React.FC = () => {
                   <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium border ${user?.role === 'admin'
                     ? 'bg-purple-50 dark:bg-purple-900/20 border-purple-100 dark:border-purple-800 text-purple-700 dark:text-purple-300'
                     : user?.role === 'client'
-                    ? 'bg-emerald-50 dark:bg-emerald-900/20 border-emerald-100 dark:border-emerald-800 text-emerald-700 dark:text-emerald-300'
-                    : 'bg-blue-50 dark:bg-blue-900/20 border-blue-100 dark:border-blue-800 text-blue-700 dark:text-blue-300'
+                      ? 'bg-emerald-50 dark:bg-emerald-900/20 border-emerald-100 dark:border-emerald-800 text-emerald-700 dark:text-emerald-300'
+                      : 'bg-blue-50 dark:bg-blue-900/20 border-blue-100 dark:border-blue-800 text-blue-700 dark:text-blue-300'
                     }`}>
                     {user?.role === 'admin' ? 'Administrador' : user?.role === 'client' ? 'Gratuito' : user?.role || 'Usuário'}
                   </span>
@@ -696,26 +697,37 @@ const ProfilePage: React.FC = () => {
                     </div>
                     <div className="space-y-2 max-h-32 overflow-y-auto">
                       {recentRewards.length > 0 ? (
-                        recentRewards.slice(0, 3).map((reward, index) => (
-                          <div key={index} className="flex items-center justify-between p-2 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg">
-                            <div className="flex items-center gap-2">
-                              {reward.type === 'token' ? (
-                                <TicketIcon className="h-4 w-4 text-amber-600 dark:text-amber-400" />
-                              ) : reward.type === 'badge' ? (
-                                <TrophyIcon className="h-4 w-4 text-purple-600 dark:text-purple-400" />
-                              ) : (
-                                <GiftIcon className="h-4 w-4 text-green-600 dark:text-green-400" />
-                              )}
-                              <span className="text-sm font-medium text-slate-900 dark:text-white">
-                                {reward.type === 'token' ? `+${reward.amount} Token${reward.amount > 1 ? 's' : ''}` :
-                                  reward.type === 'badge' ? 'Nova Conquista' : 'Recompensa'}
+                        recentRewards.slice(0, 3).map((reward, index) => {
+                          const isPackage = reward.type === 'package';
+                          const isRole = reward.type === 'plan' || reward.type === 'role';
+
+                          return (
+                            <div key={index} className="flex items-center justify-between p-2 bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 rounded-lg">
+                              <div className="flex items-center gap-2">
+                                {reward.type === 'token' ? (
+                                  <TicketIcon className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+                                ) : reward.type === 'badge' ? (
+                                  <TrophyIcon className="h-4 w-4 text-purple-600 dark:text-purple-400" />
+                                ) : isPackage ? (
+                                  <ShoppingBagIcon className="h-4 w-4 text-rose-500" />
+                                ) : isRole ? (
+                                  <ShieldCheckIcon className="h-4 w-4 text-primary-600 dark:text-primary-400" />
+                                ) : (
+                                  <GiftIcon className="h-4 w-4 text-green-600 dark:text-green-400" />
+                                )}
+                                <span className="text-sm font-medium text-slate-900 dark:text-white">
+                                  {reward.type === 'token' ? `+${reward.amount} Tokens` :
+                                    reward.type === 'badge' ? 'Nova Conquista' :
+                                      isPackage ? (reward.reason.includes(':') ? reward.reason.split(':')[1] : 'Pacote') :
+                                        isRole ? 'Plano Ativado' : 'Recompensa'}
+                                </span>
+                              </div>
+                              <span className="text-xs text-slate-500 dark:text-slate-400">
+                                {new Date(reward.createdAt).toLocaleDateString('pt-BR')}
                               </span>
                             </div>
-                            <span className="text-xs text-slate-500 dark:text-slate-400">
-                              {new Date(reward.createdAt).toLocaleDateString('pt-BR')}
-                            </span>
-                          </div>
-                        ))
+                          );
+                        })
                       ) : (
                         <div className="text-center py-4 text-slate-500 dark:text-slate-400 text-sm">
                           Nenhuma recompensa recebida ainda
