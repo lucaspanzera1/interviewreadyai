@@ -11,7 +11,6 @@ import {
     XMarkIcon,
     ChevronRightIcon,
     ChevronLeftIcon,
-    CheckIcon,
     SparklesIcon,
     AcademicCapIcon,
     AdjustmentsHorizontalIcon,
