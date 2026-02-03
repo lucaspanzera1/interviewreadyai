@@ -5,6 +5,7 @@ import AuthCallback from './components/AuthCallback'
 import ProfilePage from './components/ProfilePage'
 import UserQuizHistoryPage from './components/UserQuizHistoryPage'
 import AppLayout from './components/AppLayout'
+import DevEnvironmentBadge from './components/DevEnvironmentBadge'
 
 import ErrorBoundary from './components/ErrorBoundary'
 import HomePage from './components/HomePage'
@@ -30,6 +31,7 @@ import AdminRolesPage from './components/AdminRolesPage'
 function App() {
   return (
     <ErrorBoundary>
+      <DevEnvironmentBadge />
       <Routes>
         {/* Public routes */}
         <Route

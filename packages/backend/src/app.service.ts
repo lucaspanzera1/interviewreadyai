@@ -14,6 +14,7 @@ export class AppService {
     return {
       message: 'Running...',
       version: 'beta',
+      environment: process.env.NODE_ENV || 'development',
       timestamp: new Date().toISOString(),
     };
   }

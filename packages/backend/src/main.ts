@@ -47,8 +47,7 @@ async function bootstrap() {
   const port = process.env.BACKEND_PORT || 8081;
   
   await app.listen(port);
-  console.log(`🚀 MarketDelivery API running on: http://localhost:${port}`);
-  console.log(`📚 Swagger documentation: http://localhost:${port}/api/docs`);
+  console.log(`🚀 API running on: http://localhost:${port}`);
 }
 
 bootstrap();
