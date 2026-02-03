@@ -15,4 +15,11 @@ export default defineConfig({
       },
     },
   },
+  preview: {
+   allowedHosts: [
+      'app.treinavaga.tech',
+      '.treinavaga.tech',
+      'localhost'
+    ],
+  },
 })
