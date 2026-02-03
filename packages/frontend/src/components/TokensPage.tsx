@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import PageTitle from './PageTitle';
 import { apiClient, TokenPackage } from '../lib/api';
 import { useToast } from '../contexts/ToastContext';
@@ -13,11 +14,12 @@ import {
 const TokensPage: React.FC = () => {
   const { showToast } = useToast();
   const { user, refreshUser, isLoading } = useAuth();
-
+  const navigate = useNavigate();
 
   const [packages, setPackages] = useState<TokenPackage[]>([]);
-  const [loadingPackages, setLoadingPackages] = useState(true);
+  const [loadingPackages, setLoadingPackages] = useState(false);
   const [redeeming, setRedeeming] = useState<string | null>(null);
+  const [paying, setPaying] = useState<string | null>(null);
 
   useEffect(() => {
     fetchPackages();
@@ -46,6 +48,26 @@ const TokensPage: React.FC = () => {
       showToast(errorMessage, 'error');
     } finally {
       setRedeeming(null);
+    }
+  };
+
+  const handlePayForPackage = async (packageId: string) => {
+    // Verificar se o usuário tem os dados necessários para pagamento
+    if (!user?.cellphone || !user?.taxid) {
+      showToast('Complete seu telefone e CPF no perfil para fazer pagamentos', 'error');
+      navigate('/profile');
+      return;
+    }
+
+    try {
+      setPaying(packageId);
+      const result = await apiClient.payForPlan(packageId);
+      // Redirecionar para o checkout da AbacatePay
+      window.location.href = result.checkoutUrl;
+    } catch (error: any) {
+      const errorMessage = error?.response?.data?.message || 'Erro ao iniciar pagamento';
+      showToast(errorMessage, 'error');
+      setPaying(null);
     }
   };
 
@@ -95,6 +117,33 @@ const TokensPage: React.FC = () => {
 
       {/* Notice Badge */}
       <div className="px-4">
+        {(!user?.cellphone || !user?.taxid) && (
+          <div className="relative overflow-hidden bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/10 dark:to-orange-900/10 border border-amber-200 dark:border-amber-800 rounded-2xl p-5 sm:p-6 mb-6 flex flex-col sm:flex-row items-start sm:items-center gap-5">
+            <div className="absolute top-0 right-0 -mt-4 -mr-4 w-24 h-24 bg-amber-500/10 rounded-full blur-2xl"></div>
+
+            <div className="h-12 w-12 flex-shrink-0 bg-amber-100 dark:bg-amber-900/50 rounded-xl flex items-center justify-center border border-amber-200 dark:border-amber-700/50">
+              <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6 text-amber-600 dark:text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+              </svg>
+            </div>
+
+            <div className="relative flex-1">
+              <h4 className="text-base font-bold text-amber-900 dark:text-amber-100 mb-1">
+                Complete seu perfil para pagamentos
+              </h4>
+              <p className="text-sm text-amber-800 dark:text-amber-200/80 font-medium leading-relaxed mb-3">
+                Para adquirir planos pagos, você precisa informar seu telefone e CPF.
+              </p>
+              <button
+                onClick={() => navigate('/profile')}
+                className="inline-flex items-center px-4 py-2 bg-amber-600 text-white text-sm font-medium rounded-lg hover:bg-amber-700 transition-colors"
+              >
+                Completar Perfil
+              </button>
+            </div>
+          </div>
+        )}
+
         <div className="relative overflow-hidden bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/10 dark:to-orange-900/10 border border-amber-200 dark:border-amber-800 rounded-2xl p-5 sm:p-6 flex flex-col sm:flex-row items-start sm:items-center gap-5">
           <div className="absolute top-0 right-0 -mt-4 -mr-4 w-24 h-24 bg-amber-500/10 rounded-full blur-2xl"></div>
 
@@ -138,7 +187,6 @@ const TokensPage: React.FC = () => {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {packages.map((pkg) => {
-              const isRedeeming = redeeming === pkg.id;
               const hasActivePlan = !!(user?.role === pkg.role.name && user?.roleExpiresAt && new Date(user.roleExpiresAt) > new Date());
               const isPro = pkg.role.name.toLowerCase().includes('pro');
 
@@ -193,11 +241,11 @@ const TokensPage: React.FC = () => {
 
                     {/* Action Button - Minimalist */}
                     <button
-                      onClick={() => handleRedeemPackage(pkg.id)}
-                      disabled={isRedeeming || hasActivePlan}
+                      onClick={() => pkg.value ? handlePayForPackage(pkg.id) : handleRedeemPackage(pkg.id)}
+                      disabled={(pkg.value ? paying === pkg.id : redeeming === pkg.id) || hasActivePlan}
                       className={`w-full py-4 rounded-2xl font-bold text-sm transition-all flex items-center justify-center gap-2 ${hasActivePlan
                         ? 'bg-slate-50 dark:bg-slate-800 text-slate-400 cursor-not-allowed'
-                        : isRedeeming
+                        : (pkg.value ? paying === pkg.id : redeeming === pkg.id)
                           ? 'animate-pulse bg-slate-100 text-slate-400'
                           : pkg.value
                             ? 'bg-green-500 text-white hover:bg-green-600 shadow-lg shadow-green-500/20'
@@ -206,7 +254,7 @@ const TokensPage: React.FC = () => {
                               : 'bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white hover:bg-slate-200 dark:hover:bg-slate-750'
                         }`}
                     >
-                      {isRedeeming ? '...' : hasActivePlan ? 'Ativo' : pkg.value ? 'Comprar Agora' : 'Começar Agora'}
+                      {(pkg.value ? paying === pkg.id : redeeming === pkg.id) ? '...' : hasActivePlan ? 'Ativo' : pkg.value ? 'Comprar Agora' : 'Começar Agora'}
                     </button>
                   </div>
                   {hasActivePlan && user?.roleExpiresAt && (

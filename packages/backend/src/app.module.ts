@@ -13,6 +13,7 @@ import { QuizModule } from './quiz/quiz.module';
 import { TokenPackageModule } from './token-package/token-package.module';
 import { RoleModule } from './role/role.module';
 import { EmailModule } from './common/email.module';
+import { PlansModule } from './plans/plans.module';
 
 /**
  * Módulo principal da aplicação
@@ -41,6 +42,7 @@ import { EmailModule } from './common/email.module';
     QuizModule,
     TokenPackageModule,
     RoleModule,
+    PlansModule,
   ],
   controllers: [AppController],
   providers: [

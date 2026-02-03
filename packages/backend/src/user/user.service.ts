@@ -2,6 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
+import { HttpService } from '@nestjs/axios';
+import { firstValueFrom } from 'rxjs';
 import { User, UserDocument, UserRole } from './schemas/user.schema';
 import { UpdateUserDto, UserDto } from './dto';
 import { NotFoundException, DatabaseException } from '../common/exceptions';
@@ -18,6 +20,7 @@ export class UserService {
     private readonly userModel: Model<UserDocument>,
     private readonly configService: ConfigService,
     private readonly emailService: EmailService,
+    private readonly httpService: HttpService,
   ) {}
 
   /**
@@ -275,6 +278,30 @@ export class UserService {
    */
   async updateProfile(userId: string, profileData: any): Promise<UserDocument> {
     const user = await this.findById(userId);
+
+    // Verificar se deve criar cliente na AbacatePay
+    const shouldCreateAbacatePayCustomer =
+      !user.abacatepayCustomerId &&
+      profileData.cellphone &&
+      profileData.taxid &&
+      profileData.name &&
+      user.email;
+
+    if (shouldCreateAbacatePayCustomer) {
+      try {
+        const customerId = await this.createAbacatePayCustomer({
+          name: profileData.name || user.name,
+          email: user.email,
+          cellphone: profileData.cellphone,
+          taxid: profileData.taxid,
+        });
+        profileData.abacatepayCustomerId = customerId;
+      } catch (error) {
+        console.error('Erro ao criar cliente na AbacatePay:', error);
+        // Não falha a atualização do perfil por erro na AbacatePay
+      }
+    }
+
     Object.assign(user, profileData);
     return await user.save();
   }
@@ -412,5 +439,54 @@ export class UserService {
       user.dailyFreeQuizzesUsed = 0;
       user.lastFreeQuizReset = now;
     }
+  }
+
+  /**
+   * Cria um cliente na AbacatePay
+   * @param customerData Dados do cliente
+   * @returns ID do cliente criado
+   */
+  private async createAbacatePayCustomer(customerData: {
+    name: string;
+    email: string;
+    cellphone: string;
+    taxid: string;
+  }): Promise<string> {
+    const abacatepayToken = this.configService.get<string>('ABACATEPAY_TOKEN');
+    if (!abacatepayToken) {
+      throw new Error('ABACATEPAY_TOKEN não configurado');
+    }
+
+    const payload = {
+      name: customerData.name,
+      email: customerData.email,
+      cellphone: customerData.cellphone,
+      taxid: customerData.taxid,
+    };
+
+    try {
+      const response = await firstValueFrom(
+        this.httpService.post('https://api.abacatepay.com/v1/customers', payload, {
+          headers: {
+            'Authorization': `Bearer ${abacatepayToken}`,
+            'Content-Type': 'application/json',
+          },
+        })
+      );
+
+      return response.data.id;
+    } catch (error) {
+      console.error('Erro ao criar cliente na AbacatePay:', error.response?.data || error.message);
+      throw error;
+    }
+  }
+
+  /**
+   * Busca usuário pelo ID do cliente na AbacatePay
+   * @param abacatepayCustomerId ID do cliente na AbacatePay
+   * @returns Usuário encontrado ou null
+   */
+  async findByAbacatePayCustomerId(abacatepayCustomerId: string): Promise<UserDocument | null> {
+    return this.userModel.findOne({ abacatepayCustomerId }).exec();
   }
 }

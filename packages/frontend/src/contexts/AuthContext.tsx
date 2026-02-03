@@ -112,7 +112,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     try {
       // Separate basic profile fields from onboarding/profile fields
       const basicFields = ['name'];
-      const profileFields = ['careerTime', 'techArea', 'techStack', 'bio', 'location', 'linkedinUrl', 'githubUrl'];
+      const profileFields = ['careerTime', 'techArea', 'techStack', 'bio', 'location', 'linkedinUrl', 'githubUrl', 'cellphone', 'taxid'];
 
       const basicData: Partial<User> = {};
       const profileData: Partial<User> = {};
@@ -145,7 +145,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         showToast(message, 'success');
       }
 
-      // Refresh user data to get the latest
+      // Clear cache and refresh user data to get the latest
+      apiClient.clearUserProfileCache();
       const updatedUser = await apiClient.getUserProfile();
       setUser(updatedUser);
     } catch (error) {

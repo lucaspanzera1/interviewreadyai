@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
+import { HttpModule } from '@nestjs/axios';
 import { UserController } from './user.controller';
 import { UserService } from './user.service';
 import { UserExpirationService } from './user-expiration.service';
@@ -16,6 +17,7 @@ import { EmailModule } from '../common/email.module';
       { name: User.name, schema: UserSchema },
     ]),
     EmailModule,
+    HttpModule,
   ],
   controllers: [UserController],
   providers: [UserService, UserExpirationService],
