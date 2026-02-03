@@ -19,7 +19,7 @@ import {
 import { Request, Response } from 'express';
 import { AuthService } from './auth.service';
 import { LoginDto, TokenResponseDto, RefreshTokenDto } from './dto';
-import { GoogleOAuthGuard, JwtAuthGuard } from './guards';
+import { GoogleOAuthGuard, GitHubOAuthGuard, JwtAuthGuard } from './guards';
 import { Public, CurrentUser } from './decorators';
 import { 
   UnauthorizedErrorDto, 
@@ -69,6 +69,59 @@ export class AuthController {
   async googleCallback(@Req() req: Request, @Res() res: Response) {
     try {
       const loginData = await this.authService.googleLogin(req.user);
+      
+      // Redireciona para o frontend com os tokens como query parameters
+      const frontendUrl = process.env.CORS_ORIGIN || 'http://localhost:3000';
+      const callbackUrl = new URL('/auth/callback', frontendUrl);
+      
+      callbackUrl.searchParams.set('access_token', loginData.accessToken);
+      callbackUrl.searchParams.set('refresh_token', loginData.refreshToken);
+      
+      res.redirect(callbackUrl.toString());
+    } catch (error) {
+      // Redireciona para o frontend com erro
+      const frontendUrl = process.env.CORS_ORIGIN || 'http://localhost:3000';
+      const callbackUrl = new URL('/auth/callback', frontendUrl);
+      callbackUrl.searchParams.set('error', 'authentication_failed');
+      
+      res.redirect(callbackUrl.toString());
+    }
+  }
+
+  /**
+   * Inicia o fluxo de autenticação com GitHub
+   */
+  @Get('github/login')
+  @Public()
+  @UseGuards(GitHubOAuthGuard)
+  @ApiOperation({ summary: 'Inicia login com GitHub OAuth' })
+  @ApiResponse({ 
+    status: 302, 
+    description: 'Redireciona para página de autenticação do GitHub' 
+  })
+  async githubLogin() {
+    // O guard do GitHub redireciona automaticamente
+  }
+
+  /**
+   * Callback do GitHub OAuth - processa retorno da autenticação
+   */
+  @Get('github/callback')
+  @Public()
+  @UseGuards(GitHubOAuthGuard)
+  @ApiOperation({ summary: 'Callback do GitHub OAuth' })
+  @ApiResponse({ 
+    status: 302, 
+    description: 'Redireciona para frontend com tokens de autenticação'
+  })
+  @ApiResponse({ 
+    status: 401, 
+    description: 'Falha na autenticação',
+    type: UnauthorizedErrorDto
+  })
+  async githubCallback(@Req() req: Request, @Res() res: Response) {
+    try {
+      const loginData = await this.authService.githubLogin(req.user);
       
       // Redireciona para o frontend com os tokens como query parameters
       const frontendUrl = process.env.CORS_ORIGIN || 'http://localhost:3000';

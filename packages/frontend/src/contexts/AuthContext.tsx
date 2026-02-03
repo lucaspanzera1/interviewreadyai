@@ -7,7 +7,7 @@ interface AuthContextType {
   isLoading: boolean;
   isAuthenticated: boolean;
   showOnboarding: boolean;
-  login: () => Promise<void>;
+  login: (provider?: 'google' | 'github') => Promise<void>;
   logout: () => Promise<void>;
   refreshUser: () => Promise<void>;
   updateProfile: (userData: Partial<User>) => Promise<void>;
@@ -49,11 +49,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     initializeAuth();
   }, []);
 
-  const login = async (): Promise<void> => {
+  const login = async (provider: 'google' | 'github' = 'google'): Promise<void> => {
     try {
       setIsLoading(true);
-      // Redirect to Google OAuth
-      window.location.href = `${import.meta.env.VITE_API_BASE_URL}/auth/google/login`;
+      // Redirect to OAuth provider
+      window.location.href = `${import.meta.env.VITE_API_BASE_URL}/auth/${provider}/login`;
     } catch (error) {
       console.error('Login failed:', error);
       throw error;

@@ -51,6 +51,24 @@ export class AuthService {
   }
 
   /**
+   * Processa login do GitHub OAuth
+   */
+  async githubLogin(githubUser: any): Promise<TokenResponse> {
+    if (!githubUser) {
+      throw new UnauthorizedException('No user from GitHub');
+    }
+
+    const user = await this.userService.findOrCreateUser({
+      githubId: githubUser.githubId,
+      email: githubUser.email,
+      name: githubUser.name,
+      picture: githubUser.picture,
+    });
+
+    return this.generateTokens(user);
+  }
+
+  /**
    * Gera tokens JWT para o usuário
    */
   async generateTokens(user: UserDocument): Promise<TokenResponse> {
@@ -119,7 +137,7 @@ export class AuthService {
     return {
       module: 'AuthModule',
       status: 'active',
-      provider: 'Google OAuth',
+      provider: 'Google OAuth, GitHub OAuth',
       jwt: 'enabled',
       timestamp: new Date().toISOString(),
     };

@@ -10,8 +10,11 @@ export enum UserRole {
 
 @Schema({ timestamps: true })
 export class User {
-  @Prop({ required: true, unique: true })
-  googleId: string;
+  @Prop({ unique: true })
+  googleId?: string;
+
+  @Prop({ unique: true })
+  githubId?: string;
 
   @Prop({ required: true, unique: true, lowercase: true })
   email: string;
@@ -116,5 +119,4 @@ UserSchema.set('toJSON', {
 });
 
 // Índices para buscas frequentes
-UserSchema.index({ googleId: 1 });
-UserSchema.index({ email: 1 });
+// Removidos pois unique já cria os índices automaticamente

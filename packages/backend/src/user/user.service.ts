@@ -19,12 +19,13 @@ export class UserService {
   ) {}
 
   /**
-   * Busca ou cria um usuário baseado nos dados do Google OAuth
-   * @param userData Dados do usuário do Google
+   * Busca ou cria um usuário baseado nos dados do OAuth (Google ou GitHub)
+   * @param userData Dados do usuário do OAuth
    * @returns Usuário encontrado ou criado
    */
   async findOrCreateUser(userData: {
-    googleId: string;
+    googleId?: string;
+    githubId?: string;
     email: string;
     name: string;
     picture?: string;
@@ -34,16 +35,25 @@ export class UserService {
     const adminEmails = adminEmailsRaw.split(',').map(e => e.trim().toLowerCase()).filter(Boolean);
     
     try {
-      // Tenta encontrar usuário pelo Google ID
-      let user = await this.userModel.findOne({ googleId: userData.googleId });
+      // Tenta encontrar usuário pelo provider ID
+      let user: UserDocument | null = null;
+      if (userData.googleId) {
+        user = await this.userModel.findOne({ googleId: userData.googleId });
+      } else if (userData.githubId) {
+        user = await this.userModel.findOne({ githubId: userData.githubId });
+      }
 
       if (!user) {
         // Se não encontrar, tenta pelo email
         user = await this.userModel.findOne({ email: userData.email.toLowerCase() });
 
         if (user) {
-          // Se encontrar pelo email, atualiza o Google ID
-          user.googleId = userData.googleId;
+          // Se encontrar pelo email, atualiza o provider ID
+          if (userData.googleId) {
+            user.googleId = userData.googleId;
+          } else if (userData.githubId) {
+            user.githubId = userData.githubId;
+          }
           user.lastLoginAt = new Date();
           return await user.save();
         }
@@ -55,6 +65,7 @@ export class UserService {
 
         user = new this.userModel({
           googleId: userData.googleId,
+          githubId: userData.githubId,
           email: userData.email.toLowerCase(),
           name: userData.name,
           picture: userData.picture,
@@ -64,7 +75,7 @@ export class UserService {
         return await user.save();
       }
 
-      // Se encontrar pelo Google ID, atualiza último login
+      // Se encontrar pelo provider ID, atualiza último login
       user.lastLoginAt = new Date();
       
       // Atualiza role se mudou no .env
