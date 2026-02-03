@@ -31,13 +31,23 @@ export class GitHubStrategy extends PassportStrategy(Strategy, 'github') {
     profile: Profile,
     done: VerifyCallback,
   ): Promise<void> {
-    const { id, emails, displayName, photos, username } = profile;
+    const { id, emails, displayName, photos, username, _json } = profile;
+
+    // Tentar detectar LinkedIn do blog
+    let linkedinUrl: string | undefined;
+    if (_json?.blog && _json.blog.includes('linkedin.com')) {
+      linkedinUrl = _json.blog;
+    }
 
     const user = {
       githubId: id,
       email: emails?.[0]?.value,
       name: displayName || username,
       picture: photos?.[0]?.value,
+      bio: _json?.bio,
+      location: _json?.location,
+      githubUrl: `https://github.com/${username}`,
+      linkedinUrl,
     };
 
     done(null, user);

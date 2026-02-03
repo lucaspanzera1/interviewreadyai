@@ -29,6 +29,10 @@ export class UserService {
     email: string;
     name: string;
     picture?: string;
+    bio?: string;
+    location?: string;
+    githubUrl?: string;
+    linkedinUrl?: string;
   }): Promise<UserDocument> {
     // Busca lista de admins do .env
     const adminEmailsRaw = this.configService.get<string>('ADMIN_EMAILS') || '';
@@ -69,6 +73,10 @@ export class UserService {
           email: userData.email.toLowerCase(),
           name: userData.name,
           picture: userData.picture,
+          bio: userData.bio,
+          location: userData.location,
+          githubUrl: userData.githubUrl,
+          linkedinUrl: userData.linkedinUrl,
           lastLoginAt: new Date(),
           role,
         });

@@ -63,6 +63,10 @@ export class AuthService {
       email: githubUser.email,
       name: githubUser.name,
       picture: githubUser.picture,
+      bio: githubUser.bio,
+      location: githubUser.location,
+      githubUrl: githubUser.githubUrl,
+      linkedinUrl: githubUser.linkedinUrl,
     });
 
     return this.generateTokens(user);
