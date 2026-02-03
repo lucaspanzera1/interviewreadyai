@@ -7,6 +7,7 @@ import { UserRole } from '../user/schemas/user.schema';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { User } from '../user/schemas/user.schema';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
+import { Public } from '../auth/decorators/public.decorator';
 
 @Controller('token-packages')
 @UseGuards(RolesGuard)
@@ -26,6 +27,7 @@ export class TokenPackageController {
   }
 
   @Get('available')
+  @Public()
   findAvailable() {
     return this.tokenPackageService.findAll();
   }

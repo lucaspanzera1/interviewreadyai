@@ -168,6 +168,15 @@ const TokensPage: React.FC = () => {
                         <span className="text-slate-400 font-bold text-sm">Tokens</span>
                       </div>
 
+                      {pkg.value && (
+                        <div className="flex items-baseline gap-2">
+                          <span className="text-2xl font-bold text-green-600 dark:text-green-400">
+                            R$ {pkg.value.toFixed(2)}
+                          </span>
+                          <span className="text-xs text-slate-500 font-medium">por mês</span>
+                        </div>
+                      )}
+
                       <ul className="space-y-2">
                         {pkg.features?.map((f, i) => (
                           <li key={i} className="text-xs text-slate-500 font-medium flex gap-2">
@@ -190,12 +199,14 @@ const TokensPage: React.FC = () => {
                         ? 'bg-slate-50 dark:bg-slate-800 text-slate-400 cursor-not-allowed'
                         : isRedeeming
                           ? 'animate-pulse bg-slate-100 text-slate-400'
-                          : isPro
-                            ? 'bg-primary-500 text-white hover:bg-primary-600 shadow-lg shadow-primary-500/20'
-                            : 'bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white hover:bg-slate-200 dark:hover:bg-slate-750'
+                          : pkg.value
+                            ? 'bg-green-500 text-white hover:bg-green-600 shadow-lg shadow-green-500/20'
+                            : isPro
+                              ? 'bg-primary-500 text-white hover:bg-primary-600 shadow-lg shadow-primary-500/20'
+                              : 'bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white hover:bg-slate-200 dark:hover:bg-slate-750'
                         }`}
                     >
-                      {isRedeeming ? '...' : hasActivePlan ? 'Ativo' : 'Começar Agora'}
+                      {isRedeeming ? '...' : hasActivePlan ? 'Ativo' : pkg.value ? 'Comprar Agora' : 'Começar Agora'}
                     </button>
                   </div>
                   {hasActivePlan && user?.roleExpiresAt && (

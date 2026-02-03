@@ -27,6 +27,9 @@ export class TokenPackage {
   @Prop({ type: Number })
   validityDays?: number; // Número de dias de validade (null/undefined = vitalício)
 
+  @Prop({ type: Number })
+  value?: number; // Valor do plano em reais
+
   createdAt: Date;
   updatedAt: Date;
 }

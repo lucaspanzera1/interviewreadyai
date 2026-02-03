@@ -25,6 +25,7 @@ export interface TokenPackage {
   features: string[];
   active: boolean;
   validityDays?: number;
+  value?: number;
   createdAt: string;
   updatedAt: string;
 }
@@ -36,6 +37,7 @@ export interface CreateTokenPackage {
   role: string;
   features: string[];
   validityDays?: number;
+  value?: number;
 }
 
 export interface UpdateTokenPackage {

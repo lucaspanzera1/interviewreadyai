@@ -1,4 +1,4 @@
-import { IsString, IsOptional, IsNumber, IsMongoId, IsArray, Min } from 'class-validator';
+import { IsString, IsOptional, IsNumber, IsMongoId, IsArray, Min, IsBoolean } from 'class-validator';
 
 export class CreateTokenPackageDto {
   @IsString()
@@ -24,4 +24,13 @@ export class CreateTokenPackageDto {
   @IsNumber()
   @Min(1)
   validityDays?: number; // Número de dias de validade (opcional, null = vitalício)
+
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  value?: number; // Valor do plano em reais
+
+  @IsOptional()
+  @IsBoolean()
+  active?: boolean; // Se o plano está ativo
 }
