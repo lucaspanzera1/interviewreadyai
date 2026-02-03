@@ -22,7 +22,7 @@ import { RoleModule } from './role/role.module';
     // Configuração de variáveis de ambiente
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: ['.env.local', '.env'],
+      envFilePath: process.env.NODE_ENV === 'production' ? '.env.prod' : ['.env.local', '.env'],
     }),
     
     // Módulo de agendamento de tarefas
