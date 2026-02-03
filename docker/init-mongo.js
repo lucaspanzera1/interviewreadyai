@@ -1,14 +1,14 @@
 // MongoDB initialization script for TreinaVagaAI App
 
 // Switch to the treinavagaai database
-db = db.getSiblingDB('treinavagaai');
+db = db.getSiblingDB(process.env.MONGO_INITDB_DATABASE || 'treinavagaai');
 
 // Create application user with read/write permissions
 db.createUser({
-  user: 'treinavagaai_user',
-  pwd: 'treinavagaai_password',
+  user: process.env.MONGO_APP_USER || 'treinavagaai_user',
+  pwd: process.env.MONGO_APP_PASSWORD || 'treinavagaai_password',
   roles: [
-    { role: 'readWrite', db: 'treinavagaai' }
+    { role: 'readWrite', db: process.env.MONGO_INITDB_DATABASE || 'treinavagaai' }
   ]
 });
 
