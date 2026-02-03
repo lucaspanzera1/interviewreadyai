@@ -5,6 +5,7 @@ import { Model } from 'mongoose';
 import { User, UserDocument, UserRole } from './schemas/user.schema';
 import { UpdateUserDto, UserDto } from './dto';
 import { NotFoundException, DatabaseException } from '../common/exceptions';
+import { EmailService } from '../common/services/email.service';
 
 /**
  * Service de usuários
@@ -16,6 +17,7 @@ export class UserService {
     @InjectModel(User.name)
     private readonly userModel: Model<UserDocument>,
     private readonly configService: ConfigService,
+    private readonly emailService: EmailService,
   ) {}
 
   /**
@@ -80,7 +82,14 @@ export class UserService {
           lastLoginAt: new Date(),
           role,
         });
-        return await user.save();
+        user = await user.save();
+
+        // Envia email de boas-vindas de forma assíncrona
+        this.emailService.sendWelcomeEmail(user.email, user.name).catch(error => {
+          console.error('Erro ao enviar email de boas-vindas:', error);
+        });
+
+        return user;
       }
 
       // Se encontrar pelo provider ID, atualiza último login

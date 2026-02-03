@@ -23,6 +23,7 @@
     "clean": "rimraf dist coverage"
   },
   "dependencies": {
+    "@nestjs-modules/mailer": "^2.0.2",
     "@nestjs/axios": "^4.0.1",
     "@nestjs/common": "^10.3.0",
     "@nestjs/config": "^3.1.1",
@@ -38,7 +39,9 @@
     "class-validator": "^0.14.0",
     "dotenv": "^17.2.3",
     "express": "^5.1.0",
+    "handlebars": "^4.7.8",
     "mongoose": "^8.1.0",
+    "nodemailer": "^7.0.13",
     "passport": "^0.7.0",
     "passport-github2": "^0.1.12",
     "passport-google-oauth20": "^2.0.0",
