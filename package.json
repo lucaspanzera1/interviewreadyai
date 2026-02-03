@@ -19,7 +19,7 @@
     "build:backend": "pnpm --filter backend build",
     "build:frontend": "pnpm --filter frontend build",
     "start": "pnpm --filter backend start",
-    "start:prod": "pnpm build && NODE_ENV=production pnpm --filter backend start:prod",
+    "start:prod": "pnpm build && NODE_ENV=production concurrently \"pnpm --filter backend start:prod\" \"pnpm --filter frontend preview\"",
     "docker:up": "docker-compose -f docker/docker-compose.yml up -d",
     "docker:down": "docker-compose -f docker/docker-compose.yml down",
     "docker:logs": "docker-compose -f docker/docker-compose.yml logs -f",
