@@ -36,18 +36,24 @@ export class AuthService {
    * Processa login do Google OAuth
    */
   async googleLogin(googleUser: any): Promise<TokenResponse> {
+    console.log('Google login service entered, googleUser:', googleUser);
     if (!googleUser) {
       throw new UnauthorizedException('No user from Google');
     }
 
+    console.log('Calling userService.findOrCreateUser');
     const user = await this.userService.findOrCreateUser({
       googleId: googleUser.googleId,
       email: googleUser.email,
       name: googleUser.name,
       picture: googleUser.picture,
     });
+    console.log('User found/created:', { id: user._id, email: user.email, role: user.role });
 
-    return this.generateTokens(user);
+    console.log('Generating tokens');
+    const tokens = this.generateTokens(user);
+    console.log('Tokens generated successfully');
+    return tokens;
   }
 
   /**

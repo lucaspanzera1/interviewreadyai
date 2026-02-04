@@ -39,6 +39,7 @@ export class UserService {
     githubUrl?: string;
     linkedinUrl?: string;
   }): Promise<UserDocument> {
+    console.log('findOrCreateUser entered, userData:', userData);
     // Busca lista de admins do .env
     const adminEmailsRaw = this.configService.get<string>('ADMIN_EMAILS') || '';
     const adminEmails = adminEmailsRaw.split(',').map(e => e.trim().toLowerCase()).filter(Boolean);
@@ -47,14 +48,20 @@ export class UserService {
       // Tenta encontrar usuário pelo provider ID
       let user: UserDocument | null = null;
       if (userData.googleId) {
+        console.log('Finding by googleId:', userData.googleId);
         user = await this.userModel.findOne({ googleId: userData.googleId });
+        console.log('User found by googleId:', user ? 'yes' : 'no');
       } else if (userData.githubId) {
+        console.log('Finding by githubId:', userData.githubId);
         user = await this.userModel.findOne({ githubId: userData.githubId });
+        console.log('User found by githubId:', user ? 'yes' : 'no');
       }
 
       if (!user) {
         // Se não encontrar, tenta pelo email
+        console.log('Finding by email:', userData.email.toLowerCase());
         user = await this.userModel.findOne({ email: userData.email.toLowerCase() });
+        console.log('User found by email:', user ? 'yes' : 'no');
 
         if (user) {
           // Se encontrar pelo email, atualiza o provider ID
@@ -72,10 +79,12 @@ export class UserService {
             user.role = UserRole.CLIENT;
           }
           
+          console.log('Saving updated user');
           return await user.save();
         }
 
         // Se não encontrar, cria novo usuário
+        console.log('Creating new user');
         const role = adminEmails.includes(userData.email.toLowerCase()) 
           ? UserRole.ADMIN 
           : UserRole.CLIENT;
@@ -93,6 +102,7 @@ export class UserService {
           lastLoginAt: new Date(),
           role,
         });
+        console.log('Saving new user');
         user = await user.save();
 
         // Envia email de boas-vindas de forma assíncrona
@@ -121,8 +131,10 @@ export class UserService {
         user.role = newRole;
       }
       
+      console.log('Saving existing user');
       return await user.save();
     } catch (error) {
+      console.error('Error in findOrCreateUser:', error);
       throw new DatabaseException('Erro ao buscar ou criar usuário', 'USER_OPERATION_FAILED');
     }
   }
