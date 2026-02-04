@@ -16,6 +16,11 @@ async function bootstrap() {
   app.setGlobalPrefix('api');
 
   // Captura o rawBody para validação de assinatura do webhook AbacatePay
+  app.use(bodyParser.json({
+    verify: (req: any, res, buf) => {
+      req.rawBody = buf;
+    },
+  }));
 
   // Configuração de CORS
   app.enableCors({
@@ -24,13 +29,13 @@ async function bootstrap() {
   });
 
   // Configuração de validação global
-  app.useGlobalPipes(
-    new ValidationPipe({
-      whitelist: true,
-      forbidNonWhitelisted: true,
-      transform: true,
-    }),
-  );
+  // app.useGlobalPipes(
+  //   new ValidationPipe({
+  //     whitelist: true,
+  //     forbidNonWhitelisted: true,
+  //     transform: true,
+  //   }),
+  // );
 
   // Configuração do filtro global de exceções
   app.useGlobalFilters(new GlobalExceptionFilter());

@@ -60,12 +60,27 @@ const TokensPage: React.FC = () => {
     }
 
     try {
-      setPaying(packageId);
       const result = await apiClient.payForPlan(packageId);
+
+      if (!result.checkoutUrl) {
+        console.error('❌ Checkout URL está vazia!');
+        showToast('Erro: URL de checkout não recebida', 'error');
+        return;
+      }
+
       // Redirecionar para o checkout da AbacatePay
-      window.location.href = result.checkoutUrl;
+      setPaying(packageId); // Define o estado após iniciar o redirecionamento
+      try {
+        window.location.assign(result.checkoutUrl);
+      } catch (redirectError) {
+        console.error('❌ Erro no redirecionamento assign():', redirectError);
+        // Fallback para href
+        window.location.href = result.checkoutUrl;
+      }
     } catch (error: any) {
+      console.error('❌ Erro completo no pagamento:', error);
       const errorMessage = error?.response?.data?.message || 'Erro ao iniciar pagamento';
+      console.error('📝 Mensagem de erro:', errorMessage);
       showToast(errorMessage, 'error');
       setPaying(null);
     }

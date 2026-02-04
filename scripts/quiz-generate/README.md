@@ -1,0 +1,1 @@
+export AUTH_TOKEN="" && python3 quiz-generate.py

@@ -30,6 +30,9 @@ export class TokenPackage {
   @Prop({ type: Number })
   value?: number; // Valor do plano em reais
 
+  @Prop({ type: String })
+  externalId?: string; // ID externo para integração com AbacatePay
+
   createdAt: Date;
   updatedAt: Date;
 }
@@ -48,3 +51,4 @@ TokenPackageSchema.set('toJSON', {
 
 // Índices
 TokenPackageSchema.index({ name: 1 });
+TokenPackageSchema.index({ externalId: 1 });

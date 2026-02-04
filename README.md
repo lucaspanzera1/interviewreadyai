@@ -137,3 +137,209 @@ preview: {
 }
 ```
 
+# Cloudflare Tunnel servico
+
+Vou te ajudar a criar um serviço para rodar o cloudflared tunnel no macOS. No macOS, usamos o `launchd` para gerenciar serviços.
+
+## Passo a passo para criar o serviço Treinavagaai
+
+### 1. Primeiro, vamos criar o arquivo de configuração do serviço
+
+Crie o arquivo plist do serviço:
+
+```bash
+sudo nano ~/Library/LaunchAgents/com.treinavagaai.cloudflared.plist
+```
+
+### 2. Cole o seguinte conteúdo no arquivo:
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.treinavagaai.cloudflared</string>
+    
+    <key>ProgramArguments</key>
+    <array>
+        <string>/usr/local/bin/cloudflared</string>
+        <string>tunnel</string>
+        <string>--config</string>
+        <string>/Users/lucaspazera/treinavaga-tunnel.yml</string>
+        <string>run</string>
+    </array>
+    
+    <key>RunAtLoad</key>
+    <true/>
+    
+    <key>KeepAlive</key>
+    <true/>
+    
+    <key>StandardOutPath</key>
+    <string>/Users/lucaspazera/Library/Logs/treinavagaai-stdout.log</string>
+    
+    <key>StandardErrorPath</key>
+    <string>/Users/lucaspazera/Library/Logs/treinavagaai-stderr.log</string>
+</dict>
+</plist>
+```
+
+**Nota:** Se o cloudflared estiver em outro local, você pode encontrá-lo com o comando `which cloudflared` e ajustar o caminho no arquivo.
+
+### 3. Salve o arquivo
+- Pressione `Ctrl + O` para salvar
+- Pressione `Enter` para confirmar
+- Pressione `Ctrl + X` para sair
+
+### 4. Ajuste as permissões do arquivo
+
+```bash
+chmod 644 ~/Library/LaunchAgents/com.treinavagaai.cloudflared.plist
+```
+
+### 5. Carregue o serviço
+
+```bash
+launchctl load ~/Library/LaunchAgents/com.treinavagaai.cloudflared.plist
+```
+
+### 6. Comandos úteis para gerenciar o serviço
+
+**Iniciar o serviço:**
+```bash
+launchctl start com.treinavagaai.cloudflared
+```
+
+**Parar o serviço:**
+```bash
+launchctl stop com.treinavagaai.cloudflared
+```
+
+**Descarregar o serviço (desabilitar):**
+```bash
+launchctl unload ~/Library/LaunchAgents/com.treinavagaai.cloudflared.plist
+```
+
+**Verificar o status:**
+```bash
+launchctl list | grep treinavagaai
+```
+
+**Ver os logs:**
+```bash
+tail -f ~/Library/Logs/treinavagaai-stdout.log
+tail -f ~/Library/Logs/treinavagaai-stderr.log
+```
+
+### 7. Verificar se está funcionando
+
+Após carregar o serviço, ele deve iniciar automaticamente. Você pode verificar os logs para confirmar:
+
+```bash
+tail -20 ~/Library/Logs/treinavagaai-stdout.log
+```
+# App como servico
+Ótimo! Vou criar um serviço para rodar o `pnpm start:prod` no diretório do TreinaVaga.
+
+## Criando o serviço TreinaVaga
+
+### 1. Crie o arquivo de configuração do serviço
+
+```bash
+nano ~/Library/LaunchAgents/com.treinavaga.app.plist
+```
+
+### 2. Cole o seguinte conteúdo:
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.treinavaga.app</string>
+    
+    <key>ProgramArguments</key>
+    <array>
+        <string>/usr/local/bin/pnpm</string>
+        <string>start:prod</string>
+    </array>
+    
+    <key>WorkingDirectory</key>
+    <string>/Users/lucaspazera/TreinaVaga</string>
+    
+    <key>RunAtLoad</key>
+    <true/>
+    
+    <key>KeepAlive</key>
+    <true/>
+    
+    <key>StandardOutPath</key>
+    <string>/Users/lucaspazera/Library/Logs/treinavaga-app-stdout.log</string>
+    
+    <key>StandardErrorPath</key>
+    <string>/Users/lucaspazera/Library/Logs/treinavaga-app-stderr.log</string>
+    
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>PATH</key>
+        <string>/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
+    </dict>
+</dict>
+</plist>
+```
+
+### 3. Salve o arquivo
+- `Ctrl + O` → Enter → `Ctrl + X`
+
+### 4. Ajuste as permissões
+
+```bash
+chmod 644 ~/Library/LaunchAgents/com.treinavaga.app.plist
+```
+
+### 5. Carregue o serviço
+
+```bash
+launchctl load ~/Library/LaunchAgents/com.treinavaga.app.plist
+```
+
+### 6. Comandos úteis para gerenciar o serviço
+
+**Verificar status:**
+```bash
+launchctl list | grep treinavaga
+```
+
+**Ver logs em tempo real:**
+```bash
+tail -f ~/Library/Logs/treinavaga-app-stdout.log
+```
+
+**Ver erros:**
+```bash
+tail -f ~/Library/Logs/treinavaga-app-stderr.log
+```
+
+**Parar o serviço:**
+```bash
+launchctl stop com.treinavaga.app
+```
+
+**Iniciar o serviço:**
+```bash
+launchctl start com.treinavaga.app
+```
+
+**Recarregar (após editar o plist):**
+```bash
+launchctl unload ~/Library/LaunchAgents/com.treinavaga.app.plist
+launchctl load ~/Library/LaunchAgents/com.treinavaga.app.plist
+```
+
+### 7. Verificar se está funcionando
+
+```bash
+tail -20 ~/Library/Logs/treinavaga-app-stdout.log
+```

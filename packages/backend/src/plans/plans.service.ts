@@ -15,11 +15,33 @@ export class PlansService {
     private readonly userService: UserService,
   ) {}
 
+  async createAbacatePayCustomerIfNeeded(user: User): Promise<string | null> {
+    if (user.abacatepayCustomerId) {
+      return user.abacatepayCustomerId;
+    }
+
+    if (!user.cellphone || !user.taxid || !user.name || !user.email) {
+      return null;
+    }
+
+    return await this.userService.createAbacatePayCustomer({
+      name: user.name,
+      email: user.email,
+      cellphone: user.cellphone,
+      taxid: user.taxid,
+    });
+  }
+
   async createPayment(planId: string, user: User) {
     // Buscar o plano
     const plan = await this.tokenPackageService.findOne(planId);
     if (!plan || !plan.active || !plan.value) {
       throw new NotFoundException('Plano não encontrado ou não disponível para compra');
+    }
+
+    // Garantir que o plano tenha externalId
+    if (!plan.externalId) {
+      await this.tokenPackageService.update(planId, { externalId: planId });
     }
 
     const abacatepayToken = this.configService.get<string>('ABACATEPAY_TOKEN');
@@ -40,8 +62,8 @@ export class PlansService {
           price: Math.round(plan.value * 100), // Converter para centavos
         },
       ],
-      returnUrl: this.configService.get<string>('FRONTEND_URL', 'http://localhost:8080') + '/dashboard',
-      completionUrl: this.configService.get<string>('FRONTEND_URL', 'http://localhost:8080') + '/dashboard',
+      returnUrl: this.configService.get<string>('FRONTEND_URL', 'http://localhost:8080') + '/tokens',
+      completionUrl: this.configService.get<string>('FRONTEND_URL', 'http://localhost:8080') + '/tokens',
       customerId: user.abacatepayCustomerId,
     };
 
@@ -56,8 +78,8 @@ export class PlansService {
       );
 
       return {
-        checkoutUrl: response.data.url,
-        billingId: response.data.id,
+        checkoutUrl: response.data.data?.url || response.data.url,
+        billingId: response.data.data?.id || response.data.id,
       };
     } catch (error) {
       console.error('Erro ao criar cobrança na AbacatePay:', error.response?.data || error.message);
@@ -79,9 +101,15 @@ export class PlansService {
     }
 
     // Buscar o plano
-    const plan = await this.tokenPackageService.findOne(planId);
+    let plan = await this.tokenPackageService.findByExternalId(planId);
+    if (!plan) {
+      plan = await this.tokenPackageService.findOne(planId);
+    }
     if (!plan || !plan.active) {
       console.error(`Plano não encontrado ou inativo: ${planId}`);
+      // Log available plans for debugging
+      const allPlans = await this.tokenPackageService.findAll();
+      console.error('Planos disponíveis:', allPlans.map(p => ({ id: (p as any).id || p['_id'], name: p.name, externalId: p.externalId })));
       return;
     }
 

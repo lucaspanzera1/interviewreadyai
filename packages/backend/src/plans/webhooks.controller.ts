@@ -5,22 +5,22 @@ import { PlansService } from './plans.service';
 import { Request } from 'express';
 import { Public } from '../auth/decorators/public.decorator';
 
-@Controller('abacatepay')
-export class AbacatePayWebhookController {
+@Controller('webhooks')
+export class WebhooksController {
   constructor(
     private readonly configService: ConfigService,
     private readonly plansService: PlansService,
   ) {}
 
-  @Post('webhook')
+  @Post('abacatepay')
   @Public()
-  async handleWebhook(
+  async handleAbacatePayWebhook(
     @Body() payload: any,
     @Headers() allHeaders: any,
     @Query() allQuery: any,
     @Req() req: RawBodyRequest<Request>,
   ) {
-    console.log('🔍 Webhook recebido!');
+    console.log('🔍 Webhook AbacatePay recebido!');
     console.log('  - Todos os headers:', JSON.stringify(allHeaders, null, 2));
     console.log('  - Todos os query params:', JSON.stringify(allQuery, null, 2));
     console.log('  - Payload:', JSON.stringify(payload, null, 2));
@@ -96,51 +96,28 @@ export class AbacatePayWebhookController {
     return { status: 'ok' };
   }
 
-  @Post('test')
-  @Public()
-  async testEndpoint(
-    @Body() payload: any,
-    @Headers() allHeaders: any,
-    @Query() allQuery: any,
-  ) {
-    console.log('🧪 Endpoint de teste chamado!');
-    console.log('  - Headers:', JSON.stringify(allHeaders, null, 2));
-    console.log('  - Query params:', JSON.stringify(allQuery, null, 2));
-    console.log('  - Payload:', JSON.stringify(payload, null, 2));
-
-    return { status: 'test ok', received: payload };
-  }
-
   private async processPaymentSuccess(data: any) {
     try {
-      // Extrair customerId de múltiplas possibilidades
-      const customerId = data.billing?.customer?.id ||
-                        data.customerId ||
-                        data.customer?.id;
+      const { billing, payment } = data;
+      const abacatepayCustomerId = billing.customer.id;
 
-      if (!customerId) {
-        console.error('Customer ID não encontrado no payload:', data);
-        return;
+      console.log('💰 Processando pagamento bem-sucedido:', {
+        billingId: billing.id,
+        customerId: abacatepayCustomerId,
+        amount: payment.amount,
+        products: billing.products,
+      });
+
+      // Ativar plano para o usuário
+      for (const product of billing.products) {
+        const planId = product.externalId;
+        await this.plansService.activatePlanForUser(abacatepayCustomerId, planId);
       }
 
-      // Extrair planId do produto
-      const product = data.billing?.products?.[0] || data.products?.[0];
-      const planId = product?.externalId;
-
-      if (!planId) {
-        console.error('Plan ID não encontrado no payload:', data);
-        return;
-      }
-
-      // Aqui você implementaria a lógica para ativar o plano do usuário
-      // Por enquanto, apenas log
-      console.log(`Pagamento confirmado - Customer: ${customerId}, Plan: ${planId}`);
-
-      // Ativar o plano
-      await this.plansService.activatePlanForUser(customerId, planId);
-
+      console.log('✅ Pagamento processado com sucesso');
     } catch (error) {
-      console.error('Erro ao processar webhook:', error);
+      console.error('❌ Erro ao processar pagamento:', error);
+      throw error;
     }
   }
 }

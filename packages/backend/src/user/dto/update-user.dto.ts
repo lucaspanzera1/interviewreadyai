@@ -14,4 +14,9 @@ export class UpdateUserDto {
   @IsOptional()
   @IsString()
   picture?: string;
+
+  @ApiProperty({ description: 'ID do cliente na AbacatePay', required: false })
+  @IsOptional()
+  @IsString()
+  abacatepayCustomerId?: string;
 }
