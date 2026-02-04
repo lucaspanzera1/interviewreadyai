@@ -29,6 +29,14 @@ export class ProfileDto {
   @IsOptional()
   @IsString()
   githubUrl?: string;
+
+  @IsOptional()
+  @IsString()
+  cellphone?: string;
+
+  @IsOptional()
+  @IsString()
+  taxid?: string;
 }
 
 export class CompleteOnboardingDto extends ProfileDto {

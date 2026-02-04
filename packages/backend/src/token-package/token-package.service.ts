@@ -30,6 +30,10 @@ export class TokenPackageService {
     return this.tokenPackageModel.findById(id).populate('role').exec();
   }
 
+  async findByExternalId(externalId: string): Promise<TokenPackage> {
+    return this.tokenPackageModel.findOne({ externalId }).populate('role').exec();
+  }
+
   async update(id: string, updateTokenPackageDto: any): Promise<TokenPackage> {
     const data = { ...updateTokenPackageDto };
     if (data.role) {

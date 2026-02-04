@@ -265,6 +265,8 @@ export class UserController {
       location: userDoc.location,
       linkedinUrl: userDoc.linkedinUrl,
       githubUrl: userDoc.githubUrl,
+      cellphone: userDoc.cellphone,
+      taxid: userDoc.taxid,
     };
   }
 

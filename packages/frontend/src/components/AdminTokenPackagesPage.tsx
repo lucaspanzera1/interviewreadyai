@@ -27,6 +27,7 @@ const AdminTokenPackagesPage: React.FC = () => {
     role: '',
     features: [] as string[],
     validityDays: undefined as number | undefined,
+    value: undefined as number | undefined,
   });
 
   useEffect(() => {
@@ -108,6 +109,7 @@ const AdminTokenPackagesPage: React.FC = () => {
       role: '',
       features: [],
       validityDays: undefined,
+      value: undefined,
     });
     setEditingPackage(null);
   };
@@ -121,6 +123,7 @@ const AdminTokenPackagesPage: React.FC = () => {
       role: pkg.role.id,
       features: pkg.features || [],
       validityDays: pkg.validityDays,
+      value: pkg.value,
     });
     setIsModalOpen(true);
   };
@@ -192,6 +195,9 @@ const AdminTokenPackagesPage: React.FC = () => {
                     Tokens
                   </th>
                   <th className="px-6 py-4 text-left text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                    Valor
+                  </th>
+                  <th className="px-6 py-4 text-left text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
                     Cargo Atribuído
                   </th>
                   <th className="px-6 py-4 text-left text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
@@ -222,6 +228,15 @@ const AdminTokenPackagesPage: React.FC = () => {
                         </span>
                         <span className="text-xs text-slate-400">tokens</span>
                       </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      {pkg.value ? (
+                        <span className="text-sm font-bold text-green-600 dark:text-green-400">
+                          R$ {pkg.value.toFixed(2)}
+                        </span>
+                      ) : (
+                        <span className="text-xs text-slate-400">-</span>
+                      )}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span
@@ -367,6 +382,22 @@ const AdminTokenPackagesPage: React.FC = () => {
                   placeholder="Vazio = Vitalício"
                 />
                 <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Deixe vazio para vitalício</p>
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
+                  Valor (R$)
+                </label>
+                <input
+                  type="number"
+                  value={formData.value || ''}
+                  onChange={(e) => setFormData(prev => ({ ...prev, value: e.target.value ? parseFloat(e.target.value) : undefined }))}
+                  className="w-full px-4 py-2.5 border border-slate-300 dark:border-slate-600 rounded-xl bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-primary-500"
+                  min="0"
+                  step="0.01"
+                  placeholder="0.00"
+                />
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Valor em reais (opcional)</p>
               </div>
 
               <div className="md:col-span-2">

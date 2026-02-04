@@ -2,6 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
+import { HttpService } from '@nestjs/axios';
+import { firstValueFrom } from 'rxjs';
 import { User, UserDocument, UserRole } from './schemas/user.schema';
 import { UpdateUserDto, UserDto } from './dto';
 import { NotFoundException, DatabaseException } from '../common/exceptions';
@@ -18,6 +20,7 @@ export class UserService {
     private readonly userModel: Model<UserDocument>,
     private readonly configService: ConfigService,
     private readonly emailService: EmailService,
+    private readonly httpService: HttpService,
   ) {}
 
   /**
@@ -61,6 +64,14 @@ export class UserService {
             user.githubId = userData.githubId;
           }
           user.lastLoginAt = new Date();
+          
+          // Normalize role for old users
+          if (user.role) {
+            user.role = user.role.toLowerCase() === 'admin' ? UserRole.ADMIN : UserRole.CLIENT;
+          } else {
+            user.role = UserRole.CLIENT;
+          }
+          
           return await user.save();
         }
 
@@ -94,6 +105,13 @@ export class UserService {
 
       // Se encontrar pelo provider ID, atualiza último login
       user.lastLoginAt = new Date();
+      
+      // Normalize role for old users
+      if (user.role) {
+        user.role = user.role.toLowerCase() === 'admin' ? UserRole.ADMIN : UserRole.CLIENT;
+      } else {
+        user.role = UserRole.CLIENT;
+      }
       
       // Atualiza role se mudou no .env
       const newRole = adminEmails.includes(user.email.toLowerCase()) 
@@ -168,6 +186,15 @@ export class UserService {
    */
   async findByGoogleId(googleId: string): Promise<UserDocument | null> {
     return await this.userModel.findOne({ googleId });
+  }
+
+  /**
+   * Busca usuário por AbacatePay Customer ID
+   * @param abacatepayCustomerId ID do cliente na AbacatePay
+   * @returns Usuário encontrado ou null
+   */
+  async findByAbacatePayCustomerId(abacatepayCustomerId: string): Promise<UserDocument | null> {
+    return await this.userModel.findOne({ abacatepayCustomerId });
   }
 
   /**
@@ -275,6 +302,32 @@ export class UserService {
    */
   async updateProfile(userId: string, profileData: any): Promise<UserDocument> {
     const user = await this.findById(userId);
+
+    // Verificar se deve criar cliente na AbacatePay
+    const shouldCreateAbacatePayCustomer =
+      !user.abacatepayCustomerId &&
+      profileData.cellphone &&
+      profileData.taxid &&
+      (profileData.name || user.name) &&
+      user.email;
+
+    if (shouldCreateAbacatePayCustomer) {
+      try {
+        const customerId = await this.createAbacatePayCustomer({
+          name: profileData.name || user.name,
+          email: user.email,
+          cellphone: profileData.cellphone,
+          taxid: profileData.taxid,
+        });
+        if (customerId) {
+          profileData.abacatepayCustomerId = customerId;
+        }
+      } catch (error) {
+        console.error('Erro ao criar cliente na AbacatePay:', error.response?.data || error.message);
+        // Não falha a atualização do perfil por erro na AbacatePay
+      }
+    }
+
     Object.assign(user, profileData);
     return await user.save();
   }
@@ -411,6 +464,53 @@ export class UserService {
     if (!lastReset || now.toDateString() !== lastReset.toDateString()) {
       user.dailyFreeQuizzesUsed = 0;
       user.lastFreeQuizReset = now;
+    }
+  }
+
+  /**
+   * Cria um cliente na AbacatePay
+   * @param customerData Dados do cliente
+   * @returns ID do cliente criado
+   */
+  async createAbacatePayCustomer(customerData: {
+    name: string;
+    email: string;
+    cellphone: string;
+    taxid: string;
+  }): Promise<string | null> {
+    const abacatepayToken = this.configService.get<string>('ABACATEPAY_TOKEN');
+    if (!abacatepayToken) {
+      console.error('❌ ABACATEPAY_TOKEN não configurado');
+      return null;
+    }
+
+    const payload = {
+      name: customerData.name,
+      email: customerData.email,
+      cellphone: customerData.cellphone,
+      taxId: customerData.taxid,
+    };
+
+    try {
+      const response = await firstValueFrom(
+        this.httpService.post('https://api.abacatepay.com/v1/customer/create', payload, {
+          headers: {
+            'Authorization': `Bearer ${abacatepayToken}`,
+            'Content-Type': 'application/json',
+          },
+        })
+      );
+      return response.data.data?.id || response.data.id;
+    } catch (error) {
+      console.error('Erro ao criar cliente na AbacatePay:', {
+        status: error.response?.status,
+        statusText: error.response?.statusText,
+        data: error.response?.data,
+        message: error.message
+      });
+      // Por enquanto, não falha a atualização do perfil
+      // throw error;
+      return null; // Retorna null para indicar falha
     }
   }
 }

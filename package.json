@@ -1,6 +1,6 @@
 {
   "name": "treinavagaai-app",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "description": "TreinaVagaAI App com autenticação OAuth Google",
   "private": true,
   "workspaces": [

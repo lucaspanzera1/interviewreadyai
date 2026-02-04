@@ -25,6 +25,7 @@ export interface TokenPackage {
   features: string[];
   active: boolean;
   validityDays?: number;
+  value?: number;
   createdAt: string;
   updatedAt: string;
 }
@@ -36,6 +37,7 @@ export interface CreateTokenPackage {
   role: string;
   features: string[];
   validityDays?: number;
+  value?: number;
 }
 
 export interface UpdateTokenPackage {
@@ -62,6 +64,7 @@ export interface User {
   lastLoginAt?: string;
   cellphone?: string | null;
   taxid?: string | null;
+  abacatepayCustomerId?: string | null;
   tokens?: number;
   // Campos de perfil
   hasCompletedOnboarding?: boolean;
@@ -96,6 +99,8 @@ export interface UserProfile {
   location?: string;
   linkedinUrl?: string;
   githubUrl?: string;
+  cellphone?: string | null;
+  taxid?: string | null;
 }
 
 export interface CompleteOnboardingData {
@@ -293,6 +298,12 @@ class ApiClient {
     });
 
     return this.userProfilePromise;
+  }
+
+  clearUserProfileCache(): void {
+    this._cachedUser = null;
+    this._cachedUserAt = null;
+    this.userProfilePromise = null;
   }
 
 
@@ -537,6 +548,12 @@ class ApiClient {
 
   async redeemTokenPackage(id: string): Promise<{ message: string }> {
     const res = await this.client.post(`/token-packages/${id}/redeem`);
+    return res.data;
+  }
+
+  // Plan payment methods
+  async payForPlan(planId: string): Promise<{ checkoutUrl: string; billingId: string }> {
+    const res = await this.client.post(`/plans/${planId}/pay`);
     return res.data;
   }
 }

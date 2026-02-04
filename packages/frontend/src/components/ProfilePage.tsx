@@ -68,6 +68,8 @@ interface FormData {
   location: string;
   linkedinUrl: string;
   githubUrl: string;
+  cellphone: string;
+  taxid: string;
 }
 
 interface Reward {
@@ -95,6 +97,8 @@ const ProfilePage: React.FC = () => {
     location: user?.location || '',
     linkedinUrl: user?.linkedinUrl || '',
     githubUrl: user?.githubUrl || '',
+    cellphone: user?.cellphone || '',
+    taxid: user?.taxid || '',
   });
 
   const [stats, setStats] = useState({
@@ -200,6 +204,8 @@ const ProfilePage: React.FC = () => {
       location: user?.location || '',
       linkedinUrl: user?.linkedinUrl || '',
       githubUrl: user?.githubUrl || '',
+      cellphone: user?.cellphone || '',
+      taxid: user?.taxid || '',
     });
     setIsEditing(false);
   };
@@ -421,6 +427,127 @@ const ProfilePage: React.FC = () => {
                     </div>
                   </div>
 
+                </div>
+              </div>
+            </div>
+
+            {/* 1.5. PAYMENT DATA CARD */}
+            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg shadow-sm">
+              <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
+                <h2 className="text-base font-semibold text-slate-900 dark:text-white">Dados de Pagamento</h2>
+                {!isEditing ? (
+                  <button
+                    onClick={() => setIsEditing(true)}
+                    className="flex items-center text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors"
+                  >
+                    <PencilIcon className="h-4 w-4 mr-1.5 opacity-70" />
+                    Editar
+                  </button>
+                ) : (
+                  <div className="flex gap-3">
+                    <button
+                      onClick={handleCancel}
+                      className="flex items-center px-3 py-1.5 text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-800 rounded-md transition-all"
+                      disabled={isLoading}
+                    >
+                      <XMarkIcon className="h-4 w-4 mr-1" />
+                      Cancelar
+                    </button>
+                    <button
+                      onClick={handleSave}
+                      className="flex items-center px-4 py-2 text-sm font-semibold text-white bg-primary-600 hover:bg-primary-500 rounded-lg transition-all shadow-md shadow-primary-600/20 active:scale-95"
+                      disabled={isLoading}
+                    >
+                      <CheckIcon className="h-4 w-4 mr-1.5" />
+                      {isLoading ? 'Salvando...' : 'Salvar'}
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              <div className="p-6">
+                <div className="max-w-md space-y-6">
+                  {/* Cellphone */}
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                      Telefone <span className="text-red-500">*</span>
+                    </label>
+                    {isEditing ? (
+                      <input
+                        type="tel"
+                        name="cellphone"
+                        value={formData.cellphone}
+                        onChange={handleInputChange}
+                        placeholder="(11) 99999-9999"
+                        className="block w-full px-4 py-2 text-sm bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:border-primary-500 dark:text-white"
+                      />
+                    ) : (
+                      <div className="flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 rounded-md">
+                        <div className="p-1 bg-green-100 dark:bg-green-900/30 rounded text-green-600 dark:text-green-400">
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                          </svg>
+                        </div>
+                        <span className="text-slate-700 dark:text-slate-200 font-medium text-sm">
+                          {user?.cellphone || 'Não informado'}
+                        </span>
+                      </div>
+                    )}
+                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                      Necessário para pagamentos via PIX
+                    </p>
+                  </div>
+
+                  {/* Tax ID (CPF) */}
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                      CPF <span className="text-red-500">*</span>
+                    </label>
+                    {isEditing ? (
+                      <input
+                        type="text"
+                        name="taxid"
+                        value={formData.taxid}
+                        onChange={handleInputChange}
+                        placeholder="000.000.000-00"
+                        className="block w-full px-4 py-2 text-sm bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:border-primary-500 dark:text-white"
+                      />
+                    ) : (
+                      <div className="flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 rounded-md">
+                        <div className="p-1 bg-blue-100 dark:bg-blue-900/30 rounded text-blue-600 dark:text-blue-400">
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2" />
+                          </svg>
+                        </div>
+                        <span className="text-slate-700 dark:text-slate-200 font-medium text-sm">
+                          {user?.taxid ? `***${user.taxid.slice(-3)}` : 'Não informado'}
+                        </span>
+                      </div>
+                    )}
+                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                      Necessário para pagamentos via PIX
+                    </p>
+                  </div>
+
+                  {/* Payment Status */}
+                  <div className="pt-4 border-t border-slate-100 dark:border-slate-700">
+                    <div className="flex items-center gap-3 p-3 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/10 dark:to-emerald-900/10 border border-green-200 dark:border-green-800 rounded-lg">
+                      <div className="p-2 bg-green-100 dark:bg-green-900/30 rounded-lg text-green-600 dark:text-green-400">
+                        <ShieldCheckIcon className="h-5 w-5" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-semibold text-green-800 dark:text-green-200">
+                          {user?.cellphone && user?.taxid ? 'Pronto para pagamentos' : 'Complete seus dados'}
+                        </p>
+                        <p className="text-xs text-green-700 dark:text-green-300">
+                          {user?.cellphone && user?.taxid
+                            ? 'Você pode adquirir planos pagos via PIX'
+                            : 'Adicione telefone e CPF para desbloquear pagamentos'
+                          }
+                        </p>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>

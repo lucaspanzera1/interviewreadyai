@@ -77,6 +77,7 @@ export class AuthController {
       callbackUrl.searchParams.set('access_token', loginData.accessToken);
       callbackUrl.searchParams.set('refresh_token', loginData.refreshToken);
       
+      res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
       res.redirect(callbackUrl.toString());
     } catch (error) {
       // Redireciona para o frontend com erro
@@ -84,6 +85,7 @@ export class AuthController {
       const callbackUrl = new URL('/auth/callback', frontendUrl);
       callbackUrl.searchParams.set('error', 'authentication_failed');
       
+      res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
       res.redirect(callbackUrl.toString());
     }
   }
@@ -130,6 +132,7 @@ export class AuthController {
       callbackUrl.searchParams.set('access_token', loginData.accessToken);
       callbackUrl.searchParams.set('refresh_token', loginData.refreshToken);
       
+      res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
       res.redirect(callbackUrl.toString());
     } catch (error) {
       // Redireciona para o frontend com erro
@@ -137,6 +140,7 @@ export class AuthController {
       const callbackUrl = new URL('/auth/callback', frontendUrl);
       callbackUrl.searchParams.set('error', 'authentication_failed');
       
+      res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
       res.redirect(callbackUrl.toString());
     }
   }

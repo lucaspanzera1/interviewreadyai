@@ -28,6 +28,12 @@ export class User {
   @Prop({ maxlength: 20 })
   taxid?: string;
 
+  @Prop()
+  cellphone?: string;
+
+  @Prop()
+  abacatepayCustomerId?: string; // ID do cliente na AbacatePay
+
   @Prop({ type: String, enum: UserRole, default: UserRole.CLIENT })
   role: UserRole;
 
