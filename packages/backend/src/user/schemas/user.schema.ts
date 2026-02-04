@@ -10,10 +10,10 @@ export enum UserRole {
 
 @Schema({ timestamps: true })
 export class User {
-  @Prop({ unique: true })
+  @Prop({ unique: true, sparse: true })
   googleId?: string;
 
-  @Prop({ unique: true })
+  @Prop({ unique: true, sparse: true })
   githubId?: string;
 
   @Prop({ required: true, unique: true, lowercase: true })
