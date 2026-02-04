@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import PageTitle from './PageTitle';
 import {
@@ -53,6 +53,20 @@ const FreeQuizzesPage: React.FC = () => {
         }
     };
 
+    const [debouncedSearch, setDebouncedSearch] = useState(searchQuery);
+    const observer = useRef<IntersectionObserver | null>(null);
+
+    const lastQuizElementRef = useCallback((node: HTMLDivElement) => {
+        if (loading) return;
+        if (observer.current) observer.current.disconnect();
+        observer.current = new IntersectionObserver(entries => {
+            if (entries[0].isIntersecting && currentPage < totalPages) {
+                setCurrentPage(prev => prev + 1);
+            }
+        });
+        if (node) observer.current.observe(node);
+    }, [loading, totalPages, currentPage]);
+
     // Load initial data
     useEffect(() => {
         loadHighlightQuiz();
@@ -60,19 +74,24 @@ const FreeQuizzesPage: React.FC = () => {
         loadFilters();
     }, []);
 
+    // Sync search query with debounce
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setDebouncedSearch(searchQuery);
+        }, 300);
+        return () => clearTimeout(timer);
+    }, [searchQuery]);
+
+    // Reset list when filters change
+    useEffect(() => {
+        setCurrentPage(1);
+        setPublicQuizzes([]);
+    }, [selectedCategory, selectedDifficulty, debouncedSearch]);
+
     // Load public quizzes when filters or page change
     useEffect(() => {
         loadPublicQuizzes();
-    }, [selectedCategory, selectedDifficulty, currentPage]);
-
-    // Handle search with debounce
-    useEffect(() => {
-        const timer = setTimeout(() => {
-            loadPublicQuizzes();
-        }, 300);
-
-        return () => clearTimeout(timer);
-    }, [searchQuery]);
+    }, [selectedCategory, selectedDifficulty, currentPage, debouncedSearch]);
 
     const loadFilters = async () => {
         try {
@@ -127,9 +146,17 @@ const FreeQuizzesPage: React.FC = () => {
                 12,
                 selectedCategory,
                 selectedDifficulty,
-                searchQuery
+                debouncedSearch
             );
-            setPublicQuizzes(response.quizzes);
+            
+            setPublicQuizzes(prev => {
+                if (currentPage === 1) return response.quizzes;
+                // Filter out duplicates just in case
+                const newQuizzes = response.quizzes.filter((newQ: any) => 
+                    !prev.some(existingQ => existingQ._id === newQ._id)
+                );
+                return [...prev, ...newQuizzes];
+            });
             setTotalPages(response.totalPages);
         } catch (error: any) {
             console.error('Erro ao carregar quizzes:', error);
@@ -309,15 +336,13 @@ const FreeQuizzesPage: React.FC = () => {
             </div>
 
             {/* Grid of Quizzes */}
-            {loading ? (
-                <div className="flex items-center justify-center py-20">
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
-                </div>
-            ) : publicQuizzes.length > 0 ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {publicQuizzes.map((quiz) => (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {publicQuizzes.map((quiz, index) => {
+                    const isLast = index === publicQuizzes.length - 1;
+                    return (
                         <div
                             key={quiz._id}
+                            ref={isLast ? lastQuizElementRef : null}
                             className="group bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 hover:border-primary-400 dark:hover:border-primary-500 shadow-sm hover:shadow-md transition-all duration-300 flex flex-col overflow-hidden cursor-pointer"
                             onClick={() => startPublicQuiz(quiz)}
                         >
@@ -380,9 +405,17 @@ const FreeQuizzesPage: React.FC = () => {
                                 </div>
                             </div>
                         </div>
-                    ))}
+                    );
+                })}
+            </div>
+
+            {loading && (
+                <div className="flex items-center justify-center py-10">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
                 </div>
-            ) : (
+            )}
+
+            {!loading && publicQuizzes.length === 0 && (
                 <div className="text-center py-20 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-dashed border-slate-200 dark:border-slate-700">
                     <AcademicCapIcon className="w-8 h-8 text-slate-300 dark:text-slate-600 mx-auto mb-4" />
                     <h3 className="text-lg font-medium text-slate-900 dark:text-white">Nenhum quiz encontrado</h3>
@@ -392,29 +425,6 @@ const FreeQuizzesPage: React.FC = () => {
                         className="mt-4 text-primary-600 font-medium text-sm hover:underline"
                     >
                         Limpar filtros
-                    </button>
-                </div>
-            )}
-
-            {/* Pagination */}
-            {totalPages > 1 && (
-                <div className="flex justify-center items-center gap-2 mt-8">
-                    <button
-                        onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
-                        disabled={currentPage === 1}
-                        className="px-3 py-2 text-sm font-medium text-slate-500 bg-white border border-slate-300 rounded-md hover:bg-slate-50 disabled:opacity-50"
-                    >
-                        Anterior
-                    </button>
-                    <span className="text-sm text-slate-700 dark:text-slate-300">
-                        Página {currentPage} de {totalPages}
-                    </span>
-                    <button
-                        onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
-                        disabled={currentPage === totalPages}
-                        className="px-3 py-2 text-sm font-medium text-slate-500 bg-white border border-slate-300 rounded-md hover:bg-slate-50 disabled:opacity-50"
-                    >
-                        Próxima
                     </button>
                 </div>
             )}
