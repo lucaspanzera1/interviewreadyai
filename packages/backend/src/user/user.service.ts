@@ -21,7 +21,7 @@ export class UserService {
     private readonly configService: ConfigService,
     private readonly emailService: EmailService,
     private readonly httpService: HttpService,
-  ) {}
+  ) { }
 
   /**
    * Busca ou cria um usuário baseado nos dados do OAuth (Google ou GitHub)
@@ -43,7 +43,7 @@ export class UserService {
     // Busca lista de admins do .env
     const adminEmailsRaw = this.configService.get<string>('ADMIN_EMAILS') || '';
     const adminEmails = adminEmailsRaw.split(',').map(e => e.trim().toLowerCase()).filter(Boolean);
-    
+
     try {
       // Tenta encontrar usuário pelo provider ID
       let user: UserDocument | null = null;
@@ -71,22 +71,22 @@ export class UserService {
             user.githubId = userData.githubId;
           }
           user.lastLoginAt = new Date();
-          
+
           // Normalize role for old users
           if (user.role) {
             user.role = user.role.toLowerCase() === 'admin' ? UserRole.ADMIN : UserRole.CLIENT;
           } else {
             user.role = UserRole.CLIENT;
           }
-          
+
           console.log('Saving updated user');
           return await user.save();
         }
 
         // Se não encontrar, cria novo usuário
         console.log('Creating new user');
-        const role = adminEmails.includes(userData.email.toLowerCase()) 
-          ? UserRole.ADMIN 
+        const role = adminEmails.includes(userData.email.toLowerCase())
+          ? UserRole.ADMIN
           : UserRole.CLIENT;
 
         user = new this.userModel({
@@ -115,22 +115,22 @@ export class UserService {
 
       // Se encontrar pelo provider ID, atualiza último login
       user.lastLoginAt = new Date();
-      
+
       // Normalize role for old users
       if (user.role) {
         user.role = user.role.toLowerCase() === 'admin' ? UserRole.ADMIN : UserRole.CLIENT;
       } else {
         user.role = UserRole.CLIENT;
       }
-      
+
       // Atualiza role se mudou no .env
-      const newRole = adminEmails.includes(user.email.toLowerCase()) 
-        ? UserRole.ADMIN 
+      const newRole = adminEmails.includes(user.email.toLowerCase())
+        ? UserRole.ADMIN
         : UserRole.CLIENT;
       if (user.role !== newRole) {
         user.role = newRole;
       }
-      
+
       console.log('Saving existing user');
       return await user.save();
     } catch (error) {
@@ -247,8 +247,10 @@ export class UserService {
       createdAt: user.createdAt,
       updatedAt: user.updatedAt,
       lastLoginAt: user.lastLoginAt,
+      hasCompletedOnboarding: user.hasCompletedOnboarding,
     };
   }
+
 
   /**
    * Retorna status do módulo de usuários
@@ -397,7 +399,7 @@ export class UserService {
       user.tokens = (user.tokens || 0) + 1;
       user.lastTokenRewardMilestone = user.totalFreeQuizzesCompleted;
       user.lastTokenRewardAt = new Date();
-      
+
       // Adicionar ao histórico de recompensas
       user.rewardHistory.push({
         type: 'token',
@@ -405,7 +407,7 @@ export class UserService {
         reason: 'quiz_completion',
         createdAt: new Date()
       });
-      
+
       tokenReward = true;
     }
 
