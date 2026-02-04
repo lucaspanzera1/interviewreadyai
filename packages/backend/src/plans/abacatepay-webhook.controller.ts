@@ -94,6 +94,10 @@ export class AbacatePayWebhookController {
         return;
       }
 
+      // Extrair email do cliente
+      const customerEmail = data.billing?.customer?.metadata?.email ||
+                           data.customer?.metadata?.email;
+
       // Extrair planId do produto
       const product = data.billing?.products?.[0] || data.products?.[0];
       const planId = product?.externalId;
@@ -104,7 +108,7 @@ export class AbacatePayWebhookController {
       }
 
       // Ativar o plano
-      await this.plansService.activatePlanForUser(customerId, planId);
+      await this.plansService.activatePlanForUser(customerId, planId, customerEmail);
 
     } catch (error) {
       console.error('Erro ao processar webhook:', error);

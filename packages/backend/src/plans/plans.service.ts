@@ -24,12 +24,19 @@ export class PlansService {
       return null;
     }
 
-    return await this.userService.createAbacatePayCustomer({
+    const customerId = await this.userService.createAbacatePayCustomer({
       name: user.name,
       email: user.email,
       cellphone: user.cellphone,
       taxid: user.taxid,
     });
+
+    if (customerId) {
+      // Atualizar o usuário com o customerId
+      await this.userService.updateUser((user as any)._id.toString(), { abacatepayCustomerId: customerId });
+    }
+
+    return customerId;
   }
 
   async createPayment(planId: string, user: User) {
@@ -91,12 +98,20 @@ export class PlansService {
    * Ativa um plano para um usuário (chamado pelo webhook)
    * @param abacatepayCustomerId ID do cliente na AbacatePay
    * @param planId ID do plano
+   * @param customerEmail Email do cliente (fallback)
    */
-  async activatePlanForUser(abacatepayCustomerId: string, planId: string) {
+  async activatePlanForUser(abacatepayCustomerId: string, planId: string, customerEmail?: string) {
     // Encontrar usuário pelo abacatepayCustomerId
-    const user = await this.userService.findByAbacatePayCustomerId(abacatepayCustomerId);
+    let user = await this.userService.findByAbacatePayCustomerId(abacatepayCustomerId);
+    if (!user && customerEmail) {
+      // Tentar encontrar pelo email e atualizar o customerId
+      user = await this.userService.findByEmail(customerEmail);
+      if (user) {
+        await this.userService.updateUser((user as any)._id.toString(), { abacatepayCustomerId });
+      }
+    }
     if (!user) {
-      console.error(`Usuário não encontrado para customerId: ${abacatepayCustomerId}`);
+      console.error(`Usuário não encontrado para customerId: ${abacatepayCustomerId} ou email: ${customerEmail}`);
       return;
     }
 

@@ -1,6 +1,7 @@
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
+import { IoAdapter } from '@nestjs/platform-socket.io';
 import { AppModule } from './app.module';
 import { GlobalExceptionFilter } from './common/filters/global-exception.filter';
 import * as bodyParser from 'body-parser';
@@ -27,6 +28,9 @@ async function bootstrap() {
     origin: process.env.CORS_ORIGIN || 'http://localhost:8080',
     credentials: true,
   });
+
+  // Configuração do WebSocket Adapter
+  app.useWebSocketAdapter(new IoAdapter(app));
 
   // Configuração de validação global
   // app.useGlobalPipes(

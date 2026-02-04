@@ -65,12 +65,6 @@ export class UserService {
           }
           user.lastLoginAt = new Date();
 
-          // Check if role has expired
-          if (user.roleExpiresAt && user.roleExpiresAt <= new Date() && user.role !== UserRole.CLIENT) {
-            user.role = UserRole.CLIENT;
-            user.roleExpiresAt = undefined;
-          }
-
           // Normalize role for old users
           if (user.role) {
             if (user.role.toLowerCase() === 'admin') {
