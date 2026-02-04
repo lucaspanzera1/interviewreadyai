@@ -116,6 +116,5 @@ export class PlansService {
     // Ativar o plano para o usuário
     await this.tokenPackageService.redeem(planId, user);
 
-    console.log(`Plano ${plan.name} ativado para usuário ${user.email}`);
   }
 }

@@ -67,11 +67,8 @@ export class AuthController {
     type: UnauthorizedErrorDto
   })
   async googleCallback(@Req() req: Request, @Res() res: Response) {
-    console.log('Google callback entered, req.user:', req.user);
     try {
-      console.log('Calling authService.googleLogin');
       const loginData = await this.authService.googleLogin(req.user);
-      console.log('Login data received:', { accessToken: loginData.accessToken.substring(0, 20) + '...', refreshToken: loginData.refreshToken.substring(0, 20) + '...', user: loginData.user });
       
       // Redireciona para o frontend com os tokens como query parameters
       const frontendUrl = process.env.CORS_ORIGIN || 'http://localhost:3000';
@@ -80,7 +77,6 @@ export class AuthController {
       callbackUrl.searchParams.set('access_token', loginData.accessToken);
       callbackUrl.searchParams.set('refresh_token', loginData.refreshToken);
       
-      console.log('Redirecting to success:', callbackUrl.toString());
       res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
       res.redirect(callbackUrl.toString());
     } catch (error) {
@@ -90,7 +86,6 @@ export class AuthController {
       const callbackUrl = new URL('/auth/callback', frontendUrl);
       callbackUrl.searchParams.set('error', 'authentication_failed');
       
-      console.log('Redirecting to error:', callbackUrl.toString());
       res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
       res.redirect(callbackUrl.toString());
     }
