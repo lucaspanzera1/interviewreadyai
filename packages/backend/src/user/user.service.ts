@@ -109,8 +109,8 @@ export class UserService {
       // Se encontrar pelo provider ID, atualiza último login
       user.lastLoginAt = new Date();
 
-      // Check if role has expired
-      if (user.roleExpiresAt && user.roleExpiresAt <= new Date() && user.role !== UserRole.CLIENT) {
+      // Check if role has expired (não resetar se for admin)
+      if (user.roleExpiresAt && user.roleExpiresAt <= new Date() && user.role !== UserRole.ADMIN) {
         user.role = UserRole.CLIENT;
         user.roleExpiresAt = undefined;
       }
@@ -125,12 +125,9 @@ export class UserService {
         user.role = UserRole.CLIENT;
       }
 
-      // Atualiza role se mudou no .env
-      const newRole = adminEmails.includes(user.email.toLowerCase())
-        ? UserRole.ADMIN
-        : UserRole.CLIENT;
-      if (user.role !== newRole) {
-        user.role = newRole;
+      // Atualiza role apenas se for admin no .env (não sobrescrever roles de pacotes)
+      if (adminEmails.includes(user.email.toLowerCase())) {
+        user.role = UserRole.ADMIN;
       }
 
       return await user.save();

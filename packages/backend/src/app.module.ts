@@ -14,7 +14,6 @@ import { TokenPackageModule } from './token-package/token-package.module';
 import { RoleModule } from './role/role.module';
 import { EmailModule } from './common/email.module';
 import { PlansModule } from './plans/plans.module';
-import { WebsocketModule } from './websocket/websocket.module';
 
 /**
  * Módulo principal da aplicação
@@ -44,7 +43,6 @@ import { WebsocketModule } from './websocket/websocket.module';
     TokenPackageModule,
     RoleModule,
     PlansModule,
-    WebsocketModule,
   ],
   controllers: [AppController],
   providers: [

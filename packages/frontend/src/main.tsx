@@ -4,7 +4,6 @@ import { BrowserRouter } from 'react-router-dom'
 import { AuthProvider } from './contexts/AuthContext'
 import { SidebarProvider } from './contexts/SidebarContext'
 import { ThemeProvider } from './contexts/ThemeContext'
-import { WebSocketProvider } from './contexts/WebSocketContext'
 import App from './App.tsx'
 import './index.css'
 import { ToastProvider } from './contexts/ToastContext'
@@ -15,11 +14,9 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
       <ThemeProvider>
         <ToastProvider>
           <AuthProvider>
-            <WebSocketProvider>
-              <SidebarProvider>
-                <App />
-              </SidebarProvider>
-            </WebSocketProvider>
+            <SidebarProvider>
+              <App />
+            </SidebarProvider>
           </AuthProvider>
         </ToastProvider>
       </ThemeProvider>
