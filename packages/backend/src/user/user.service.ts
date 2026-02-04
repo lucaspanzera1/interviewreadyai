@@ -64,6 +64,14 @@ export class UserService {
             user.githubId = userData.githubId;
           }
           user.lastLoginAt = new Date();
+          
+          // Normalize role for old users
+          if (user.role) {
+            user.role = user.role.toLowerCase() === 'admin' ? UserRole.ADMIN : UserRole.CLIENT;
+          } else {
+            user.role = UserRole.CLIENT;
+          }
+          
           return await user.save();
         }
 
@@ -97,6 +105,13 @@ export class UserService {
 
       // Se encontrar pelo provider ID, atualiza último login
       user.lastLoginAt = new Date();
+      
+      // Normalize role for old users
+      if (user.role) {
+        user.role = user.role.toLowerCase() === 'admin' ? UserRole.ADMIN : UserRole.CLIENT;
+      } else {
+        user.role = UserRole.CLIENT;
+      }
       
       // Atualiza role se mudou no .env
       const newRole = adminEmails.includes(user.email.toLowerCase()) 
