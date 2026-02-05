@@ -1,9 +1,0 @@
-blank_issues_enabled: false
-
-contact_links:
-  - name: 💬 Dúvidas ou ideias gerais
-    url: https://github.com/<seu-usuario-ou-org>/<seu-repo>/discussions
-    about: "Use Discussions para perguntas, ideias e debates não relacionados a bugs ou features."
-  - name: 📄 Documentação do projeto
-    url: https://github.com/<seu-usuario-ou-org>/<seu-repo>/wiki
-    about: "Consulte a Wiki do projeto para guias e padrões técnicos."
