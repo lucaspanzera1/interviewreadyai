@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useToast } from '../contexts/ToastContext';
 import { apiClient, UserDetails } from '../lib/api';
 import {
   XMarkIcon,
@@ -7,7 +8,8 @@ import {
   AcademicCapIcon,
   BriefcaseIcon,
   MapPinIcon,
-  CodeBracketIcon
+  CodeBracketIcon,
+  PlusIcon
 } from '@heroicons/react/24/outline';
 
 interface UserDetailsModalProps {
@@ -17,11 +19,16 @@ interface UserDetailsModalProps {
 }
 
 const UserDetailsModal: React.FC<UserDetailsModalProps> = ({ userId, userName, onClose }) => {
+  const { showToast } = useToast();
   const [details, setDetails] = useState<UserDetails | null>(null);
   const [quizzes, setQuizzes] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'profile' | 'tokens' | 'quizzes'>('profile');
+  const [showAddTokensModal, setShowAddTokensModal] = useState(false);
+  const [addTokensAmount, setAddTokensAmount] = useState('');
+  const [addTokensReason, setAddTokensReason] = useState('');
+  const [addTokensLoading, setAddTokensLoading] = useState(false);
 
   useEffect(() => {
     const fetchDetails = async () => {
@@ -90,6 +97,30 @@ const UserDetailsModal: React.FC<UserDetailsModalProps> = ({ userId, userName, o
     return labels[reason] || reason;
   };
 
+  const handleAddTokens = async () => {
+    const amount = parseInt(addTokensAmount);
+    if (!amount || amount <= 0) {
+      showToast('Por favor, insira uma quantidade válida de tokens.', 'error');
+      return;
+    }
+
+    setAddTokensLoading(true);
+    try {
+      const result = await apiClient.addTokensToUser(userId, amount, addTokensReason || 'admin_grant');
+      // Refresh details to show updated balance
+      const updatedDetails = await apiClient.getUserDetails(userId);
+      setDetails(updatedDetails);
+      setShowAddTokensModal(false);
+      setAddTokensAmount('');
+      setAddTokensReason('');
+      showToast(result.message || 'Tokens adicionados com sucesso!', 'success');
+    } catch (err: any) {
+      showToast('Erro ao adicionar tokens: ' + (err.response?.data?.message || err.message), 'error');
+    } finally {
+      setAddTokensLoading(false);
+    }
+  };
+
   return (
     <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md flex items-center justify-center z-50 p-4" onClick={onClose}>
       <div
@@ -119,8 +150,8 @@ const UserDetailsModal: React.FC<UserDetailsModalProps> = ({ userId, userName, o
             <button
               onClick={() => setActiveTab('profile')}
               className={`pb-3 text-sm font-medium border-b-2 transition-colors flex items-center gap-2 ${activeTab === 'profile'
-                  ? 'border-primary-600 text-primary-600 dark:border-primary-400 dark:text-primary-400'
-                  : 'border-transparent text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300'
+                ? 'border-primary-600 text-primary-600 dark:border-primary-400 dark:text-primary-400'
+                : 'border-transparent text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300'
                 }`}
             >
               <UserCircleIcon className="h-4 w-4" />
@@ -129,8 +160,8 @@ const UserDetailsModal: React.FC<UserDetailsModalProps> = ({ userId, userName, o
             <button
               onClick={() => setActiveTab('tokens')}
               className={`pb-3 text-sm font-medium border-b-2 transition-colors flex items-center gap-2 ${activeTab === 'tokens'
-                  ? 'border-primary-600 text-primary-600 dark:border-primary-400 dark:text-primary-400'
-                  : 'border-transparent text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300'
+                ? 'border-primary-600 text-primary-600 dark:border-primary-400 dark:text-primary-400'
+                : 'border-transparent text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300'
                 }`}
             >
               <CurrencyDollarIcon className="h-4 w-4" />
@@ -139,8 +170,8 @@ const UserDetailsModal: React.FC<UserDetailsModalProps> = ({ userId, userName, o
             <button
               onClick={() => setActiveTab('quizzes')}
               className={`pb-3 text-sm font-medium border-b-2 transition-colors flex items-center gap-2 ${activeTab === 'quizzes'
-                  ? 'border-primary-600 text-primary-600 dark:border-primary-400 dark:text-primary-400'
-                  : 'border-transparent text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300'
+                ? 'border-primary-600 text-primary-600 dark:border-primary-400 dark:text-primary-400'
+                : 'border-transparent text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300'
                 }`}
             >
               <AcademicCapIcon className="h-4 w-4" />
@@ -263,6 +294,17 @@ const UserDetailsModal: React.FC<UserDetailsModalProps> = ({ userId, userName, o
               {/* Tokens Tab */}
               {activeTab === 'tokens' && (
                 <div className="space-y-6">
+                  {/* Add Tokens Button */}
+                  <div className="flex justify-end">
+                    <button
+                      onClick={() => setShowAddTokensModal(true)}
+                      className="flex items-center gap-2 px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg font-medium transition-colors"
+                    >
+                      <PlusIcon className="h-4 w-4" />
+                      Adicionar Tokens
+                    </button>
+                  </div>
+
                   {/* Token Stats */}
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div className="bg-white dark:bg-slate-800 p-5 rounded-xl border border-slate-100 dark:border-slate-700 shadow-sm relative overflow-hidden group hover:border-blue-300 transition-colors">
@@ -369,8 +411,8 @@ const UserDetailsModal: React.FC<UserDetailsModalProps> = ({ userId, userName, o
                             <p className="text-sm text-slate-600 dark:text-slate-400 mt-1 line-clamp-1">{quiz.descricao}</p>
                           </div>
                           <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold border ${quiz.isActive
-                              ? 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-300 border-emerald-100 dark:border-emerald-800'
-                              : 'bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-100 dark:border-slate-700'
+                            ? 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-300 border-emerald-100 dark:border-emerald-800'
+                            : 'bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-100 dark:border-slate-700'
                             }`}>
                             {quiz.isActive ? 'Ativo' : 'Inativo'}
                           </span>
@@ -421,8 +463,97 @@ const UserDetailsModal: React.FC<UserDetailsModalProps> = ({ userId, userName, o
             </div>
           )}
         </div>
+
+        {/* Add Tokens Modal */}
+        {showAddTokensModal && (
+          <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md flex items-center justify-center z-50 p-4" onClick={() => setShowAddTokensModal(false)}>
+            <div
+              className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-md overflow-hidden animate-scale-in border border-slate-200 dark:border-slate-800"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="px-6 py-5 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/20">
+                <h3 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                  <CurrencyDollarIcon className="h-5 w-5 text-primary-600 dark:text-primary-400" />
+                  Adicionar Tokens
+                </h3>
+                <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">Adicionar tokens manualmente à conta de {userName}</p>
+              </div>
+
+              <div className="p-6 space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                    Quantidade de Tokens
+                  </label>
+                  <input
+                    type="number"
+                    min="1"
+                    value={addTokensAmount}
+                    onChange={(e) => setAddTokensAmount(e.target.value)}
+                    placeholder="Ex: 10"
+                    className="w-full px-3 py-2 border border-slate-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500 transition-all"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                    Motivo (opcional)
+                  </label>
+
+                  <div className="flex flex-wrap gap-2 mb-3">
+                    {[
+                      'Bônus de Boas-vindas',
+                      'Reembolso de Token',
+                      'Premiação de Concurso',
+                      'Ajuste Administrativo',
+                      'Teste Interno',
+                      'Cortesia'
+                    ].map((reason) => (
+                      <button
+                        key={reason}
+                        onClick={() => setAddTokensReason(reason)}
+                        className={`text-xs px-2.5 py-1.5 rounded-lg border transition-all font-medium ${addTokensReason === reason
+                          ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400 border-primary-200 dark:border-primary-800 ring-1 ring-primary-500/20'
+                          : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700/50'
+                          }`}
+                      >
+                        {reason}
+                      </button>
+                    ))}
+                  </div>
+
+                  <div className="relative">
+                    <input
+                      type="text"
+                      value={addTokensReason}
+                      onChange={(e) => setAddTokensReason(e.target.value)}
+                      placeholder="Ou digite um motivo personalizado..."
+                      className="w-full px-3 py-2 border border-slate-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500 transition-all text-sm"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="px-6 py-4 border-t border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/20 flex justify-end gap-3">
+                <button
+                  onClick={() => setShowAddTokensModal(false)}
+                  className="px-4 py-2 text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 font-medium transition-colors"
+                >
+                  Cancelar
+                </button>
+                <button
+                  onClick={handleAddTokens}
+                  disabled={addTokensLoading || !addTokensAmount}
+                  className="px-4 py-2 bg-primary-600 hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-lg font-medium transition-colors flex items-center gap-2"
+                >
+                  {addTokensLoading && <div className="w-4 h-4 border border-white border-t-transparent rounded-full animate-spin"></div>}
+                  Adicionar
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
-    </div>
+    </div >
   );
 };
 
