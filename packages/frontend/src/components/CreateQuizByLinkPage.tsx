@@ -9,6 +9,7 @@ import { useToast } from '../contexts/ToastContext';
 
 const CreateQuizByLinkPage: React.FC = () => {
     const [jobLink, setJobLink] = useState('');
+    const [selectedPlatform, setSelectedPlatform] = useState('linkedin');
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const navigate = useNavigate();
@@ -118,6 +119,52 @@ const CreateQuizByLinkPage: React.FC = () => {
                                     </div>
                                 )}
 
+                                {/* Platform Selector */}
+                                <div className="space-y-4 mb-8">
+                                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">
+                                        Selecione a Plataforma
+                                    </label>
+                                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                                        {/* LinkedIn Option */}
+                                        <div
+                                            className={`relative flex items-center justify-center p-4 rounded-xl border-2 cursor-pointer transition-all ${selectedPlatform === 'linkedin'
+                                                ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20 shadow-md transform scale-[1.02]'
+                                                : 'border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600'
+                                                }`}
+                                            onClick={() => setSelectedPlatform('linkedin')}
+                                        >
+                                            <div className="flex flex-col items-center gap-2">
+                                                <span className="font-bold text-slate-900 dark:text-white">LinkedIn</span>
+                                                {selectedPlatform === 'linkedin' && (
+                                                    <div className="absolute top-2 right-2 text-primary-600">
+                                                        <div className="w-2 h-2 rounded-full bg-primary-600"></div>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+
+                                        {/* Gupy Option (Disabled) */}
+                                        <div className="relative flex items-center justify-center p-4 rounded-xl border border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 opacity-60 cursor-not-allowed">
+                                            <div className="flex flex-col items-center gap-2">
+                                                <span className="font-semibold text-slate-500 dark:text-slate-400">Gupy</span>
+                                                <span className="text-[10px] uppercase font-bold px-2 py-0.5 bg-slate-200 dark:bg-slate-700 text-slate-500 rounded-full">
+                                                    Em Breve
+                                                </span>
+                                            </div>
+                                        </div>
+
+                                        {/* InfoJobs Option (Disabled) */}
+                                        <div className="relative flex items-center justify-center p-4 rounded-xl border border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 opacity-60 cursor-not-allowed">
+                                            <div className="flex flex-col items-center gap-2">
+                                                <span className="font-semibold text-slate-500 dark:text-slate-400">InfoJobs</span>
+                                                <span className="text-[10px] uppercase font-bold px-2 py-0.5 bg-slate-200 dark:bg-slate-700 text-slate-500 rounded-full">
+                                                    Em Breve
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
                                 <div className="space-y-2">
                                     <label htmlFor="job-link" className="block text-sm font-medium text-slate-700 dark:text-slate-300">
                                         Link da Vaga do LinkedIn
@@ -147,8 +194,8 @@ const CreateQuizByLinkPage: React.FC = () => {
                                     type="submit"
                                     disabled={isLoading || !isValidLinkedInUrl || !user?.tokens || user.tokens < 1}
                                     className={`w-full flex items-center justify-center gap-3 px-8 py-4 border border-transparent text-lg font-bold rounded-xl text-white transition-all duration-300 ${isLoading || !isValidLinkedInUrl || !user?.tokens || user.tokens < 1
-                                            ? 'bg-slate-400 dark:bg-slate-600 cursor-not-allowed'
-                                            : 'bg-gradient-to-r from-primary-600 to-indigo-600 hover:from-primary-700 hover:to-indigo-700 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5'
+                                        ? 'bg-slate-400 dark:bg-slate-600 cursor-not-allowed'
+                                        : 'bg-gradient-to-r from-primary-600 to-indigo-600 hover:from-primary-700 hover:to-indigo-700 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5'
                                         }`}
                                 >
                                     {isLoading ? (

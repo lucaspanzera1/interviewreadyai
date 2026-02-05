@@ -15,6 +15,7 @@ import FreeQuizzesPage from './components/FreeQuizzesPage'
 import OnboardingProvider from './components/OnboardingProvider'
 import ToastContainer from './components/ToastContainer'
 import GeneratedQuizPage from './components/GeneratedQuizPage'
+import UserQuizPage from './components/UserQuizPage'
 import AdminQuizzesPage from './components/AdminQuizzesPage'
 import AdminQuizStatsPage from './components/AdminQuizStatsPage'
 import AdminQuizDetailsPage from './components/AdminQuizDetailsPage'
@@ -187,6 +188,16 @@ function App() {
           element={
             <ProtectedRoute>
               <GeneratedQuizPage />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* User Quiz page */}
+        <Route
+          path="/quiz/user"
+          element={
+            <ProtectedRoute>
+              <UserQuizPage />
             </ProtectedRoute>
           }
         />

@@ -76,6 +76,7 @@ export class QuizService {
         questions: generatedQuiz.questions,
         createdBy: userObjectId,
         isPublic: isAdmin, // Quizzes created by admins are public
+        isFree: isAdmin, // Only admin quizzes are free (with daily limits)
       });
       
       return {
@@ -518,8 +519,11 @@ IMPORTANTE:
       throw new HttpException('Este quiz não está disponível no momento.', HttpStatus.FORBIDDEN);
     }
 
-    if (!quiz.isFree) {
-      // Se não é gratuito, verificar se o usuário tem tokens suficientes
+    // Verificar se o usuário é o criador do quiz
+    const isCreator = quiz.createdBy.toString() === userId.toString();
+
+    if (!quiz.isFree && !isCreator) {
+      // Se não é gratuito E não é o criador, verificar se o usuário tem tokens suficientes
       const userTokens = await this.userService.getUserTokens(userId);
       if (userTokens < 1) {
         throw new HttpException(
@@ -530,7 +534,7 @@ IMPORTANTE:
 
       // Debitar 1 token
       await this.userService.removeTokensFromUser(userId, 1);
-    } else {
+    } else if (quiz.isFree) {
       // Se é gratuito, verificar limite diário
       const hasAccess = await this.userService.canDoFreeQuiz(userId);
       if (!hasAccess) {
@@ -540,6 +544,7 @@ IMPORTANTE:
         );
       }
     }
+    // Se é o criador, não faz nenhuma verificação (pode jogar livremente)
 
     // Retornar quiz completo com questões
     return {
@@ -784,7 +789,7 @@ IMPORTANTE:
         questions: generatedQuiz.questions,
         createdBy: userObjectId,
         isActive: true,
-        isFree: true, // Quiz de vaga é de uso pessoal, não cobra ao jogar
+        isFree: false, // Quiz de vaga é pessoal, sem limites diários
         isPublic: false, // Quiz de vaga é privado, apenas para o criador
       });
       
