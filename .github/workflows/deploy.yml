@@ -18,15 +18,25 @@ jobs:
           curl -L --output cloudflared.deb https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64.deb
           sudo dpkg -i cloudflared.deb
 
-      - name: Deploy via SSH
-        uses: appleboy/ssh-action@v1.0.3
+      - name: Setup SSH
+        uses: webfactory/ssh-agent@v0.9.0
         with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USERNAME }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          proxy_command: cloudflared access ssh --hostname %h
-          script: |
-            cd /Users/lucaspazera/TreinaVaga
-            git pull origin main
-            launchctl unload ~/Library/LaunchAgents/com.treinavaga.app.plist
-            launchctl load ~/Library/LaunchAgents/com.treinavaga.app.plist
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: Deploy via SSH
+        run: |
+          ssh -o "ProxyCommand=cloudflared access ssh --hostname %h" -o StrictHostKeyChecking=no ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} << 'ENDSSH'
+          
+          echo "[info] Deploy automático iniciado..."
+          cd ${{ secrets.PROJECT_PATH }}
+          
+          echo "[info] Fazendo git pull..."
+          git pull origin main
+          
+          echo "[info] Reiniciando aplicação..."
+          chmod +x scripts/deploy.sh
+          ./scripts/deploy.sh
+          
+          echo "[info] Deploy concluído!"
+          
+          ENDSSH
