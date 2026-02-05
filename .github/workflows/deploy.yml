@@ -33,14 +33,23 @@ jobs:
           PROJECT_PATH=${{ secrets.PROJECT_PATH }}
           echo "[info] Deploy automático iniciado..."
           echo "[debug] PROJECT_PATH: $PROJECT_PATH"
-          cd $PROJECT_PATH
+          cd $PROJECT_PATH || { echo "[error] Falha ao mudar para $PROJECT_PATH"; exit 1; }
+          echo "[debug] Diretório atual após cd: $(pwd)"
           
           echo "[info] Fazendo git pull..."
-          git pull origin main
+          git pull origin main || { echo "[error] Falha no git pull"; exit 1; }
+          echo "[info] Git pull concluído."
           
           echo "[info] Reiniciando aplicação..."
-          chmod +x scripts/deploy.sh
-          ./scripts/deploy.sh
+          if [ -f scripts/deploy.sh ]; then
+            chmod +x scripts/deploy.sh
+            echo "[debug] Executando scripts/deploy.sh..."
+            ./scripts/deploy.sh || { echo "[error] Falha na execução do deploy.sh"; exit 1; }
+            echo "[info] Script deploy.sh executado com sucesso."
+          else
+            echo "[error] scripts/deploy.sh não encontrado em $(pwd)"
+            exit 1
+          fi
           
           echo "[info] Deploy concluído!"
           
