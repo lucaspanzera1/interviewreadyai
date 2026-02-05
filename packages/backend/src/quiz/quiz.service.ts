@@ -533,7 +533,7 @@ IMPORTANTE:
       }
 
       // Debitar 1 token
-      await this.userService.removeTokensFromUser(userId, 1);
+      await this.userService.removeTokensFromUser(userId, 1, 'quiz_play');
     } else if (quiz.isFree) {
       // Se é gratuito, verificar limite diário
       const hasAccess = await this.userService.canDoFreeQuiz(userId);
@@ -571,9 +571,14 @@ IMPORTANTE:
       ? attempts.reduce((sum, attempt) => sum + attempt.score, 0) / totalAttempts
       : 0;
 
+    // Buscar totalFreeQuizzesCompleted do usuário
+    const user = await this.userService.findById(userId);
+    const totalFreeQuizzesCompleted = user.totalFreeQuizzesCompleted || 0;
+
     return {
       totalAttempts,
       averageScore,
+      totalFreeQuizzesCompleted, // Apenas quizzes gratuitos
     };
   }
 
@@ -628,7 +633,7 @@ IMPORTANTE:
       const quiz = await this.generateJobQuizFromData(jobData, userId);
 
       // Deduzir 1 token do usuário após sucesso
-      await this.userService.removeTokensFromUser(userId, 1);
+      await this.userService.removeTokensFromUser(userId, 1, 'quiz_generation');
 
       return quiz;
     } catch (error) {

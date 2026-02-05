@@ -103,7 +103,8 @@ const ProfilePage: React.FC = () => {
 
   const [stats, setStats] = useState({
     totalAttempts: 0,
-    averageScore: 0
+    averageScore: 0,
+    totalFreeQuizzesCompleted: 0
   });
 
   const [activityData, setActivityData] = useState<{ date: string; count: number }[]>([]);
@@ -117,7 +118,8 @@ const ProfilePage: React.FC = () => {
         if (data) {
           setStats({
             totalAttempts: data.totalAttempts || 0,
-            averageScore: data.averageScore || 0
+            averageScore: data.averageScore || 0,
+            totalFreeQuizzesCompleted: data.totalFreeQuizzesCompleted || 0
           });
         }
       } catch (error) {
@@ -794,20 +796,20 @@ const ProfilePage: React.FC = () => {
                   {/* Progress to next reward */}
                   <div className="mb-4">
                     <div className="flex items-center justify-between text-sm mb-2">
-                      <span className="text-slate-600 dark:text-slate-400">Quizzes feitos</span>
+                      <span className="text-slate-600 dark:text-slate-400">Quizzes gratuitos feitos</span>
                       <span className="font-medium text-slate-900 dark:text-white">
-                        {stats.totalAttempts}
+                        {stats.totalFreeQuizzesCompleted}
                       </span>
                     </div>
                     <div className="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-2 mb-2">
                       <div
                         className="bg-primary-500 h-2 rounded-full transition-all duration-300"
-                        style={{ width: `${(stats.totalAttempts % 5) * 20}%` }}
+                        style={{ width: `${(stats.totalFreeQuizzesCompleted % 5) * 20}%` }}
                       ></div>
                     </div>
                     <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
-                      <span>Próximo token em {5 - (stats.totalAttempts % 5)} quizzes</span>
-                      <span>{stats.totalAttempts % 5}/5</span>
+                      <span>Próximo token em {5 - (stats.totalFreeQuizzesCompleted % 5)} quizzes</span>
+                      <span>{stats.totalFreeQuizzesCompleted % 5}/5</span>
                     </div>
                   </div>
 

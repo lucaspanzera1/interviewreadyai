@@ -572,6 +572,22 @@ class ApiClient {
     const res = await this.client.post(`/plans/${planId}/pay`);
     return res.data;
   }
+
+  // Token stats
+  async getTokenStats(): Promise<{
+    currentBalance: number;
+    totalEarned: number;
+    totalSpent: number;
+    history: Array<{
+      type: string;
+      amount: number;
+      reason: string;
+      createdAt: string;
+    }>;
+  }> {
+    const res = await this.client.get('/users/me/token-stats');
+    return res.data;
+  }
 }
 
 export const apiClient = new ApiClient();

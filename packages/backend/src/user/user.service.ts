@@ -289,10 +289,22 @@ export class UserService {
    * Adiciona tokens ao usuário
    * @param userId ID do usuário
    * @param amount Quantidade a adicionar
+   * @param reason Motivo da adição (ex: 'package_purchase', 'admin_grant')
    */
-  async addTokensToUser(userId: string, amount: number): Promise<void> {
+  async addTokensToUser(userId: string, amount: number, reason: string = 'token_added'): Promise<void> {
     const user = await this.findById(userId);
     user.tokens = Math.max(0, (user.tokens || 0) + amount);
+    
+    // Registrar no histórico apenas se não for quiz_completion (já é registrado em outro lugar)
+    if (reason !== 'quiz_completion') {
+      user.rewardHistory.push({
+        type: 'token',
+        amount: amount,
+        reason: reason,
+        createdAt: new Date()
+      });
+    }
+    
     await user.save();
   }
 
@@ -300,10 +312,20 @@ export class UserService {
    * Remove tokens do usuário
    * @param userId ID do usuário
    * @param amount Quantidade a remover
+   * @param reason Motivo da remoção (ex: 'quiz_play', 'quiz_generation')
    */
-  async removeTokensFromUser(userId: string, amount: number): Promise<void> {
+  async removeTokensFromUser(userId: string, amount: number, reason: string = 'token_spent'): Promise<void> {
     const user = await this.findById(userId);
     user.tokens = Math.max(0, (user.tokens || 0) - amount);
+    
+    // Registrar no histórico de recompensas com valor negativo
+    user.rewardHistory.push({
+      type: 'token',
+      amount: -amount, // Negativo para indicar gasto
+      reason: reason,
+      createdAt: new Date()
+    });
+    
     await user.save();
   }
 
@@ -464,7 +486,35 @@ export class UserService {
     const user = await this.findById(userId);
     return user.rewardHistory.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
   }
-
+  /**
+   * Obtém estatísticas detalhadas de tokens
+   * @param userId ID do usuário
+   * @returns estatísticas de tokens (saldo atual, total ganho, total gasto, histórico)
+   */
+  async getTokenStats(userId: string) {
+    const user = await this.findById(userId);
+    
+    // Filtrar apenas transações de tokens
+    const tokenHistory = user.rewardHistory
+      .filter(r => r.type === 'token')
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    
+    // Calcular totais
+    const totalEarned = tokenHistory
+      .filter(r => r.amount > 0)
+      .reduce((sum, r) => sum + r.amount, 0);
+    
+    const totalSpent = Math.abs(tokenHistory
+      .filter(r => r.amount < 0)
+      .reduce((sum, r) => sum + r.amount, 0));
+    
+    return {
+      currentBalance: user.tokens || 0,
+      totalEarned,
+      totalSpent,
+      history: tokenHistory,
+    };
+  }
   /**
    * Reseta o limite diário se necessário (se passou um dia)
    * @param user Usuário

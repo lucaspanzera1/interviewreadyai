@@ -236,6 +236,44 @@ export class UserController {
     return this.userService.getRewardHistory(userId);
   }
 
+  /**
+   * Obter estatísticas de tokens
+   * @returns Estatísticas detalhadas de tokens
+   */
+  @Get('me/token-stats')
+  @ApiOperation({
+    summary: 'Obter estatísticas de tokens',
+    description: 'Retorna estatísticas detalhadas sobre ganhos e gastos de tokens do usuário'
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Estatísticas de tokens retornadas com sucesso',
+    schema: {
+      type: 'object',
+      properties: {
+        currentBalance: { type: 'number', example: 5 },
+        totalEarned: { type: 'number', example: 10 },
+        totalSpent: { type: 'number', example: 5 },
+        history: {
+          type: 'array',
+          items: {
+            type: 'object',
+            properties: {
+              type: { type: 'string', example: 'token' },
+              amount: { type: 'number', example: -1 },
+              reason: { type: 'string', example: 'quiz_generation' },
+              createdAt: { type: 'string', format: 'date-time' }
+            }
+          }
+        }
+      }
+    }
+  })
+  async getTokenStats(@CurrentUser() user: any) {
+    const userId = this.getUserId(user);
+    return this.userService.getTokenStats(userId);
+  }
+
 
 
 

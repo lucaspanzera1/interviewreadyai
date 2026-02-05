@@ -28,8 +28,20 @@ const RewardHistoryPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [stats, setStats] = useState({
     totalAttempts: 0,
-    averageScore: 0
+    averageScore: 0,
+    totalFreeQuizzesCompleted: 0
   });
+  const [tokenStats, setTokenStats] = useState<{
+    currentBalance: number;
+    totalEarned: number;
+    totalSpent: number;
+    history: Array<{
+      type: string;
+      amount: number;
+      reason: string;
+      createdAt: string;
+    }>;
+  } | null>(null);
 
   useEffect(() => {
     const loadRewardHistory = async () => {
@@ -50,7 +62,8 @@ const RewardHistoryPage: React.FC = () => {
         if (data) {
           setStats({
             totalAttempts: data.totalAttempts || 0,
-            averageScore: data.averageScore || 0
+            averageScore: data.averageScore || 0,
+            totalFreeQuizzesCompleted: data.totalFreeQuizzesCompleted || 0
           });
         }
       } catch (error) {
@@ -58,9 +71,19 @@ const RewardHistoryPage: React.FC = () => {
       }
     };
 
+    const loadTokenStats = async () => {
+      try {
+        const data = await apiClient.getTokenStats();
+        setTokenStats(data);
+      } catch (error) {
+        console.error('Erro ao carregar estatísticas de tokens:', error);
+      }
+    };
+
     if (user) {
       loadRewardHistory();
       loadStats();
+      loadTokenStats();
     }
   }, [user, showToast]);
 
@@ -87,7 +110,8 @@ const RewardHistoryPage: React.FC = () => {
 
     switch (reward.type) {
       case 'token':
-        return `+${reward.amount} Token${reward.amount > 1 ? 's' : ''}`;
+        const sign = reward.amount > 0 ? '+' : '';
+        return `${sign}${reward.amount} Token${Math.abs(reward.amount) > 1 ? 's' : ''}`;
       case 'badge':
         return `Nova Conquista`;
       case 'plan':
@@ -108,12 +132,20 @@ const RewardHistoryPage: React.FC = () => {
     switch (reward.reason) {
       case 'quiz_completion':
         return 'Completou quizzes gratuitos';
+      case 'quiz_generation':
+        return 'Geração de quiz personalizado';
+      case 'quiz_play':
+        return 'Jogou quiz de outro usuário';
       case 'referral':
         return 'Indicação de amigo';
       case 'achievement':
         return 'Conquista desbloqueada';
       case 'package_redemption':
         return 'Resgate de pacote promocional';
+      case 'token_added':
+        return 'Tokens adicionados';
+      case 'token_spent':
+        return 'Tokens gastos';
       default:
         return reward.reason;
     }
@@ -155,22 +187,53 @@ const RewardHistoryPage: React.FC = () => {
             <span className="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Ganhos Totais</span>
             <div className="flex items-center md:justify-end gap-2">
               <span className="text-3xl font-black text-slate-900 dark:text-white leading-none">
-                {rewards.filter(r => r.type === 'token').reduce((sum, r) => sum + r.amount, 0)}
+                {tokenStats?.totalEarned || 0}
               </span>
               <TicketIcon className="w-5 h-5 text-amber-500" />
             </div>
           </div>
           <div className="text-right">
-            <span className="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Conquistas</span>
+            <span className="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Gastos</span>
             <div className="flex items-center justify-end gap-2">
               <span className="text-3xl font-black text-slate-900 dark:text-white leading-none">
-                {rewards.length}
+                {tokenStats?.totalSpent || 0}
               </span>
-              <TrophyIcon className="w-5 h-5 text-purple-500" />
+              <TicketIcon className="w-5 h-5 text-red-500" />
             </div>
           </div>
         </div>
       </div>
+
+      {/* Token Stats Cards */}
+      {tokenStats && (
+        <div className="px-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="bg-gradient-to-br from-amber-50 to-amber-100 dark:from-amber-900/20 dark:to-amber-800/10 rounded-2xl p-6 border border-amber-200 dark:border-amber-800">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-xs font-bold text-amber-600 dark:text-amber-400 uppercase tracking-widest">Saldo Atual</span>
+                <TicketIcon className="w-5 h-5 text-amber-600 dark:text-amber-400" />
+              </div>
+              <span className="text-3xl font-black text-amber-900 dark:text-amber-100">{tokenStats.currentBalance}</span>
+            </div>
+            
+            <div className="bg-gradient-to-br from-green-50 to-emerald-100 dark:from-green-900/20 dark:to-emerald-800/10 rounded-2xl p-6 border border-green-200 dark:border-green-800">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-xs font-bold text-green-600 dark:text-green-400 uppercase tracking-widest">Total Ganho</span>
+                <TrophyIcon className="w-5 h-5 text-green-600 dark:text-green-400" />
+              </div>
+              <span className="text-3xl font-black text-green-900 dark:text-green-100">+{tokenStats.totalEarned}</span>
+            </div>
+            
+            <div className="bg-gradient-to-br from-red-50 to-rose-100 dark:from-red-900/20 dark:to-rose-800/10 rounded-2xl p-6 border border-red-200 dark:border-red-800">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-xs font-bold text-red-600 dark:text-red-400 uppercase tracking-widest">Total Gasto</span>
+                <ShoppingBagIcon className="w-5 h-5 text-red-600 dark:text-red-400" />
+              </div>
+              <span className="text-3xl font-black text-red-900 dark:text-red-100">-{tokenStats.totalSpent}</span>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Progress Section */}
       <div className="px-4">
@@ -183,13 +246,13 @@ const RewardHistoryPage: React.FC = () => {
 
             <div className="flex-1 max-w-md space-y-3">
               <div className="flex justify-between text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-                <span>{stats.totalAttempts % 5}/5 para o próximo bônus</span>
-                <span className="text-primary-500">{(stats.totalAttempts % 5) * 20}%</span>
+                <span>{stats.totalFreeQuizzesCompleted % 5}/5 para o próximo bônus</span>
+                <span className="text-primary-500">{(stats.totalFreeQuizzesCompleted % 5) * 20}%</span>
               </div>
               <div className="w-full bg-slate-200 dark:bg-slate-700/50 rounded-full h-1.5 overflow-hidden">
                 <div
                   className="bg-primary-500 h-full rounded-full transition-all duration-700"
-                  style={{ width: `${(stats.totalAttempts % 5) * 20}%` }}
+                  style={{ width: `${(stats.totalFreeQuizzesCompleted % 5) * 20}%` }}
                 ></div>
               </div>
             </div>
