@@ -1,7 +1,15 @@
-import { Controller, Get, Put, Body, Param, UseGuards, Post, Delete } from '@nestjs/common';
+import { Controller, Get, Put, Body, Param, UseGuards, Post, Delete, Query } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiParam } from '@nestjs/swagger';
 import { UserService } from './user.service';
+import { UserSocialService } from './user-social.service';
 import { UserDto, UpdateUserDto, ProfileDto, CompleteOnboardingDto } from './dto';
+import { 
+  SearchUsersDto, 
+  FollowUserDto, 
+  UnfollowUserDto, 
+  PublicUserDto, 
+  UserConnectionsDto 
+} from './dto/social.dto';
 import { CurrentUser, Public, Roles } from '../auth/decorators';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { UserRole } from './schemas/user.schema';
@@ -22,6 +30,7 @@ import {
 export class UserController {
   constructor(
     private readonly userService: UserService,
+    private readonly userSocialService: UserSocialService,
   ) { }
 
   /**
@@ -143,6 +152,42 @@ export class UserController {
     const userId = this.getUserId(user);
     const updatedUser = await this.userService.updateUser(userId, updateData);
     return { success: true, data: this.userService.toDto(updatedUser), message: "Perfil atualizado com sucesso!" };
+  }
+
+  /**
+   * Atualizar configurações de privacidade do usuário
+   * @param user Usuário atual da requisição
+   * @param body Dados de privacidade
+   * @returns Status da atualização
+   */
+  @Put('privacy-settings')
+  @ApiOperation({ summary: 'Atualizar configurações de privacidade' })
+  @ApiResponse({
+    status: 200,
+    description: 'Configurações atualizadas com sucesso',
+    schema: {
+      type: 'object',
+      properties: {
+        success: { type: 'boolean', example: true },
+        message: { type: 'string', example: 'Configurações de privacidade atualizadas com sucesso!' }
+      }
+    }
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Token de acesso inválido ou expirado',
+    type: UnauthorizedErrorDto
+  })
+  async updatePrivacySettings(
+    @CurrentUser() user: any,
+    @Body() body: { isProfilePublic: boolean },
+  ): Promise<{ success: boolean; message: string }> {
+    const userId = this.getUserId(user);
+    await this.userService.updateUser(userId, { isProfilePublic: body.isProfilePublic });
+    return { 
+      success: true, 
+      message: `Perfil ${body.isProfilePublic ? 'público' : 'privado'} configurado com sucesso!` 
+    };
   }
 
 
@@ -524,6 +569,162 @@ export class UserController {
       message: `${amount} ${amount === 1 ? 'token adicionado' : 'tokens adicionados'} com sucesso`,
       newBalance
     };
+  }
+
+  /**
+   * Buscar usuários por filtros
+   * @returns Lista paginada de usuários encontrados
+   */
+  @Get('search')
+  @ApiOperation({ summary: 'Buscar usuários' })
+  @ApiResponse({
+    status: 200,
+    description: 'Usuários encontrados',
+    type: [PublicUserDto]
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Não autorizado',
+    type: UnauthorizedErrorDto
+  })
+  async searchUsers(
+    @Query() searchDto: SearchUsersDto,
+    @CurrentUser() currentUser: any
+  ): Promise<{
+    users: PublicUserDto[];
+    total: number;
+    page: number;
+    limit: number;
+  }> {
+    const currentUserId = this.getUserId(currentUser);
+    return this.userSocialService.searchUsers(searchDto, currentUserId);
+  }
+
+  /**
+   * Obter perfil público de um usuário
+   * @param id ID do usuário
+   * @returns Perfil público do usuário
+   */
+  @Get('profile/:id')
+  @ApiOperation({ summary: 'Obter perfil público de usuário' })
+  @ApiParam({ name: 'id', description: 'ID do usuário' })
+  @ApiResponse({
+    status: 200,
+    description: 'Perfil público obtido',
+    type: PublicUserDto
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Não autorizado',
+    type: UnauthorizedErrorDto
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Usuário não encontrado',
+    type: NotFoundErrorDto
+  })
+  async getPublicProfile(
+    @Param('id') id: string,
+    @CurrentUser() currentUser: any
+  ): Promise<PublicUserDto> {
+    const currentUserId = this.getUserId(currentUser);
+    return this.userSocialService.getPublicProfile(id, currentUserId);
+  }
+
+  /**
+   * Seguir um usuário
+   * @param followUserDto Dados do usuário a ser seguido
+   * @returns Sucesso da operação
+   */
+  @Post('follow')
+  @ApiOperation({ summary: 'Seguir usuário' })
+  @ApiResponse({
+    status: 201,
+    description: 'Usuário seguido com sucesso'
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Erro de validação',
+    type: ValidationErrorDto
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Não autorizado',
+    type: UnauthorizedErrorDto
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Usuário não encontrado',
+    type: NotFoundErrorDto
+  })
+  async followUser(
+    @Body() followUserDto: FollowUserDto,
+    @CurrentUser() currentUser: any
+  ): Promise<{ success: boolean; message: string }> {
+    const followerId = this.getUserId(currentUser);
+    await this.userSocialService.followUser(followerId, followUserDto.userId);
+    return { success: true, message: 'Usuário seguido com sucesso' };
+  }
+
+  /**
+   * Deixar de seguir um usuário
+   * @param unfollowUserDto Dados do usuário a deixar de seguir
+   * @returns Sucesso da operação
+   */
+  @Post('unfollow')
+  @ApiOperation({ summary: 'Deixar de seguir usuário' })
+  @ApiResponse({
+    status: 201,
+    description: 'Parou de seguir o usuário'
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Erro de validação',
+    type: ValidationErrorDto
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Não autorizado',
+    type: UnauthorizedErrorDto
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Relacionamento não encontrado',
+    type: NotFoundErrorDto
+  })
+  async unfollowUser(
+    @Body() unfollowUserDto: UnfollowUserDto,
+    @CurrentUser() currentUser: any
+  ): Promise<{ success: boolean; message: string }> {
+    const followerId = this.getUserId(currentUser);
+    await this.userSocialService.unfollowUser(followerId, unfollowUserDto.userId);
+    return { success: true, message: 'Parou de seguir o usuário' };
+  }
+
+  /**
+   * Obter conexões de um usuário (seguidores e seguindo)
+   * @param id ID do usuário
+   * @returns Conexões do usuário
+   */
+  @Get('connections/:id')
+  @ApiOperation({ summary: 'Obter conexões de usuário' })
+  @ApiParam({ name: 'id', description: 'ID do usuário' })
+  @ApiResponse({
+    status: 200,
+    description: 'Conexões obtidas',
+    type: UserConnectionsDto
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Não autorizado',
+    type: UnauthorizedErrorDto
+  })
+  async getUserConnections(
+    @Param('id') id: string,
+    @CurrentUser() currentUser: any
+  ): Promise<UserConnectionsDto> {
+    const currentUserId = this.getUserId(currentUser);
+    return this.userSocialService.getUserConnections(id, currentUserId);
   }
 
   /**

@@ -26,6 +26,7 @@ import {
   ShoppingBagIcon
 } from '@heroicons/react/24/outline';
 import ActivityHeatmap from './ActivityHeatmap';
+import SocialConnectionsComponent from './SocialConnectionsComponent';
 
 const LinkedInIcon = (props: React.ComponentProps<'svg'>) => (
   <svg fill="currentColor" viewBox="0 0 24 24" {...props}>
@@ -86,17 +87,17 @@ const ProfilePage: React.FC = () => {
   const { user, updateProfile, logout } = useAuth();
   const { showToast } = useToast();
   const navigate = useNavigate();
-  
+
   // Estados de edição separados para cada seção
   const [isEditingPersonal, setIsEditingPersonal] = useState(false);
   const [isEditingPayment, setIsEditingPayment] = useState(false);
   const [isEditingProfessional, setIsEditingProfessional] = useState(false);
-  
+
   // Estados de loading separados para cada seção
   const [isLoadingPersonal, setIsLoadingPersonal] = useState(false);
   const [isLoadingPayment, setIsLoadingPayment] = useState(false);
   const [isLoadingProfessional, setIsLoadingProfessional] = useState(false);
-  
+
   const [formData, setFormData] = useState<FormData>({
     name: user?.name || '',
     careerTime: user?.careerTime || '',
@@ -193,7 +194,7 @@ const ProfilePage: React.FC = () => {
     return fields.some(field => {
       const currentValue = formData[field];
       const userValue = user?.[field];
-      
+
       if (Array.isArray(currentValue) && Array.isArray(userValue)) {
         return JSON.stringify(currentValue.sort()) !== JSON.stringify(userValue.sort());
       }
@@ -208,7 +209,7 @@ const ProfilePage: React.FC = () => {
       setIsEditingPersonal(false);
       return;
     }
-    
+
     setIsLoadingPersonal(true);
     try {
       const dataToUpdate = {
@@ -233,7 +234,7 @@ const ProfilePage: React.FC = () => {
       setIsEditingPayment(false);
       return;
     }
-    
+
     setIsLoadingPayment(true);
     try {
       const dataToUpdate = {
@@ -255,7 +256,7 @@ const ProfilePage: React.FC = () => {
       setIsEditingProfessional(false);
       return;
     }
-    
+
     setIsLoadingProfessional(true);
     try {
       const dataToUpdate = {
@@ -344,11 +345,11 @@ const ProfilePage: React.FC = () => {
     <>
       <PageTitle title="Perfil - TreinaVagaAI" />
 
-      <div className="space-y-8">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="space-y-8 pb-32">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
 
           {/* Left Column Group */}
-          <div className="lg:col-span-2 space-y-6">
+          <div className="lg:col-span-2 space-y-6 sticky top-6">
 
             {/* 1. PERSONAL INFO CARD */}
             <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg shadow-sm">
@@ -779,7 +780,7 @@ const ProfilePage: React.FC = () => {
           </div>
 
           {/* Right Column Group (Account Details, etc) */}
-          <div className="lg:col-span-1 space-y-6">
+          <div className="lg:col-span-1 space-y-6 sticky top-6">
             <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg shadow-sm">
               <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-800">
                 <h2 className="text-base font-semibold text-slate-900 dark:text-white">Detalhes da Conta</h2>
@@ -965,6 +966,9 @@ const ProfilePage: React.FC = () => {
                 </div>
               </div>
             </div>
+
+            {/* SOCIAL CONNECTIONS */}
+            <SocialConnectionsComponent />
 
             {/* Logout Button */}
             {/* ... previous code ... */}

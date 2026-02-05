@@ -77,6 +77,10 @@ export class User {
   @Prop()
   githubUrl?: string;
 
+  // Configurações de privacidade
+  @Prop({ default: true })
+  isProfilePublic: boolean;
+
   // Limite diário de quizzes gratuitos
   @Prop({ type: Number, default: 0 })
   dailyFreeQuizzesUsed: number;

@@ -3,8 +3,11 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { HttpModule } from '@nestjs/axios';
 import { UserController } from './user.controller';
 import { UserService } from './user.service';
+import { UserSocialService } from './user-social.service';
 import { UserExpirationService } from './user-expiration.service';
 import { User, UserSchema } from './schemas/user.schema';
+import { UserFollow, UserFollowSchema } from './schemas/user-follow.schema';
+import { QuizAttempt, QuizAttemptSchema } from '../quiz/schemas/quiz-attempt.schema';
 import { EmailModule } from '../common/email.module';
 
 /**
@@ -15,12 +18,14 @@ import { EmailModule } from '../common/email.module';
   imports: [
     MongooseModule.forFeature([
       { name: User.name, schema: UserSchema },
+      { name: UserFollow.name, schema: UserFollowSchema },
+      { name: QuizAttempt.name, schema: QuizAttemptSchema },
     ]),
     EmailModule,
     HttpModule,
   ],
   controllers: [UserController],
-  providers: [UserService, UserExpirationService],
-  exports: [UserService, MongooseModule],
+  providers: [UserService, UserSocialService, UserExpirationService],
+  exports: [UserService, UserSocialService, MongooseModule],
 })
 export class UserModule {}

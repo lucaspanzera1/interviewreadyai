@@ -29,6 +29,8 @@ import RewardHistoryPage from './components/RewardHistoryPage'
 import AdminTokenPackagesPage from './components/AdminTokenPackagesPage'
 import AdminRolesPage from './components/AdminRolesPage'
 import OrderConfirmationPage from './components/OrderConfirmationPage'
+import UserSearchPage from './components/UserSearchPage'
+import PublicProfilePage from './components/PublicProfilePage'
 
 function App() {
   return (
@@ -291,6 +293,30 @@ function App() {
             <ProtectedRoute>
               <AppLayout>
                 <AdminQuizDetailsPage />
+              </AppLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Social features - Search Users */}
+        <Route
+          path="/search"
+          element={
+            <ProtectedRoute>
+              <AppLayout>
+                <UserSearchPage />
+              </AppLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Social features - Public Profile */}
+        <Route
+          path="/profile/:userId"
+          element={
+            <ProtectedRoute>
+              <AppLayout>
+                <PublicProfilePage />
               </AppLayout>
             </ProtectedRoute>
           }

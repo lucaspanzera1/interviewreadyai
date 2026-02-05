@@ -76,6 +76,8 @@ export interface User {
   location?: string;
   linkedinUrl?: string;
   githubUrl?: string;
+  // Configurações de privacidade
+  isProfilePublic?: boolean;
   // Reward system fields
   totalFreeQuizzesCompleted?: number;
   lastTokenRewardAt?: string;
@@ -646,6 +648,37 @@ class ApiClient {
       amount,
       reason: reason || 'admin_grant'
     });
+    return res.data;
+  }
+
+  // Social API methods
+  async searchUsers(params: any): Promise<any> {
+    const res = await this.client.get('/users/search', { params });
+    return res.data;
+  }
+
+  async getPublicProfile(userId: string): Promise<any> {
+    const res = await this.client.get(`/users/profile/${userId}`);
+    return res.data;
+  }
+
+  async followUser(userId: string): Promise<{ success: boolean; message: string }> {
+    const res = await this.client.post('/users/follow', { userId });
+    return res.data;
+  }
+
+  async unfollowUser(userId: string): Promise<{ success: boolean; message: string }> {
+    const res = await this.client.post('/users/unfollow', { userId });
+    return res.data;
+  }
+
+  async getUserConnections(userId: string): Promise<any> {
+    const res = await this.client.get(`/users/connections/${userId}`);
+    return res.data;
+  }
+
+  async updatePrivacySettings(isProfilePublic: boolean): Promise<{ success: boolean; message: string }> {
+    const res = await this.client.put('/users/privacy-settings', { isProfilePublic });
     return res.data;
   }
 }

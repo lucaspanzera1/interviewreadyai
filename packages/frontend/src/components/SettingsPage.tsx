@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import PageTitle from './PageTitle';
 import { useTheme } from '../contexts/ThemeContext';
 import { useAuth } from '../contexts/AuthContext';
 import { useToast } from '../contexts/ToastContext';
+import { apiClient } from '../lib/api';
 import {
     MoonIcon,
     SunIcon,
@@ -10,7 +11,9 @@ import {
     ShieldCheckIcon,
     TrashIcon,
     ComputerDesktopIcon,
-    ClockIcon
+    ClockIcon,
+    EyeIcon,
+    EyeSlashIcon
 } from '@heroicons/react/24/outline';
 
 const SettingsPage: React.FC = () => {
@@ -29,9 +32,39 @@ const SettingsPage: React.FC = () => {
         return stored !== null ? stored === 'true' : true;
     });
 
+    // Privacy Settings
+    const [isProfilePublic, setIsProfilePublic] = useState(() => {
+        return user?.isProfilePublic !== undefined ? user.isProfilePublic : true;
+    });
+    const [isUpdatingPrivacy, setIsUpdatingPrivacy] = useState(false);
+
+    // Update local state when user data changes
+    useEffect(() => {
+        if (user?.isProfilePublic !== undefined) {
+            setIsProfilePublic(user.isProfilePublic);
+        }
+    }, [user?.isProfilePublic]);
+
     const handleTimerChange = (checked: boolean) => {
         setShowTimer(checked);
         localStorage.setItem('settings_show_quiz_timer', String(checked));
+    };
+
+    const handlePrivacyChange = async (checked: boolean) => {
+        setIsUpdatingPrivacy(true);
+        try {
+            await apiClient.updatePrivacySettings(checked);
+            setIsProfilePublic(checked);
+            showToast(
+                `Perfil ${checked ? 'público' : 'privado'} configurado com sucesso!`, 
+                'success'
+            );
+        } catch (error) {
+            console.error('Erro ao atualizar configurações de privacidade:', error);
+            showToast('Erro ao atualizar configurações de privacidade', 'error');
+        } finally {
+            setIsUpdatingPrivacy(false);
+        }
     };
 
     const handleThemeChange = (newTheme: 'light' | 'dark' | 'system') => {
@@ -145,6 +178,57 @@ const SettingsPage: React.FC = () => {
                                 <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600"></div>
                             </label>
                         </div>
+                    </div>
+                </div>
+
+                {/* Privacy Settings */}
+                <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg shadow-sm">
+                    <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-800">
+                        <h2 className="text-base font-semibold text-slate-900 dark:text-white flex items-center gap-2">
+                            <EyeIcon className="w-5 h-5 text-green-500" />
+                            Privacidade do Perfil
+                        </h2>
+                        <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
+                            Controle quem pode ver seu perfil e informações.
+                        </p>
+                    </div>
+                    <div className="p-6">
+                        <div className="flex items-center justify-between">
+                            <div className="flex-1">
+                                <label className="text-sm font-medium text-slate-900 dark:text-white flex items-center gap-2">
+                                    {isProfilePublic ? (
+                                        <EyeIcon className="w-4 h-4 text-green-500" />
+                                    ) : (
+                                        <EyeSlashIcon className="w-4 h-4 text-red-500" />
+                                    )}
+                                    Perfil Público
+                                </label>
+                                <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                                    {isProfilePublic 
+                                        ? 'Seu perfil pode ser encontrado e visualizado por outros usuários.'
+                                        : 'Seu perfil está privado e não pode ser encontrado por outros usuários.'
+                                    }
+                                </p>
+                            </div>
+                            <label className="relative inline-flex items-center cursor-pointer ml-4">
+                                <input 
+                                    type="checkbox" 
+                                    checked={isProfilePublic} 
+                                    onChange={(e) => handlePrivacyChange(e.target.checked)}
+                                    disabled={isUpdatingPrivacy}
+                                    className="sr-only peer" 
+                                />
+                                <div className={`w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600 ${isUpdatingPrivacy ? 'opacity-50 cursor-not-allowed' : ''}`}></div>
+                            </label>
+                        </div>
+                        
+                        {!isProfilePublic && (
+                            <div className="mt-4 p-3 bg-yellow-50 dark:bg-yellow-900/10 border border-yellow-200 dark:border-yellow-800 rounded-lg">
+                                <p className="text-sm text-yellow-800 dark:text-yellow-300">
+                                    ⚠️ Com o perfil privado, você não aparecerá nas buscas e outros usuários não poderão seguir você ou ver suas estatísticas.
+                                </p>
+                            </div>
+                        )}
                     </div>
                 </div>
 

@@ -61,6 +61,7 @@ const Sidebar: React.FC = () => {
         { name: 'Meus Quizzes', path: '/my-quizzes', icon: DocumentTextIcon, activeIcon: DocumentTextIconSolid },
         { name: 'Criar', path: '/create-quiz', icon: PlusCircleIcon, activeIcon: PlusCircleIconSolid },
         { name: 'Explorar', path: '/free-quizzes', icon: AcademicCapIcon, activeIcon: AcademicCapIconSolid },
+        { name: 'Comunidade', path: '/search', icon: UsersIconLucide, activeIcon: UsersIconLucide },
         { name: 'Evolução', path: '/desempenho', icon: ChartBarIcon, activeIcon: ChartBarIconSolid },
         { name: 'Histórico', path: '/profile/reward-history', icon: ClockIcon, activeIcon: ClockIconSolid },
         { name: 'Tokens', path: '/tokens', icon: TicketIcon, activeIcon: TicketIconSolid },
