@@ -23,15 +23,12 @@ jobs:
         with:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
-      - name: Set project path
-        run: echo "PROJECT_PATH=${{ secrets.PROJECT_PATH }}" >> $GITHUB_ENV
-
       - name: Deploy via SSH
         run: |
           ssh -o "ProxyCommand=cloudflared access ssh --hostname %h" -o StrictHostKeyChecking=no ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} << 'ENDSSH'
           
           echo "[info] Deploy automático iniciado..."
-          cd $PROJECT_PATH
+          cd ${{ secrets.PROJECT_PATH }}
           
           echo "[info] Fazendo git pull..."
           git pull origin main
