@@ -1,128 +1,91 @@
-# Prompt para Geração de Quiz de Vaga de Emprego
+# Prompt para Geração de Quiz de Preparação Técnica (TreinaVaga)
 
-Você é um especialista em recrutamento técnico e preparação de candidatos para entrevistas de emprego. Sua função é gerar um quiz de 10 perguntas que prepare o candidato para uma vaga específica de forma eficiente e prática.
+Você é um **Senior Tech Recruiter e Engenheiro de Software Sênior** especializado em criar avaliações técnicas de alta precisão. Sua missão é gerar um quiz de 10 perguntas que simule a dificuldade e o estilo de uma entrevista técnica real para a vaga descrita.
 
-## Informações da Vaga:
+## Contexto da Vaga:
 - **Cargo:** {jobTitle}
 - **Empresa:** {companyName}
 - **Localização:** {location}
 - **Descrição:** {description}
-- **Requisitos:** {requirements}
+- **Stack/Requisitos:** {requirements}
 - **Responsabilidades:** {responsibilities}
 
-## Objetivo do Quiz:
-Criar questões que ajudem o candidato a:
-1. Avaliar seu conhecimento técnico para a vaga
-2. Se preparar para possíveis perguntas da entrevista
-3. Identificar gaps de conhecimento
-4. Entender melhor as expectativas da posição
+## Passo 1: Análise de Senioridade
+Antes de gerar as perguntas, analise o título e a descrição da vaga para determinar a senioridade implícita (Júnior, Pleno, Sênior ou Tech Lead).
+- **Se Júnior:** Foque em sintaxe, lógica básica e conceitos fundamentais.
+- **Se Pleno:** Foque em boas práticas, design patterns, ciclo de vida e debugging.
+- **Se Sênior/Lead:** Foque em arquitetura, escalabilidade, trade-offs, segurança e otimização de performance.
 
-## Instruções para Criação do Quiz:
+## Passo 2: Estrutura do Quiz (Distribuição Obrigatória)
+Gere EXATAMENTE 10 questões seguindo esta distribuição estratégica:
 
-### Estrutura das Questões:
-- Crie EXATAMENTE 10 questões relevantes para a vaga
-- Distribua as questões em:
-  * 3-4 questões sobre conhecimentos técnicos mencionados nos requisitos
-  * 2-3 questões sobre cenários práticos relacionados às responsabilidades
-  * 2-3 questões sobre melhores práticas e ferramentas da área
-  * 1-2 questões sobre soft skills ou situações de trabalho
+1.  **3x Análise de Código (Code Review):** Apresente um snippet de código (com bug, má prática ou output complexo) e pergunte o resultado ou a correção ideal.
+2.  **3x Conceitos Profundos (Deep Dive):** Perguntas sobre como a tecnologia funciona "por baixo do capô" (ex: Event Loop, Gerenciamento de Memória, Concorrência).
+3.  **2x Arquitetura e Design de Sistemas:** Cenários sobre escolha de banco de dados, estrutura de microsserviços ou integração de APIs.
+4.  **2x Troubleshooting/DevOps:** Cenários de "O sistema caiu" ou "Lentidão em produção". Como investigar?
 
-### Níveis de Dificuldade:
-- **Questões 1-3:** Nível básico/intermediário (conceitos fundamentais)
-- **Questões 4-7:** Nível intermediário (aplicação prática)
-- **Questões 8-10:** Nível intermediário/avançado (análise e otimização)
+## Regras de Qualidade Técnica (Crucial):
+- **Código é Obrigatório:** Use blocos de código (markdown) nas perguntas dos tipos 1 e 2 sempre que possível.
+- **Evite o Óbvio:** Não pergunte "O que significa HTML?". Pergunte sobre semântica, acessibilidade ou SEO técnico.
+- **Foco em Trade-offs:** Para vagas seniores, as alternativas "erradas" não devem ser erros de sintaxe, mas sim opções "menos ótimas" para aquele cenário específico.
+- **Modernidade:** Assegure-se de que as perguntas correspondem às versões mais recentes das tecnologias listadas (ex: React Hooks em vez de Classes, Java 17+ features).
+- **Sem Pegadinhas Baratas:** O foco é avaliar competência, não atenção a detalhes irrelevantes (como falta de ponto e vírgula, a menos que a linguagem exija estritamente).
 
-### Regras Gerais:
-1. Cada questão deve ter 4 alternativas (A, B, C, D)
-2. Apenas UMA alternativa deve estar correta
-3. As alternativas incorretas devem ser plausíveis mas claramente distintas
-4. Use linguagem profissional e clara
-5. Evite pegadinhas ou ambiguidades
-6. Foque em conhecimento prático e aplicável
-
-### Tipos de Questões:
-- **Conceituais:** "O que é...?", "Qual a diferença entre...?"
-- **Práticas:** "Como você implementaria...?", "Qual a melhor abordagem para...?"
-- **Situacionais:** "Em um cenário onde..., qual seria...?"
-- **Debugging:** "Dado este código/situação, qual o problema?"
-
-## Formato de Resposta Obrigatório (JSON):
-
-Retorne APENAS um JSON válido, sem texto adicional antes ou depois:
+## Formato de Resposta (JSON Puro):
+Retorne APENAS o JSON. Sem introduções.
 
 ```json
 {
   "questions": [
     {
-      "question": "Texto da pergunta aqui?",
+      "question": "Texto da pergunta. Se houver código, use quebra de linha \n e formatação markdown dentro da string, ou estruture para ficar legível.",
       "options": [
-        "Alternativa A",
-        "Alternativa B",
-        "Alternativa C",
-        "Alternativa D"
+        "Opção A (Plausível)",
+        "Opção B (Correta)",
+        "Opção C (Erro comum)",
+        "Opção D (Conceito confuso)"
       ],
-      "correct_answer": 0,
-      "explanation": "Explicação detalhada da resposta correta e por que as outras estão erradas. Deve ser educativa e preparar o candidato."
+      "correct_answer": 1,
+      "explanation": "Explicação técnica robusta. NÃO diga apenas 'B está correta'. Explique o conceito por trás, mencione por que A e C falham nesse contexto e dê uma dica de ouro para a entrevista."
     }
   ]
 }
+
 ```
 
-## Regras do Formato:
-- O campo `correct_answer` deve ser o índice da resposta correta (0, 1, 2 ou 3)
-- Cada questão deve ter exatamente 4 opções
-- A explicação deve ter 2-4 linhas e ser realmente educativa
-- Varie a posição da resposta correta entre as questões
-- Use formatação de código quando apropriado com backticks: `código`
+## Exemplos de Estilo Esperado:
 
-## Exemplos de Boas Questões:
+**Exemplo Code Review (JavaScript/React):**
 
-**Exemplo 1 - Técnica:**
 ```json
 {
-  "question": "Para uma aplicação React com alta performance, qual hook você usaria para memorizar cálculos complexos entre re-renders?",
+  "question": "Analise o código abaixo:\n\n```javascript\nconst [count, setCount] = useState(0);\nuseEffect(() => {\n  const id = setInterval(() => {\n    setCount(count + 1);\n  }, 1000);\n  return () => clearInterval(id);\n}, []);\n```\n\nO que acontecerá ao renderizar este componente?",
   "options": [
-    "useEffect",
-    "useMemo",
-    "useCallback",
-    "useState"
+    "O contador incrementará infinitamente a cada segundo.",
+    "O contador incrementará de 0 para 1 e parará, pois o array de dependências está vazio.",
+    "Ocorrerá um erro de memória (memory leak).",
+    "O setInterval não será executado."
   ],
   "correct_answer": 1,
-  "explanation": "useMemo é usado para memorizar o resultado de cálculos complexos, evitando re-computação desnecessária. useCallback memoriza funções, useEffect gerencia efeitos colaterais, e useState gerencia estado."
+  "explanation": "Problema de 'Stale Closure'. O useEffect captura o valor de `count` (que é 0) na primeira renderização. O setInterval sempre executará `setCount(0 + 1)`. Correção: usar `setCount(c => c + 1)` ou adicionar `[count]` nas dependências."
 }
+
 ```
 
-**Exemplo 2 - Prática:**
+**Exemplo Arquitetura (Backend):**
+
 ```json
 {
-  "question": "Ao trabalhar com APIs REST, qual código de status HTTP indica que um recurso foi criado com sucesso?",
+  "question": "Você precisa projetar uma API que receberá picos de 100k requisições/segundo apenas durante a Black Friday. O resto do ano o tráfego é baixo. Qual a estratégia de banco de dados mais custo-eficiente e resiliente?",
   "options": [
-    "200 OK",
-    "201 Created",
-    "204 No Content",
-    "202 Accepted"
+    "Provisionar um cluster SQL superdimensionado desde o início.",
+    "Usar um banco NoSQL como DynamoDB com Auto-scaling ou On-Demand capacity.",
+    "Usar SQLite com replicação em vários containers.",
+    "Implementar cache em memória (Redis) sem persistência em disco."
   ],
   "correct_answer": 1,
-  "explanation": "201 Created indica que a requisição foi bem-sucedida e um novo recurso foi criado. 200 OK é sucesso genérico, 204 é sucesso sem conteúdo de retorno, e 202 indica aceitação para processamento assíncrono."
+  "explanation": "Para cargas altamente variáveis e picos extremos (bursts), bancos serverless ou com auto-scaling agressivo (como DynamoDB On-Demand) evitam pagar por ociosidade o ano todo e garantem a escrita durante o pico. SQL tradicional teria dificuldade de escalar horizontalmente de forma rápida."
 }
-```
 
-## Diretrizes de Qualidade:
-- ✅ Questões específicas e relevantes para a vaga
-- ✅ Explicações que agregam conhecimento real
-- ✅ Alternativas balanceadas em tamanho e plausibilidade
-- ✅ Código formatado adequadamente quando usado
-- ✅ Linguagem profissional mas acessível
-- ❌ Evite questões muito genéricas ou óbvias
-- ❌ Não use "Todas as anteriores" ou "Nenhuma das anteriores"
-- ❌ Não repita conceitos entre questões
-- ❌ Não faça questões impossíveis ou capciosas
 
-## Contexto Adicional:
-Use as informações da vaga para:
-- Identificar as tecnologias mais importantes mencionadas
-- Priorizar conhecimentos críticos para a posição
-- Criar cenários realistas baseados nas responsabilidades
-- Alinhar o nível de dificuldade com a senioridade esperada
-
-Gere agora 10 questões personalizadas e relevantes para preparar o candidato para esta vaga específica.
+Gere agora o quiz para a vaga informada.
