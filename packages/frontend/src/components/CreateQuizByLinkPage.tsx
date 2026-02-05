@@ -1,25 +1,59 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import PageTitle from './PageTitle';
 import { SparklesIcon, LinkIcon } from '@heroicons/react/24/outline';
+import { apiClient } from '../lib/api';
+import { useAuth } from '../contexts/AuthContext';
+import { useToast } from '../contexts/ToastContext';
 
 
 const CreateQuizByLinkPage: React.FC = () => {
     const [jobLink, setJobLink] = useState('');
     const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+    const navigate = useNavigate();
+    const { user, refreshUser } = useAuth();
+    const { showToast } = useToast();
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsLoading(true);
+        setError(null);
 
-        // Simulating API call
-        setTimeout(() => {
+        try {
+            // Validar que é uma URL do LinkedIn
+            if (!jobLink.includes('linkedin.com/jobs')) {
+                throw new Error('Por favor, insira um link válido de vaga do LinkedIn');
+            }
+
+            // Verificar se o usuário tem tokens
+            if (!user?.tokens || user.tokens < 1) {
+                throw new Error('Você não tem tokens suficientes. Você precisa de pelo menos 1 token para gerar um quiz.');
+            }
+
+            // Gerar o quiz
+            const result = await apiClient.generateJobQuiz({ linkedinUrl: jobLink });
+
+            // Atualizar dados do usuário (para atualizar saldo de tokens)
+            await refreshUser();
+
+            // Mostrar mensagem de sucesso
+            showToast('Quiz gerado com sucesso! 1 token foi deduzido.', 'success');
+
+            // Redirecionar para página de Meus Quizzes
+            setTimeout(() => {
+                navigate('/my-quizzes');
+            }, 500);
+        } catch (err: any) {
+            console.error('Error generating quiz:', err);
+            const errorMessage = err.response?.data?.message || err.message || 'Erro ao gerar quiz. Tente novamente.';
+            setError(errorMessage);
+        } finally {
             setIsLoading(false);
-            // For now, just show an alert or console log since it's "fictional" for now
-            // In the future this would navigate to the generated quiz or quiz creation flow
-            console.log('Generating quiz for:', jobLink);
-            alert('Funcionalidade em desenvolvimento! Em breve você poderá gerar quizzes a partir de links.');
-        }, 1500);
+        }
     };
+
+    const isValidLinkedInUrl = jobLink.includes('linkedin.com/jobs');
 
     return (
         <div className="flex flex-col min-h-full transition-colors duration-300">
@@ -48,26 +82,45 @@ const CreateQuizByLinkPage: React.FC = () => {
 
                         <div className="relative z-10">
                             <form onSubmit={handleSubmit} className="space-y-6">
-                                {/* Development Notice Card */}
-                                <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700/50 rounded-xl p-4 mb-6 flex items-start gap-4">
-                                    <div className="p-2 bg-amber-100 dark:bg-amber-900/30 rounded-lg text-amber-600 dark:text-amber-400 shrink-0">
+                                {/* Token Info Card */}
+                                <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700/50 rounded-xl p-4 mb-6 flex items-start gap-4">
+                                    <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg text-blue-600 dark:text-blue-400 shrink-0">
                                         <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                         </svg>
                                     </div>
-                                    <div>
-                                        <h3 className="text-lg font-bold text-amber-800 dark:text-amber-200">
-                                            Em Desenvolvimento
+                                    <div className="flex-1">
+                                        <h3 className="text-lg font-bold text-blue-800 dark:text-blue-200">
+                                            Custa 1 Token
                                         </h3>
-                                        <p className="text-amber-700 dark:text-amber-300 mt-1">
-                                            Estamos na versão beta, essa feature vai ser liberada no lançamento da 1.0.0.
+                                        <p className="text-blue-700 dark:text-blue-300 mt-1">
+                                            Você tem <span className="font-bold">{user?.tokens || 0} tokens</span> disponíveis. Cada quiz personalizado custa 1 token.
                                         </p>
                                     </div>
                                 </div>
 
-                                <div className="space-y-2 opacity-60 pointer-events-none select-none">
+                                {/* Error Message */}
+                                {error && (
+                                    <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700/50 rounded-xl p-4 flex items-start gap-4">
+                                        <div className="p-2 bg-red-100 dark:bg-red-900/30 rounded-lg text-red-600 dark:text-red-400 shrink-0">
+                                            <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                            </svg>
+                                        </div>
+                                        <div className="flex-1">
+                                            <h3 className="text-lg font-bold text-red-800 dark:text-red-200">
+                                                Erro
+                                            </h3>
+                                            <p className="text-red-700 dark:text-red-300 mt-1">
+                                                {error}
+                                            </p>
+                                        </div>
+                                    </div>
+                                )}
+
+                                <div className="space-y-2">
                                     <label htmlFor="job-link" className="block text-sm font-medium text-slate-700 dark:text-slate-300">
-                                        Link da Vaga (LinkedIn, Gupy, etc)
+                                        Link da Vaga do LinkedIn
                                     </label>
                                     <div className="relative rounded-xl shadow-sm">
                                         <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
@@ -77,20 +130,27 @@ const CreateQuizByLinkPage: React.FC = () => {
                                             type="url"
                                             name="job-link"
                                             id="job-link"
-                                            disabled
-                                            className="block w-full pl-11 pr-4 py-4 sm:text-lg border-slate-200 dark:border-slate-600 rounded-xl bg-slate-50 dark:bg-slate-900/50 text-slate-900 dark:text-white placeholder-slate-400 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all duration-200"
+                                            disabled={isLoading}
+                                            className="block w-full pl-11 pr-4 py-4 sm:text-lg border-slate-200 dark:border-slate-600 rounded-xl bg-white dark:bg-slate-900/50 text-slate-900 dark:text-white placeholder-slate-400 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                                             placeholder="https://www.linkedin.com/jobs/view/..."
                                             value={jobLink}
                                             onChange={(e) => setJobLink(e.target.value)}
                                             required
                                         />
                                     </div>
+                                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-2">
+                                        Cole aqui o link completo de uma vaga do LinkedIn
+                                    </p>
                                 </div>
 
                                 <button
                                     type="submit"
-                                    disabled={true}
-                                    className={`w-full flex items-center justify-center gap-3 px-8 py-4 border border-transparent text-lg font-bold rounded-xl text-white bg-slate-400 dark:bg-slate-600 cursor-not-allowed shadow-none transition-all duration-300`}
+                                    disabled={isLoading || !isValidLinkedInUrl || !user?.tokens || user.tokens < 1}
+                                    className={`w-full flex items-center justify-center gap-3 px-8 py-4 border border-transparent text-lg font-bold rounded-xl text-white transition-all duration-300 ${
+                                        isLoading || !isValidLinkedInUrl || !user?.tokens || user.tokens < 1
+                                            ? 'bg-slate-400 dark:bg-slate-600 cursor-not-allowed'
+                                            : 'bg-gradient-to-r from-primary-600 to-indigo-600 hover:from-primary-700 hover:to-indigo-700 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5'
+                                    }`}
                                 >
                                     {isLoading ? (
                                         <>

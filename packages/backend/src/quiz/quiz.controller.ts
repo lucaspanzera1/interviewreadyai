@@ -1,6 +1,6 @@
 import { Controller, Post, Body, Get, Param, Patch, Delete, Query, UseGuards, NotFoundException } from '@nestjs/common';
 import { QuizService } from './quiz.service';
-import { GenerateQuizDto, GeneratedQuiz } from './dto';
+import { GenerateQuizDto, GeneratedQuiz, GenerateJobQuizDto } from './dto';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { User, UserDocument } from '../user/schemas/user.schema';
 import { RolesGuard } from '../auth/guards/roles.guard';
@@ -21,6 +21,15 @@ export class QuizController {
     @CurrentUser() user: UserDocument,
   ): Promise<GeneratedQuiz> {
     return this.quizService.generateQuiz(dto, user._id.toString());
+  }
+
+  @Post('generate-job')
+  @UseGuards(JwtAuthGuard)
+  async generateJobQuiz(
+    @Body() dto: GenerateJobQuizDto,
+    @CurrentUser() user: UserDocument,
+  ): Promise<GeneratedQuiz> {
+    return this.quizService.generateJobQuiz(dto, user._id.toString());
   }
 
   @Post(':id/attempt')
@@ -94,6 +103,16 @@ export class QuizController {
     @CurrentUser() user: UserDocument,
   ) {
     return this.quizService.getUserAttempts(user._id.toString(), parseInt(page), parseInt(limit));
+  }
+
+  @Get('my-quizzes')
+  @UseGuards(JwtAuthGuard)
+  async getUserQuizzes(
+    @Query('page') page: string = '1',
+    @Query('limit') limit: string = '10',
+    @CurrentUser() user: UserDocument,
+  ) {
+    return this.quizService.getUserQuizzes(user._id.toString(), parseInt(page), parseInt(limit));
   }
 
   @Get('my-attempts/:attemptId')

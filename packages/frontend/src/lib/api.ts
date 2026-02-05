@@ -131,6 +131,10 @@ export interface GenerateQuizDto {
   contexto?: string;
 }
 
+export interface GenerateJobQuizDto {
+  linkedinUrl: string;
+}
+
 export interface QuizQuestion {
   question: string;
   options: string[];
@@ -392,6 +396,11 @@ class ApiClient {
     return res.data;
   }
 
+  async generateJobQuiz(dto: GenerateJobQuizDto): Promise<GeneratedQuiz> {
+    const res = await this.client.post('/quiz/generate-job', dto);
+    return res.data;
+  }
+
   // Admin Quiz methods
   async getAllQuizzes(page: number = 1, limit: number = 10) {
     const res = await this.client.get('/admin/quiz', {
@@ -469,6 +478,13 @@ class ApiClient {
 
   async getUserAttempts(page: number = 1, limit: number = 10) {
     const res = await this.client.get('/quiz/my-attempts', {
+      params: { page, limit },
+    });
+    return res.data;
+  }
+
+  async getUserQuizzes(page: number = 1, limit: number = 10) {
+    const res = await this.client.get('/quiz/my-quizzes', {
       params: { page, limit },
     });
     return res.data;
