@@ -18,6 +18,15 @@ export class QuizAdminController {
     return this.quizService.getAllQuizzes(parseInt(page), parseInt(limit));
   }
 
+  @Get('user/:userId')
+  async getUserQuizzes(
+    @Param('userId') userId: string,
+    @Query('page') page: string = '1',
+    @Query('limit') limit: string = '100',
+  ) {
+    return this.quizService.getUserQuizzes(userId, parseInt(page), parseInt(limit));
+  }
+
   @Get(':id')
   async getQuizById(@Param('id') id: string) {
     return this.quizService.getQuizById(id);

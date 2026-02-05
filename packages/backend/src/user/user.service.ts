@@ -229,6 +229,20 @@ export class UserService {
   }
 
   /**
+   * Mascara o taxid exibindo apenas os últimos 3 dígitos
+   * @param taxid CPF/CNPJ completo
+   * @returns taxid mascarado ou undefined
+   */
+  private maskTaxid(taxid?: string): string | undefined {
+    if (!taxid) return undefined;
+    const cleaned = taxid.replace(/\D/g, ''); // Remove caracteres não numéricos
+    if (cleaned.length < 3) return '***';
+    const lastThree = cleaned.slice(-3);
+    const masked = '*'.repeat(cleaned.length - 3) + lastThree;
+    return masked;
+  }
+
+  /**
    * Converte documento User para DTO
    * @param user Documento User
    * @returns UserDto
@@ -249,6 +263,52 @@ export class UserService {
     };
   }
 
+
+  /**
+   * Obtém detalhes completos de um usuário para administradores
+   * @param userId ID do usuário
+   * @returns Detalhes completos incluindo perfil, tokens, e estatísticas
+   */
+  async getUserDetailsForAdmin(userId: string): Promise<any> {
+    const user = await this.findById(userId);
+    
+    // Buscar estatísticas de tokens
+    const tokenStats = await this.getTokenStats(userId);
+    
+    // Buscar histórico de recompensas
+    const rewardHistory = await this.getRewardHistory(userId);
+    
+    // Retornar dados completos
+    return {
+      user: this.toDto(user),
+      profile: {
+        hasCompletedOnboarding: user.hasCompletedOnboarding,
+        careerTime: user.careerTime,
+        techArea: user.techArea,
+        techStack: user.techStack,
+        bio: user.bio,
+        location: user.location,
+        linkedinUrl: user.linkedinUrl,
+        githubUrl: user.githubUrl,
+        cellphone: user.cellphone,
+        taxid: this.maskTaxid(user.taxid),
+      },
+      tokens: {
+        currentBalance: user.tokens || 0,
+        totalEarned: tokenStats.totalEarned,
+        totalSpent: tokenStats.totalSpent,
+        history: tokenStats.history,
+      },
+      quizStats: {
+        totalFreeQuizzesCompleted: user.totalFreeQuizzesCompleted || 0,
+        lastTokenRewardMilestone: user.lastTokenRewardMilestone || 0,
+        lastTokenRewardAt: user.lastTokenRewardAt,
+        dailyFreeQuizzesUsed: user.dailyFreeQuizzesUsed || 0,
+        lastFreeQuizReset: user.lastFreeQuizReset,
+      },
+      rewardHistory,
+    };
+  }
 
   /**
    * Retorna status do módulo de usuários

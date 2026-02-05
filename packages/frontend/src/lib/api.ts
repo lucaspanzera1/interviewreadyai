@@ -80,6 +80,46 @@ export interface User {
   lastTokenRewardAt?: string;
 }
 
+export interface UserDetails {
+  user: User;
+  profile: {
+    hasCompletedOnboarding?: boolean;
+    careerTime?: string;
+    techArea?: string;
+    techStack?: string[];
+    bio?: string;
+    location?: string;
+    linkedinUrl?: string;
+    githubUrl?: string;
+    cellphone?: string | null;
+    taxid?: string | null;
+  };
+  tokens: {
+    currentBalance: number;
+    totalEarned: number;
+    totalSpent: number;
+    history: Array<{
+      type: string;
+      amount: number;
+      reason: string;
+      createdAt: string;
+    }>;
+  };
+  quizStats: {
+    totalFreeQuizzesCompleted: number;
+    lastTokenRewardMilestone: number;
+    lastTokenRewardAt?: string;
+    dailyFreeQuizzesUsed: number;
+    lastFreeQuizReset?: string;
+  };
+  rewardHistory: Array<{
+    type: string;
+    amount: number;
+    reason: string;
+    createdAt: string;
+  }>;
+}
+
 export interface LoginResponse {
   access_token: string;
   refresh_token: string;
@@ -586,6 +626,19 @@ class ApiClient {
     }>;
   }> {
     const res = await this.client.get('/users/me/token-stats');
+    return res.data;
+  }
+
+  // Admin user methods
+  async getUserDetails(userId: string): Promise<UserDetails> {
+    const res = await this.client.get(`/users/${userId}/details`);
+    return res.data;
+  }
+
+  async getUserQuizzesByAdmin(userId: string, page: number = 1, limit: number = 100) {
+    const res = await this.client.get(`/admin/quiz/user/${userId}`, {
+      params: { page, limit },
+    });
     return res.data;
   }
 }

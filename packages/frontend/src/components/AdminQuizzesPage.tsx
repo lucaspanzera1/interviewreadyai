@@ -212,7 +212,7 @@ const AdminQuizzesPage: React.FC = () => {
     }
 
     return (
-        <div className="min-h-screen bg-slate-50 dark:bg-slate-900 pb-20 animate-fade-in">
+        <div className="min-h-screen bg-slate-50 dark:bg-slate-900 pb-20">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
                 <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
                     <div>

@@ -264,7 +264,13 @@ const ProfilePage: React.FC = () => {
                 <h2 className="text-base font-semibold text-slate-900 dark:text-white">Informações Pessoais</h2>
                 {!isEditing ? (
                   <button
-                    onClick={() => setIsEditing(true)}
+                    onClick={() => {
+                      setIsEditing(true);
+                      // Se o taxid estiver mascarado, limpar o campo para facilitar a redigitação
+                      if (formData.taxid && formData.taxid.includes('*')) {
+                        setFormData(prev => ({ ...prev, taxid: '' }));
+                      }
+                    }}
                     className="flex items-center text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors"
                   >
                     <PencilIcon className="h-4 w-4 mr-1.5 opacity-70" />
@@ -522,7 +528,7 @@ const ProfilePage: React.FC = () => {
                           </svg>
                         </div>
                         <span className="text-slate-700 dark:text-slate-200 font-medium text-sm">
-                          {user?.taxid ? `***${user.taxid.slice(-3)}` : 'Não informado'}
+                          {user?.taxid || 'Não informado'}
                         </span>
                       </div>
                     )}
@@ -845,7 +851,7 @@ const ProfilePage: React.FC = () => {
                                   <GiftIcon className="h-4 w-4 text-green-600 dark:text-green-400" />
                                 )}
                                 <span className="text-sm font-medium text-slate-900 dark:text-white">
-                                  {reward.type === 'token' ? `+${reward.amount} Tokens` :
+                                  {reward.type === 'token' ? `${reward.amount > 0 ? '+' : ''}${reward.amount} Tokens` :
                                     reward.type === 'badge' ? 'Nova Conquista' :
                                       isPackage ? (reward.reason.includes(':') ? reward.reason.split(':')[1] : 'Pacote') :
                                         isRole ? 'Plano Ativado' : 'Recompensa'}
