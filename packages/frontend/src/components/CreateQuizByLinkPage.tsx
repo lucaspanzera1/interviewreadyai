@@ -133,7 +133,12 @@ const CreateQuizByLinkPage: React.FC = () => {
                                                 }`}
                                             onClick={() => setSelectedPlatform('linkedin')}
                                         >
-                                            <div className="flex flex-col items-center gap-2">
+                                            <div className="flex flex-col items-center gap-3">
+                                                <img
+                                                    src="https://upload.wikimedia.org/wikipedia/commons/c/ca/LinkedIn_logo_initials.png"
+                                                    alt="LinkedIn"
+                                                    className="h-10 w-10 object-contain"
+                                                />
                                                 <span className="font-bold text-slate-900 dark:text-white">LinkedIn</span>
                                                 {selectedPlatform === 'linkedin' && (
                                                     <div className="absolute top-2 right-2 text-primary-600">
@@ -249,6 +254,24 @@ const CreateQuizByLinkPage: React.FC = () => {
                             <p className="text-slate-600 dark:text-slate-400">Acompanhe seu desempenho e identifique pontos de melhoria antes da entrevista real.</p>
                         </div>
                     </div>
+                </div>
+
+                {/* Support Badge */}
+                <div className="mt-12 mb-8 p-4 bg-blue-50 dark:bg-blue-900/10 rounded-xl border border-blue-100 dark:border-blue-800/30 text-center">
+                    <p className="text-sm text-slate-600 dark:text-slate-400 flex items-center justify-center gap-2 flex-wrap">
+                        <span>Não gostou do quiz gerado?</span>
+                        <a
+                            href="https://wa.me/5531997313160"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 font-medium hover:underline inline-flex items-center gap-1"
+                        >
+                            Entre em contato com o suporte via WhatsApp
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4">
+                                <path fillRule="evenodd" d="M1.5 4.5a3 3 0 013-3h1.372c.86 0 1.61.586 1.819 1.42l1.105 4.423a1.875 1.875 0 01-.694 1.955l-1.293.97c-.135.101-.164.249-.126.352a11.285 11.285 0 006.697 6.697c.103.038.25.009.352-.126l.97-1.293a1.875 1.875 0 011.955-.694l4.423 1.105c.834.209 1.42.959 1.42 1.82V19.5a3 3 0 01-3 3h-2.25C8.552 22.5 1.5 15.448 1.5 5.25V4.5z" clipRule="evenodd" />
+                            </svg>
+                        </a>
+                    </p>
                 </div>
             </main>
         </div>
