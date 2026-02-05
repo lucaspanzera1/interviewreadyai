@@ -30,7 +30,7 @@ jobs:
         run: |
           ssh -o "ProxyCommand=cloudflared access ssh --hostname %h" -o StrictHostKeyChecking=no ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} << ENDSSH
           
-          PROJECT_PATH=${{ secrets.PROJECT_PATH }}
+          PROJECT_PATH=/Users/lucaspanzera/TreinaVaga  # Caminho mockado para teste - substitua pelo secret depois
           echo "[info] Deploy automático iniciado..."
           echo "[debug] PROJECT_PATH: $PROJECT_PATH"
           cd $PROJECT_PATH || { echo "[error] Falha ao mudar para $PROJECT_PATH"; exit 1; }
