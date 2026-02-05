@@ -154,7 +154,7 @@ class ApiClient {
   private _userCacheTtlMs = 5000; // 5 seconds
 
   constructor() {
-    const baseURL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001';
+    const baseURL = import.meta.env.VITE_API_BASE_URL || '/api';
     const timeout = parseInt(import.meta.env.VITE_API_TIMEOUT || '10000');
 
     this.client = axios.create({
@@ -236,14 +236,12 @@ class ApiClient {
 
   // Auth methods
   async handleAuthCallback(code: string): Promise<LoginResponse> {
-    const baseURL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001';
-    const response = await axios.get(`${baseURL}/auth/google/callback?code=${code}`);
+    const response = await this.client.get(`/auth/google/callback?code=${code}`);
     return response.data;
   }
 
   async refreshToken(refreshToken: string): Promise<RefreshTokenResponse> {
-    const baseURL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001';
-    const response = await axios.post(`${baseURL}/auth/refresh`, {
+    const response = await this.client.post('/auth/refresh', {
       refreshToken: refreshToken,
     });
     return response.data;

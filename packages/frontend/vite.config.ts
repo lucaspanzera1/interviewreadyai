@@ -12,14 +12,20 @@ export default defineConfig({
         target: 'http://localhost:8081',
         changeOrigin: true,
         secure: false,
+        ws: true, // Habilita proxy de websockets
       },
     },
   },
   preview: {
-   allowedHosts: [
+    allowedHosts: [
       'app.treinavaga.tech',
       '.treinavaga.tech',
       'localhost'
     ],
+  },
+  build: {
+    rollupOptions: {
+      external: [], // Evite externalizar bibliotecas que podem precisar de websockets
+    },
   },
 })
