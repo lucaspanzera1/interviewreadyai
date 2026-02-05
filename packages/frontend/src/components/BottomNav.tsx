@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
     HomeIcon,
@@ -15,7 +15,8 @@ import {
     PlusCircleIcon,
     AcademicCapIcon,
     ShieldCheckIcon,
-    ClockIcon
+    ClockIcon,
+    MagnifyingGlassIcon
 } from '@heroicons/react/24/outline';
 import {
     HomeIcon as HomeIconSolid,
@@ -25,12 +26,15 @@ import {
     AcademicCapIcon as AcademicCapIconSolid,
     PlusCircleIcon as PlusCircleIconSolid,
     ShieldCheckIcon as ShieldCheckIconSolid,
-    ClockIcon as ClockIconSolid
+    ClockIcon as ClockIconSolid,
+    MagnifyingGlassIcon as MagnifyingGlassIconSolid
 } from '@heroicons/react/24/solid';
 import { Users as UsersIconLucide, FileQuestion, Gift } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useSidebar } from '../contexts/SidebarContext';
 import { useTheme } from '../contexts/ThemeContext';
+import SearchModal from './SearchModal';
+import { useSearchModal } from '../hooks/useSearchModal';
 
 const Sidebar: React.FC = () => {
     const navigate = useNavigate();
@@ -39,6 +43,7 @@ const Sidebar: React.FC = () => {
     const { isCollapsed, toggleCollapsed, isMobileOpen, setIsMobileOpen } = useSidebar();
     const { resolvedTheme, toggleTheme } = useTheme();
     const sidebarRef = useRef<HTMLDivElement>(null);
+    const { isSearchOpen, openSearch, closeSearch } = useSearchModal();
 
     // Close mobile menu when clicking outside
     useEffect(() => {
@@ -61,6 +66,7 @@ const Sidebar: React.FC = () => {
         { name: 'Meus Quizzes', path: '/my-quizzes', icon: DocumentTextIcon, activeIcon: DocumentTextIconSolid },
         { name: 'Criar', path: '/create-quiz', icon: PlusCircleIcon, activeIcon: PlusCircleIconSolid },
         { name: 'Explorar', path: '/free-quizzes', icon: AcademicCapIcon, activeIcon: AcademicCapIconSolid },
+        { name: 'Pesquisar', path: '#search', icon: MagnifyingGlassIcon, activeIcon: MagnifyingGlassIconSolid, action: () => openSearch() },
         { name: 'Comunidade', path: '/search', icon: UsersIconLucide, activeIcon: UsersIconLucide },
         { name: 'Evolução', path: '/desempenho', icon: ChartBarIcon, activeIcon: ChartBarIconSolid },
         { name: 'Histórico', path: '/profile/reward-history', icon: ClockIcon, activeIcon: ClockIconSolid },
@@ -74,8 +80,12 @@ const Sidebar: React.FC = () => {
         { name: 'Pacotes de Tokens', path: '/token-packages', icon: Gift, activeIcon: Gift },
     ];
 
-    const handleNavClick = (path: string) => {
-        navigate(path);
+    const handleNavClick = (path: string, action?: () => void) => {
+        if (action) {
+            action();
+        } else {
+            navigate(path);
+        }
         setIsMobileOpen(false);
     };
 
@@ -90,6 +100,7 @@ const Sidebar: React.FC = () => {
 
     const isActive = (path: string) => {
         if (path === '/') return location.pathname === '/';
+        if (path === '#search') return false; // Search button should never be active
         if (path === '/desempenho') {
             return location.pathname.startsWith(path) || location.pathname.startsWith('/profile/quiz-history');
         }
@@ -120,7 +131,7 @@ const Sidebar: React.FC = () => {
                     return (
                         <button
                             key={item.name}
-                            onClick={() => handleNavClick(item.path)}
+                            onClick={() => handleNavClick(item.path, item.action)}
                             className={`w-full flex items-center px-3 py-2.5 rounded-xl transition-all duration-200 border-l-4 ${active
                                 ? 'bg-primary-50 dark:bg-primary-900/10 text-primary-700 dark:text-primary-300 font-semibold border-primary-600'
                                 : 'text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white border-transparent'
@@ -130,8 +141,11 @@ const Sidebar: React.FC = () => {
                             <Icon className={`w-5 h-5 flex-shrink-0 transition-colors ${active ? 'text-primary-600 dark:text-primary-400' : 'text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-300'}`} />
                             <div className={`overflow-hidden whitespace-nowrap transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] ${isCollapsed ? 'max-w-0 opacity-0' : 'max-w-[200px] opacity-100'} w-full`}>
                                 <div className="flex items-center justify-between">
-                                    <span className="text-sm pl-3">{item.name}</span>
-                                    {/* @ts-ignore */}
+                                    <span className="text-sm pl-3">{item.name}</span>                                        {item.name === 'Pesquisar' && !isCollapsed && (
+                                        <span className="ml-auto text-[10px] px-1.5 py-0.5 rounded bg-slate-200 dark:bg-slate-600 text-slate-600 dark:text-slate-300 font-mono">
+                                            /
+                                        </span>
+                                    )}                                    {/* @ts-ignore */}
                                     {item.badge && (
                                         <span className="ml-2 text-[10px] px-1.5 py-0.5 rounded shadow-sm font-bold bg-amber-100 text-amber-700 dark:bg-amber-900/50 dark:text-amber-400 border border-amber-200 dark:border-amber-700/50 uppercase tracking-wide">
                                             {/* @ts-ignore */}
@@ -324,8 +338,8 @@ const Sidebar: React.FC = () => {
     const bottomNavItems = [
         { name: 'Início', path: '/', icon: HomeIcon, activeIcon: HomeIconSolid },
         { name: 'Explorar', path: '/free-quizzes', icon: AcademicCapIcon, activeIcon: AcademicCapIconSolid },
+        { name: 'Pesquisar', path: '#search', icon: MagnifyingGlassIcon, activeIcon: MagnifyingGlassIconSolid, action: () => openSearch() },
         { name: 'Meus Quizzes', path: '/my-quizzes', icon: DocumentTextIcon, activeIcon: DocumentTextIconSolid },
-        { name: 'Evolução', path: '/desempenho', icon: ChartBarIcon, activeIcon: ChartBarIconSolid },
         { name: 'Menu', path: '#menu', icon: Bars3Icon, activeIcon: Bars3Icon, action: () => setIsMobileOpen(true) },
     ];
 
@@ -383,6 +397,24 @@ const Sidebar: React.FC = () => {
                         const active = isActive(item.path);
                         const Icon = active ? item.activeIcon : item.icon;
 
+                        if (item.name === 'Pesquisar') {
+                            return (
+                                <button
+                                    key={item.name}
+                                    onClick={(e) => {
+                                        e.preventDefault();
+                                        item.action?.();
+                                    }}
+                                    className="flex items-center justify-center w-full h-full group"
+                                    aria-label="Pesquisar"
+                                >
+                                    <div className="w-10 h-10 flex items-center justify-center rounded-full bg-slate-900 dark:bg-white shadow-lg shadow-slate-900/20 dark:shadow-white/20 transition-transform duration-200 group-active:scale-95">
+                                        <Icon className="w-5 h-5 text-white dark:text-slate-900" strokeWidth={2.5} />
+                                    </div>
+                                </button>
+                            );
+                        }
+
                         return (
                             <button
                                 key={item.name}
@@ -406,6 +438,12 @@ const Sidebar: React.FC = () => {
                     })}
                 </div>
             </nav>
+
+            {/* Search Modal */}
+            <SearchModal
+                isOpen={isSearchOpen}
+                onClose={closeSearch}
+            />
         </>
     );
 };

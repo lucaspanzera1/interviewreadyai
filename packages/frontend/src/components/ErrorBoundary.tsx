@@ -96,7 +96,7 @@ class ErrorBoundary extends Component<Props, State> {
                   href="mailto:suporte@treinavagaai.com"
                   className="text-sm text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 font-medium"
                 >
-                  suporte@treinavagaai.com
+                  lucassouzapanzera@gmail.com
                 </a>
               </div>
             </div>
