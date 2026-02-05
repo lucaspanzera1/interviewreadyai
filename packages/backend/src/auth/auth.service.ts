@@ -47,7 +47,8 @@ export class AuthService {
       picture: googleUser.picture,
     });
 
-    return this.generateTokens(user);
+    const tokens = this.generateTokens(user);
+    return tokens;
   }
 
   /**

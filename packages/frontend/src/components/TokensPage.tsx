@@ -6,6 +6,7 @@ import { useToast } from '../contexts/ToastContext';
 import { useAuth } from '../contexts/AuthContext';
 
 import Loading from './Loading';
+import PaymentLoadingModal from './PaymentLoadingModal';
 import {
   TicketIcon,
   SparklesIcon
@@ -20,6 +21,7 @@ const TokensPage: React.FC = () => {
   const [loadingPackages, setLoadingPackages] = useState(false);
   const [redeeming, setRedeeming] = useState<string | null>(null);
   const [paying, setPaying] = useState<string | null>(null);
+  const [showPaymentLoading, setShowPaymentLoading] = useState(false);
 
   useEffect(() => {
     fetchPackages();
@@ -60,16 +62,23 @@ const TokensPage: React.FC = () => {
     }
 
     try {
+      setPaying(packageId);
+      setShowPaymentLoading(true);
+
       const result = await apiClient.payForPlan(packageId);
 
       if (!result.checkoutUrl) {
         console.error('❌ Checkout URL está vazia!');
         showToast('Erro: URL de checkout não recebida', 'error');
+        setShowPaymentLoading(false);
+        setPaying(null);
         return;
       }
 
+      // Adicionar um pequeno delay para garantir que o usuário veja o loading
+      await new Promise(resolve => setTimeout(resolve, 800));
+
       // Redirecionar para o checkout da AbacatePay
-      setPaying(packageId); // Define o estado após iniciar o redirecionamento
       try {
         window.location.assign(result.checkoutUrl);
       } catch (redirectError) {
@@ -82,6 +91,7 @@ const TokensPage: React.FC = () => {
       const errorMessage = error?.response?.data?.message || 'Erro ao iniciar pagamento';
       console.error('📝 Mensagem de erro:', errorMessage);
       showToast(errorMessage, 'error');
+      setShowPaymentLoading(false);
       setPaying(null);
     }
   };
@@ -96,6 +106,9 @@ const TokensPage: React.FC = () => {
   return (
     <div className="max-w-4xl mx-auto space-y-12 sm:space-y-16 py-6 sm:py-8 pb-32 sm:pb-8">
       <PageTitle title="Créditos - TreinaVagaAI" />
+
+      {/* Payment Loading Modal */}
+      <PaymentLoadingModal isOpen={showPaymentLoading} />
       {/* Sticky Header */}
       <header className="sticky top-0 z-20 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 -mx-4 -mt-4 lg:-mx-8 lg:-mt-8 px-4 lg:px-8 py-4 mb-8 transition-all duration-300">
         <div className="max-w-4xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">

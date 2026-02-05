@@ -3,7 +3,8 @@ import axios, { AxiosInstance, AxiosResponse } from 'axios';
 
 export enum UserRole {
   ADMIN = 'admin',
-  CLIENT = 'client'
+  CLIENT = 'client',
+  PRO = 'pro'
 }
 
 export interface Role {
@@ -80,6 +81,46 @@ export interface User {
   lastTokenRewardAt?: string;
 }
 
+export interface UserDetails {
+  user: User;
+  profile: {
+    hasCompletedOnboarding?: boolean;
+    careerTime?: string;
+    techArea?: string;
+    techStack?: string[];
+    bio?: string;
+    location?: string;
+    linkedinUrl?: string;
+    githubUrl?: string;
+    cellphone?: string | null;
+    taxid?: string | null;
+  };
+  tokens: {
+    currentBalance: number;
+    totalEarned: number;
+    totalSpent: number;
+    history: Array<{
+      type: string;
+      amount: number;
+      reason: string;
+      createdAt: string;
+    }>;
+  };
+  quizStats: {
+    totalFreeQuizzesCompleted: number;
+    lastTokenRewardMilestone: number;
+    lastTokenRewardAt?: string;
+    dailyFreeQuizzesUsed: number;
+    lastFreeQuizReset?: string;
+  };
+  rewardHistory: Array<{
+    type: string;
+    amount: number;
+    reason: string;
+    createdAt: string;
+  }>;
+}
+
 export interface LoginResponse {
   access_token: string;
   refresh_token: string;
@@ -129,6 +170,10 @@ export interface GenerateQuizDto {
   quantidade_questoes: number;
   nivel: QuizLevel;
   contexto?: string;
+}
+
+export interface GenerateJobQuizDto {
+  linkedinUrl: string;
 }
 
 export interface QuizQuestion {
@@ -390,6 +435,11 @@ class ApiClient {
     return res.data;
   }
 
+  async generateJobQuiz(dto: GenerateJobQuizDto): Promise<GeneratedQuiz> {
+    const res = await this.client.post('/quiz/generate-job', dto);
+    return res.data;
+  }
+
   // Admin Quiz methods
   async getAllQuizzes(page: number = 1, limit: number = 10) {
     const res = await this.client.get('/admin/quiz', {
@@ -467,6 +517,13 @@ class ApiClient {
 
   async getUserAttempts(page: number = 1, limit: number = 10) {
     const res = await this.client.get('/quiz/my-attempts', {
+      params: { page, limit },
+    });
+    return res.data;
+  }
+
+  async getUserQuizzes(page: number = 1, limit: number = 10) {
+    const res = await this.client.get('/quiz/my-quizzes', {
       params: { page, limit },
     });
     return res.data;
@@ -552,6 +609,43 @@ class ApiClient {
   // Plan payment methods
   async payForPlan(planId: string): Promise<{ checkoutUrl: string; billingId: string }> {
     const res = await this.client.post(`/plans/${planId}/pay`);
+    return res.data;
+  }
+
+  // Token stats
+  async getTokenStats(): Promise<{
+    currentBalance: number;
+    totalEarned: number;
+    totalSpent: number;
+    history: Array<{
+      type: string;
+      amount: number;
+      reason: string;
+      createdAt: string;
+    }>;
+  }> {
+    const res = await this.client.get('/users/me/token-stats');
+    return res.data;
+  }
+
+  // Admin user methods
+  async getUserDetails(userId: string): Promise<UserDetails> {
+    const res = await this.client.get(`/users/${userId}/details`);
+    return res.data;
+  }
+
+  async getUserQuizzesByAdmin(userId: string, page: number = 1, limit: number = 100) {
+    const res = await this.client.get(`/admin/quiz/user/${userId}`, {
+      params: { page, limit },
+    });
+    return res.data;
+  }
+
+  async addTokensToUser(userId: string, amount: number, reason?: string): Promise<{ success: boolean; message: string; newBalance: number }> {
+    const res = await this.client.post(`/users/${userId}/add-tokens`, {
+      amount,
+      reason: reason || 'admin_grant'
+    });
     return res.data;
   }
 }

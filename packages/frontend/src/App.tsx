@@ -15,6 +15,7 @@ import FreeQuizzesPage from './components/FreeQuizzesPage'
 import OnboardingProvider from './components/OnboardingProvider'
 import ToastContainer from './components/ToastContainer'
 import GeneratedQuizPage from './components/GeneratedQuizPage'
+import UserQuizPage from './components/UserQuizPage'
 import AdminQuizzesPage from './components/AdminQuizzesPage'
 import AdminQuizStatsPage from './components/AdminQuizStatsPage'
 import AdminQuizDetailsPage from './components/AdminQuizDetailsPage'
@@ -27,6 +28,7 @@ import PrivacyPolicyPage from './components/PrivacyPolicyPage'
 import RewardHistoryPage from './components/RewardHistoryPage'
 import AdminTokenPackagesPage from './components/AdminTokenPackagesPage'
 import AdminRolesPage from './components/AdminRolesPage'
+import OrderConfirmationPage from './components/OrderConfirmationPage'
 
 function App() {
   return (
@@ -190,6 +192,16 @@ function App() {
           }
         />
 
+        {/* User Quiz page */}
+        <Route
+          path="/quiz/user"
+          element={
+            <ProtectedRoute>
+              <UserQuizPage />
+            </ProtectedRoute>
+          }
+        />
+
         {/* Tokens page */}
         <Route
           path="/tokens"
@@ -198,6 +210,16 @@ function App() {
               <AppLayout>
                 <TokensPage />
               </AppLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Order Confirmation page */}
+        <Route
+          path="/order-confirmation"
+          element={
+            <ProtectedRoute>
+              <OrderConfirmationPage />
             </ProtectedRoute>
           }
         />

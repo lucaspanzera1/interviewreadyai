@@ -32,6 +32,18 @@ export class UserController {
   }
 
   /**
+   * Helper para mascarar taxid exibindo apenas os últimos 3 dígitos
+   */
+  private maskTaxid(taxid?: string): string | undefined {
+    if (!taxid) return undefined;
+    const cleaned = taxid.replace(/\D/g, ''); // Remove caracteres não numéricos
+    if (cleaned.length < 3) return '***';
+    const lastThree = cleaned.slice(-3);
+    const masked = '*'.repeat(cleaned.length - 3) + lastThree;
+    return masked;
+  }
+
+  /**
    * Lista todos os usuários do sistema (admin only)
    * @returns Array com todos os usuários
    */
@@ -236,6 +248,44 @@ export class UserController {
     return this.userService.getRewardHistory(userId);
   }
 
+  /**
+   * Obter estatísticas de tokens
+   * @returns Estatísticas detalhadas de tokens
+   */
+  @Get('me/token-stats')
+  @ApiOperation({
+    summary: 'Obter estatísticas de tokens',
+    description: 'Retorna estatísticas detalhadas sobre ganhos e gastos de tokens do usuário'
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Estatísticas de tokens retornadas com sucesso',
+    schema: {
+      type: 'object',
+      properties: {
+        currentBalance: { type: 'number', example: 5 },
+        totalEarned: { type: 'number', example: 10 },
+        totalSpent: { type: 'number', example: 5 },
+        history: {
+          type: 'array',
+          items: {
+            type: 'object',
+            properties: {
+              type: { type: 'string', example: 'token' },
+              amount: { type: 'number', example: -1 },
+              reason: { type: 'string', example: 'quiz_generation' },
+              createdAt: { type: 'string', format: 'date-time' }
+            }
+          }
+        }
+      }
+    }
+  })
+  async getTokenStats(@CurrentUser() user: any) {
+    const userId = this.getUserId(user);
+    return this.userService.getTokenStats(userId);
+  }
+
 
 
 
@@ -266,7 +316,7 @@ export class UserController {
       linkedinUrl: userDoc.linkedinUrl,
       githubUrl: userDoc.githubUrl,
       cellphone: userDoc.cellphone,
-      taxid: userDoc.taxid,
+      taxid: this.maskTaxid(userDoc.taxid),
     };
   }
 
@@ -365,6 +415,115 @@ export class UserController {
     const userId = this.getUserId(user);
     const hasCompleted = await this.userService.hasCompletedOnboarding(userId);
     return { hasCompletedOnboarding: hasCompleted };
+  }
+
+  /**
+   * Obtém detalhes completos de um usuário específico (admin only)
+   * Inclui perfil profissional, tokens, e quizzes criados
+   * @param id ID do usuário
+   * @returns Detalhes completos do usuário
+   */
+  @Get(':id/details')
+  @Roles(UserRole.ADMIN)
+  @ApiOperation({
+    summary: 'Obter detalhes completos de um usuário',
+    description: 'Retorna perfil profissional, tokens, estatísticas e quizzes criados pelo usuário (apenas admins)'
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'ID do usuário',
+    type: String
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Detalhes do usuário retornados com sucesso'
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Token de acesso inválido ou expirado',
+    type: UnauthorizedErrorDto
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'Acesso negado - requer role admin',
+    type: ForbiddenErrorDto
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Usuário não encontrado',
+    type: NotFoundErrorDto
+  })
+  async getUserDetails(@Param('id') id: string): Promise<any> {
+    return this.userService.getUserDetailsForAdmin(id);
+  }
+
+  /**
+   * Adiciona tokens manualmente à conta de um usuário (admin only)
+   * @param id ID do usuário
+   * @param body Dados da operação (amount e reason)
+   * @returns Confirmação da operação
+   */
+  @Post(':id/add-tokens')
+  @Roles(UserRole.ADMIN)
+  @ApiOperation({
+    summary: 'Adicionar tokens manualmente a um usuário',
+    description: 'Permite que administradores adicionem tokens à conta de um usuário (apenas admins)'
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'ID do usuário',
+    type: String
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Tokens adicionados com sucesso',
+    schema: {
+      type: 'object',
+      properties: {
+        success: { type: 'boolean', example: true },
+        message: { type: 'string', example: 'Tokens adicionados com sucesso' },
+        newBalance: { type: 'number', example: 15 }
+      }
+    }
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Dados de entrada inválidos',
+    type: ValidationErrorDto
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Token de acesso inválido ou expirado',
+    type: UnauthorizedErrorDto
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'Acesso negado - requer role admin',
+    type: ForbiddenErrorDto
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Usuário não encontrado',
+    type: NotFoundErrorDto
+  })
+  async addTokensToUser(
+    @Param('id') id: string,
+    @Body() body: { amount: number; reason?: string }
+  ): Promise<{ success: boolean; message: string; newBalance: number }> {
+    const { amount, reason = 'admin_grant' } = body;
+
+    if (!amount || amount <= 0) {
+      throw new Error('Amount must be a positive number');
+    }
+
+    await this.userService.addTokensToUser(id, amount, reason);
+    const newBalance = await this.userService.getUserTokens(id);
+
+    return {
+      success: true,
+      message: `${amount} ${amount === 1 ? 'token adicionado' : 'tokens adicionados'} com sucesso`,
+      newBalance
+    };
   }
 
   /**

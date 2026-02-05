@@ -21,7 +21,7 @@ export class UserService {
     private readonly configService: ConfigService,
     private readonly emailService: EmailService,
     private readonly httpService: HttpService,
-  ) {}
+  ) { }
 
   /**
    * Busca ou cria um usuário baseado nos dados do OAuth (Google ou GitHub)
@@ -42,7 +42,7 @@ export class UserService {
     // Busca lista de admins do .env
     const adminEmailsRaw = this.configService.get<string>('ADMIN_EMAILS') || '';
     const adminEmails = adminEmailsRaw.split(',').map(e => e.trim().toLowerCase()).filter(Boolean);
-    
+
     try {
       // Tenta encontrar usuário pelo provider ID
       let user: UserDocument | null = null;
@@ -64,20 +64,23 @@ export class UserService {
             user.githubId = userData.githubId;
           }
           user.lastLoginAt = new Date();
-          
+
           // Normalize role for old users
           if (user.role) {
-            user.role = user.role.toLowerCase() === 'admin' ? UserRole.ADMIN : UserRole.CLIENT;
+            if (user.role.toLowerCase() === 'admin') {
+              user.role = UserRole.ADMIN;
+            }
+            // else keep the role as is
           } else {
             user.role = UserRole.CLIENT;
           }
-          
+
           return await user.save();
         }
 
         // Se não encontrar, cria novo usuário
-        const role = adminEmails.includes(userData.email.toLowerCase()) 
-          ? UserRole.ADMIN 
+        const role = adminEmails.includes(userData.email.toLowerCase())
+          ? UserRole.ADMIN
           : UserRole.CLIENT;
 
         user = new this.userModel({
@@ -105,24 +108,31 @@ export class UserService {
 
       // Se encontrar pelo provider ID, atualiza último login
       user.lastLoginAt = new Date();
-      
+
+      // Check if role has expired (não resetar se for admin)
+      if (user.roleExpiresAt && user.roleExpiresAt <= new Date() && user.role !== UserRole.ADMIN) {
+        user.role = UserRole.CLIENT;
+        user.roleExpiresAt = undefined;
+      }
+
       // Normalize role for old users
       if (user.role) {
-        user.role = user.role.toLowerCase() === 'admin' ? UserRole.ADMIN : UserRole.CLIENT;
+        if (user.role.toLowerCase() === 'admin') {
+          user.role = UserRole.ADMIN;
+        }
+        // else keep the role as is
       } else {
         user.role = UserRole.CLIENT;
       }
-      
-      // Atualiza role se mudou no .env
-      const newRole = adminEmails.includes(user.email.toLowerCase()) 
-        ? UserRole.ADMIN 
-        : UserRole.CLIENT;
-      if (user.role !== newRole) {
-        user.role = newRole;
+
+      // Atualiza role apenas se for admin no .env (não sobrescrever roles de pacotes)
+      if (adminEmails.includes(user.email.toLowerCase())) {
+        user.role = UserRole.ADMIN;
       }
-      
+
       return await user.save();
     } catch (error) {
+      console.error('Error in findOrCreateUser:', error);
       throw new DatabaseException('Erro ao buscar ou criar usuário', 'USER_OPERATION_FAILED');
     }
   }
@@ -219,6 +229,20 @@ export class UserService {
   }
 
   /**
+   * Mascara o taxid exibindo apenas os últimos 3 dígitos
+   * @param taxid CPF/CNPJ completo
+   * @returns taxid mascarado ou undefined
+   */
+  private maskTaxid(taxid?: string): string | undefined {
+    if (!taxid) return undefined;
+    const cleaned = taxid.replace(/\D/g, ''); // Remove caracteres não numéricos
+    if (cleaned.length < 3) return '***';
+    const lastThree = cleaned.slice(-3);
+    const masked = '*'.repeat(cleaned.length - 3) + lastThree;
+    return masked;
+  }
+
+  /**
    * Converte documento User para DTO
    * @param user Documento User
    * @returns UserDto
@@ -235,6 +259,54 @@ export class UserService {
       createdAt: user.createdAt,
       updatedAt: user.updatedAt,
       lastLoginAt: user.lastLoginAt,
+      hasCompletedOnboarding: user.hasCompletedOnboarding,
+    };
+  }
+
+
+  /**
+   * Obtém detalhes completos de um usuário para administradores
+   * @param userId ID do usuário
+   * @returns Detalhes completos incluindo perfil, tokens, e estatísticas
+   */
+  async getUserDetailsForAdmin(userId: string): Promise<any> {
+    const user = await this.findById(userId);
+    
+    // Buscar estatísticas de tokens
+    const tokenStats = await this.getTokenStats(userId);
+    
+    // Buscar histórico de recompensas
+    const rewardHistory = await this.getRewardHistory(userId);
+    
+    // Retornar dados completos
+    return {
+      user: this.toDto(user),
+      profile: {
+        hasCompletedOnboarding: user.hasCompletedOnboarding,
+        careerTime: user.careerTime,
+        techArea: user.techArea,
+        techStack: user.techStack,
+        bio: user.bio,
+        location: user.location,
+        linkedinUrl: user.linkedinUrl,
+        githubUrl: user.githubUrl,
+        cellphone: user.cellphone,
+        taxid: this.maskTaxid(user.taxid),
+      },
+      tokens: {
+        currentBalance: user.tokens || 0,
+        totalEarned: tokenStats.totalEarned,
+        totalSpent: tokenStats.totalSpent,
+        history: tokenStats.history,
+      },
+      quizStats: {
+        totalFreeQuizzesCompleted: user.totalFreeQuizzesCompleted || 0,
+        lastTokenRewardMilestone: user.lastTokenRewardMilestone || 0,
+        lastTokenRewardAt: user.lastTokenRewardAt,
+        dailyFreeQuizzesUsed: user.dailyFreeQuizzesUsed || 0,
+        lastFreeQuizReset: user.lastFreeQuizReset,
+      },
+      rewardHistory,
     };
   }
 
@@ -277,10 +349,22 @@ export class UserService {
    * Adiciona tokens ao usuário
    * @param userId ID do usuário
    * @param amount Quantidade a adicionar
+   * @param reason Motivo da adição (ex: 'package_purchase', 'admin_grant')
    */
-  async addTokensToUser(userId: string, amount: number): Promise<void> {
+  async addTokensToUser(userId: string, amount: number, reason: string = 'token_added'): Promise<void> {
     const user = await this.findById(userId);
     user.tokens = Math.max(0, (user.tokens || 0) + amount);
+    
+    // Registrar no histórico apenas se não for quiz_completion (já é registrado em outro lugar)
+    if (reason !== 'quiz_completion') {
+      user.rewardHistory.push({
+        type: 'token',
+        amount: amount,
+        reason: reason,
+        createdAt: new Date()
+      });
+    }
+    
     await user.save();
   }
 
@@ -288,10 +372,20 @@ export class UserService {
    * Remove tokens do usuário
    * @param userId ID do usuário
    * @param amount Quantidade a remover
+   * @param reason Motivo da remoção (ex: 'quiz_play', 'quiz_generation')
    */
-  async removeTokensFromUser(userId: string, amount: number): Promise<void> {
+  async removeTokensFromUser(userId: string, amount: number, reason: string = 'token_spent'): Promise<void> {
     const user = await this.findById(userId);
     user.tokens = Math.max(0, (user.tokens || 0) - amount);
+    
+    // Registrar no histórico de recompensas com valor negativo
+    user.rewardHistory.push({
+      type: 'token',
+      amount: -amount, // Negativo para indicar gasto
+      reason: reason,
+      createdAt: new Date()
+    });
+    
     await user.save();
   }
 
@@ -326,6 +420,15 @@ export class UserService {
         console.error('Erro ao criar cliente na AbacatePay:', error.response?.data || error.message);
         // Não falha a atualização do perfil por erro na AbacatePay
       }
+    }
+
+    // Se qualquer informação de perfil foi adicionada, marca onboarding como completo
+    const hasProfileData = Object.keys(profileData).some(key => 
+      key !== 'abacatepayCustomerId' && profileData[key] !== undefined && profileData[key] !== null
+    );
+    
+    if (hasProfileData && !user.hasCompletedOnboarding) {
+      profileData.hasCompletedOnboarding = true;
     }
 
     Object.assign(user, profileData);
@@ -385,7 +488,7 @@ export class UserService {
       user.tokens = (user.tokens || 0) + 1;
       user.lastTokenRewardMilestone = user.totalFreeQuizzesCompleted;
       user.lastTokenRewardAt = new Date();
-      
+
       // Adicionar ao histórico de recompensas
       user.rewardHistory.push({
         type: 'token',
@@ -393,7 +496,7 @@ export class UserService {
         reason: 'quiz_completion',
         createdAt: new Date()
       });
-      
+
       tokenReward = true;
     }
 
@@ -452,7 +555,35 @@ export class UserService {
     const user = await this.findById(userId);
     return user.rewardHistory.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
   }
-
+  /**
+   * Obtém estatísticas detalhadas de tokens
+   * @param userId ID do usuário
+   * @returns estatísticas de tokens (saldo atual, total ganho, total gasto, histórico)
+   */
+  async getTokenStats(userId: string) {
+    const user = await this.findById(userId);
+    
+    // Filtrar apenas transações de tokens
+    const tokenHistory = user.rewardHistory
+      .filter(r => r.type === 'token')
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    
+    // Calcular totais
+    const totalEarned = tokenHistory
+      .filter(r => r.amount > 0)
+      .reduce((sum, r) => sum + r.amount, 0);
+    
+    const totalSpent = Math.abs(tokenHistory
+      .filter(r => r.amount < 0)
+      .reduce((sum, r) => sum + r.amount, 0));
+    
+    return {
+      currentBalance: user.tokens || 0,
+      totalEarned,
+      totalSpent,
+      history: tokenHistory,
+    };
+  }
   /**
    * Reseta o limite diário se necessário (se passou um dia)
    * @param user Usuário

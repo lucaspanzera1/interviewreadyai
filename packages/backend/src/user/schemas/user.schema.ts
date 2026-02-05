@@ -10,10 +10,10 @@ export enum UserRole {
 
 @Schema({ timestamps: true })
 export class User {
-  @Prop({ unique: true, sparse: true })
+  @Prop()
   googleId?: string;
 
-  @Prop({ unique: true, sparse: true })
+  @Prop()
   githubId?: string;
 
   @Prop({ required: true, unique: true, lowercase: true })
@@ -34,8 +34,8 @@ export class User {
   @Prop()
   abacatepayCustomerId?: string; // ID do cliente na AbacatePay
 
-  @Prop({ type: String, enum: UserRole, default: UserRole.CLIENT })
-  role: UserRole;
+  @Prop({ type: String, default: UserRole.CLIENT })
+  role: string;
 
   @Prop()
   roleExpiresAt?: Date; // Data de expiração da role atual (null = vitalício)

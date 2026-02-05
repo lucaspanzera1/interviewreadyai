@@ -1,52 +1,52 @@
 [
   {
-    "id": "quiz_infra_windows_ad_legacy",
-    "categoria": "Infraestrutura Windows",
-    "titulo": "Administração de Windows Server e Active Directory",
-    "descricao": "Gestão de usuários, GPOs e segurança em ambientes corporativos Windows.",
-    "tags": "windows-server, active-directory, gpo, dns, infraestrutura",
-    "quantidade_questoes": 10,
-    "nivel": "Médio",
-    "contexto": "O candidato tem mais de 10 anos de experiência. Crie questões práticas sobre o dia a dia de um SysAdmin Windows. Foque em: Como desbloquear contas e resetar senhas no AD Users & Computers, criação e aplicação de GPOs (Políticas de Grupo) para mapeamento de impressoras ou restrições de pasta, e diagnóstico básico de DNS (por que a estação não loga no domínio?). Inclua situações de permissão NTFS em pastas de rede."
-  },
-  {
-    "id": "quiz_hardware_printers_advanced",
-    "categoria": "Hardware e Periféricos",
-    "titulo": "Manutenção de Hardware e Gestão de Impressão",
-    "descricao": "Diagnóstico avançado em desktops, notebooks e configuração de impressoras em rede (Ricoh/Samsung).",
-    "tags": "hardware, impressoras, ricoh, redes, manutenção",
+    "id": "quiz_sydle_frontend_architecture",
+    "categoria": "Frontend Enterprise",
+    "titulo": "Arquitetura Frontend com Angular & TS",
+    "descricao": "Focado na stack da vaga: Angular, TypeScript, RxJS e integração com APIs.",
+    "tags": "angular, typescript, rxjs, frontend, sydle-one",
     "quantidade_questoes": 10,
     "nivel": "Difícil",
-    "contexto": "Este quiz é para um especialista em hardware. Pergunte sobre protocolos de impressão em rede (TCP/IP, RAW, LPR). Crie cenários de troubleshooting: 'Impressora Ricoh/Samsung está na rede, pinga, mas não imprime - o que verificar? (Driver, Spooler, Porta IP)'. Aborde configurações de 'Scan to Folder' (SMB) vs 'Scan to Email' (SMTP). Inclua diagnóstico de hardware: identificar falhas de RAM vs Fonte vs Placa-mãe (bips, multímetro básico)."
+    "contexto": "A vaga cita explicitamente Angular e 'boas práticas de organização'. O quiz deve focar em arquitetura de grandes aplicações Angular. Pergunte sobre: Injeção de Dependência, Gerenciamento de Estado (Services/ngRx), RxJS (Observables, Subjects e operadores como switchMap - crucial para buscas tipo Elasticsearch), Lazy Loading de Módulos e a diferença entre Componentes Inteligentes (Containers) vs Apresentacionais."
   },
   {
-    "id": "quiz_citrix_remote_support",
-    "categoria": "Virtualização e Acesso Remoto",
-    "titulo": "Suporte Remoto e Ambientes Virtualizados (Citrix)",
-    "descricao": "Resolução de problemas em sessões remotas e aplicações virtualizadas.",
-    "tags": "citrix, xenapp, vnc, teamviewer, suporte-remoto",
+    "id": "quiz_performance_usability",
+    "categoria": "Frontend / UX",
+    "titulo": "Performance Web e Usabilidade",
+    "descricao": "Como otimizar interfaces, Core Web Vitals e garantir a fluidez da aplicação.",
+    "tags": "performance, ux, core-web-vitals, css-rendering, otimizacao",
     "quantidade_questoes": 10,
     "nivel": "Médio",
-    "contexto": "Foque na experiência com XenApp e suporte a filiais. Pergunte sobre o conceito de 'Sessão Travada' no Citrix e como derrubá-la. Diferencie problemas de conexão de rede (latência) de problemas de processamento no servidor. Aborde segurança no acesso remoto (TeamViewer/LogMeIn): cuidados com senhas fixas e aprovação de acesso. Pergunte sobre perfis de usuários móveis (Roaming Profiles)."
+    "contexto": "A vaga pede 'otimizar interfaces para melhorar a performance'. Crie questões sobre: O que bloqueia a renderização (Render Blocking CSS/JS)? Como reduzir o First Contentful Paint (FCP)? Técnicas de Debounce/Throttle em inputs de busca. Uso correto do Chrome DevTools para identificar gargalos de memória e layout thrashing. Noções básicas de Acessibilidade (WCAG) como parte da usabilidade."
   },
   {
-    "id": "quiz_erp_sales_force",
-    "categoria": "Sistemas Corporativos",
-    "titulo": "Suporte a ERP (Datasul) e Força de Vendas",
-    "descricao": "Sustentação de sistemas de missão crítica e apoio a representantes externos.",
-    "tags": "erp, datasul, afv, suporte-aplicacao, sql-basico",
+    "id": "quiz_java_fullstack_integration",
+    "categoria": "Backend / Fullstack",
+    "titulo": "Java para Fullstacks: O Essencial",
+    "descricao": "Conceitos de Java que um dev focado em frontend/fullstack precisa saber para não travar.",
+    "tags": "java, spring-boot, api-rest, backend, integracao",
     "quantidade_questoes": 10,
     "nivel": "Médio",
-    "contexto": "O foco é o suporte ao sistema, não o desenvolvimento. Crie cenários onde o usuário do Datasul relata erro de conexão com o banco ou lentidão. Pergunte sobre a lógica de suporte a Força de Vendas (AFV): sincronização de dados de pedidos (tablet/celular para servidor), problemas de versão de aplicativo e cache. Inclua uma questão sobre a importância de Logs de erro para diagnosticar falhas no ERP."
+    "contexto": "Como a vaga é Full Stack na plataforma SYDLE ONE, o candidato precisa saber Java. Foque na integração: Como expor uma API RESTful em Java? Tratamento de exceções (HTTP Status Codes corretos). Conceitos de DTO (Data Transfer Object) para não expor a entidade do banco diretamente. Noções básicas de JPA/Hibernate e Coleções Java (List vs Set vs Map) para manipulação de dados."
   },
   {
-    "id": "quiz_google_workspace_email",
-    "categoria": "Cloud e Colaboração",
-    "titulo": "Gestão de Google Workspace e E-mails Corporativos",
-    "descricao": "Administração de contas, grupos e segurança de e-mail na nuvem.",
-    "tags": "google-workspace, email, dns, mx-record, suporte",
+    "id": "quiz_data_search_engine",
+    "categoria": "Dados / Busca",
+    "titulo": "Elasticsearch e NoSQL (MongoDB)",
+    "descricao": "Entenda como funcionam os motores de busca e bancos orientados a documentos citados na vaga.",
+    "tags": "elasticsearch, mongodb, nosql, busca, dados",
+    "quantidade_questoes": 10,
+    "nivel": "Difícil",
+    "contexto": "A vaga cita Elasticsearch e MongoDB. Não precisa ser expert, mas deve entender o conceito. Pergunte: Qual a diferença entre um banco Relacional e o MongoDB (Schema-less)? O que é um Índice Invertido no Elasticsearch (o coração da busca rápida)? Como funciona uma query básica de 'Full-text search' versus um filtro exato. Consistência Eventual em bancos NoSQL."
+  },
+  {
+    "id": "quiz_agile_software_engineering",
+    "categoria": "Engenharia de Software",
+    "titulo": "Rotina Ágil e Viabilidade Técnica",
+    "descricao": "Scrum, Git Flow e análise de requisitos para novas features.",
+    "tags": "agile, scrum, git, engenharia-software, soft-skills",
     "quantidade_questoes": 10,
     "nivel": "Médio",
-    "contexto": "Valide a experiência com migração e gestão de e-mails. Pergunte o que é um registro MX no DNS e para que serve (recebimento de e-mail). Aborde a criação de usuários no Google Workspace, reset de senha, grupos de distribuição vs grupos de segurança. Inclua uma questão sobre SPF/DKIM (por que o e-mail está caindo no SPAM?) e recuperação de arquivos deletados no Google Drive."
+    "contexto": "A vaga menciona 'analisar viabilidade técnica' e 'metodologias ágeis'. Crie cenários: 'O PO pediu uma feature impossível para o prazo, o que fazer?'. Pergunte sobre o fluxo de Code Review (o que olhar além de sintaxe?). Git Flow (feature branches, pull requests). O papel das cerimônias do Scrum (Planning, Daily, Retro) na organização do time."
   }
 ]

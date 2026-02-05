@@ -47,5 +47,8 @@ export class UserDto {
   @IsDateString()
   lastLoginAt?: Date;
 
+  @ApiProperty({ description: 'Indica se o usuário completou o onboarding', required: false })
+  @IsOptional()
+  hasCompletedOnboarding?: boolean;
 
 }

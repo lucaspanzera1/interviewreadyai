@@ -18,7 +18,6 @@ import {
   ArrowRightOnRectangleIcon,
   BoltIcon,
   LockClosedIcon,
-  UserGroupIcon,
   TrophyIcon,
   QuestionMarkCircleIcon
 } from '@heroicons/react/24/outline';
@@ -184,7 +183,7 @@ const HomePage: React.FC = () => {
       label: 'Novo Simulado',
       desc: 'Gerar quiz personalizado',
       icon: PlusIcon,
-      action: () => navigate('/simulados/novo'),
+      action: () => navigate('/create-quiz'),
       primary: true,
       bg: 'bg-primary-600',
       text: 'text-white'
@@ -193,19 +192,29 @@ const HomePage: React.FC = () => {
       label: 'Continuar',
       desc: 'Retomar último quiz',
       icon: PlayIcon,
-      action: () => navigate('/simulados/continuar'),
+      action: () => navigate('/my-quizzes'),
       primary: false,
       bg: 'bg-indigo-50 dark:bg-indigo-900/20',
       text: 'text-indigo-600 dark:text-indigo-400'
     },
     {
-      label: 'Ranking',
-      desc: 'Compare seu desempenho',
-      icon: UserGroupIcon,
-      action: () => navigate('/ranking'),
+      label: 'Evolução',
+      desc: 'Acompanhe seu progresso',
+      icon: ArrowTrendingUpIcon,
+      action: () => navigate('/desempenho'),
       primary: false,
-      bg: 'bg-amber-50 dark:bg-amber-900/20',
-      text: 'text-amber-600 dark:text-amber-400'
+      bg: 'bg-purple-50 dark:bg-purple-900/20',
+      text: 'text-purple-600 dark:text-purple-400'
+    },
+    {
+      label: 'Ranking',
+      desc: 'Em breve',
+      icon: TrophyIcon,
+      action: () => { },
+      primary: false,
+      bg: 'bg-slate-100 dark:bg-slate-800',
+      text: 'text-slate-400 dark:text-slate-500',
+      disabled: true
     },
   ];
 
@@ -316,29 +325,37 @@ const HomePage: React.FC = () => {
                   {isGuest ? 'Comece Agora' : 'Ações Rápidas'}
                 </h2>
                 <div className="space-y-3">
-                  {quickActions.map((action, index) => (
-                    <button
-                      key={index}
-                      onClick={action.action}
-                      className={`w-full p-4 rounded-xl border transition-all text-left group relative overflow-hidden ${action.primary
-                        ? 'bg-primary-600 border-primary-500 text-white shadow-lg shadow-primary-500/20 hover:bg-primary-500'
-                        : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:border-primary-400 dark:hover:border-primary-500'
-                        }`}
-                    >
-                      <div className="relative z-10 flex items-center justify-between">
-                        <div className="flex items-center gap-4 min-w-0">
-                          <div className={`p-2 rounded-lg shrink-0 ${action.primary ? 'bg-white/20' : action.bg} ${action.primary ? 'text-white' : action.text}`}>
-                            <action.icon className="w-5 h-5" />
+                  {quickActions.map((action, index) => {
+                    const isDisabled = (action as any).disabled;
+                    return (
+                      <button
+                        key={index}
+                        onClick={action.action}
+                        disabled={isDisabled}
+                        className={`w-full p-4 rounded-xl border transition-all text-left group relative overflow-hidden ${isDisabled
+                          ? 'opacity-60 cursor-not-allowed bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-800'
+                          : action.primary
+                            ? 'bg-primary-600 border-primary-500 text-white shadow-lg shadow-primary-500/20 hover:bg-primary-500'
+                            : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:border-primary-400 dark:hover:border-primary-500'
+                          }`}
+                      >
+                        <div className="relative z-10 flex items-center justify-between">
+                          <div className="flex items-center gap-4 min-w-0">
+                            <div className={`p-2 rounded-lg shrink-0 ${action.primary ? 'bg-white/20' : action.bg} ${action.primary ? 'text-white' : action.text}`}>
+                              <action.icon className="w-5 h-5" />
+                            </div>
+                            <div className="min-w-0">
+                              <p className={`font-bold truncate ${action.primary ? 'text-white' : 'text-slate-900 dark:text-white'}`}>{action.label}</p>
+                              <p className={`text-xs truncate ${action.primary ? 'text-white/80' : 'text-slate-500 dark:text-slate-400'}`}>{action.desc}</p>
+                            </div>
                           </div>
-                          <div className="min-w-0">
-                            <p className={`font-bold truncate ${action.primary ? 'text-white' : 'text-slate-900 dark:text-white'}`}>{action.label}</p>
-                            <p className={`text-xs truncate ${action.primary ? 'text-white/80' : 'text-slate-500 dark:text-slate-400'}`}>{action.desc}</p>
-                          </div>
+                          {!isDisabled && (
+                            <ArrowRightOnRectangleIcon className={`w-4 h-4 shrink-0 -rotate-45 transition-transform group-hover:translate-x-1 ${action.primary ? 'text-white/70' : 'text-slate-400'}`} />
+                          )}
                         </div>
-                        <ArrowRightOnRectangleIcon className={`w-4 h-4 shrink-0 -rotate-45 transition-transform group-hover:translate-x-1 ${action.primary ? 'text-white/70' : 'text-slate-400'}`} />
-                      </div>
-                    </button>
-                  ))}
+                      </button>
+                    );
+                  })}
                 </div>
               </section>
 

@@ -4,7 +4,9 @@ import { ConfigService } from '@nestjs/config';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { firstValueFrom } from 'rxjs';
-import { GenerateQuizDto, GeneratedQuiz } from './dto';
+import axios from 'axios';
+import * as cheerio from 'cheerio';
+import { GenerateQuizDto, GeneratedQuiz, GenerateJobQuizDto } from './dto';
 import { Quiz, QuizDocument, QuizAttempt, QuizAttemptDocument } from './schemas';
 import { UserService } from '../user/user.service';
 
@@ -65,10 +67,16 @@ export class QuizService {
       const { Types } = require('mongoose');
       const userObjectId = new Types.ObjectId(userId);
       
+      // Check if user is admin to set quiz as public
+      const user = await this.userService.findById(userId);
+      const isAdmin = user && user.role === 'admin';
+      
       const savedQuiz = await this.quizModel.create({
         ...dto,
         questions: generatedQuiz.questions,
         createdBy: userObjectId,
+        isPublic: isAdmin, // Quizzes created by admins are public
+        isFree: isAdmin, // Only admin quizzes are free (with daily limits)
       });
       
       return {
@@ -275,7 +283,7 @@ IMPORTANTE:
 
   async getPublicQuizzes(page: number = 1, limit: number = 10, category?: string, level?: string, search?: string) {
     const skip = (page - 1) * limit;
-    const filter: any = { isActive: true, isFree: true };
+    const filter: any = { isActive: true, isFree: true, isPublic: true };
 
     if (category && category !== 'Todas') {
       filter.categoria = category;
@@ -314,8 +322,8 @@ IMPORTANTE:
   }
 
   async getPublicFilters() {
-    const categories = await this.quizModel.distinct('categoria', { isActive: true, isFree: true }).exec();
-    const levels = await this.quizModel.distinct('nivel', { isActive: true, isFree: true }).exec();
+    const categories = await this.quizModel.distinct('categoria', { isActive: true, isFree: true, isPublic: true }).exec();
+    const levels = await this.quizModel.distinct('nivel', { isActive: true, isFree: true, isPublic: true }).exec();
     return { categories, levels };
   }
 
@@ -511,8 +519,11 @@ IMPORTANTE:
       throw new HttpException('Este quiz não está disponível no momento.', HttpStatus.FORBIDDEN);
     }
 
-    if (!quiz.isFree) {
-      // Se não é gratuito, verificar se o usuário tem tokens suficientes
+    // Verificar se o usuário é o criador do quiz
+    const isCreator = quiz.createdBy.toString() === userId.toString();
+
+    if (!quiz.isFree && !isCreator) {
+      // Se não é gratuito E não é o criador, verificar se o usuário tem tokens suficientes
       const userTokens = await this.userService.getUserTokens(userId);
       if (userTokens < 1) {
         throw new HttpException(
@@ -522,8 +533,8 @@ IMPORTANTE:
       }
 
       // Debitar 1 token
-      await this.userService.removeTokensFromUser(userId, 1);
-    } else {
+      await this.userService.removeTokensFromUser(userId, 1, 'quiz_play');
+    } else if (quiz.isFree) {
       // Se é gratuito, verificar limite diário
       const hasAccess = await this.userService.canDoFreeQuiz(userId);
       if (!hasAccess) {
@@ -533,6 +544,7 @@ IMPORTANTE:
         );
       }
     }
+    // Se é o criador, não faz nenhuma verificação (pode jogar livremente)
 
     // Retornar quiz completo com questões
     return {
@@ -559,9 +571,332 @@ IMPORTANTE:
       ? attempts.reduce((sum, attempt) => sum + attempt.score, 0) / totalAttempts
       : 0;
 
+    // Buscar totalFreeQuizzesCompleted do usuário
+    const user = await this.userService.findById(userId);
+    const totalFreeQuizzesCompleted = user.totalFreeQuizzesCompleted || 0;
+
     return {
       totalAttempts,
       averageScore,
+      totalFreeQuizzesCompleted, // Apenas quizzes gratuitos
     };
+  }
+
+  /**
+   * Busca quizzes criados pelo usuário
+   */
+  async getUserQuizzes(userId: string, page: number = 1, limit: number = 10) {
+    const skip = (page - 1) * limit;
+    const { Types } = require('mongoose');
+    const userObjectId = new Types.ObjectId(userId);
+
+    const [quizzes, total] = await Promise.all([
+      this.quizModel
+        .find({ createdBy: userObjectId })
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit)
+        .select('-questions') // Não retornar as questões na listagem
+        .exec(),
+      this.quizModel.countDocuments({ createdBy: userObjectId }).exec(),
+    ]);
+
+    return {
+      data: quizzes,
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit),
+    };
+  }
+
+  /**
+   * Gera quiz personalizado baseado em vaga do LinkedIn
+   * Deduz 1 token do usuário antes de gerar
+   */
+  async generateJobQuiz(dto: GenerateJobQuizDto, userId: string): Promise<GeneratedQuiz> {
+    // Validar que o usuário existe e tem tokens suficientes
+    const user = await this.userService.findById(userId);
+    if (!user) {
+      throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+    }
+    
+    if (user.tokens < 1) {
+      throw new HttpException('Insufficient tokens. You need at least 1 token to generate a job quiz.', HttpStatus.PAYMENT_REQUIRED);
+    }
+
+    try {
+      // Fazer scraping da vaga do LinkedIn
+      const jobData = await this.scrapeLinkedInJob(dto.linkedinUrl);
+
+      // Gerar o quiz baseado nos dados da vaga
+      const quiz = await this.generateJobQuizFromData(jobData, userId);
+
+      // Deduzir 1 token do usuário após sucesso
+      await this.userService.removeTokensFromUser(userId, 1, 'quiz_generation');
+
+      return quiz;
+    } catch (error) {
+      console.error('Error generating job quiz:', error);
+      if (error instanceof HttpException) {
+        throw error;
+      }
+      throw new HttpException(
+        'Failed to generate job quiz. Please check the LinkedIn URL and try again.',
+        HttpStatus.INTERNAL_SERVER_ERROR
+      );
+    }
+  }
+
+  /**
+   * Faz scraping de uma vaga do LinkedIn
+   */
+  private async scrapeLinkedInJob(url: string): Promise<any> {
+    try {
+      // Validar que é uma URL do LinkedIn
+      if (!url.includes('linkedin.com/jobs/view') && !url.includes('linkedin.com/jobs/collections')) {
+        throw new HttpException('Invalid LinkedIn job URL', HttpStatus.BAD_REQUEST);
+      }
+
+      // Fazer requisição HTTP para obter o HTML da página
+      const response = await axios.get(url, {
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+          'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+          'Accept-Language': 'en-US,en;q=0.5',
+        },
+        timeout: 10000,
+      });
+
+      // Fazer parsing do HTML com Cheerio
+      const $ = cheerio.load(response.data);
+
+      // Extrair informações da vaga
+      const jobTitle = $('h1.top-card-layout__title, h2.top-card-layout__title').first().text().trim() || 
+                       $('h1').first().text().trim();
+      
+      const companyName = $('.top-card-layout__card .topcard__org-name-link, .topcard__flavor--black-link').first().text().trim() ||
+                         $('.top-card-layout__card a[data-tracking-control-name="public_jobs_topcard-org-name"]').first().text().trim();
+      
+      const location = $('.top-card-layout__card .topcard__flavor--bullet, .topcard__flavor').first().text().trim();
+      
+      const description = $('.show-more-less-html__markup, .description__text').text().trim() ||
+                         $('div[class*="description"]').first().text().trim();
+
+      // Extrair requisitos e responsabilidades do texto da descrição
+      const requirements: string[] = [];
+      const responsibilities: string[] = [];
+
+      // Tentar identificar seções no texto
+      const descriptionLower = description.toLowerCase();
+      
+      if (descriptionLower.includes('requirements') || descriptionLower.includes('requisitos')) {
+        const reqSection = description.substring(
+          Math.max(
+            descriptionLower.indexOf('requirements'),
+            descriptionLower.indexOf('requisitos')
+          )
+        );
+        // Extrair linhas que começam com bullet points ou números
+        const lines = reqSection.split('\n').slice(0, 10);
+        lines.forEach(line => {
+          const trimmed = line.trim();
+          if (trimmed && (trimmed.match(/^[•\-\*\d]/) || trimmed.length > 20)) {
+            requirements.push(trimmed.replace(/^[•\-\*\d.]+\s*/, ''));
+          }
+        });
+      }
+
+      if (descriptionLower.includes('responsibilities') || descriptionLower.includes('responsabilidades')) {
+        const respSection = description.substring(
+          Math.max(
+            descriptionLower.indexOf('responsibilities'),
+            descriptionLower.indexOf('responsabilidades')
+          )
+        );
+        const lines = respSection.split('\n').slice(0, 10);
+        lines.forEach(line => {
+          const trimmed = line.trim();
+          if (trimmed && (trimmed.match(/^[•\-\*\d]/) || trimmed.length > 20)) {
+            responsibilities.push(trimmed.replace(/^[•\-\*\d.]+\s*/, ''));
+          }
+        });
+      }
+
+      return {
+        jobTitle: jobTitle || 'Job Title Not Found',
+        companyName: companyName || 'Company Not Found',
+        location: location || 'Location Not Found',
+        description: description || 'Description not available',
+        requirements: requirements.length > 0 ? requirements : ['Requirements not specified'],
+        responsibilities: responsibilities.length > 0 ? responsibilities : ['Responsibilities not specified'],
+      };
+    } catch (error) {
+      console.error('Scraping error:', error.message);
+      throw new HttpException(
+        'Failed to scrape LinkedIn job. The page might be private or the URL is invalid.',
+        HttpStatus.BAD_REQUEST
+      );
+    }
+  }
+
+  /**
+   * Gera quiz baseado nos dados da vaga
+   */
+  private async generateJobQuizFromData(jobData: any, userId: string): Promise<GeneratedQuiz> {
+    const apiKey = this.configService.get<string>('GROQ_API_KEY');
+    if (!apiKey) {
+      throw new HttpException('GROQ_API_KEY not configured', HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    // Ler o template de prompt para quiz de vagas
+    const promptTemplate = await this.getJobQuizPromptTemplate();
+
+    // Construir o prompt com os dados da vaga
+    const prompt = this.buildJobQuizPrompt(promptTemplate, jobData);
+
+    // Chamar a API do Groq
+    const response = await this.callGroqAPI(prompt, apiKey);
+
+    // Parse do JSON de resposta
+    try {
+      let content = response.trim();
+      
+      // Remover blocos de código markdown se presentes
+      const jsonCodeBlockMatch = content.match(/```(?:json)?\s*(\{[\s\S]*\})\s*```/);
+      if (jsonCodeBlockMatch) {
+        content = jsonCodeBlockMatch[1];
+      } else if (content.startsWith('```json')) {
+        content = content.replace(/^```json\s*/, '').replace(/\s*```$/, '');
+      } else if (content.startsWith('```')) {
+        content = content.replace(/^```\s*/, '').replace(/\s*```$/, '');
+      }
+      
+      const jsonMatch = content.match(/\{[\s\S]*\}/);
+      if (jsonMatch && !content.trim().startsWith('{')) {
+        content = jsonMatch[0];
+      }
+      
+      content = content.trim();
+      const generatedQuiz: GeneratedQuiz = JSON.parse(content);
+
+      // Salvar quiz no banco de dados
+      const { Types } = require('mongoose');
+      const userObjectId = new Types.ObjectId(userId);
+      
+      const savedQuiz = await this.quizModel.create({
+        categoria: 'Vaga de Emprego',
+        titulo: `Quiz: ${jobData.jobTitle} - ${jobData.companyName}`,
+        descricao: `Quiz personalizado para a vaga de ${jobData.jobTitle} na empresa ${jobData.companyName}`,
+        tags: ['vaga', 'linkedin', jobData.jobTitle.toLowerCase()],
+        quantidade_questoes: 10,
+        nivel: 'MEDIO',
+        questions: generatedQuiz.questions,
+        createdBy: userObjectId,
+        isActive: true,
+        isFree: false, // Quiz de vaga é pessoal, sem limites diários
+        isPublic: false, // Quiz de vaga é privado, apenas para o criador
+      });
+      
+      return {
+        ...generatedQuiz,
+        quizId: savedQuiz._id.toString(),
+      };
+    } catch (error) {
+      console.error('Parse error:', error);
+      throw new HttpException('Failed to parse quiz response', HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
+
+  /**
+   * Obtém o template de prompt para quiz de vagas
+   */
+  private async getJobQuizPromptTemplate(): Promise<string> {
+    const fs = require('fs');
+    const path = require('path');
+    const promptPath = path.join(__dirname, '../../../../prompt/job-quiz.md');
+    try {
+      const template = fs.readFileSync(promptPath, 'utf-8');
+      return template;
+    } catch (error) {
+      // Fallback para template hardcoded
+      return this.getDefaultJobQuizPrompt();
+    }
+  }
+
+  /**
+   * Template padrão para quiz de vagas (fallback)
+   */
+  private getDefaultJobQuizPrompt(): string {
+    return `# Prompt para Geração de Quiz de Vaga de Emprego
+
+Você é um especialista em recrutamento técnico e preparação de candidatos para entrevistas de emprego. Sua função é gerar um quiz de 10 perguntas que prepare o candidato para uma vaga específica.
+
+## Informações da Vaga:
+- **Cargo:** {jobTitle}
+- **Empresa:** {companyName}
+- **Localização:** {location}
+- **Descrição:** {description}
+- **Requisitos:** {requirements}
+- **Responsabilidades:** {responsibilities}
+
+## Instruções para Criação do Quiz:
+
+1. Crie EXATAMENTE 10 questões relevantes para a vaga
+2. As questões devem focar em:
+   - Conhecimentos técnicos mencionados nos requisitos
+   - Habilidades necessárias para as responsabilidades listadas
+   - Cenários práticos relacionados ao trabalho
+   - Melhores práticas da área
+   - Ferramentas e tecnologias mencionadas
+
+3. Cada questão deve ter 4 alternativas (A, B, C, D)
+4. Apenas UMA alternativa deve estar correta
+5. O nível deve ser intermediário, adequado para candidatos à vaga
+6. As alternativas incorretas devem ser plausíveis
+
+## Formato de Resposta Obrigatório (JSON):
+
+Retorne APENAS um JSON válido, sem texto adicional:
+
+\`\`\`json
+{
+  "questions": [
+    {
+      "question": "Texto da pergunta aqui?",
+      "options": [
+        "Alternativa A",
+        "Alternativa B",
+        "Alternativa C",
+        "Alternativa D"
+      ],
+      "correct_answer": 0,
+      "explanation": "Explicação detalhada da resposta correta e por que as outras estão erradas."
+    }
+  ]
+}
+\`\`\`
+
+## Regras Importantes:
+- O campo \`correct_answer\` deve ser o índice da resposta correta (0, 1, 2 ou 3)
+- Use linguagem profissional e clara
+- As explicações devem ser educativas e preparar o candidato
+- Varie os tipos de questão (conceitual, prática, situacional)
+- Mantenha relevância com a vaga específica
+
+Gere agora 10 questões para preparar o candidato para esta vaga.`;
+  }
+
+  /**
+   * Constrói o prompt com os dados da vaga
+   */
+  private buildJobQuizPrompt(template: string, jobData: any): string {
+    return template
+      .replace(/{jobTitle}/g, jobData.jobTitle)
+      .replace(/{companyName}/g, jobData.companyName)
+      .replace(/{location}/g, jobData.location)
+      .replace(/{description}/g, jobData.description.substring(0, 1000)) // Limitar tamanho
+      .replace(/{requirements}/g, jobData.requirements.join('\n- '))
+      .replace(/{responsibilities}/g, jobData.responsibilities.join('\n- '));
   }
 }

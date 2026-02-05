@@ -14,6 +14,11 @@ export default defineConfig({
         secure: false,
         ws: true, // Habilita proxy de websockets
       },
+      '/socket.io': {
+        target: 'http://localhost:3000',
+        changeOrigin: true,
+        ws: true,
+      },
     },
   },
   preview: {

@@ -7,7 +7,7 @@ import re
 from typing import Dict, Any
 
 # Configurações
-API_BASE_URL = os.getenv('API_BASE_URL', 'https://api.treinavaga.tech//api')
+API_BASE_URL = os.getenv('API_BASE_URL', 'http://localhost:8081/api')
 AUTH_TOKEN = os.getenv('AUTH_TOKEN')
 
 if not AUTH_TOKEN:
