@@ -13,7 +13,7 @@ export class PlansService {
     private readonly configService: ConfigService,
     private readonly tokenPackageService: TokenPackageService,
     private readonly userService: UserService,
-  ) {}
+  ) { }
 
   async createAbacatePayCustomerIfNeeded(user: User): Promise<string | null> {
     if (user.abacatepayCustomerId) {
@@ -69,8 +69,8 @@ export class PlansService {
           price: Math.round(plan.value * 100), // Converter para centavos
         },
       ],
-      returnUrl: this.configService.get<string>('FRONTEND_URL', 'http://localhost:8080') + '/tokens',
-      completionUrl: this.configService.get<string>('FRONTEND_URL', 'http://localhost:8080') + '/tokens',
+      returnUrl: this.configService.get<string>('FRONTEND_URL', 'http://localhost:8080') + '/order-confirmation?status=pending',
+      completionUrl: this.configService.get<string>('FRONTEND_URL', 'http://localhost:8080') + '/order-confirmation?status=completed',
       customerId: user.abacatepayCustomerId,
     };
 
@@ -84,9 +84,20 @@ export class PlansService {
         })
       );
 
+      const billingId = response.data.data?.id || response.data.id;
+      const checkoutUrl = response.data.data?.url || response.data.url;
+
+      // Atualizar as URLs com o billingId
+      const frontendUrl = this.configService.get<string>('FRONTEND_URL', 'http://localhost:8080');
+      const returnUrlWithId = `${frontendUrl}/order-confirmation?status=pending&billingId=${billingId}`;
+      const completionUrlWithId = `${frontendUrl}/order-confirmation?status=completed&billingId=${billingId}`;
+
+      // Atualizar o billing com as URLs corretas (se a API suportar)
+      // Nota: Isso depende da API do AbacatePay. Se não suportar, as URLs já foram enviadas no payload inicial.
+
       return {
-        checkoutUrl: response.data.data?.url || response.data.url,
-        billingId: response.data.data?.id || response.data.id,
+        checkoutUrl,
+        billingId,
       };
     } catch (error) {
       console.error('Erro ao criar cobrança na AbacatePay:', error.response?.data || error.message);

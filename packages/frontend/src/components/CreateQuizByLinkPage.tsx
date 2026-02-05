@@ -32,7 +32,7 @@ const CreateQuizByLinkPage: React.FC = () => {
             }
 
             // Gerar o quiz
-            const result = await apiClient.generateJobQuiz({ linkedinUrl: jobLink });
+            await apiClient.generateJobQuiz({ linkedinUrl: jobLink });
 
             // Atualizar dados do usuário (para atualizar saldo de tokens)
             await refreshUser();
@@ -146,11 +146,10 @@ const CreateQuizByLinkPage: React.FC = () => {
                                 <button
                                     type="submit"
                                     disabled={isLoading || !isValidLinkedInUrl || !user?.tokens || user.tokens < 1}
-                                    className={`w-full flex items-center justify-center gap-3 px-8 py-4 border border-transparent text-lg font-bold rounded-xl text-white transition-all duration-300 ${
-                                        isLoading || !isValidLinkedInUrl || !user?.tokens || user.tokens < 1
+                                    className={`w-full flex items-center justify-center gap-3 px-8 py-4 border border-transparent text-lg font-bold rounded-xl text-white transition-all duration-300 ${isLoading || !isValidLinkedInUrl || !user?.tokens || user.tokens < 1
                                             ? 'bg-slate-400 dark:bg-slate-600 cursor-not-allowed'
                                             : 'bg-gradient-to-r from-primary-600 to-indigo-600 hover:from-primary-700 hover:to-indigo-700 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5'
-                                    }`}
+                                        }`}
                                 >
                                     {isLoading ? (
                                         <>

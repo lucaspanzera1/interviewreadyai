@@ -27,6 +27,7 @@ import PrivacyPolicyPage from './components/PrivacyPolicyPage'
 import RewardHistoryPage from './components/RewardHistoryPage'
 import AdminTokenPackagesPage from './components/AdminTokenPackagesPage'
 import AdminRolesPage from './components/AdminRolesPage'
+import OrderConfirmationPage from './components/OrderConfirmationPage'
 
 function App() {
   return (
@@ -198,6 +199,16 @@ function App() {
               <AppLayout>
                 <TokensPage />
               </AppLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Order Confirmation page */}
+        <Route
+          path="/order-confirmation"
+          element={
+            <ProtectedRoute>
+              <OrderConfirmationPage />
             </ProtectedRoute>
           }
         />
