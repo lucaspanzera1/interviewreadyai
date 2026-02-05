@@ -458,6 +458,75 @@ export class UserController {
   }
 
   /**
+   * Adiciona tokens manualmente à conta de um usuário (admin only)
+   * @param id ID do usuário
+   * @param body Dados da operação (amount e reason)
+   * @returns Confirmação da operação
+   */
+  @Post(':id/add-tokens')
+  @Roles(UserRole.ADMIN)
+  @ApiOperation({
+    summary: 'Adicionar tokens manualmente a um usuário',
+    description: 'Permite que administradores adicionem tokens à conta de um usuário (apenas admins)'
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'ID do usuário',
+    type: String
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Tokens adicionados com sucesso',
+    schema: {
+      type: 'object',
+      properties: {
+        success: { type: 'boolean', example: true },
+        message: { type: 'string', example: 'Tokens adicionados com sucesso' },
+        newBalance: { type: 'number', example: 15 }
+      }
+    }
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Dados de entrada inválidos',
+    type: ValidationErrorDto
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Token de acesso inválido ou expirado',
+    type: UnauthorizedErrorDto
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'Acesso negado - requer role admin',
+    type: ForbiddenErrorDto
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Usuário não encontrado',
+    type: NotFoundErrorDto
+  })
+  async addTokensToUser(
+    @Param('id') id: string,
+    @Body() body: { amount: number; reason?: string }
+  ): Promise<{ success: boolean; message: string; newBalance: number }> {
+    const { amount, reason = 'admin_grant' } = body;
+
+    if (!amount || amount <= 0) {
+      throw new Error('Amount must be a positive number');
+    }
+
+    await this.userService.addTokensToUser(id, amount, reason);
+    const newBalance = await this.userService.getUserTokens(id);
+
+    return {
+      success: true,
+      message: `${amount} ${amount === 1 ? 'token adicionado' : 'tokens adicionados'} com sucesso`,
+      newBalance
+    };
+  }
+
+  /**
    * Endpoint temporário para testar o módulo de usuários
    * @returns Status do módulo de usuários
    */

@@ -3,7 +3,8 @@ import axios, { AxiosInstance, AxiosResponse } from 'axios';
 
 export enum UserRole {
   ADMIN = 'admin',
-  CLIENT = 'client'
+  CLIENT = 'client',
+  PRO = 'pro'
 }
 
 export interface Role {
@@ -638,6 +639,14 @@ class ApiClient {
   async getUserQuizzesByAdmin(userId: string, page: number = 1, limit: number = 100) {
     const res = await this.client.get(`/admin/quiz/user/${userId}`, {
       params: { page, limit },
+    });
+    return res.data;
+  }
+
+  async addTokensToUser(userId: string, amount: number, reason?: string): Promise<{ success: boolean; message: string; newBalance: number }> {
+    const res = await this.client.post(`/users/${userId}/add-tokens`, {
+      amount,
+      reason: reason || 'admin_grant'
     });
     return res.data;
   }

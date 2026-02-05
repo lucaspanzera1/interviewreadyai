@@ -7,12 +7,8 @@ import {
   AcademicCapIcon,
   BriefcaseIcon,
   MapPinIcon,
-  PhoneIcon,
-  IdentificationIcon,
-  CodeBracketIcon,
-  CalendarIcon
+  CodeBracketIcon
 } from '@heroicons/react/24/outline';
-import { SocialIcon } from 'react-social-icons';
 
 interface UserDetailsModalProps {
   userId: string;

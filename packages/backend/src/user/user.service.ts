@@ -422,6 +422,15 @@ export class UserService {
       }
     }
 
+    // Se qualquer informação de perfil foi adicionada, marca onboarding como completo
+    const hasProfileData = Object.keys(profileData).some(key => 
+      key !== 'abacatepayCustomerId' && profileData[key] !== undefined && profileData[key] !== null
+    );
+    
+    if (hasProfileData && !user.hasCompletedOnboarding) {
+      profileData.hasCompletedOnboarding = true;
+    }
+
     Object.assign(user, profileData);
     return await user.save();
   }

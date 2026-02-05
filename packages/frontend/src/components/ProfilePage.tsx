@@ -86,8 +86,17 @@ const ProfilePage: React.FC = () => {
   const { user, updateProfile, logout } = useAuth();
   const { showToast } = useToast();
   const navigate = useNavigate();
-  const [isEditing, setIsEditing] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  
+  // Estados de edição separados para cada seção
+  const [isEditingPersonal, setIsEditingPersonal] = useState(false);
+  const [isEditingPayment, setIsEditingPayment] = useState(false);
+  const [isEditingProfessional, setIsEditingProfessional] = useState(false);
+  
+  // Estados de loading separados para cada seção
+  const [isLoadingPersonal, setIsLoadingPersonal] = useState(false);
+  const [isLoadingPayment, setIsLoadingPayment] = useState(false);
+  const [isLoadingProfessional, setIsLoadingProfessional] = useState(false);
+  
   const [formData, setFormData] = useState<FormData>({
     name: user?.name || '',
     careerTime: user?.careerTime || '',
@@ -179,37 +188,120 @@ const ProfilePage: React.FC = () => {
     }));
   };
 
-  const handleSave = async () => {
-    setIsLoading(true);
+  // Função para verificar se houve alterações em campos específicos
+  const hasChanges = (fields: (keyof FormData)[]) => {
+    return fields.some(field => {
+      const currentValue = formData[field];
+      const userValue = user?.[field];
+      
+      if (Array.isArray(currentValue) && Array.isArray(userValue)) {
+        return JSON.stringify(currentValue.sort()) !== JSON.stringify(userValue.sort());
+      }
+      return currentValue !== userValue;
+    });
+  };
+
+  // Funções de salvar para cada seção
+  const handleSavePersonal = async () => {
+    const fields: (keyof FormData)[] = ['name', 'bio', 'location', 'linkedinUrl', 'githubUrl'];
+    if (!hasChanges(fields)) {
+      setIsEditingPersonal(false);
+      return;
+    }
+    
+    setIsLoadingPersonal(true);
     try {
-      const processedData = {
-        ...formData,
-        // Ensure techStack is clean
-        techStack: formData.techStack.filter(s => s),
+      const dataToUpdate = {
+        name: formData.name,
+        bio: formData.bio,
+        location: formData.location,
+        linkedinUrl: formData.linkedinUrl,
+        githubUrl: formData.githubUrl,
       };
-      await updateProfile(processedData);
-      setIsEditing(false);
+      await updateProfile(dataToUpdate);
+      setIsEditingPersonal(false);
     } catch {
-      showToast('Erro ao atualizar perfil', 'error');
+      showToast('Erro ao atualizar informações pessoais', 'error');
     } finally {
-      setIsLoading(false);
+      setIsLoadingPersonal(false);
     }
   };
 
-  const handleCancel = () => {
-    setFormData({
+  const handleSavePayment = async () => {
+    const fields: (keyof FormData)[] = ['cellphone', 'taxid'];
+    if (!hasChanges(fields)) {
+      setIsEditingPayment(false);
+      return;
+    }
+    
+    setIsLoadingPayment(true);
+    try {
+      const dataToUpdate = {
+        cellphone: formData.cellphone,
+        taxid: formData.taxid,
+      };
+      await updateProfile(dataToUpdate);
+      setIsEditingPayment(false);
+    } catch {
+      showToast('Erro ao atualizar dados de pagamento', 'error');
+    } finally {
+      setIsLoadingPayment(false);
+    }
+  };
+
+  const handleSaveProfessional = async () => {
+    const fields: (keyof FormData)[] = ['careerTime', 'techArea', 'techStack'];
+    if (!hasChanges(fields)) {
+      setIsEditingProfessional(false);
+      return;
+    }
+    
+    setIsLoadingProfessional(true);
+    try {
+      const dataToUpdate = {
+        careerTime: formData.careerTime,
+        techArea: formData.techArea,
+        techStack: formData.techStack.filter(s => s),
+      };
+      await updateProfile(dataToUpdate);
+      setIsEditingProfessional(false);
+    } catch {
+      showToast('Erro ao atualizar perfil profissional', 'error');
+    } finally {
+      setIsLoadingProfessional(false);
+    }
+  };
+
+  // Funções de cancelar para cada seção
+  const handleCancelPersonal = () => {
+    setFormData(prev => ({
+      ...prev,
       name: user?.name || '',
-      careerTime: user?.careerTime || '',
-      techArea: user?.techArea || '',
-      techStack: user?.techStack || [],
       bio: user?.bio || '',
       location: user?.location || '',
       linkedinUrl: user?.linkedinUrl || '',
       githubUrl: user?.githubUrl || '',
+    }));
+    setIsEditingPersonal(false);
+  };
+
+  const handleCancelPayment = () => {
+    setFormData(prev => ({
+      ...prev,
       cellphone: user?.cellphone || '',
       taxid: user?.taxid || '',
-    });
-    setIsEditing(false);
+    }));
+    setIsEditingPayment(false);
+  };
+
+  const handleCancelProfessional = () => {
+    setFormData(prev => ({
+      ...prev,
+      careerTime: user?.careerTime || '',
+      techArea: user?.techArea || '',
+      techStack: user?.techStack || [],
+    }));
+    setIsEditingProfessional(false);
   };
 
   const handleLogout = async () => {
@@ -262,15 +354,9 @@ const ProfilePage: React.FC = () => {
             <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg shadow-sm">
               <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
                 <h2 className="text-base font-semibold text-slate-900 dark:text-white">Informações Pessoais</h2>
-                {!isEditing ? (
+                {!isEditingPersonal ? (
                   <button
-                    onClick={() => {
-                      setIsEditing(true);
-                      // Se o taxid estiver mascarado, limpar o campo para facilitar a redigitação
-                      if (formData.taxid && formData.taxid.includes('*')) {
-                        setFormData(prev => ({ ...prev, taxid: '' }));
-                      }
-                    }}
+                    onClick={() => setIsEditingPersonal(true)}
                     className="flex items-center text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors"
                   >
                     <PencilIcon className="h-4 w-4 mr-1.5 opacity-70" />
@@ -279,20 +365,20 @@ const ProfilePage: React.FC = () => {
                 ) : (
                   <div className="flex gap-3">
                     <button
-                      onClick={handleCancel}
+                      onClick={handleCancelPersonal}
                       className="flex items-center px-3 py-1.5 text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-800 rounded-md transition-all"
-                      disabled={isLoading}
+                      disabled={isLoadingPersonal}
                     >
                       <XMarkIcon className="h-4 w-4 mr-1" />
                       Cancelar
                     </button>
                     <button
-                      onClick={handleSave}
+                      onClick={handleSavePersonal}
                       className="flex items-center px-4 py-2 text-sm font-semibold text-white bg-primary-600 hover:bg-primary-500 rounded-lg transition-all shadow-md shadow-primary-600/20 active:scale-95"
-                      disabled={isLoading}
+                      disabled={isLoadingPersonal}
                     >
                       <CheckIcon className="h-4 w-4 mr-1.5" />
-                      {isLoading ? 'Salvando...' : 'Salvar'}
+                      {isLoadingPersonal ? 'Salvando...' : 'Salvar'}
                     </button>
                   </div>
                 )}
@@ -323,7 +409,7 @@ const ProfilePage: React.FC = () => {
                     <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                       Nome Completo
                     </label>
-                    {isEditing ? (
+                    {isEditingPersonal ? (
                       <input
                         type="text"
                         name="name"
@@ -344,7 +430,7 @@ const ProfilePage: React.FC = () => {
                     <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                       Biografia
                     </label>
-                    {isEditing ? (
+                    {isEditingPersonal ? (
                       <textarea
                         name="bio"
                         value={formData.bio}
@@ -367,7 +453,7 @@ const ProfilePage: React.FC = () => {
                     <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                       Localização
                     </label>
-                    {isEditing ? (
+                    {isEditingPersonal ? (
                       <input
                         type="text"
                         name="location"
@@ -391,7 +477,7 @@ const ProfilePage: React.FC = () => {
                       <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                         LinkedIn
                       </label>
-                      {isEditing ? (
+                      {isEditingPersonal ? (
                         <input
                           type="url"
                           name="linkedinUrl"
@@ -414,7 +500,7 @@ const ProfilePage: React.FC = () => {
                       <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                         GitHub
                       </label>
-                      {isEditing ? (
+                      {isEditingPersonal ? (
                         <input
                           type="url"
                           name="githubUrl"
@@ -443,9 +529,15 @@ const ProfilePage: React.FC = () => {
             <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg shadow-sm">
               <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
                 <h2 className="text-base font-semibold text-slate-900 dark:text-white">Dados de Pagamento</h2>
-                {!isEditing ? (
+                {!isEditingPayment ? (
                   <button
-                    onClick={() => setIsEditing(true)}
+                    onClick={() => {
+                      setIsEditingPayment(true);
+                      // Se o taxid estiver mascarado, limpar o campo para facilitar a redigitação
+                      if (formData.taxid && formData.taxid.includes('*')) {
+                        setFormData(prev => ({ ...prev, taxid: '' }));
+                      }
+                    }}
                     className="flex items-center text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors"
                   >
                     <PencilIcon className="h-4 w-4 mr-1.5 opacity-70" />
@@ -454,20 +546,20 @@ const ProfilePage: React.FC = () => {
                 ) : (
                   <div className="flex gap-3">
                     <button
-                      onClick={handleCancel}
+                      onClick={handleCancelPayment}
                       className="flex items-center px-3 py-1.5 text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-800 rounded-md transition-all"
-                      disabled={isLoading}
+                      disabled={isLoadingPayment}
                     >
                       <XMarkIcon className="h-4 w-4 mr-1" />
                       Cancelar
                     </button>
                     <button
-                      onClick={handleSave}
+                      onClick={handleSavePayment}
                       className="flex items-center px-4 py-2 text-sm font-semibold text-white bg-primary-600 hover:bg-primary-500 rounded-lg transition-all shadow-md shadow-primary-600/20 active:scale-95"
-                      disabled={isLoading}
+                      disabled={isLoadingPayment}
                     >
                       <CheckIcon className="h-4 w-4 mr-1.5" />
-                      {isLoading ? 'Salvando...' : 'Salvar'}
+                      {isLoadingPayment ? 'Salvando...' : 'Salvar'}
                     </button>
                   </div>
                 )}
@@ -480,7 +572,7 @@ const ProfilePage: React.FC = () => {
                     <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                       Telefone <span className="text-red-500">*</span>
                     </label>
-                    {isEditing ? (
+                    {isEditingPayment ? (
                       <input
                         type="tel"
                         name="cellphone"
@@ -511,7 +603,7 @@ const ProfilePage: React.FC = () => {
                     <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                       CPF <span className="text-red-500">*</span>
                     </label>
-                    {isEditing ? (
+                    {isEditingPayment ? (
                       <input
                         type="text"
                         name="taxid"
@@ -564,9 +656,9 @@ const ProfilePage: React.FC = () => {
             <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg shadow-sm">
               <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
                 <h2 className="text-base font-semibold text-slate-900 dark:text-white">Perfil Profissional</h2>
-                {!isEditing ? (
+                {!isEditingProfessional ? (
                   <button
-                    onClick={() => setIsEditing(true)}
+                    onClick={() => setIsEditingProfessional(true)}
                     className="flex items-center text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors"
                   >
                     <PencilIcon className="h-4 w-4 mr-1.5 opacity-70" />
@@ -575,20 +667,20 @@ const ProfilePage: React.FC = () => {
                 ) : (
                   <div className="flex gap-3">
                     <button
-                      onClick={handleCancel}
+                      onClick={handleCancelProfessional}
                       className="flex items-center px-3 py-1.5 text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-800 rounded-md transition-all"
-                      disabled={isLoading}
+                      disabled={isLoadingProfessional}
                     >
                       <XMarkIcon className="h-4 w-4 mr-1" />
                       Cancelar
                     </button>
                     <button
-                      onClick={handleSave}
+                      onClick={handleSaveProfessional}
                       className="flex items-center px-4 py-2 text-sm font-semibold text-white bg-primary-600 hover:bg-primary-500 rounded-lg transition-all shadow-md shadow-primary-600/20 active:scale-95"
-                      disabled={isLoading}
+                      disabled={isLoadingProfessional}
                     >
                       <CheckIcon className="h-4 w-4 mr-1.5" />
-                      {isLoading ? 'Salvando...' : 'Salvar'}
+                      {isLoadingProfessional ? 'Salvando...' : 'Salvar'}
                     </button>
                   </div>
                 )}
@@ -600,7 +692,7 @@ const ProfilePage: React.FC = () => {
                     <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                       Área de Atuação
                     </label>
-                    {isEditing ? (
+                    {isEditingProfessional ? (
                       <select
                         name="techArea"
                         value={formData.techArea}
@@ -623,7 +715,7 @@ const ProfilePage: React.FC = () => {
                     <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                       Experiência
                     </label>
-                    {isEditing ? (
+                    {isEditingProfessional ? (
                       <select
                         name="careerTime"
                         value={formData.careerTime}
@@ -648,7 +740,7 @@ const ProfilePage: React.FC = () => {
                     <CpuChipIcon className="w-4 h-4" />
                     Stack e Tecnologias
                   </label>
-                  {isEditing ? (
+                  {isEditingProfessional ? (
                     <div className="flex flex-wrap gap-2 max-h-[300px] overflow-y-auto p-2 border border-slate-200 dark:border-slate-700 rounded-xl">
                       {TECH_STACK_OPTIONS.map((tech) => {
                         const isSelected = formData.techStack.includes(tech);

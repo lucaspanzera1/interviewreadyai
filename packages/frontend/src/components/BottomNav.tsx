@@ -14,8 +14,8 @@ import {
     TicketIcon,
     PlusCircleIcon,
     AcademicCapIcon,
-    TrophyIcon,
-    ShieldCheckIcon
+    ShieldCheckIcon,
+    ClockIcon
 } from '@heroicons/react/24/outline';
 import {
     HomeIcon as HomeIconSolid,
@@ -24,8 +24,8 @@ import {
     TicketIcon as TicketIconSolid,
     AcademicCapIcon as AcademicCapIconSolid,
     PlusCircleIcon as PlusCircleIconSolid,
-    TrophyIcon as TrophyIconSolid,
-    ShieldCheckIcon as ShieldCheckIconSolid
+    ShieldCheckIcon as ShieldCheckIconSolid,
+    ClockIcon as ClockIconSolid
 } from '@heroicons/react/24/solid';
 import { Users as UsersIconLucide, FileQuestion, Gift } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
@@ -58,11 +58,11 @@ const Sidebar: React.FC = () => {
 
     const mainNavItems = [
         { name: 'Início', path: '/', icon: HomeIcon, activeIcon: HomeIconSolid },
-        { name: 'Meus Quizzes', path: '/my-quizzes', icon: DocumentTextIcon, activeIcon: DocumentTextIconSolid, badge: 'Beta' },
-        { name: 'Criar', path: '/create-quiz', icon: PlusCircleIcon, activeIcon: PlusCircleIconSolid, badge: 'Beta' },
+        { name: 'Meus Quizzes', path: '/my-quizzes', icon: DocumentTextIcon, activeIcon: DocumentTextIconSolid },
+        { name: 'Criar', path: '/create-quiz', icon: PlusCircleIcon, activeIcon: PlusCircleIconSolid },
         { name: 'Explorar', path: '/free-quizzes', icon: AcademicCapIcon, activeIcon: AcademicCapIconSolid },
         { name: 'Evolução', path: '/desempenho', icon: ChartBarIcon, activeIcon: ChartBarIconSolid },
-        { name: 'Recompensas', path: '/profile/reward-history', icon: TrophyIcon, activeIcon: TrophyIconSolid },
+        { name: 'Histórico', path: '/profile/reward-history', icon: ClockIcon, activeIcon: ClockIconSolid },
         { name: 'Tokens', path: '/tokens', icon: TicketIcon, activeIcon: TicketIconSolid },
     ];
 

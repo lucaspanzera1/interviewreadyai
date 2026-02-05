@@ -156,7 +156,7 @@ const RewardHistoryPage: React.FC = () => {
   if (isLoading) {
     return (
       <>
-        <PageTitle title="Histórico de Recompensas - TreinaVagaAI" />
+        <PageTitle title="Histórico - TreinaVagaAI" />
         <div className="flex items-center justify-center min-h-64">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
         </div>
@@ -178,7 +178,7 @@ const RewardHistoryPage: React.FC = () => {
             </button>
             <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Minha Jornada</span>
           </div>
-          <h1 className="text-3xl sm:text-4xl font-bold text-slate-900 dark:text-white tracking-tight">Recompensas</h1>
+          <h1 className="text-3xl sm:text-4xl font-bold text-slate-900 dark:text-white tracking-tight">Histórico</h1>
           <p className="text-slate-500 dark:text-slate-400 mt-2 font-medium text-sm sm:text-base">Seu progresso e conquistas acumuladas.</p>
         </div>
 
@@ -215,7 +215,7 @@ const RewardHistoryPage: React.FC = () => {
               </div>
               <span className="text-3xl font-black text-amber-900 dark:text-amber-100">{tokenStats.currentBalance}</span>
             </div>
-            
+
             <div className="bg-gradient-to-br from-green-50 to-emerald-100 dark:from-green-900/20 dark:to-emerald-800/10 rounded-2xl p-6 border border-green-200 dark:border-green-800">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-xs font-bold text-green-600 dark:text-green-400 uppercase tracking-widest">Total Ganho</span>
@@ -223,7 +223,7 @@ const RewardHistoryPage: React.FC = () => {
               </div>
               <span className="text-3xl font-black text-green-900 dark:text-green-100">+{tokenStats.totalEarned}</span>
             </div>
-            
+
             <div className="bg-gradient-to-br from-red-50 to-rose-100 dark:from-red-900/20 dark:to-rose-800/10 rounded-2xl p-6 border border-red-200 dark:border-red-800">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-xs font-bold text-red-600 dark:text-red-400 uppercase tracking-widest">Total Gasto</span>

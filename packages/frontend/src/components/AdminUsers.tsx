@@ -7,7 +7,6 @@ import {
   FunnelIcon,
   UserGroupIcon,
   UserPlusIcon,
-  ClockIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
   EllipsisVerticalIcon
@@ -46,12 +45,9 @@ const AdminUsers: React.FC = () => {
   const stats = useMemo(() => {
     const total = users.length;
     const admins = users.filter(u => u.role === 'admin').length;
-    const activeRecently = users.filter(u => {
-      if (!u.lastLoginAt) return false;
-      const days = (new Date().getTime() - new Date(u.lastLoginAt).getTime()) / (1000 * 3600 * 24);
-      return days <= 7;
-    }).length;
-    return { total, admins, activeRecently };
+    // Clients includes both standard 'client' and 'pro' users (everyone who is not admin)
+    const clients = users.filter(u => u.role !== 'admin').length;
+    return { total, admins, clients };
   }, [users]);
 
   // Filtering and Pagination Logic
@@ -111,31 +107,39 @@ const AdminUsers: React.FC = () => {
       <div className="space-y-8 animate-fade-in">
         {/* Header & Stats */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6 rounded-2xl shadow-sm flex items-center justify-between transition-transform hover:scale-[1.02]">
+          {/* Total Users - "Like the Bank" (Standard/Blue) */}
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6 rounded-2xl shadow-sm relative overflow-hidden group hover:border-blue-300 transition-colors">
+            <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+              <UserGroupIcon className="h-16 w-16 text-blue-600" />
+            </div>
             <div>
               <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Total de Usuários</p>
               <p className="text-3xl font-bold text-slate-900 dark:text-white mt-2">{stats.total}</p>
-            </div>
-            <div className="h-12 w-12 bg-blue-50 dark:bg-blue-900/20 rounded-xl flex items-center justify-center text-blue-600 dark:text-blue-400">
-              <UserGroupIcon className="h-6 w-6" />
+              <p className="text-xs text-blue-600 mt-2 font-medium">Cadastrados na plataforma</p>
             </div>
           </div>
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6 rounded-2xl shadow-sm flex items-center justify-between transition-transform hover:scale-[1.02]">
+
+          {/* Students/Clients - Emerald Green */}
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6 rounded-2xl shadow-sm relative overflow-hidden group hover:border-emerald-300 transition-colors">
+            <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+              <UserGroupIcon className="h-16 w-16 text-emerald-600" />
+            </div>
             <div>
-              <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Ativos Recentemente</p>
-              <p className="text-3xl font-bold text-slate-900 dark:text-white mt-2">{stats.activeRecently}</p>
-            </div>
-            <div className="h-12 w-12 bg-emerald-50 dark:bg-emerald-900/20 rounded-xl flex items-center justify-center text-emerald-600 dark:text-emerald-400">
-              <ClockIcon className="h-6 w-6" />
+              <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Alunos / Clientes</p>
+              <p className="text-3xl font-bold text-emerald-600 dark:text-emerald-400 mt-2">{stats.clients}</p>
+              <p className="text-xs text-emerald-600 mt-2 font-medium">Usuários padrão</p>
             </div>
           </div>
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6 rounded-2xl shadow-sm flex items-center justify-between transition-transform hover:scale-[1.02]">
+
+          {/* Admins - Purple */}
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6 rounded-2xl shadow-sm relative overflow-hidden group hover:border-purple-300 transition-colors">
+            <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+              <UserPlusIcon className="h-16 w-16 text-purple-600" />
+            </div>
             <div>
               <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Administradores</p>
-              <p className="text-3xl font-bold text-slate-900 dark:text-white mt-2">{stats.admins}</p>
-            </div>
-            <div className="h-12 w-12 bg-purple-50 dark:bg-purple-900/20 rounded-xl flex items-center justify-center text-purple-600 dark:text-purple-400">
-              <UserPlusIcon className="h-6 w-6" />
+              <p className="text-3xl font-bold text-purple-600 dark:text-purple-400 mt-2">{stats.admins}</p>
+              <p className="text-xs text-purple-600 mt-2 font-medium">Permissão total</p>
             </div>
           </div>
         </div>
@@ -223,10 +227,12 @@ const AdminUsers: React.FC = () => {
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap">
                               <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${user.role === 'admin'
-                                ? 'bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-300 border-purple-100 dark:border-purple-800/50'
-                                : 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-300 border-emerald-100 dark:border-emerald-800/50'
+                                  ? 'bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-300 border-purple-100 dark:border-purple-800/50'
+                                  : user.role === 'pro'
+                                    ? 'bg-indigo-50 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-300 border-indigo-100 dark:border-indigo-800/50'
+                                    : 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-300 border-emerald-100 dark:border-emerald-800/50'
                                 }`}>
-                                {user.role === 'admin' ? 'Administrador' : 'Aluno'}
+                                {user.role === 'admin' ? 'Administrador' : user.role === 'pro' ? 'Pro / Premium' : 'Aluno'}
                               </span>
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap">
