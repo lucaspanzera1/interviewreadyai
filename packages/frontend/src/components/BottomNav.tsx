@@ -16,18 +16,18 @@ import {
     AcademicCapIcon,
     ShieldCheckIcon,
     ClockIcon,
-    MagnifyingGlassIcon
+    RectangleStackIcon,
 } from '@heroicons/react/24/outline';
+
 import {
     HomeIcon as HomeIconSolid,
     DocumentTextIcon as DocumentTextIconSolid,
     ChartBarIcon as ChartBarIconSolid,
     TicketIcon as TicketIconSolid,
     AcademicCapIcon as AcademicCapIconSolid,
-    PlusCircleIcon as PlusCircleIconSolid,
     ShieldCheckIcon as ShieldCheckIconSolid,
     ClockIcon as ClockIconSolid,
-    MagnifyingGlassIcon as MagnifyingGlassIconSolid
+    RectangleStackIcon as RectangleStackIconSolid,
 } from '@heroicons/react/24/solid';
 import { Users as UsersIconLucide, FileQuestion, Gift } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
@@ -43,7 +43,7 @@ const Sidebar: React.FC = () => {
     const { isCollapsed, toggleCollapsed, isMobileOpen, setIsMobileOpen } = useSidebar();
     const { resolvedTheme, toggleTheme } = useTheme();
     const sidebarRef = useRef<HTMLDivElement>(null);
-    const { isSearchOpen, openSearch, closeSearch } = useSearchModal();
+    const { isSearchOpen, closeSearch } = useSearchModal();
 
     // Close mobile menu when clicking outside
     useEffect(() => {
@@ -64,9 +64,9 @@ const Sidebar: React.FC = () => {
     const mainNavItems = [
         { name: 'Início', path: '/', icon: HomeIcon, activeIcon: HomeIconSolid },
         { name: 'Meus Quizzes', path: '/my-quizzes', icon: DocumentTextIcon, activeIcon: DocumentTextIconSolid },
-        { name: 'Criar', path: '/create-quiz', icon: PlusCircleIcon, activeIcon: PlusCircleIconSolid },
+        { name: 'Meus Flashcards', path: '/my-flashcards', icon: RectangleStackIcon, activeIcon: RectangleStackIconSolid, badge: 'BETA' },
         { name: 'Explorar', path: '/free-quizzes', icon: AcademicCapIcon, activeIcon: AcademicCapIconSolid },
-        { name: 'Pesquisar', path: '#search', icon: MagnifyingGlassIcon, activeIcon: MagnifyingGlassIconSolid, action: () => openSearch() },
+
         { name: 'Comunidade', path: '/search', icon: UsersIconLucide, activeIcon: UsersIconLucide },
         { name: 'Evolução', path: '/desempenho', icon: ChartBarIcon, activeIcon: ChartBarIconSolid },
         { name: 'Histórico', path: '/profile/reward-history', icon: ClockIcon, activeIcon: ClockIconSolid },
@@ -100,7 +100,7 @@ const Sidebar: React.FC = () => {
 
     const isActive = (path: string) => {
         if (path === '/') return location.pathname === '/';
-        if (path === '#search') return false; // Search button should never be active
+
         if (path === '/desempenho') {
             return location.pathname.startsWith(path) || location.pathname.startsWith('/profile/quiz-history');
         }
@@ -131,7 +131,7 @@ const Sidebar: React.FC = () => {
                     return (
                         <button
                             key={item.name}
-                            onClick={() => handleNavClick(item.path, item.action)}
+                            onClick={() => handleNavClick(item.path)}
                             className={`w-full flex items-center px-3 py-2.5 rounded-xl transition-all duration-200 border-l-4 ${active
                                 ? 'bg-primary-50 dark:bg-primary-900/10 text-primary-700 dark:text-primary-300 font-semibold border-primary-600'
                                 : 'text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white border-transparent'
@@ -335,7 +335,7 @@ const Sidebar: React.FC = () => {
     const bottomNavItems = [
         { name: 'Início', path: '/', icon: HomeIcon, activeIcon: HomeIconSolid },
         { name: 'Explorar', path: '/free-quizzes', icon: AcademicCapIcon, activeIcon: AcademicCapIconSolid },
-        { name: 'Meus Quizzes', path: '/my-quizzes', icon: DocumentTextIcon, activeIcon: DocumentTextIconSolid },
+        { name: 'Flashcards', path: '/my-flashcards', icon: RectangleStackIcon, activeIcon: RectangleStackIconSolid, badge: 'BETA' },
         { name: 'Menu', path: '#menu', icon: Bars3Icon, activeIcon: Bars3Icon, action: () => setIsMobileOpen(true) },
     ];
 
@@ -358,7 +358,16 @@ const Sidebar: React.FC = () => {
                     : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'
                     }`}
             >
-                <Icon className={`w-6 h-6 transition-transform duration-200 ${active ? 'scale-110' : ''}`} />
+                <div className="relative">
+                    <Icon className={`w-6 h-6 transition-transform duration-200 ${active ? 'scale-110' : ''}`} />
+                    {/* @ts-ignore */}
+                    {item.badge && (
+                        <span className="absolute -top-1.5 -right-3 text-[9px] font-bold bg-amber-100 text-amber-700 dark:bg-amber-900/80 dark:text-amber-400 px-1 rounded-sm leading-none border border-amber-200 dark:border-amber-700/50">
+                            {/* @ts-ignore */}
+                            {item.badge}
+                        </span>
+                    )}
+                </div>
                 <span className="text-[10px] font-medium">{item.name}</span>
             </button>
         );

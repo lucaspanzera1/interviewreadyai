@@ -21,6 +21,9 @@ import AdminQuizStatsPage from './components/AdminQuizStatsPage'
 import AdminQuizDetailsPage from './components/AdminQuizDetailsPage'
 import UserQuizAttemptDetailsPage from './components/UserQuizAttemptDetailsPage'
 import CreateQuizByLinkPage from './components/CreateQuizByLinkPage'
+import CreateFlashcardByLinkPage from './components/CreateFlashcardByLinkPage'
+import MyFlashcardsPage from './components/MyFlashcardsPage'
+import FlashcardStudyPage from './components/FlashcardStudyPage'
 import MyQuizzesPage from './components/MyQuizzesPage'
 import SettingsPage from './components/SettingsPage'
 import TermsOfUsePage from './components/TermsOfUsePage'
@@ -246,6 +249,40 @@ function App() {
               <AppLayout>
                 <MyQuizzesPage />
               </AppLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Create Flashcard by Link page */}
+        <Route
+          path="/create-flashcard"
+          element={
+            <ProtectedRoute>
+              <AppLayout>
+                <CreateFlashcardByLinkPage />
+              </AppLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        {/* My Flashcards page */}
+        <Route
+          path="/my-flashcards"
+          element={
+            <ProtectedRoute>
+              <AppLayout>
+                <MyFlashcardsPage />
+              </AppLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Flashcard Study page */}
+        <Route
+          path="/flashcard/study/:id"
+          element={
+            <ProtectedRoute>
+              <FlashcardStudyPage />
             </ProtectedRoute>
           }
         />

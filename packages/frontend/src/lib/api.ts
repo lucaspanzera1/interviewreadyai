@@ -190,6 +190,50 @@ export interface GeneratedQuiz {
   quizId?: string;
 }
 
+// Flashcard interfaces
+export enum FlashcardLevel {
+  FACIL = 'FACIL',
+  MEDIO = 'MEDIO',
+  DIFICIL = 'DIFICIL',
+}
+
+export interface GenerateJobFlashcardDto {
+  linkedinUrl: string;
+  nivel: FlashcardLevel;
+  quantidade_cards?: number;
+}
+
+export interface FlashcardItem {
+  question: string;
+  answer: string;
+  explanation?: string;
+  tags?: string[];
+}
+
+export interface GeneratedFlashcard {
+  titulo: string;
+  categoria: string;
+  descricao: string;
+  tags: string[];
+  quantidade_cards: number;
+  nivel: FlashcardLevel;
+  cards: FlashcardItem[];
+  flashcardId?: string;
+  vaga_titulo?: string;
+  vaga_empresa?: string;
+  vaga_localizacao?: string;
+  vaga_url?: string;
+}
+
+export interface StudySessionDto {
+  cards: Array<{
+    cardIndex: number;
+    difficulty: 'EASY' | 'NORMAL' | 'HARD';
+    studyTime?: number;
+  }>;
+  totalSessionTime?: number;
+}
+
 class ApiClient {
 
   private client: AxiosInstance;
@@ -200,22 +244,7 @@ class ApiClient {
   private _cachedUserAt: number | null = null;
   private _userCacheTtlMs = 5000; // 5 seconds
 
-  private getMethodColor(method: string): string {
-    switch (method.toUpperCase()) {
-      case 'GET':
-        return '\x1b[34m'; // Azul
-      case 'POST':
-        return '\x1b[32m'; // Verde
-      case 'PUT':
-        return '\x1b[33m'; // Amarelo
-      case 'DELETE':
-        return '\x1b[31m'; // Vermelho
-      case 'PATCH':
-        return '\x1b[35m'; // Magenta
-      default:
-        return '\x1b[37m'; // Branco
-    }
-  }
+
 
   constructor() {
     const baseURL = import.meta.env.VITE_API_BASE_URL || '/api';
@@ -238,10 +267,7 @@ class ApiClient {
         if (token) {
           config.headers.Authorization = `Bearer ${token}`;
         }
-        // Log da requisição
-        const method = config.method?.toUpperCase() || 'UNKNOWN';
-        const methodColor = this.getMethodColor(method);
-        console.log(`${methodColor}[${method}]\x1b[0m ${config.url} - Outgoing request`);
+
         return config;
       },
       (error) => {
@@ -252,19 +278,11 @@ class ApiClient {
     // Response interceptor to handle token refresh
     this.client.interceptors.response.use(
       (response: AxiosResponse) => {
-        // Log da resposta bem-sucedida
-        const method = response.config.method?.toUpperCase() || 'UNKNOWN';
-        const methodColor = this.getMethodColor(method);
-        console.log(`${methodColor}[${method}]\x1b[0m ${response.config.url} ${response.status}`);
+
         return response;
       },
       async (error) => {
-        // Log do erro
-        const status = error.response?.status || 'UNKNOWN';
-        const url = error.config?.url || 'UNKNOWN';
-        const method = error.config?.method?.toUpperCase() || 'UNKNOWN';
-        const methodColor = this.getMethodColor(method);
-        console.error(`${methodColor}[${method}]\x1b[0m ${url} ${status} - ${error.message}`);
+
 
         const originalRequest = error.config;
 
@@ -301,7 +319,7 @@ class ApiClient {
 
         // Handle 403 Forbidden errors
         if (error.response?.status === 403) {
-          console.error('Acesso proibido (403):', error.response.data);
+
           // Don't redirect, just let the component handle the error
         }
 
@@ -355,7 +373,7 @@ class ApiClient {
         const tokenRes = await this.client.get('/users/me/tokens');
         user.tokens = tokenRes.data.tokens;
       } catch (error) {
-        console.warn('Failed to fetch tokens for user profile:', error);
+
       }
 
       // Fetch user profile data
@@ -363,7 +381,7 @@ class ApiClient {
         const profileRes = await this.client.get('/users/me/profile');
         Object.assign(user, profileRes.data);
       } catch (error) {
-        console.warn('Failed to fetch profile data for user:', error);
+
       }
 
       this._cachedUser = user;
@@ -575,6 +593,86 @@ class ApiClient {
 
   async getFreeQuizLimit() {
     const res = await this.client.get('/users/me/free-quiz-limit');
+    return res.data;
+  }
+
+  // Flashcard methods
+  async generateJobFlashcard(dto: GenerateJobFlashcardDto): Promise<GeneratedFlashcard> {
+    const res = await this.client.post('/flashcard/generate-job', dto);
+    return res.data;
+  }
+
+  async getUserFlashcards(page: number = 1, limit: number = 10, categoria?: string, nivel?: string) {
+    const params = new URLSearchParams({
+      page: page.toString(),
+      limit: limit.toString(),
+    });
+
+    if (categoria) params.append('categoria', categoria);
+    if (nivel) params.append('nivel', nivel);
+
+    const res = await this.client.get(`/flashcard/my-flashcards?${params.toString()}`);
+    return res.data;
+  }
+
+  async getPublicFlashcards(page: number = 1, limit: number = 10, categoria?: string, nivel?: string) {
+    const params = new URLSearchParams({
+      page: page.toString(),
+      limit: limit.toString(),
+    });
+
+    if (categoria) params.append('categoria', categoria);
+    if (nivel) params.append('nivel', nivel);
+
+    const res = await this.client.get(`/flashcard/public?${params.toString()}`);
+    return res.data;
+  }
+
+  async getFlashcardForStudy(id: string) {
+    const res = await this.client.get(`/flashcard/${id}`);
+    return res.data;
+  }
+
+  async recordStudySession(flashcardId: string, studySession: StudySessionDto) {
+    const res = await this.client.post(`/flashcard/${flashcardId}/study`, studySession);
+    return res.data;
+  }
+
+  async getStudyProgress(flashcardId: string) {
+    const res = await this.client.get(`/flashcard/${flashcardId}/progress`);
+    return res.data;
+  }
+
+  async getUserStudyStats() {
+    const res = await this.client.get('/flashcard/user/study-stats');
+    return res.data;
+  }
+
+  async getCardsForReview() {
+    const res = await this.client.get('/flashcard/user/due-for-review');
+    return res.data;
+  }
+
+  async toggleFlashcardPublic(flashcardId: string) {
+    const res = await this.client.patch(`/flashcard/${flashcardId}/toggle-public`);
+    return res.data;
+  }
+
+  async deleteFlashcard(flashcardId: string) {
+    const res = await this.client.delete(`/flashcard/${flashcardId}`);
+    return res.data;
+  }
+
+  // Admin Flashcard methods
+  async getAllFlashcards(page: number = 1, limit: number = 20) {
+    const res = await this.client.get('/flashcard/admin/all', {
+      params: { page, limit },
+    });
+    return res.data;
+  }
+
+  async toggleFlashcardActive(flashcardId: string) {
+    const res = await this.client.patch(`/flashcard/admin/${flashcardId}/toggle-active`);
     return res.data;
   }
 

@@ -10,6 +10,7 @@ import { DatabaseModule } from './database/database.module';
 import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
 import { RolesGuard } from './auth/guards/roles.guard';
 import { QuizModule } from './quiz/quiz.module';
+import { FlashcardModule } from './flashcard/flashcard.module';
 import { TokenPackageModule } from './token-package/token-package.module';
 import { RoleModule } from './role/role.module';
 import { EmailModule } from './common/email.module';
@@ -41,6 +42,7 @@ import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
     AuthModule,
     UserModule,
     QuizModule,
+    FlashcardModule,
     TokenPackageModule,
     RoleModule,
     PlansModule,

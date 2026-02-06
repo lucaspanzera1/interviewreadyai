@@ -134,6 +134,8 @@ const RewardHistoryPage: React.FC = () => {
         return 'Completou quizzes gratuitos';
       case 'quiz_generation':
         return 'Geração de quiz personalizado';
+      case 'flashcard_generation':
+        return 'Geração de flashcards';
       case 'quiz_play':
         return 'Jogou quiz de outro usuário';
       case 'referral':

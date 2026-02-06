@@ -3,7 +3,10 @@ import { NavLink } from 'react-router-dom';
 import {
   XMarkIcon,
   UserCircleIcon,
-  KeyIcon
+  KeyIcon,
+  SparklesIcon,
+  AcademicCapIcon,
+  PlusCircleIcon
 } from '@heroicons/react/24/outline';
 import { Users as UsersIcon, FileQuestion, Gift } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
@@ -14,6 +17,10 @@ interface SidebarProps {
 
 const navigation = [
   { name: 'Perfil', href: '/profile', icon: UserCircleIcon },
+  { name: 'Criar Quiz', href: '/create-quiz', icon: SparklesIcon },
+  { name: 'Meus Quizzes', href: '/my-quizzes', icon: FileQuestion },
+  { name: 'Criar Flashcards', href: '/create-flashcard', icon: PlusCircleIcon },
+  { name: 'Meus Flashcards', href: '/my-flashcards', icon: AcademicCapIcon },
   { name: 'Tokens', href: '/tokens', icon: KeyIcon },
 ];
 
