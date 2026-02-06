@@ -4,7 +4,6 @@ import {
   ArgumentsHost,
   HttpException,
   HttpStatus,
-  Logger,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { BaseException } from '../exceptions/base.exception';
@@ -27,7 +26,23 @@ export interface ErrorResponse {
  */
 @Catch()
 export class GlobalExceptionFilter implements ExceptionFilter {
-  private readonly logger = new Logger(GlobalExceptionFilter.name);
+
+  private getMethodColor(method: string): string {
+    switch (method.toUpperCase()) {
+      case 'GET':
+        return '\x1b[34m'; // Azul
+      case 'POST':
+        return '\x1b[32m'; // Verde
+      case 'PUT':
+        return '\x1b[33m'; // Amarelo
+      case 'DELETE':
+        return '\x1b[31m'; // Vermelho
+      case 'PATCH':
+        return '\x1b[35m'; // Magenta
+      default:
+        return '\x1b[37m'; // Branco
+    }
+  }
 
   catch(exception: unknown, host: ArgumentsHost): void {
     const ctx = host.switchToHttp();
@@ -94,29 +109,26 @@ export class GlobalExceptionFilter implements ExceptionFilter {
     const method = request.method;
     const userAgent = request.get('User-Agent') || '';
     const ip = request.ip;
+    const methodColor = this.getMethodColor(method);
+
+    const logMessage = `${methodColor}[${method}]\x1b[0m ${path} ${statusCode} - ${message}`;
 
     if (statusCode >= 500) {
       // Erros do servidor - log completo
-      this.logger.error(
-        `${method} ${path} ${statusCode} - ${message}`,
-        exception instanceof Error ? exception.stack : exception,
-        {
-          ip,
-          userAgent,
-          body: request.body,
-          params: request.params,
-          query: request.query,
-        },
-      );
+      console.error(logMessage);
+      console.error(exception instanceof Error ? exception.stack : exception, {
+        ip,
+        userAgent,
+        body: request.body,
+        params: request.params,
+        query: request.query,
+      });
     } else {
       // Erros do cliente - log simples
-      this.logger.warn(
-        `${method} ${path} ${statusCode} - ${message}`,
-        {
-          ip,
-          userAgent,
-        },
-      );
+      console.error(logMessage, {
+        ip,
+        userAgent,
+      });
     }
   }
 }

@@ -141,11 +141,8 @@ const Sidebar: React.FC = () => {
                             <Icon className={`w-5 h-5 flex-shrink-0 transition-colors ${active ? 'text-primary-600 dark:text-primary-400' : 'text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-300'}`} />
                             <div className={`overflow-hidden whitespace-nowrap transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] ${isCollapsed ? 'max-w-0 opacity-0' : 'max-w-[200px] opacity-100'} w-full`}>
                                 <div className="flex items-center justify-between">
-                                    <span className="text-sm pl-3">{item.name}</span>                                        {item.name === 'Pesquisar' && !isCollapsed && (
-                                        <span className="ml-auto text-[10px] px-1.5 py-0.5 rounded bg-slate-200 dark:bg-slate-600 text-slate-600 dark:text-slate-300 font-mono">
-                                            /
-                                        </span>
-                                    )}                                    {/* @ts-ignore */}
+                                    <span className="text-sm pl-3">{item.name}</span>
+                                    {/* @ts-ignore */}
                                     {item.badge && (
                                         <span className="ml-2 text-[10px] px-1.5 py-0.5 rounded shadow-sm font-bold bg-amber-100 text-amber-700 dark:bg-amber-900/50 dark:text-amber-400 border border-amber-200 dark:border-amber-700/50 uppercase tracking-wide">
                                             {/* @ts-ignore */}
@@ -338,10 +335,34 @@ const Sidebar: React.FC = () => {
     const bottomNavItems = [
         { name: 'Início', path: '/', icon: HomeIcon, activeIcon: HomeIconSolid },
         { name: 'Explorar', path: '/free-quizzes', icon: AcademicCapIcon, activeIcon: AcademicCapIconSolid },
-        { name: 'Pesquisar', path: '#search', icon: MagnifyingGlassIcon, activeIcon: MagnifyingGlassIconSolid, action: () => openSearch() },
         { name: 'Meus Quizzes', path: '/my-quizzes', icon: DocumentTextIcon, activeIcon: DocumentTextIconSolid },
         { name: 'Menu', path: '#menu', icon: Bars3Icon, activeIcon: Bars3Icon, action: () => setIsMobileOpen(true) },
     ];
+
+    const NavItem = ({ item }: { item: typeof bottomNavItems[0] }) => {
+        const active = isActive(item.path);
+        const Icon = active ? item.activeIcon : item.icon;
+
+        return (
+            <button
+                onClick={(e) => {
+                    if (item.action) {
+                        e.preventDefault();
+                        item.action();
+                    } else {
+                        handleNavClick(item.path);
+                    }
+                }}
+                className={`flex flex-col items-center justify-center w-full h-full space-y-1 ${active
+                    ? 'text-primary-600 dark:text-primary-400'
+                    : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'
+                    }`}
+            >
+                <Icon className={`w-6 h-6 transition-transform duration-200 ${active ? 'scale-110' : ''}`} />
+                <span className="text-[10px] font-medium">{item.name}</span>
+            </button>
+        );
+    };
 
     return (
         <>
@@ -389,53 +410,29 @@ const Sidebar: React.FC = () => {
 
             {/* Mobile Bottom Nav */}
             <nav
-                className="lg:hidden fixed bottom-0 left-0 right-0 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 z-40 px-2"
+                className="lg:hidden fixed bottom-0 left-0 right-0 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 z-40"
                 style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
             >
-                <div className="flex justify-around items-center h-16">
-                    {bottomNavItems.map((item) => {
-                        const active = isActive(item.path);
-                        const Icon = active ? item.activeIcon : item.icon;
+                <div className="grid grid-cols-4 h-16 w-full relative">
+                    {/* Item 1: Início */}
+                    <div className="col-span-1">
+                        <NavItem item={bottomNavItems[0]} />
+                    </div>
 
-                        if (item.name === 'Pesquisar') {
-                            return (
-                                <button
-                                    key={item.name}
-                                    onClick={(e) => {
-                                        e.preventDefault();
-                                        item.action?.();
-                                    }}
-                                    className="flex items-center justify-center w-full h-full group"
-                                    aria-label="Pesquisar"
-                                >
-                                    <div className="w-10 h-10 flex items-center justify-center rounded-full bg-slate-900 dark:bg-white shadow-lg shadow-slate-900/20 dark:shadow-white/20 transition-transform duration-200 group-active:scale-95">
-                                        <Icon className="w-5 h-5 text-white dark:text-slate-900" strokeWidth={2.5} />
-                                    </div>
-                                </button>
-                            );
-                        }
+                    {/* Item 2: Explorar */}
+                    <div className="col-span-1">
+                        <NavItem item={bottomNavItems[1]} />
+                    </div>
 
-                        return (
-                            <button
-                                key={item.name}
-                                onClick={(e) => {
-                                    if (item.action) {
-                                        e.preventDefault();
-                                        item.action();
-                                    } else {
-                                        handleNavClick(item.path);
-                                    }
-                                }}
-                                className={`flex flex-col items-center justify-center w-full h-full space-y-1 ${active
-                                    ? 'text-primary-600 dark:text-primary-400'
-                                    : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'
-                                    }`}
-                            >
-                                <Icon className={`w-6 h-6 transition-transform duration-200 ${active ? 'scale-110' : ''}`} />
-                                <span className="text-[10px] font-medium">{item.name}</span>
-                            </button>
-                        );
-                    })}
+                    {/* Item 3: Meus Quizzes */}
+                    <div className="col-span-1">
+                        <NavItem item={bottomNavItems[2]} />
+                    </div>
+
+                    {/* Item 4: Menu */}
+                    <div className="col-span-1">
+                        <NavItem item={bottomNavItems[3]} />
+                    </div>
                 </div>
             </nav>
 

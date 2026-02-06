@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { ScheduleModule } from '@nestjs/schedule';
-import { APP_GUARD } from '@nestjs/core';
+import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
@@ -14,6 +14,7 @@ import { TokenPackageModule } from './token-package/token-package.module';
 import { RoleModule } from './role/role.module';
 import { EmailModule } from './common/email.module';
 import { PlansModule } from './plans/plans.module';
+import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
 
 /**
  * Módulo principal da aplicação
@@ -54,6 +55,10 @@ import { PlansModule } from './plans/plans.module';
     {
       provide: APP_GUARD,
       useClass: RolesGuard,
+    },
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: LoggingInterceptor,
     },
   ],
 })

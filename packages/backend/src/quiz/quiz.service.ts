@@ -63,6 +63,9 @@ export class QuizService {
       content = content.trim();
       const generatedQuiz: GeneratedQuiz = JSON.parse(content);
 
+      // Validate the generated quiz
+      this.validateGeneratedQuiz(generatedQuiz, dto.quantidade_questoes || 10);
+
       // Save quiz to database - Convert userId string to ObjectId
       const { Types } = require('mongoose');
       const userObjectId = new Types.ObjectId(userId);
@@ -84,7 +87,52 @@ export class QuizService {
         quizId: savedQuiz._id.toString(),
       };
     } catch (error) {
-      throw new HttpException('Failed to parse quiz response', HttpStatus.INTERNAL_SERVER_ERROR);
+      // Try one more time with a cleaner prompt if JSON parsing failed
+      if (error.message.includes('parse') || error.message.includes('JSON')) {
+        try {
+          console.log('First attempt failed, trying with simplified prompt...');
+          const simplePrompt = this.buildSimplifiedPrompt(dto);
+          const retryResponse = await this.callGroqAPI(simplePrompt, apiKey);
+          
+          let content = retryResponse.trim();
+          const jsonCodeBlockMatch = content.match(/```(?:json)?\s*(\{[\s\S]*\})\s*```/);
+          if (jsonCodeBlockMatch) {
+            content = jsonCodeBlockMatch[1];
+          }
+          const jsonMatch = content.match(/\{[\s\S]*\}/);
+          if (jsonMatch) {
+            content = jsonMatch[0];
+          }
+          
+          const generatedQuiz: GeneratedQuiz = JSON.parse(content.trim());
+          this.validateGeneratedQuiz(generatedQuiz, dto.quantidade_questoes);
+
+          // Save quiz to database - Convert userId string to ObjectId
+          const { Types } = require('mongoose');
+          const userObjectId = new Types.ObjectId(userId);
+          
+          // Check if user is admin to set quiz as public
+          const user = await this.userService.findById(userId);
+          const isAdmin = user && user.role === 'admin';
+          
+          const savedQuiz = await this.quizModel.create({
+            ...dto,
+            questions: generatedQuiz.questions,
+            createdBy: userObjectId,
+            isPublic: isAdmin, // Quizzes created by admins are public
+            isFree: isAdmin, // Only admin quizzes are free (with daily limits)
+          });
+          
+          return {
+            ...generatedQuiz,
+            quizId: savedQuiz._id.toString(),
+          };
+        } catch (retryError) {
+          console.error('Retry also failed:', retryError);
+        }
+      }
+      
+      throw new HttpException('Failed to parse quiz response after retry', HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
@@ -197,14 +245,51 @@ Gere agora {quantidade_questoes} questões de nível {nivel} sobre "{titulo}" na
       .replace(/{contexto}/g, dto.contexto || 'Nenhum contexto adicional fornecido');
   }
 
-  private async callGroqAPI(prompt: string, apiKey: string): Promise<string> {
+  private buildSimplifiedPrompt(dto: GenerateQuizDto): string {
+    return `Gere um quiz com ${dto.quantidade_questoes} perguntas sobre "${dto.titulo}" na categoria "${dto.categoria}" com nível ${dto.nivel}.
+
+Descrição: ${dto.descricao}
+
+Tags: ${dto.tags.join(', ')}
+
+Contexto adicional: ${dto.contexto || 'Nenhum'}
+
+FORMATO EXATO (APENAS JSON):
+{
+  "questions": [
+    {
+      "question": "Texto da pergunta",
+      "options": ["A", "B", "C", "D"],
+      "correct_answer": 0,
+      "explanation": "Explicação detalhada"
+    }
+  ]
+}`;
+  }
+
+  private async callGroqAPI(prompt: string, apiKey: string, isJobQuiz: boolean = false): Promise<string> {
     const url = 'https://api.groq.com/openai/v1/chat/completions';
-    const payload = {
-      model: 'llama-3.3-70b-versatile', // Using Llama 3.3 70B model
-      messages: [
-        {
-          role: 'system',
-          content: `Você é um especialista em educação e tecnologia, especializado em criar quizzes de alta qualidade sobre programação, desenvolvimento de software e tecnologias relacionadas.
+    const systemMessage = isJobQuiz ? 
+      `Você é um recrutador técnico sênior e engenheiro de software experiente com 15+ anos de experiência conduzindo entrevistas técnicas em empresas de tecnologia de ponta (FAANG, unicórnios e startups de alto crescimento).
+
+Sua expertise inclui:
+- Avaliação precisa de senioridade baseada em títulos e descrições de vagas
+- Criação de perguntas que simulam entrevistas técnicas reais
+- Foco em habilidades práticas, resolução de problemas e conhecimento técnico profundo
+- Adaptação de dificuldade baseada no nível sênior esperado (junior, pleno, sênior, staff)
+- Ênfase em cenários do mundo real e decisões de arquitetura
+
+Para questões técnicas:
+- Use código real e moderno das tecnologias mencionadas
+- Inclua análise de código, debugging e otimização
+- Foque em conceitos fundamentais e aplicação prática
+- Evite perguntas teóricas sem contexto prático
+
+IMPORTANTE:
+1. Retorne APENAS JSON válido, sem texto adicional antes ou depois.
+2. Garanta que todas as perguntas sejam relevantes para a vaga específica.
+3. Mantenha o nível de dificuldade apropriado para o cargo.` :
+      `Você é um especialista em educação e tecnologia, especializado em criar quizzes de alta qualidade sobre programação, desenvolvimento de software e tecnologias relacionadas.
 
 Sua expertise inclui:
 - Linguagens de programação (JavaScript, TypeScript, Python, Java, C#, Go, Rust, etc.)
@@ -231,14 +316,21 @@ Para questões sobre código:
 IMPORTANTE: 
 1. Sempre formate código adequadamente usando as marcações especificadas.
 2. Retorne APENAS JSON válido, sem texto adicional antes ou depois.
-3. NÃO inclua explicações, comentários ou texto fora do JSON.`,
+3. NÃO inclua explicações, comentários ou texto fora do JSON.`;
+
+    const payload = {
+      model: 'openai/gpt-oss-120b',
+      messages: [
+        {
+          role: 'system',
+          content: systemMessage,
         },
         {
           role: 'user',
           content: prompt,
         },
       ],
-      temperature: 0.7,
+      temperature: isJobQuiz ? 0.6 : 0.7, // Slightly lower temperature for job quizzes for more consistency
     };
 
     try {
@@ -672,55 +764,112 @@ IMPORTANTE:
       const $ = cheerio.load(response.data);
 
       // Extrair informações da vaga
-      const jobTitle = $('h1.top-card-layout__title, h2.top-card-layout__title').first().text().trim() || 
-                       $('h1').first().text().trim();
+      const jobTitle = $('h1.top-card-layout__title, h2.top-card-layout__title, h1[data-test-id="job-title"]').first().text().trim() || 
+                       $('h1').first().text().trim() ||
+                       'Título da Vaga Não Encontrado';
       
-      const companyName = $('.top-card-layout__card .topcard__org-name-link, .topcard__flavor--black-link').first().text().trim() ||
-                         $('.top-card-layout__card a[data-tracking-control-name="public_jobs_topcard-org-name"]').first().text().trim();
+      const companyName = $('.top-card-layout__card .topcard__org-name-link, .topcard__flavor--black-link, [data-test-id="company-name"]').first().text().trim() ||
+                         $('.top-card-layout__card a[data-tracking-control-name="public_jobs_topcard-org-name"]').first().text().trim() ||
+                         'Empresa Não Encontrada';
       
-      const location = $('.top-card-layout__card .topcard__flavor--bullet, .topcard__flavor').first().text().trim();
+      const location = $('.top-card-layout__card .topcard__flavor--bullet, .topcard__flavor, [data-test-id="job-location"]').first().text().trim() ||
+                      'Localização Não Encontrada';
       
-      const description = $('.show-more-less-html__markup, .description__text').text().trim() ||
-                         $('div[class*="description"]').first().text().trim();
+      // Tentar múltiplos seletores para descrição
+      const description = $('.show-more-less-html__markup, .description__text, [data-test-id="job-description"]').text().trim() ||
+                         $('div[class*="description"]').first().text().trim() ||
+                         $('section[data-test-id="job-details"]').text().trim() ||
+                         'Descrição não disponível';
 
       // Extrair requisitos e responsabilidades do texto da descrição
       const requirements: string[] = [];
       const responsibilities: string[] = [];
 
-      // Tentar identificar seções no texto
+      // Melhorar extração de seções
       const descriptionLower = description.toLowerCase();
       
-      if (descriptionLower.includes('requirements') || descriptionLower.includes('requisitos')) {
-        const reqSection = description.substring(
-          Math.max(
-            descriptionLower.indexOf('requirements'),
-            descriptionLower.indexOf('requisitos')
-          )
-        );
-        // Extrair linhas que começam com bullet points ou números
-        const lines = reqSection.split('\n').slice(0, 10);
-        lines.forEach(line => {
-          const trimmed = line.trim();
-          if (trimmed && (trimmed.match(/^[•\-\*\d]/) || trimmed.length > 20)) {
-            requirements.push(trimmed.replace(/^[•\-\*\d.]+\s*/, ''));
-          }
-        });
+      // Procurar por seções de requisitos
+      const reqPatterns = ['requirements', 'requisitos', 'qualifications', 'qualificações', 'skills', 'habilidades', 'what you need', 'o que você precisa'];
+      let reqStart = -1;
+      for (const pattern of reqPatterns) {
+        const index = descriptionLower.indexOf(pattern);
+        if (index !== -1) {
+          reqStart = index;
+          break;
+        }
       }
 
-      if (descriptionLower.includes('responsibilities') || descriptionLower.includes('responsabilidades')) {
-        const respSection = description.substring(
-          Math.max(
-            descriptionLower.indexOf('responsibilities'),
-            descriptionLower.indexOf('responsabilidades')
-          )
-        );
-        const lines = respSection.split('\n').slice(0, 10);
-        lines.forEach(line => {
+      if (reqStart !== -1) {
+        const reqSection = description.substring(reqStart);
+        // Extrair linhas que parecem ser bullet points ou itens de lista
+        const lines = reqSection.split('\n').filter(line => line.trim().length > 0).slice(0, 15);
+        for (const line of lines) {
           const trimmed = line.trim();
-          if (trimmed && (trimmed.match(/^[•\-\*\d]/) || trimmed.length > 20)) {
-            responsibilities.push(trimmed.replace(/^[•\-\*\d.]+\s*/, ''));
+          // Verificar se é um item de lista (bullet, número, etc.)
+          if (trimmed.match(/^[-•*]\s/) || trimmed.match(/^\d+[\.)]\s/) || 
+              (trimmed.length > 10 && !trimmed.includes('responsibilities') && !trimmed.includes('responsabilidades'))) {
+            const cleanItem = trimmed.replace(/^[-•*\d]+[\.)]?\s*/, '').trim();
+            if (cleanItem.length > 5 && cleanItem.length < 200) {
+              requirements.push(cleanItem);
+            }
           }
-        });
+          // Parar se encontrar próxima seção
+          if (trimmed.toLowerCase().includes('responsibilities') || trimmed.toLowerCase().includes('responsabilidades') || 
+              trimmed.toLowerCase().includes('what you will') || trimmed.toLowerCase().includes('o que você fará')) {
+            break;
+          }
+        }
+      }
+
+      // Procurar por seções de responsabilidades
+      const respPatterns = ['responsibilities', 'responsabilidades', 'what you will', 'o que você fará', 'what you\'ll do', 'o que você irá fazer'];
+      let respStart = -1;
+      for (const pattern of respPatterns) {
+        const index = descriptionLower.indexOf(pattern);
+        if (index !== -1) {
+          respStart = index;
+          break;
+        }
+      }
+
+      if (respStart !== -1) {
+        const respSection = description.substring(respStart);
+        const lines = respSection.split('\n').filter(line => line.trim().length > 0).slice(0, 15);
+        for (const line of lines) {
+          const trimmed = line.trim();
+          if (trimmed.match(/^[-•*]\s/) || trimmed.match(/^\d+[\.)]\s/) || 
+              (trimmed.length > 10 && !trimmed.includes('requirements') && !trimmed.includes('requisitos'))) {
+            const cleanItem = trimmed.replace(/^[-•*\d]+[\.)]?\s*/, '').trim();
+            if (cleanItem.length > 5 && cleanItem.length < 200) {
+              responsibilities.push(cleanItem);
+            }
+          }
+        }
+      }
+
+      // Fallback se não encontrou seções estruturadas
+      if (requirements.length === 0) {
+        // Extrair frases que contenham palavras-chave técnicas
+        const techKeywords = ['javascript', 'python', 'java', 'react', 'node', 'sql', 'api', 'git', 'docker', 'aws', 'cloud'];
+        const sentences = description.split(/[.!?]+/).filter(s => s.trim().length > 10);
+        for (const sentence of sentences.slice(0, 8)) {
+          const lowerSentence = sentence.toLowerCase();
+          if (techKeywords.some(keyword => lowerSentence.includes(keyword))) {
+            requirements.push(sentence.trim());
+          }
+        }
+      }
+
+      if (responsibilities.length === 0) {
+        // Extrair frases que contenham verbos de ação
+        const actionVerbs = ['desenvolver', 'implementar', 'criar', 'gerenciar', 'manter', 'otimizar', 'integrar', 'colaborar', 'develop', 'implement', 'create', 'manage', 'maintain', 'optimize', 'integrate', 'collaborate'];
+        const sentences = description.split(/[.!?]+/).filter(s => s.trim().length > 10);
+        for (const sentence of sentences.slice(0, 8)) {
+          const lowerSentence = sentence.toLowerCase();
+          if (actionVerbs.some(verb => lowerSentence.includes(verb))) {
+            responsibilities.push(sentence.trim());
+          }
+        }
       }
 
       return {
@@ -756,7 +905,7 @@ IMPORTANTE:
     const prompt = this.buildJobQuizPrompt(promptTemplate, jobData);
 
     // Chamar a API do Groq
-    const response = await this.callGroqAPI(prompt, apiKey);
+    const response = await this.callGroqAPI(prompt, apiKey, true);
 
     // Parse do JSON de resposta
     try {
@@ -779,6 +928,9 @@ IMPORTANTE:
       
       content = content.trim();
       const generatedQuiz: GeneratedQuiz = JSON.parse(content);
+
+      // Validate the generated quiz
+      this.validateGeneratedQuiz(generatedQuiz, 10);
 
       // Salvar quiz no banco de dados
       const { Types } = require('mongoose');
@@ -898,5 +1050,43 @@ Gere agora 10 questões para preparar o candidato para esta vaga.`;
       .replace(/{description}/g, jobData.description.substring(0, 1000)) // Limitar tamanho
       .replace(/{requirements}/g, jobData.requirements.join('\n- '))
       .replace(/{responsibilities}/g, jobData.responsibilities.join('\n- '));
+  }
+
+  /**
+   * Valida a estrutura do quiz gerado pela IA
+   */
+  private validateGeneratedQuiz(quiz: GeneratedQuiz, expectedQuestions: number): void {
+    if (!quiz.questions || !Array.isArray(quiz.questions)) {
+      throw new HttpException('Invalid quiz format: questions array missing', HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    if (quiz.questions.length !== expectedQuestions) {
+      throw new HttpException(`Invalid quiz format: expected ${expectedQuestions} questions, got ${quiz.questions.length}`, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    for (let i = 0; i < quiz.questions.length; i++) {
+      const question = quiz.questions[i];
+      
+      if (!question.question || typeof question.question !== 'string') {
+        throw new HttpException(`Invalid question ${i + 1}: missing or invalid question text`, HttpStatus.INTERNAL_SERVER_ERROR);
+      }
+
+      if (!question.options || !Array.isArray(question.options) || question.options.length !== 4) {
+        throw new HttpException(`Invalid question ${i + 1}: must have exactly 4 options`, HttpStatus.INTERNAL_SERVER_ERROR);
+      }
+
+      if (typeof question.correct_answer !== 'number' || question.correct_answer < 0 || question.correct_answer > 3) {
+        throw new HttpException(`Invalid question ${i + 1}: correct_answer must be 0-3`, HttpStatus.INTERNAL_SERVER_ERROR);
+      }
+
+      if (!question.explanation || typeof question.explanation !== 'string' || question.explanation.length < 10) {
+        throw new HttpException(`Invalid question ${i + 1}: explanation too short or missing`, HttpStatus.INTERNAL_SERVER_ERROR);
+      }
+
+      // Check that correct answer index is valid
+      if (!question.options[question.correct_answer]) {
+        throw new HttpException(`Invalid question ${i + 1}: correct_answer index out of bounds`, HttpStatus.INTERNAL_SERVER_ERROR);
+      }
+    }
   }
 }
