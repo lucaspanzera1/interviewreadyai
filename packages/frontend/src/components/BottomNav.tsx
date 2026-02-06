@@ -335,7 +335,7 @@ const Sidebar: React.FC = () => {
     const bottomNavItems = [
         { name: 'Início', path: '/', icon: HomeIcon, activeIcon: HomeIconSolid },
         { name: 'Explorar', path: '/free-quizzes', icon: AcademicCapIcon, activeIcon: AcademicCapIconSolid },
-        { name: 'Flashcards', path: '/my-flashcards', icon: RectangleStackIcon, activeIcon: RectangleStackIconSolid, badge: 'BETA' },
+        { name: 'Quizzes', path: '/my-quizzes', icon: DocumentTextIcon, activeIcon: DocumentTextIconSolid },
         { name: 'Menu', path: '#menu', icon: Bars3Icon, activeIcon: Bars3Icon, action: () => setIsMobileOpen(true) },
     ];
 
