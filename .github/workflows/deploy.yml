@@ -29,13 +29,14 @@ jobs:
       - name: Deploy via SSH
         run: |
           ssh -o "ProxyCommand=cloudflared access ssh --hostname %h" -o StrictHostKeyChecking=no ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} << ENDSSH
-          
-          PROJECT_PATH=$PROJECT_PATH
+
           echo "[info] Deploy automático iniciado..."
+          
           cd TreinaVaga
           echo "[info] Fazendo git pull..."
           git pull origin main || { echo "[error] Falha no git pull"; exit 1; }
           echo "[info] Git pull concluído."
+
           echo "[info] Reiniciando aplicação..."
           if [ -f scripts/deploy.sh ]; then
             chmod +x scripts/deploy.sh
