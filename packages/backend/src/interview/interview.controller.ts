@@ -7,8 +7,12 @@ import {
   Query, 
   UseGuards, 
   NotFoundException,
-  Patch
+  Patch,
+  UseInterceptors,
+  UploadedFile,
+  BadRequestException
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { InterviewService } from './interview.service';
 import { GenerateInterviewDto, GeneratedInterview, InterviewAttemptDto } from './dto';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
@@ -126,5 +130,45 @@ export class InterviewController {
     @CurrentUser() user: UserDocument,
   ) {
     return this.interviewService.completeInterview(interviewId, user._id.toString());
+  }
+
+  @Post(':id/video-attempt')
+  @UseGuards(JwtAuthGuard)
+  @UseInterceptors(FileInterceptor('video', {
+    limits: {
+      fileSize: 50 * 1024 * 1024, // 50MB max
+    },
+    fileFilter: (req, file, callback) => {
+      if (!file.mimetype.startsWith('video/')) {
+        return callback(new BadRequestException('Only video files are allowed'), false);
+      }
+      callback(null, true);
+    },
+  }))
+  async recordVideoAttempt(
+    @Param('id') interviewId: string,
+    @UploadedFile() videoFile: Express.Multer.File,
+    @Body() attemptDto: any,
+    @CurrentUser() user: UserDocument,
+  ) {
+    if (!videoFile) {
+      throw new BadRequestException('Video file is required');
+    }
+
+    return this.interviewService.recordVideoInterviewAttempt(
+      interviewId,
+      user._id.toString(),
+      videoFile,
+      attemptDto,
+    );
+  }
+
+  @Get('video-analysis/:attemptId')
+  @UseGuards(JwtAuthGuard)
+  async getVideoAnalysis(
+    @Param('attemptId') attemptId: string,
+    @CurrentUser() user: UserDocument,
+  ) {
+    return this.interviewService.getVideoAnalysis(attemptId, user._id.toString());
   }
 }

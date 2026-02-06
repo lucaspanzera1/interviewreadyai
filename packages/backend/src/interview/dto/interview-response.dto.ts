@@ -6,6 +6,7 @@ export interface InterviewQuestion {
   difficulty: 'easy' | 'medium' | 'hard';
   tips?: string; // Dicas para responder a pergunta
   keywords?: string[]; // Palavras-chave que devem ser mencionadas
+  maxDuration?: number; // tempo máximo sugerido em segundos
 }
 
 export interface GeneratedInterview {
@@ -19,9 +20,21 @@ export interface GeneratedInterview {
   companyInfo?: string;
 }
 
+// Remove duplicate types - using schema classes instead
+
 export interface InterviewAttemptDto {
-  userAnswers: string[];
+  userAnswers?: string[]; // Opcional agora, já que temos vídeo
   actualDuration: number; // tempo que o usuário levou
   difficultyRating: number; // de 1 a 5
   feedback?: string; // feedback opcional do usuário
+  // Novos campos para vídeo
+  hasVideo?: boolean;
+  videoPath?: string; // caminho do arquivo de vídeo
+}
+
+export interface VideoInterviewAttemptDto {
+  actualDuration: number;
+  difficultyRating: number;
+  feedback?: string;
+  videoFile: Express.Multer.File; // arquivo de vídeo enviado
 }

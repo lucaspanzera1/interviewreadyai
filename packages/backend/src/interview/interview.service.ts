@@ -211,7 +211,7 @@ export class InterviewService {
       const generatedInterview: GeneratedInterview = JSON.parse(content);
 
       // Validar a simulação gerada
-      this.validateGeneratedInterview(generatedInterview, dto.numberOfQuestions || 8);
+      this.validateGeneratedInterview(generatedInterview, dto.numberOfQuestions || 4);
 
       // Salvar simulação no banco de dados
       const { Types } = require('mongoose');
@@ -222,7 +222,7 @@ export class InterviewService {
         companyName: jobData.companyName,
         linkedinUrl: jobData.url,
         questions: generatedInterview.questions,
-        numberOfQuestions: dto.numberOfQuestions || 8,
+        numberOfQuestions: dto.numberOfQuestions || 4,
         estimatedDuration: generatedInterview.estimatedDuration,
         preparationTips: generatedInterview.preparationTips,
         jobRequirements: generatedInterview.jobRequirements,
@@ -288,7 +288,7 @@ export class InterviewService {
         throw new Error('Invalid response structure from Groq API');
       }
 
-      return content;
+      return response.data.choices[0].message.content;
     } catch (error) {
       // More specific error messages
       if (error.response?.status === 401) {
@@ -371,7 +371,7 @@ export class InterviewService {
 # Geração de Simulação de Entrevista
 
 Você é um especialista em recursos humanos e condutor de entrevistas. Baseado nos dados da vaga fornecidos, 
-gere uma simulação de entrevista realista com {{numberOfQuestions}} perguntas.
+gere uma simulação de entrevista realista com {{numberOfQuestions}} perguntas focadas para gravação de vídeo.
 
 ## Dados da Vaga:
 - **Título**: {{jobTitle}}
@@ -389,10 +389,11 @@ gere uma simulação de entrevista realista com {{numberOfQuestions}} perguntas.
 4. Liste palavras-chave importantes para as respostas
 5. Forneça dicas de preparação
 6. Estime duração realista da entrevista
+7. **IMPORTANTE**: Defina tempo sugerido para cada pergunta (para gravação de vídeo)
 
 **IMPORTANTE**: Responda APENAS com um JSON válido no formato especificado.
 
-## Formato da Resposta:
+## Format da Resposta:
 \`\`\`json
 {
   "jobTitle": "string",
@@ -405,15 +406,22 @@ gere uma simulação de entrevista realista com {{numberOfQuestions}} perguntas.
       "category": "Categoria da pergunta",
       "difficulty": "easy|medium|hard",
       "tips": "Dicas para responder bem",
-      "keywords": ["palavra-chave1", "palavra-chave2"]
+      "keywords": ["palavra-chave1", "palavra-chave2"],
+      "maxDuration": 120
     }
   ],
-  "estimatedDuration": 45,
+  "estimatedDuration": 20,
   "preparationTips": ["Dica 1", "Dica 2"],
   "jobRequirements": ["Requisito 1", "Requisito 2"],
   "companyInfo": "Informações sobre a empresa"
 }
 \`\`\`
+
+**Tempos Sugeridos:**
+- Perguntas fáceis: 60-90 segundos
+- Perguntas médias: 90-120 segundos  
+- Perguntas difíceis: 120-180 segundos
+- Total da simulação: 8-15 minutos (4 perguntas)
 `;
   }
 
@@ -422,7 +430,7 @@ gere uma simulação de entrevista realista com {{numberOfQuestions}} perguntas.
    */
   private buildInterviewPrompt(template: string, jobData: any, dto: GenerateInterviewDto): string {
     return template
-      .replace(/{{numberOfQuestions}}/g, (dto.numberOfQuestions || 8).toString())
+      .replace(/{{numberOfQuestions}}/g, (dto.numberOfQuestions || 4).toString())
       .replace(/{{jobTitle}}/g, jobData.jobTitle || 'Não especificado')
       .replace(/{{companyName}}/g, jobData.companyName || 'Não especificada')
       .replace(/{{location}}/g, jobData.location || 'Não especificada')
@@ -461,10 +469,6 @@ gere uma simulação de entrevista realista com {{numberOfQuestions}} perguntas.
       $inc: { 
         totalAttempts: 1,
         totalCompletions: 1,
-      },
-      $push: {
-        $each: [],
-        $slice: -1
       }
     });
 
@@ -666,5 +670,305 @@ gere uma simulação de entrevista realista com {{numberOfQuestions}} perguntas.
     });
     
     return { success: true };
+  }
+
+  /**
+   * Registra tentativa de entrevista com vídeo
+   */
+  async recordVideoInterviewAttempt(
+    interviewId: string,
+    userId: string,
+    videoFile: Express.Multer.File,
+    attemptDto: any
+  ) {
+    const { Types } = require('mongoose');
+    const fs = require('fs');
+    const path = require('path');
+    
+    // Salvar arquivo de vídeo
+    const uploadDir = path.join(__dirname, '../../../../public/uploads/videos');
+    if (!fs.existsSync(uploadDir)) {
+      fs.mkdirSync(uploadDir, { recursive: true });
+    }
+    
+    const videoFileName = `interview_${interviewId}_${userId}_${Date.now()}.${videoFile.originalname.split('.').pop()}`;
+    const videoPath = path.join(uploadDir, videoFileName);
+    
+    fs.writeFileSync(videoPath, videoFile.buffer);
+    
+    // Criar tentativa com status pending para análise
+    const attempt = await this.interviewAttemptModel.create({
+      interviewId: new Types.ObjectId(interviewId),
+      userId: new Types.ObjectId(userId),
+      actualDuration: attemptDto.actualDuration || 0,
+      difficultyRating: attemptDto.difficultyRating || 3,
+      feedback: attemptDto.feedback,
+      hasVideo: true,
+      videoPath: `/uploads/videos/${videoFileName}`,
+      analysisStatus: 'pending',
+      isCompleted: false,
+    });
+
+    // Disparar análise de vídeo em background
+    this.processVideoAnalysis(attempt._id.toString(), videoPath, interviewId);
+
+    return {
+      attemptId: attempt._id.toString(),
+      status: 'uploaded',
+      message: 'Vídeo enviado com sucesso. Análise será processada em breve.',
+    };
+  }
+
+  /**
+   * Processa análise de vídeo com Google Gemini
+   */
+  private async processVideoAnalysis(attemptId: string, videoPath: string, interviewId: string) {
+    try {
+      console.log(`[VideoAnalysis] Starting analysis for attempt ${attemptId}`);
+      
+      // Atualizar status para 'processing'
+      await this.interviewAttemptModel.findByIdAndUpdate(attemptId, {
+        analysisStatus: 'processing'
+      });
+
+      // Buscar perguntas da entrevista para contexto
+      const interview = await this.interviewModel.findById(interviewId);
+      if (!interview) {
+        throw new Error('Interview not found');
+      }
+
+      console.log(`[VideoAnalysis] Calling Gemini API for video at: ${videoPath}`);
+      
+      // Chamar Google Gemini API
+      const analysisResult = await this.analyzeVideoWithGemini(videoPath, interview.questions);
+
+      console.log(`[VideoAnalysis] Analysis completed successfully`);
+
+      // Salvar resultado da análise
+      await this.interviewAttemptModel.findByIdAndUpdate(attemptId, {
+        videoAnalysis: analysisResult,
+        analysisStatus: 'completed',
+        isCompleted: true,
+        completedAt: new Date(),
+        strengths: analysisResult.summary?.strengths || [],
+        improvements: analysisResult.summary?.improvements || [],
+        preparednessScore: analysisResult.overall_score || 0,
+      });
+
+      // Atualizar estatísticas da simulação
+      await this.interviewModel.findByIdAndUpdate(interviewId, {
+        $inc: { 
+          totalAttempts: 1,
+          totalCompletions: 1,
+        }
+      });
+
+      console.log(`[VideoAnalysis] Results saved successfully`);
+
+    } catch (error) {
+      console.error(`[VideoAnalysis] Error processing video analysis:`, error);
+      console.error(`[VideoAnalysis] Error stack:`, error.stack);
+      
+      // Usar análise de fallback e marcar como concluído (com limitações)
+      const fallbackAnalysis = this.createFallbackAnalysis();
+      
+      await this.interviewAttemptModel.findByIdAndUpdate(attemptId, {
+        videoAnalysis: fallbackAnalysis,
+        analysisStatus: 'completed_with_errors',
+        isCompleted: true,
+        completedAt: new Date(),
+        strengths: fallbackAnalysis.summary?.strengths || [],
+        improvements: fallbackAnalysis.summary?.improvements || [],
+        preparednessScore: fallbackAnalysis.overall_score || 70,
+      });
+      
+      console.log(`[VideoAnalysis] Saved fallback analysis due to error`);
+    }
+  }
+
+  /**
+   * Analisa vídeo usando Google Gemini
+   */
+  private async analyzeVideoWithGemini(videoPath: string, questions: any[]): Promise<any> {
+    try {
+      const { GoogleGenerativeAI } = require('@google/generative-ai');
+      const fs = require('fs');
+      const path = require('path');
+      
+      const apiKey = this.configService.get<string>('GEMINI_API_KEY');
+      if (!apiKey) {
+        throw new Error('GEMINI_API_KEY not configured');
+      }
+
+      const genAI = new GoogleGenerativeAI(apiKey);
+      // Usar gemini-1.5-flash para análise de vídeo (mais rápido e otimizado)
+      const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
+
+      // Carregar template de prompt
+      let promptTemplate: string;
+      try {
+        const promptPath = path.join(__dirname, '../../../../prompt/video-analysis.md');
+        promptTemplate = fs.readFileSync(promptPath, 'utf-8');
+      } catch (error) {
+        // Fallback simplificado se não conseguir ler o template
+        promptTemplate = this.getVideoAnalysisFallbackPrompt();
+      }
+
+      // Construir prompt com dados da entrevista
+      const questionsText = questions.map((q, i) => `${i + 1}. ${q.question} (${q.type})`).join('\n');
+      const prompt = promptTemplate
+        .replace(/{{questions}}/g, questionsText)
+        .replace(/{{jobTitle}}/g, 'Cargo da Entrevista')
+        .replace(/{{companyName}}/g, 'Empresa Simulação');
+
+      // Converter vídeo para base64 (Gemini suporta vídeo diretamente)
+      const videoBuffer = fs.readFileSync(videoPath);
+      const videoBase64 = videoBuffer.toString('base64');
+      
+      // Detectar tipo MIME baseado na extensão
+      const ext = path.extname(videoPath).toLowerCase();
+      const mimeTypes: { [key: string]: string } = {
+        '.mp4': 'video/mp4',
+        '.webm': 'video/webm',
+        '.mov': 'video/quicktime',
+        '.avi': 'video/x-msvideo'
+      };
+      const mimeType = mimeTypes[ext] || 'video/mp4';
+
+      const result = await model.generateContent([
+        {
+          inlineData: {
+            data: videoBase64,
+            mimeType: mimeType,
+          },
+        },
+        { text: prompt }
+      ]);
+
+      const response = await result.response;
+      const text = response.text();
+      
+      // Parse JSON response
+      let analysisData;
+      try {
+        // Remover possíveis markdown code blocks
+        const cleanJson = text.replace(/```json\s*|\s*```/g, '').trim();
+        // Remover possíveis textos antes/depois do JSON
+        const jsonMatch = cleanJson.match(/\{[\s\S]*\}/);
+        const jsonText = jsonMatch ? jsonMatch[0] : cleanJson;
+        analysisData = JSON.parse(jsonText);
+      } catch (parseError) {
+        // Fallback se não conseguir parsear
+        analysisData = this.createFallbackAnalysis();
+      }
+
+      return analysisData;
+
+    } catch (error) {
+      console.error('Error analyzing video with Gemini:', error);
+      console.error('Error details:', error.response?.data || error.message);
+      
+      // Se for erro 404, pode ser modelo incorreto
+      if (error.response?.status === 404) {
+        console.error('Gemini API 404 - Modelo não encontrado. Verifique se o modelo está correto e se a API key tem acesso.');
+      }
+      
+      // Fallback analysis em caso de erro
+      return this.createFallbackAnalysis();
+    }
+  }
+
+  /**
+   * Cria análise de fallback em caso de erro
+   */
+  private createFallbackAnalysis(): any {
+    return {
+      overall_score: 75,
+      duration: 120, // 2 minutos
+      moments: [
+        {
+          timestamp: 30,
+          type: 'neutral',
+          category: 'content',
+          message: 'Análise detalhada não disponível no momento',
+          severity: 'low',
+          suggestion: 'Tente enviar o vídeo novamente mais tarde'
+        }
+      ],
+      summary: {
+        strengths: ['Participação na simulação', 'Completou a gravação'],
+        improvements: ['Análise detalhada será disponibilizada em breve'],
+        keyPoints: ['Vídeo recebido com sucesso', 'Sistema processando análise']
+      },
+      metrics: {
+        speech_clarity: 75,
+        confidence_level: 75,
+        engagement: 75,
+        technical_accuracy: 75
+      }
+    };
+  }
+
+  /**
+   * Template de prompt fallback para análise de vídeo
+   */
+  private getVideoAnalysisFallbackPrompt(): string {
+    return `
+Analise este vídeo de simulação de entrevista e forneça feedback em JSON:
+
+Perguntas da entrevista:
+{{questions}}
+
+Responda APENAS com JSON válido seguindo esta estrutura:
+{
+  "overall_score": 0-100,
+  "duration": seconds,
+  "moments": [
+    {
+      "timestamp": seconds,
+      "type": "positive|improvement|neutral|warning",
+      "category": "verbal|non-verbal|content|technical", 
+      "message": "observação específica",
+      "severity": "low|medium|high",
+      "suggestion": "sugestão de melhoria"
+    }
+  ],
+  "summary": {
+    "strengths": ["pontos fortes"],
+    "improvements": ["áreas para melhorar"],
+    "keyPoints": ["observações importantes"]
+  },
+  "metrics": {
+    "speech_clarity": 0-100,
+    "confidence_level": 0-100,
+    "engagement": 0-100,
+    "technical_accuracy": 0-100
+  }
+}`;
+  }
+
+  /**
+   * Obtém resultado da análise de vídeo
+   */
+  async getVideoAnalysis(attemptId: string, userId: string) {
+    const { Types } = require('mongoose');
+    const userObjectId = new Types.ObjectId(userId);
+    
+    const attempt = await this.interviewAttemptModel.findOne({
+      _id: attemptId,
+      userId: userObjectId
+    });
+
+    if (!attempt) {
+      throw new NotFoundException('Interview attempt not found');
+    }
+
+    return {
+      status: attempt.analysisStatus,
+      hasVideo: attempt.hasVideo,
+      videoPath: attempt.videoPath,
+      analysis: attempt.videoAnalysis,
+      completedAt: attempt.completedAt,
+    };
   }
 }

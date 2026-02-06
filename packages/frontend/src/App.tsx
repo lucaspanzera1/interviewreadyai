@@ -26,6 +26,8 @@ import CreateInterviewPage from './components/CreateInterviewPage'
 import MyInterviewsPage from './components/MyInterviewsPage'
 import GeneratedInterviewPage from './components/GeneratedInterviewPage'
 import InterviewPlayPage from './components/InterviewPlayPage'
+import InterviewVideoRecorderPage from './components/InterviewVideoRecorderPage'
+import VideoTimelineAnalysisPage from './components/VideoTimelineAnalysisPage'
 import MyFlashcardsPage from './components/MyFlashcardsPage'
 import FlashcardStudyPage from './components/FlashcardStudyPage'
 import MyQuizzesPage from './components/MyQuizzesPage'
@@ -311,6 +313,26 @@ function App() {
           element={
             <ProtectedRoute>
               <InterviewPlayPage />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Interview Video Recorder page */}
+        <Route
+          path="/interview/video"
+          element={
+            <ProtectedRoute>
+              <InterviewVideoRecorderPage />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Video Analysis page */}
+        <Route
+          path="/interview-analysis/:attemptId"
+          element={
+            <ProtectedRoute>
+              <VideoTimelineAnalysisPage />
             </ProtectedRoute>
           }
         />

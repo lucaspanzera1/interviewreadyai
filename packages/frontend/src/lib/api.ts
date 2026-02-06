@@ -256,6 +256,7 @@ export interface InterviewQuestion {
   difficulty: 'easy' | 'medium' | 'hard';
   tips?: string;
   keywords?: string[];
+  maxDuration?: number;
 }
 
 export interface GeneratedInterview {
@@ -943,6 +944,21 @@ class ApiClient {
 
   async updatePrivacySettings(isProfilePublic: boolean): Promise<{ success: boolean; message: string }> {
     const res = await this.client.put('/users/privacy-settings', { isProfilePublic });
+    return res.data;
+  }
+
+  // Video Interview methods
+  async uploadVideoAttempt(interviewId: string, formData: FormData): Promise<{ attemptId: string; message: string }> {
+    const res = await this.client.post(`/interview/${interviewId}/video-attempt`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return res.data;
+  }
+
+  async getVideoAnalysis(attemptId: string): Promise<any> {
+    const res = await this.client.get(`/interview/video-analysis/${attemptId}`);
     return res.data;
   }
 }

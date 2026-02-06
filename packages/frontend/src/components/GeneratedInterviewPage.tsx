@@ -9,7 +9,10 @@ import {
     ChatBubbleLeftRightIcon,
     BuildingOfficeIcon,
     LightBulbIcon,
-    TagIcon
+    TagIcon,
+    VideoCameraIcon,
+    DocumentTextIcon,
+    ChevronDownIcon
 } from '@heroicons/react/24/outline';
 import { apiClient, Interview } from '../lib/api';
 import { useToast } from '../contexts/ToastContext';
@@ -21,6 +24,7 @@ const GeneratedInterviewPage: React.FC = () => {
     const [interview, setInterview] = useState<Interview | null>(null);
     const [loading, setLoading] = useState(true);
     const [starting, setStarting] = useState(false);
+    const [dropdownOpen, setDropdownOpen] = useState(false);
 
     useEffect(() => {
         if (id) {
@@ -42,7 +46,7 @@ const GeneratedInterviewPage: React.FC = () => {
         }
     };
 
-    const startInterview = async () => {
+    const startInterview = async (mode: 'text' | 'video' = 'text') => {
         if (!interview) return;
 
         setStarting(true);
@@ -58,8 +62,14 @@ const GeneratedInterviewPage: React.FC = () => {
             localStorage.setItem('generatedInterview', JSON.stringify(fullInterview));
             localStorage.setItem('currentInterviewId', fullInterview._id);
 
-            showToast('Simulação iniciada! Boa sorte! 🎯', 'success');
-            navigate('/interview/play');
+            showToast(`Simulação ${mode === 'video' ? 'de vídeo' : 'de texto'} iniciada! Boa sorte! 🎯`, 'success');
+            
+            // Redirecionar baseado no modo escolhido
+            if (mode === 'video') {
+                navigate('/interview/video');
+            } else {
+                navigate('/interview/play');
+            }
         } catch (error: any) {
             console.error('Erro ao iniciar simulação:', error);
             const message = error.response?.data?.message || 'Erro ao iniciar a simulação.';
@@ -159,24 +169,72 @@ const GeneratedInterviewPage: React.FC = () => {
                         </div>
                     </div>
                     
-                    <button
-                        onClick={startInterview}
-                        disabled={starting}
-                        className="flex items-center gap-2 px-4 py-2 bg-primary-600 hover:bg-primary-700 disabled:bg-primary-400 text-white rounded-lg font-medium transition-colors shadow-sm shrink-0"
-                    >
-                        {starting ? (
+                    
+                    <div className="relative shrink-0">
+                        <button
+                            onClick={() => setDropdownOpen(!dropdownOpen)}
+                            disabled={starting}
+                            className="flex items-center gap-2 px-4 py-2 bg-primary-600 hover:bg-primary-700 disabled:bg-primary-400 text-white rounded-lg font-medium transition-colors shadow-sm"
+                        >
+                            {starting ? (
+                                <>
+                                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                                    <span className="hidden sm:inline">Iniciando...</span>
+                                </>
+                            ) : (
+                                <>
+                                    <PlayIcon className="w-5 h-5" />
+                                    <span className="hidden sm:inline">Iniciar Simulação</span>
+                                    <span className="sm:hidden">Iniciar</span>
+                                    <ChevronDownIcon className="w-4 h-4" />
+                                </>
+                            )}
+                        </button>
+                        
+                        {dropdownOpen && !starting && (
                             <>
-                                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                                <span className="hidden sm:inline">Iniciando...</span>
-                            </>
-                        ) : (
-                            <>
-                                <PlayIcon className="w-5 h-5" />
-                                <span className="hidden sm:inline">Iniciar Simulação</span>
-                                <span className="sm:hidden">Iniciar</span>
+                                <div 
+                                    className="fixed inset-0 z-10" 
+                                    onClick={() => setDropdownOpen(false)}
+                                ></div>
+                                <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg shadow-lg z-20">
+                                    <div className="p-2">
+                                        <button
+                                            onClick={() => {
+                                                setDropdownOpen(false);
+                                                startInterview('text');
+                                            }}
+                                            className="w-full flex items-center gap-3 px-3 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-md transition-colors"
+                                        >
+                                            <DocumentTextIcon className="w-5 h-5 text-slate-500" />
+                                            <div className="text-left">
+                                                <div className="font-medium">Modo Texto</div>
+                                                <div className="text-xs text-slate-500 dark:text-slate-400">
+                                                    Responda por texto digitado
+                                                </div>
+                                            </div>
+                                        </button>
+                                        
+                                        <button
+                                            onClick={() => {
+                                                setDropdownOpen(false);
+                                                startInterview('video');
+                                            }}
+                                            className="w-full flex items-center gap-3 px-3 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-md transition-colors"
+                                        >
+                                            <VideoCameraIcon className="w-5 h-5 text-red-500" />
+                                            <div className="text-left">
+                                                <div className="font-medium">Modo Vídeo</div>
+                                                <div className="text-xs text-slate-500 dark:text-slate-400">
+                                                    Grave suas respostas em vídeo
+                                                </div>
+                                            </div>
+                                        </button>
+                                    </div>
+                                </div>
                             </>
                         )}
-                    </button>
+                    </div>
                 </div>
             </header>
 
@@ -319,25 +377,56 @@ const GeneratedInterviewPage: React.FC = () => {
                         Pronto para começar?
                     </h3>
                     <p className="text-primary-700 dark:text-primary-200 mb-4 text-sm">
-                        A simulação foi criada especialmente para esta vaga. Pratique quantas vezes quiser!
+                        Escolha o formato da simulação: respostas por escrito ou gravação de vídeo para análise com IA
                     </p>
-                    <button
-                        onClick={startInterview}
-                        disabled={starting}
-                        className="inline-flex items-center gap-2 px-6 py-3 bg-primary-600 hover:bg-primary-700 disabled:bg-primary-400 text-white font-medium rounded-lg transition-colors shadow-sm"
-                    >
-                        {starting ? (
-                            <>
-                                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                                Iniciando simulação...
-                            </>
-                        ) : (
-                            <>
-                                <PlayIcon className="w-5 h-5" />
-                                Iniciar Simulação Completa
-                            </>
-                        )}
-                    </button>
+                    <div className="flex gap-3 justify-center flex-wrap">
+                        <button
+                            onClick={() => startInterview('text')}
+                            disabled={starting}
+                            className="inline-flex items-center gap-2 px-6 py-3 bg-primary-600 hover:bg-primary-700 disabled:bg-primary-400 text-white font-medium rounded-lg transition-colors shadow-sm"
+                        >
+                            {starting ? (
+                                <>
+                                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                                    Iniciando...
+                                </>
+                            ) : (
+                                <>
+                                    <DocumentTextIcon className="w-5 h-5" />
+                                    Simulação por Texto
+                                </>
+                            )}
+                        </button>
+                        <button
+                            onClick={() => startInterview('video')}
+                            disabled={starting}
+                            className="inline-flex items-center gap-2 px-6 py-3 bg-red-600 hover:bg-red-700 disabled:bg-red-400 text-white font-medium rounded-lg transition-colors shadow-sm"
+                        >
+                            {starting ? (
+                                <>
+                                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                                    Iniciando...
+                                </>
+                            ) : (
+                                <>
+                                    <VideoCameraIcon className="w-5 h-5" />
+                                    Simulação por Vídeo
+                                </>
+                            )}
+                        </button>
+                    </div>
+                    <div className="mt-4 text-sm text-primary-600 dark:text-primary-200">
+                        <div className="flex justify-center gap-8 flex-wrap">
+                            <div className="flex items-center gap-2">
+                                <DocumentTextIcon className="w-4 h-4" />
+                                <span>Texto: 4 perguntas, feedback imediato</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <VideoCameraIcon className="w-4 h-4" />
+                                <span>Vídeo: 4 perguntas, análise com IA</span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </main>
         </div>
