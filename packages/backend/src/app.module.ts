@@ -15,6 +15,7 @@ import { TokenPackageModule } from './token-package/token-package.module';
 import { RoleModule } from './role/role.module';
 import { EmailModule } from './common/email.module';
 import { PlansModule } from './plans/plans.module';
+import { InterviewModule } from './interview/interview.module';
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
 
 /**
@@ -46,6 +47,7 @@ import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
     TokenPackageModule,
     RoleModule,
     PlansModule,
+    InterviewModule,
   ],
   controllers: [AppController],
   providers: [

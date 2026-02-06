@@ -6,7 +6,8 @@ import {
   KeyIcon,
   SparklesIcon,
   AcademicCapIcon,
-  PlusCircleIcon
+  PlusCircleIcon,
+  ChatBubbleLeftRightIcon
 } from '@heroicons/react/24/outline';
 import { Users as UsersIcon, FileQuestion, Gift } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
@@ -19,6 +20,8 @@ const navigation = [
   { name: 'Perfil', href: '/profile', icon: UserCircleIcon },
   { name: 'Criar Quiz', href: '/create-quiz', icon: SparklesIcon },
   { name: 'Meus Quizzes', href: '/my-quizzes', icon: FileQuestion },
+  { name: 'Simulação Entrevista', href: '/create-interview', icon: ChatBubbleLeftRightIcon },
+  { name: 'Minhas Simulações', href: '/my-interviews', icon: ChatBubbleLeftRightIcon },
   { name: 'Criar Flashcards', href: '/create-flashcard', icon: PlusCircleIcon },
   { name: 'Meus Flashcards', href: '/my-flashcards', icon: AcademicCapIcon },
   { name: 'Tokens', href: '/tokens', icon: KeyIcon },

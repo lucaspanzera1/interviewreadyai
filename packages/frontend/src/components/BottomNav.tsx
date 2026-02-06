@@ -17,6 +17,7 @@ import {
     ShieldCheckIcon,
     ClockIcon,
     RectangleStackIcon,
+    ChatBubbleLeftRightIcon,
 } from '@heroicons/react/24/outline';
 
 import {
@@ -28,6 +29,7 @@ import {
     ShieldCheckIcon as ShieldCheckIconSolid,
     ClockIcon as ClockIconSolid,
     RectangleStackIcon as RectangleStackIconSolid,
+    ChatBubbleLeftRightIcon as ChatBubbleLeftRightIconSolid,
 } from '@heroicons/react/24/solid';
 import { Users as UsersIconLucide, FileQuestion, Gift } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
@@ -64,6 +66,8 @@ const Sidebar: React.FC = () => {
     const mainNavItems = [
         { name: 'Início', path: '/', icon: HomeIcon, activeIcon: HomeIconSolid },
         { name: 'Meus Quizzes', path: '/my-quizzes', icon: DocumentTextIcon, activeIcon: DocumentTextIconSolid },
+        { name: 'Simulação Entrevista', path: '/create-interview', icon: ChatBubbleLeftRightIcon, activeIcon: ChatBubbleLeftRightIconSolid, badge: 'NOVO' },
+        { name: 'Minhas Simulações', path: '/my-interviews', icon: ChatBubbleLeftRightIcon, activeIcon: ChatBubbleLeftRightIconSolid },
         { name: 'Meus Flashcards', path: '/my-flashcards', icon: RectangleStackIcon, activeIcon: RectangleStackIconSolid, badge: 'BETA' },
         { name: 'Explorar', path: '/free-quizzes', icon: AcademicCapIcon, activeIcon: AcademicCapIconSolid },
 
@@ -334,8 +338,8 @@ const Sidebar: React.FC = () => {
 
     const bottomNavItems = [
         { name: 'Início', path: '/', icon: HomeIcon, activeIcon: HomeIconSolid },
-        { name: 'Explorar', path: '/free-quizzes', icon: AcademicCapIcon, activeIcon: AcademicCapIconSolid },
         { name: 'Quizzes', path: '/my-quizzes', icon: DocumentTextIcon, activeIcon: DocumentTextIconSolid },
+        { name: 'Entrevista', path: '/create-interview', icon: ChatBubbleLeftRightIcon, activeIcon: ChatBubbleLeftRightIconSolid, badge: 'NOVO' },
         { name: 'Menu', path: '#menu', icon: Bars3Icon, activeIcon: Bars3Icon, action: () => setIsMobileOpen(true) },
     ];
 

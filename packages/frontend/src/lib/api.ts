@@ -115,6 +115,13 @@ export interface UserDetails {
     dailyFreeQuizzesUsed: number;
     lastFreeQuizReset?: string;
   };
+  interviewStats?: {
+    totalInterviewsGenerated: number;
+    totalAttempts: number;
+    averageDifficultyRating: number;
+    averageDuration: number;
+    tokensSpentOnInterviews: number;
+  };
   rewardHistory: Array<{
     type: string;
     amount: number;
@@ -232,6 +239,78 @@ export interface StudySessionDto {
     studyTime?: number;
   }>;
   totalSessionTime?: number;
+}
+
+// Interview interfaces
+export interface GenerateInterviewDto {
+  linkedinUrl: string;
+  numberOfQuestions?: number;
+  experienceLevel?: string;
+}
+
+export interface InterviewQuestion {
+  id: number;
+  question: string;
+  type: 'technical' | 'behavioral' | 'situational' | 'company_specific';
+  category: string;
+  difficulty: 'easy' | 'medium' | 'hard';
+  tips?: string;
+  keywords?: string[];
+}
+
+export interface GeneratedInterview {
+  interviewId?: string;
+  jobTitle: string;
+  companyName: string;
+  questions: InterviewQuestion[];
+  estimatedDuration: number;
+  preparationTips: string[];
+  jobRequirements: string[];
+  companyInfo?: string;
+}
+
+export interface InterviewAttemptDto {
+  userAnswers: string[];
+  actualDuration: number;
+  difficultyRating: number;
+  feedback?: string;
+}
+
+export interface Interview {
+  _id: string;
+  jobTitle: string;
+  companyName: string;
+  linkedinUrl: string;
+  questions: InterviewQuestion[];
+  numberOfQuestions: number;
+  estimatedDuration: number;
+  preparationTips: string[];
+  jobRequirements: string[];
+  companyInfo?: string;
+  experienceLevel?: string;
+  interviewType: string;
+  totalAccess: number;
+  totalAttempts: number;
+  totalCompletions: number;
+  averageDifficulty: number;
+  createdAt: string;
+  isActive: boolean;
+}
+
+export interface InterviewAttempt {
+  _id: string;
+  interviewId: string;
+  userId: string;
+  userAnswers: Array<{
+    questionId: number;
+    answer: string;
+  }>;
+  actualDuration: number;
+  difficultyRating: number;
+  feedback?: string;
+  isCompleted: boolean;
+  completedAt?: string;
+  createdAt: string;
 }
 
 class ApiClient {
@@ -593,6 +672,61 @@ class ApiClient {
 
   async getFreeQuizLimit() {
     const res = await this.client.get('/users/me/free-quiz-limit');
+    return res.data;
+  }
+
+  // Interview methods
+  async generateInterview(dto: GenerateInterviewDto): Promise<GeneratedInterview> {
+    const res = await this.client.post('/interview/generate', dto);
+    return res.data;
+  }
+
+  async getUserInterviews(page: number = 1, limit: number = 10) {
+    const res = await this.client.get('/interview/my-interviews', {
+      params: { page, limit },
+    });
+    return res.data;
+  }
+
+  async getInterviewById(id: string) {
+    const res = await this.client.get(`/interview/${id}`);
+    return res.data;
+  }
+
+  async getInterviewForPlaying(id: string) {
+    const res = await this.client.get(`/interview/${id}/play`);
+    return res.data;
+  }
+
+  async recordInterviewAttempt(id: string, attemptDto: InterviewAttemptDto) {
+    const res = await this.client.post(`/interview/${id}/attempt`, attemptDto);
+    return res.data;
+  }
+
+  async recordInterviewAccess(id: string) {
+    const res = await this.client.post(`/interview/${id}/access`);
+    return res.data;
+  }
+
+  async completeInterview(id: string) {
+    const res = await this.client.patch(`/interview/${id}/complete`);
+    return res.data;
+  }
+
+  async getUserInterviewAttempts(page: number = 1, limit: number = 10) {
+    const res = await this.client.get('/interview/my-attempts', {
+      params: { page, limit },
+    });
+    return res.data;
+  }
+
+  async getUserInterviewAttemptDetails(attemptId: string) {
+    const res = await this.client.get(`/interview/my-attempts/${attemptId}`);
+    return res.data;
+  }
+
+  async getUserInterviewStats() {
+    const res = await this.client.get('/interview/my-stats');
     return res.data;
   }
 

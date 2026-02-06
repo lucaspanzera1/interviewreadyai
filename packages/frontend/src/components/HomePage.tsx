@@ -19,7 +19,8 @@ import {
   BoltIcon,
   LockClosedIcon,
   TrophyIcon,
-  QuestionMarkCircleIcon
+  QuestionMarkCircleIcon,
+  ChatBubbleLeftRightIcon
 } from '@heroicons/react/24/outline';
 import OnboardingGuide from './OnboardingGuide';
 import ActivityHeatmap from './ActivityHeatmap';
@@ -187,6 +188,15 @@ const HomePage: React.FC = () => {
       primary: true,
       bg: 'bg-primary-600',
       text: 'text-white'
+    },
+    {
+      label: 'Simulação Entrevista',
+      desc: 'Pratique para entrevistas',
+      icon: ChatBubbleLeftRightIcon,
+      action: () => navigate('/create-interview'),
+      primary: false,
+      bg: 'bg-green-50 dark:bg-green-900/20',
+      text: 'text-green-600 dark:text-green-400'
     },
     {
       label: 'Continuar',
