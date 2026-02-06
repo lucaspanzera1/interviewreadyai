@@ -1,5 +1,5 @@
 import { Controller, Get, Put, Body, Param, UseGuards, Post, Delete, Query } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiParam } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiParam, ApiQuery } from '@nestjs/swagger';
 import { UserService } from './user.service';
 import { UserSocialService } from './user-social.service';
 import { UserDto, UpdateUserDto, ProfileDto, CompleteOnboardingDto } from './dto';
@@ -329,6 +329,95 @@ export class UserController {
   async getTokenStats(@CurrentUser() user: any) {
     const userId = this.getUserId(user);
     return this.userService.getTokenStats(userId);
+  }
+
+  /**
+   * Obter estatísticas gerais do usuário (quizzes + flashcards)
+   */
+  @Get('me/general-stats')
+  @ApiOperation({
+    summary: 'Obter estatísticas gerais',
+    description: 'Retorna estatísticas combinadas de quizzes e flashcards do usuário'
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Estatísticas gerais retornadas com sucesso',
+    schema: {
+      type: 'object',
+      properties: {
+        quizStats: {
+          type: 'object',
+          properties: {
+            totalAttempts: { type: 'number' },
+            averageScore: { type: 'number' },
+            totalFreeQuizzesCompleted: { type: 'number' }
+          }
+        },
+        flashcardStats: {
+          type: 'object',
+          properties: {
+            totalFlashcardsCreated: { type: 'number' },
+            totalStudySessions: { type: 'number' },
+            totalReviews: { type: 'number' },
+            totalStudyTime: { type: 'number' },
+            averageCardsPerSession: { type: 'number' }
+          },
+          nullable: true
+        },
+        combineStats: {
+          type: 'object',
+          properties: {
+            totalLearningActivities: { type: 'number' },
+            totalTokensSpent: { type: 'number' },
+            overallEngagement: { type: 'number' }
+          }
+        }
+      }
+    }
+  })
+  async getGeneralStats(@CurrentUser() user: any) {
+    const userId = this.getUserId(user);
+    return this.userService.getGeneralStats(userId);
+  }
+
+  /**
+   * Obter atividade combinada do usuário (para heatmap)
+   */
+  @Get('me/activity')
+  @ApiOperation({
+    summary: 'Obter atividade combinada',
+    description: 'Retorna dados de atividade diária combinando quizzes e flashcards para heatmap'
+  })
+  @ApiQuery({
+    name: 'days',
+    required: false,
+    type: 'number',
+    description: 'Número de dias para buscar (padrão: 365)',
+    example: 90
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Dados de atividade combinada retornados com sucesso',
+    schema: {
+      type: 'array',
+      items: {
+        type: 'object',
+        properties: {
+          date: { type: 'string', format: 'date', example: '2024-01-15' },
+          quizAttempts: { type: 'number', example: 2 },
+          flashcardSessions: { type: 'number', example: 3 },
+          totalActivities: { type: 'number', example: 5 },
+          engagement: { type: 'number', example: 4 }
+        }
+      }
+    }
+  })
+  async getCombinedActivity(
+    @CurrentUser() user: any,
+    @Query('days') days: string = '365'
+  ) {
+    const userId = this.getUserId(user);
+    return this.userService.getCombinedActivity(userId, parseInt(days));
   }
 
 

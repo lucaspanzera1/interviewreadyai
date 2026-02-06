@@ -3,6 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { HttpService } from '@nestjs/axios';
+import { ModuleRef } from '@nestjs/core';
 import { firstValueFrom } from 'rxjs';
 import { User, UserDocument, UserRole } from './schemas/user.schema';
 import { UpdateUserDto, UserDto } from './dto';
@@ -21,6 +22,7 @@ export class UserService {
     private readonly configService: ConfigService,
     private readonly emailService: EmailService,
     private readonly httpService: HttpService,
+    private readonly moduleRef: ModuleRef,
   ) { }
 
   /**
@@ -278,6 +280,17 @@ export class UserService {
     // Buscar histórico de recompensas
     const rewardHistory = await this.getRewardHistory(userId);
     
+    // Buscar flashcard service se disponível
+    let flashcardStats = null;
+    try {
+      const flashcardService = this.moduleRef.get('FlashcardService', { strict: false });
+      if (flashcardService) {
+        flashcardStats = await flashcardService.getUserStats(userId);
+      }
+    } catch (error) {
+      console.log('FlashcardService não encontrado para estatísticas');
+    }
+    
     // Retornar dados completos
     return {
       user: this.toDto(user),
@@ -306,6 +319,7 @@ export class UserService {
         dailyFreeQuizzesUsed: user.dailyFreeQuizzesUsed || 0,
         lastFreeQuizReset: user.lastFreeQuizReset,
       },
+      flashcardStats,
       rewardHistory,
     };
   }
@@ -583,6 +597,143 @@ export class UserService {
       totalSpent,
       history: tokenHistory,
     };
+  }
+
+  /**
+   * Obter estatísticas gerais combinadas (quizzes + flashcards)
+   */
+  async getGeneralStats(userId: string) {
+    // Buscar quiz service
+    let quizStats = null;
+    try {
+      const quizService = this.moduleRef.get('QuizService', { strict: false });
+      if (quizService) {
+        quizStats = await quizService.getUserStats(userId);
+      }
+    } catch (error) {
+      console.log('QuizService não encontrado para estatísticas');
+      quizStats = {
+        totalAttempts: 0,
+        averageScore: 0,
+        totalFreeQuizzesCompleted: 0,
+      };
+    }
+
+    // Buscar flashcard service
+    let flashcardStats = null;
+    try {
+      const flashcardService = this.moduleRef.get('FlashcardService', { strict: false });
+      if (flashcardService) {
+        flashcardStats = await flashcardService.getUserStats(userId);
+      }
+    } catch (error) {
+      console.log('FlashcardService não encontrado para estatísticas');
+    }
+
+    // Obter dados do usuário para estatísticas de tokens
+    const tokenStats = await this.getTokenStats(userId);
+
+    // Calcular estatísticas combinadas
+    const totalLearningActivities = (quizStats?.totalAttempts || 0); // totalAttempts já inclui flashcards
+    const totalTokensSpent = tokenStats.totalSpent;
+    
+    // Calcular engajamento geral (baseado em atividades e consistência)
+    const overallEngagement = this.calculateOverallEngagement(
+      quizStats, 
+      flashcardStats,
+      totalLearningActivities,
+      totalTokensSpent
+    );
+
+    return {
+      quizStats,
+      flashcardStats,
+      combinedStats: {
+        totalLearningActivities,
+        totalTokensSpent,
+        overallEngagement,
+      }
+    };
+  }
+
+  /**
+   * Calcular score de engajamento geral do usuário
+   */
+  private calculateOverallEngagement(quizStats: any, flashcardStats: any, totalActivities: number, tokensSpent: number): number {
+    let engagementScore = 0;
+    
+    // Pontos por atividade (máximo 40 pontos)
+    engagementScore += Math.min(totalActivities * 2, 40);
+    
+    // Pontos por performance em quizzes (máximo 20 pontos)
+    if (quizStats && quizStats.averageScore > 0) {
+      engagementScore += Math.min(quizStats.averageScore / 5, 20);
+    }
+    
+    // Pontos por tempo de estudo em flashcards (máximo 20 pontos)
+    if (flashcardStats && flashcardStats.totalStudyTime > 0) {
+      engagementScore += Math.min(flashcardStats.totalStudyTime / 10, 20); // 10 minutos = 1 ponto
+    }
+    
+    // Pontos por uso de tokens (máximo 10 pontos)
+    engagementScore += Math.min(tokensSpent, 10);
+    
+    // Pontos por criação de conteúdo (máximo 10 pontos)
+    if (flashcardStats && flashcardStats.totalFlashcardsCreated > 0) {
+      engagementScore += Math.min(flashcardStats.totalFlashcardsCreated, 10);
+    }
+    
+    return Math.round(Math.min(engagementScore, 100));
+  }
+
+  /**
+   * Obter atividade combinada do usuário (quizzes + flashcards)
+   */
+  async getCombinedActivity(userId: string, days: number = 365) {
+    // Buscar atividade de flashcards
+    let flashcardActivity = [];
+    try {
+      const flashcardService = this.moduleRef.get('FlashcardService', { strict: false });
+      if (flashcardService) {
+        flashcardActivity = await flashcardService.getUserActivityStats(userId, days);
+      }
+    } catch (error) {
+      console.log('FlashcardService não encontrado para atividade');
+    }
+
+    // Buscar atividade de quizzes (implementar se necessário)
+    // Por ora, vamos usar os dados que já temos
+    const startDate = new Date();
+    startDate.setDate(startDate.getDate() - days);
+
+    // Para quizzes, precisaríamos buscar por data, mas como não temos essa estrutura,
+    // vamos focar nos flashcards e expandir conforme necessário
+    
+    // Mapear atividade de flashcards para formato combinado
+    const activityMap = new Map<string, {
+      quizAttempts: number;
+      flashcardSessions: number;
+      totalActivities: number;
+      engagement: number;
+    }>();
+
+    // Adicionar dados de flashcards
+    flashcardActivity.forEach(activity => {
+      activityMap.set(activity.date, {
+        quizAttempts: 0, // TODO: implementar quando tivermos dados por data
+        flashcardSessions: activity.sessions,
+        totalActivities: activity.sessions,
+        engagement: Math.min(activity.sessions + Math.round(activity.intensity), 5)
+      });
+    });
+
+    // Converter para array ordenado
+    const combinedActivity = Array.from(activityMap.entries()).map(([date, data]) => ({
+      date,
+      ...data
+    }));
+
+    return combinedActivity.sort((a, b) => a.date.localeCompare(b.date));
   }
   /**
    * Reseta o limite diário se necessário (se passou um dia)

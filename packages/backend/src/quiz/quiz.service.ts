@@ -2,6 +2,7 @@ import { Injectable, HttpException, HttpStatus, NotFoundException } from '@nestj
 import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
 import { InjectModel } from '@nestjs/mongoose';
+import { ModuleRef } from '@nestjs/core';
 import { Model } from 'mongoose';
 import { firstValueFrom } from 'rxjs';
 import axios from 'axios';
@@ -18,6 +19,7 @@ export class QuizService {
     @InjectModel(Quiz.name) private quizModel: Model<QuizDocument>,
     @InjectModel(QuizAttempt.name) private quizAttemptModel: Model<QuizAttemptDocument>,
     private readonly userService: UserService,
+    private readonly moduleRef: ModuleRef,
   ) { }
 
   async generateQuiz(dto: GenerateQuizDto, userId: string): Promise<GeneratedQuiz> {
@@ -653,22 +655,37 @@ IMPORTANTE:
   }
 
   async getUserStats(userId: string) {
+    // Buscar tentativas de quiz
     const attempts = await this.quizAttemptModel
       .find({ userId })
       .select('score')
       .exec();
 
-    const totalAttempts = attempts.length;
-    const averageScore = totalAttempts > 0
-      ? attempts.reduce((sum, attempt) => sum + attempt.score, 0) / totalAttempts
+    const quizAttempts = attempts.length;
+    const averageScore = quizAttempts > 0
+      ? attempts.reduce((sum, attempt) => sum + attempt.score, 0) / quizAttempts
       : 0;
+
+    // Buscar sessões de flashcard
+    let flashcardSessions = 0;
+    try {
+      const flashcardService = this.moduleRef.get('FlashcardService', { strict: false });
+      if (flashcardService) {
+        const flashcardStats = await flashcardService.getUserStats(userId);
+        flashcardSessions = flashcardStats.totalStudySessions || 0;
+      }
+    } catch (error) {
+      console.log('FlashcardService não encontrado para estatísticas de quiz');
+    }
 
     // Buscar totalFreeQuizzesCompleted do usuário
     const user = await this.userService.findById(userId);
     const totalFreeQuizzesCompleted = user.totalFreeQuizzesCompleted || 0;
 
     return {
-      totalAttempts,
+      totalAttempts: quizAttempts + flashcardSessions, // Combinar tentativas de quiz e sessões de flashcard
+      quizAttempts, // Manter separado para referência
+      flashcardSessions, // Manter separado para referência
       averageScore,
       totalFreeQuizzesCompleted, // Apenas quizzes gratuitos
     };

@@ -83,7 +83,7 @@ const MyQuizzesPage: React.FC = () => {
                         </p>
                     </div>
                     <button
-                        onClick={() => navigate('/create-quiz-link')}
+                        onClick={() => navigate('/create-quiz')}
                         className="flex items-center gap-2 px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg font-medium transition-colors shadow-sm shrink-0"
                     >
                         <PlusCircleIcon className="w-5 h-5" />
@@ -110,7 +110,7 @@ const MyQuizzesPage: React.FC = () => {
                             Você ainda não criou nenhum quiz. Crie quizzes personalizados a partir de vagas do LinkedIn.
                         </p>
                         <button
-                            onClick={() => navigate('/create-quiz-link')}
+                            onClick={() => navigate('/create-quiz')}
                             className="flex items-center gap-2 px-6 py-3 bg-primary-600 hover:bg-primary-700 text-white rounded-xl font-bold transition-all shadow-lg hover:shadow-primary-600/20 hover:-translate-y-1"
                         >
                             <SparklesIcon className="w-5 h-5" />

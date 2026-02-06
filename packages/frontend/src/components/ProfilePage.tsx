@@ -881,7 +881,7 @@ const ProfilePage: React.FC = () => {
                   <div className="text-center p-3 bg-slate-50 dark:bg-slate-800/50 rounded-lg border border-slate-100 dark:border-slate-700">
                     <ShieldCheckIcon className="h-6 w-6 text-green-500 mx-auto mb-2" />
                     <p className="text-xs text-slate-500 dark:text-slate-400">Média Geral</p>
-                    <p className="text-lg font-bold text-slate-900 dark:text-white">{stats.averageScore.toFixed(0)}%</p>
+                    <p className="text-lg font-bold text-slate-900 dark:text-white">{(stats.averageScore * 10).toFixed(0)}%</p>
                   </div>
                 </div>
 

@@ -139,7 +139,7 @@ const HomePage: React.FC = () => {
   ] : userStats ? [
     // Real User Stats
     { label: 'Simulados', value: (userStats.totalAttempts ?? 0).toString(), icon: DocumentTextIcon, color: 'indigo', blur: false },
-    { label: 'Taxa de Acerto', value: `${((userStats.averageScore ?? 0)).toFixed(0)}%`, icon: CheckCircleIcon, color: 'green', blur: false },
+    { label: 'Taxa de Acerto', value: `${((userStats.averageScore ?? 0) * 10).toFixed(0)}%`, icon: CheckCircleIcon, color: 'green', blur: false },
     { label: 'Tempo Médio', value: `${Math.floor((userStats.averageTime ?? 0) / 60)}min`, icon: ClockIcon, color: 'amber', blur: false },
     { label: 'Evolução', value: `${(userStats.evolution ?? 0) >= 0 ? '+' : ''}${(userStats.evolution ?? 0).toFixed(0)}%`, icon: ArrowTrendingUpIcon, color: 'purple', blur: false },
   ] : [
