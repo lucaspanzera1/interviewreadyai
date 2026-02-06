@@ -200,6 +200,23 @@ class ApiClient {
   private _cachedUserAt: number | null = null;
   private _userCacheTtlMs = 5000; // 5 seconds
 
+  private getMethodColor(method: string): string {
+    switch (method.toUpperCase()) {
+      case 'GET':
+        return '\x1b[34m'; // Azul
+      case 'POST':
+        return '\x1b[32m'; // Verde
+      case 'PUT':
+        return '\x1b[33m'; // Amarelo
+      case 'DELETE':
+        return '\x1b[31m'; // Vermelho
+      case 'PATCH':
+        return '\x1b[35m'; // Magenta
+      default:
+        return '\x1b[37m'; // Branco
+    }
+  }
+
   constructor() {
     const baseURL = import.meta.env.VITE_API_BASE_URL || '/api';
     const timeout = parseInt(import.meta.env.VITE_API_TIMEOUT || '10000');
@@ -221,6 +238,10 @@ class ApiClient {
         if (token) {
           config.headers.Authorization = `Bearer ${token}`;
         }
+        // Log da requisição
+        const method = config.method?.toUpperCase() || 'UNKNOWN';
+        const methodColor = this.getMethodColor(method);
+        console.log(`${methodColor}[${method}]\x1b[0m ${config.url} - Outgoing request`);
         return config;
       },
       (error) => {
@@ -231,9 +252,20 @@ class ApiClient {
     // Response interceptor to handle token refresh
     this.client.interceptors.response.use(
       (response: AxiosResponse) => {
+        // Log da resposta bem-sucedida
+        const method = response.config.method?.toUpperCase() || 'UNKNOWN';
+        const methodColor = this.getMethodColor(method);
+        console.log(`${methodColor}[${method}]\x1b[0m ${response.config.url} ${response.status}`);
         return response;
       },
       async (error) => {
+        // Log do erro
+        const status = error.response?.status || 'UNKNOWN';
+        const url = error.config?.url || 'UNKNOWN';
+        const method = error.config?.method?.toUpperCase() || 'UNKNOWN';
+        const methodColor = this.getMethodColor(method);
+        console.error(`${methodColor}[${method}]\x1b[0m ${url} ${status} - ${error.message}`);
+
         const originalRequest = error.config;
 
         if (error.response?.status === 401 && !originalRequest._retry) {

@@ -319,7 +319,7 @@ IMPORTANTE:
 3. NÃO inclua explicações, comentários ou texto fora do JSON.`;
 
     const payload = {
-      model: 'llama-3.3-70b-versatile', // Using Llama 3.3 70B model
+      model: 'openai/gpt-oss-120b',
       messages: [
         {
           role: 'system',
