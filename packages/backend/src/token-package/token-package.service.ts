@@ -3,6 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { TokenPackage, TokenPackageDocument } from './schemas/token-package.schema';
 import { User } from '../user/schemas/user.schema';
+import { EmailService } from '../common/services/email.service';
 
 @Injectable()
 export class TokenPackageService {
@@ -11,6 +12,7 @@ export class TokenPackageService {
     private tokenPackageModel: Model<TokenPackageDocument>,
     @InjectModel(User.name)
     private userModel: Model<User>,
+    private readonly emailService: EmailService,
   ) {}
 
   async create(createTokenPackageDto: any): Promise<TokenPackage> {
@@ -129,6 +131,18 @@ export class TokenPackageService {
         message += ` Válido até ${roleExpiresAt.toLocaleDateString('pt-BR')}.`;
       }
     }
+
+    // Enviar email notificando o resgate do plano
+    await this.emailService.sendPlanRedeemedEmail(
+      currentUser.email,
+      currentUser.name || currentUser.email,
+      tokenPackage.name,
+      tokenPackage.description || `Pacote ${tokenPackage.name}`,
+      tokenPackage.tokenAmount,
+      newTokenBalance,
+      tokenPackage.packageType === 'subscription' ? newRole : undefined,
+      roleExpiresAt ? roleExpiresAt.toLocaleDateString('pt-BR') : undefined
+    );
 
     return { message };
   }

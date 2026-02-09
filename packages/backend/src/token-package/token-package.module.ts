@@ -4,6 +4,7 @@ import { TokenPackageController } from './token-package.controller';
 import { TokenPackageService } from './token-package.service';
 import { TokenPackage, TokenPackageSchema } from './schemas/token-package.schema';
 import { User, UserSchema } from '../user/schemas/user.schema';
+import { EmailModule } from '../common/email.module';
 
 @Module({
   imports: [
@@ -11,6 +12,7 @@ import { User, UserSchema } from '../user/schemas/user.schema';
       { name: TokenPackage.name, schema: TokenPackageSchema },
       { name: User.name, schema: UserSchema },
     ]),
+    EmailModule,
   ],
   controllers: [TokenPackageController],
   providers: [TokenPackageService],
