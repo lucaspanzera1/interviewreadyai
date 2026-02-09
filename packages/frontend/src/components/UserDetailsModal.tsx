@@ -9,7 +9,9 @@ import {
   BriefcaseIcon,
   MapPinIcon,
   CodeBracketIcon,
-  PlusIcon
+  PlusIcon,
+  DocumentTextIcon,
+  ChatBubbleLeftRightIcon
 } from '@heroicons/react/24/outline';
 
 interface UserDetailsModalProps {
@@ -22,9 +24,11 @@ const UserDetailsModal: React.FC<UserDetailsModalProps> = ({ userId, userName, o
   const { showToast } = useToast();
   const [details, setDetails] = useState<UserDetails | null>(null);
   const [quizzes, setQuizzes] = useState<any[]>([]);
+  const [flashcards, setFlashcards] = useState<any[]>([]);
+  const [interviews, setInterviews] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<'profile' | 'tokens' | 'quizzes'>('profile');
+  const [activeTab, setActiveTab] = useState<'profile' | 'tokens' | 'quizzes' | 'flashcards' | 'interviews'>('profile');
   const [showAddTokensModal, setShowAddTokensModal] = useState(false);
   const [addTokensAmount, setAddTokensAmount] = useState('');
   const [addTokensReason, setAddTokensReason] = useState('');
@@ -35,12 +39,16 @@ const UserDetailsModal: React.FC<UserDetailsModalProps> = ({ userId, userName, o
       setLoading(true);
       setError(null);
       try {
-        const [userDetails, userQuizzes] = await Promise.all([
+        const [userDetails, userQuizzes, userFlashcards, userInterviews] = await Promise.all([
           apiClient.getUserDetails(userId),
-          apiClient.getUserQuizzesByAdmin(userId)
+          apiClient.getUserQuizzesByAdmin(userId),
+          apiClient.getUserFlashcardsByAdmin(userId),
+          apiClient.getUserInterviewsByAdmin(userId)
         ]);
         setDetails(userDetails);
         setQuizzes(userQuizzes.data || []);
+        setFlashcards(userFlashcards.flashcards || []);
+        setInterviews(userInterviews.interviews || []);
       } catch (err: any) {
         setError('Erro ao buscar detalhes do usuário.');
         console.error(err);
@@ -176,6 +184,26 @@ const UserDetailsModal: React.FC<UserDetailsModalProps> = ({ userId, userName, o
             >
               <AcademicCapIcon className="h-4 w-4" />
               Quizzes Criados <span className="ml-1 px-2 py-0.5 bg-slate-100 dark:bg-slate-800 rounded-full text-xs">{quizzes.length}</span>
+            </button>
+            <button
+              onClick={() => setActiveTab('flashcards')}
+              className={`pb-3 text-sm font-medium border-b-2 transition-colors flex items-center gap-2 ${activeTab === 'flashcards'
+                ? 'border-primary-600 text-primary-600 dark:border-primary-400 dark:text-primary-400'
+                : 'border-transparent text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300'
+                }`}
+            >
+              <DocumentTextIcon className="h-4 w-4" />
+              Flashcards <span className="ml-1 px-2 py-0.5 bg-slate-100 dark:bg-slate-800 rounded-full text-xs">{flashcards.length}</span>
+            </button>
+            <button
+              onClick={() => setActiveTab('interviews')}
+              className={`pb-3 text-sm font-medium border-b-2 transition-colors flex items-center gap-2 ${activeTab === 'interviews'
+                ? 'border-primary-600 text-primary-600 dark:border-primary-400 dark:text-primary-400'
+                : 'border-transparent text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300'
+                }`}
+            >
+              <ChatBubbleLeftRightIcon className="h-4 w-4" />
+              Entrevistas <span className="ml-1 px-2 py-0.5 bg-slate-100 dark:bg-slate-800 rounded-full text-xs">{interviews.length}</span>
             </button>
           </div>
         </div>
@@ -453,6 +481,127 @@ const UserDetailsModal: React.FC<UserDetailsModalProps> = ({ userId, userName, o
                           <div className="bg-slate-50 dark:bg-slate-900/50 rounded-lg p-2">
                             <span className="block text-xs uppercase text-slate-400 font-bold">Média</span>
                             <span className="block font-semibold text-slate-800 dark:text-slate-200">{quiz.averageScore ? quiz.averageScore.toFixed(0) : 0}%</span>
+                          </div>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              )}
+
+              {/* Flashcards Tab */}
+              {activeTab === 'flashcards' && (
+                <div className="grid grid-cols-1 gap-4">
+                  {flashcards.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center py-16 text-slate-400 bg-white dark:bg-slate-800 rounded-xl border border-dashed border-slate-200 dark:border-slate-700">
+                      <DocumentTextIcon className="h-12 w-12 mb-3 opacity-50" />
+                      <p>Este usuário ainda não criou nenhum flashcard.</p>
+                    </div>
+                  ) : (
+                    flashcards.map((flashcard) => (
+                      <div
+                        key={flashcard._id}
+                        className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-5 hover:shadow-md transition-shadow group"
+                      >
+                        <div className="flex items-start justify-between mb-3">
+                          <div>
+                            <h4 className="text-lg font-bold text-slate-900 dark:text-white group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">
+                              {flashcard.titulo}
+                            </h4>
+                            <p className="text-sm text-slate-600 dark:text-slate-400 mt-1 line-clamp-1">{flashcard.descricao}</p>
+                          </div>
+                          <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold border ${flashcard.isActive
+                            ? 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-300 border-emerald-100 dark:border-emerald-800'
+                            : 'bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-100 dark:border-slate-700'
+                            }`}>
+                            {flashcard.isActive ? 'Ativo' : 'Inativo'}
+                          </span>
+                        </div>
+
+                        <div className="flex flex-wrap items-center gap-y-2 gap-x-4 text-sm text-slate-500 dark:text-slate-400 mt-4 pt-4 border-t border-slate-100 dark:border-slate-700/50">
+                          <span className="flex items-center gap-1.5 px-2 py-1 bg-slate-50 dark:bg-slate-800/50 rounded-md">
+                            <span className="font-semibold text-slate-700 dark:text-slate-300">{flashcard.categoria}</span>
+                          </span>
+                          <span>{flashcard.nivel}</span>
+                          <span>•</span>
+                          <span>{flashcard.quantidade_cards} cards</span>
+                          <span>•</span>
+                          <span className={`font-medium ${flashcard.isFree ? 'text-emerald-600' : 'text-amber-600'}`}>
+                            {flashcard.isFree ? 'Gratuito' : 'Premium'}
+                          </span>
+                        </div>
+
+                        <div className="mt-4 flex gap-2">
+                          {flashcard.tags && flashcard.tags.map((tag: string, idx: number) => (
+                            <span key={idx} className="text-xs px-2 py-0.5 rounded border border-slate-100 dark:border-slate-700 text-slate-500">#{tag}</span>
+                          ))}
+                        </div>
+
+                        <div className="grid grid-cols-3 gap-2 mt-4 text-center">
+                          <div className="bg-slate-50 dark:bg-slate-900/50 rounded-lg p-2">
+                            <span className="block text-xs uppercase text-slate-400 font-bold">Sessões</span>
+                            <span className="block font-semibold text-slate-800 dark:text-slate-200">{flashcard.totalSessions || 0}</span>
+                          </div>
+                          <div className="bg-slate-50 dark:bg-slate-900/50 rounded-lg p-2">
+                            <span className="block text-xs uppercase text-slate-400 font-bold">Cards Estudados</span>
+                            <span className="block font-semibold text-slate-800 dark:text-slate-200">{flashcard.totalCardsStudied || 0}</span>
+                          </div>
+                          <div className="bg-slate-50 dark:bg-slate-900/50 rounded-lg p-2">
+                            <span className="block text-xs uppercase text-slate-400 font-bold">Tempo Médio</span>
+                            <span className="block font-semibold text-slate-800 dark:text-slate-200">{flashcard.averageSessionTime ? Math.round(flashcard.averageSessionTime / 60) : 0}min</span>
+                          </div>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              )}
+
+              {/* Interviews Tab */}
+              {activeTab === 'interviews' && (
+                <div className="grid grid-cols-1 gap-4">
+                  {interviews.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center py-16 text-slate-400 bg-white dark:bg-slate-800 rounded-xl border border-dashed border-slate-200 dark:border-slate-700">
+                      <ChatBubbleLeftRightIcon className="h-12 w-12 mb-3 opacity-50" />
+                      <p>Este usuário ainda não criou nenhuma entrevista.</p>
+                    </div>
+                  ) : (
+                    interviews.map((interview) => (
+                      <div
+                        key={interview._id}
+                        className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-5 hover:shadow-md transition-shadow group"
+                      >
+                        <div className="flex items-start justify-between mb-3">
+                          <div>
+                            <h4 className="text-lg font-bold text-slate-900 dark:text-white group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">
+                              {interview.jobTitle}
+                            </h4>
+                            <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">{interview.companyName}</p>
+                          </div>
+                          <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold border ${interview.isActive
+                            ? 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-300 border-emerald-100 dark:border-emerald-800'
+                            : 'bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-100 dark:border-slate-700'
+                            }`}>
+                            {interview.isActive ? 'Ativo' : 'Inativo'}
+                          </span>
+                        </div>
+
+                        <div className="flex flex-wrap items-center gap-y-2 gap-x-4 text-sm text-slate-500 dark:text-slate-400 mt-4 pt-4 border-t border-slate-100 dark:border-slate-700/50">
+                          <span>{interview.interviewType}</span>
+                          <span>•</span>
+                          <span>{interview.estimatedDuration} min</span>
+                          <span>•</span>
+                          <span>{interview.totalAttempts || 0} tentativas</span>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-2 mt-4 text-center">
+                          <div className="bg-slate-50 dark:bg-slate-900/50 rounded-lg p-2">
+                            <span className="block text-xs uppercase text-slate-400 font-bold">Acessos</span>
+                            <span className="block font-semibold text-slate-800 dark:text-slate-200">{interview.totalAccess || 0}</span>
+                          </div>
+                          <div className="bg-slate-50 dark:bg-slate-900/50 rounded-lg p-2">
+                            <span className="block text-xs uppercase text-slate-400 font-bold">Conclusões</span>
+                            <span className="block font-semibold text-slate-800 dark:text-slate-200">{interview.totalCompletions || 0}</span>
                           </div>
                         </div>
                       </div>

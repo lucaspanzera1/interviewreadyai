@@ -912,6 +912,20 @@ class ApiClient {
     return res.data;
   }
 
+  async getUserFlashcardsByAdmin(userId: string, page: number = 1, limit: number = 100) {
+    const res = await this.client.get(`/flashcard/admin/user/${userId}`, {
+      params: { page, limit },
+    });
+    return res.data;
+  }
+
+  async getUserInterviewsByAdmin(userId: string, page: number = 1, limit: number = 100) {
+    const res = await this.client.get(`/interview/admin/user/${userId}`, {
+      params: { page, limit },
+    });
+    return res.data;
+  }
+
   async addTokensToUser(userId: string, amount: number, reason?: string): Promise<{ success: boolean; message: string; newBalance: number }> {
     const res = await this.client.post(`/users/${userId}/add-tokens`, {
       amount,

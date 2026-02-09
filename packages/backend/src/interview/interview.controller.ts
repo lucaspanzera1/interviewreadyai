@@ -24,6 +24,9 @@ import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { Public } from '../auth/decorators/public.decorator';
 import { UserDocument } from '../user/schemas/user.schema';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { RolesGuard } from '../auth/guards/roles.guard';
+import { Roles } from '../auth/decorators/roles.decorator';
+import { UserRole } from '../user/schemas/user.schema';
 import { ConfigService } from '@nestjs/config';
 import * as jwt from 'jsonwebtoken';
 
@@ -121,6 +124,17 @@ export class InterviewController {
   @UseGuards(JwtAuthGuard)
   async getUserStats(@CurrentUser() user: UserDocument) {
     return this.interviewService.getUserStats(user._id.toString());
+  }
+
+  @Get('admin/user/:userId')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN)
+  async getUserInterviewsByAdmin(
+    @Param('userId') userId: string,
+    @Query('page') page: string = '1',
+    @Query('limit') limit: string = '100',
+  ) {
+    return this.interviewService.getUserInterviewsByAdmin(userId, parseInt(page), parseInt(limit));
   }
 
   @Get(':id')

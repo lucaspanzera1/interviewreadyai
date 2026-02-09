@@ -558,6 +558,32 @@ gere uma simulação de entrevista realista com {{numberOfQuestions}} perguntas 
     };
   }
 
+  async getUserInterviewsByAdmin(userId: string, page: number, limit: number) {
+    const { Types } = require('mongoose');
+    const userObjectId = new Types.ObjectId(userId);
+    
+    const skip = (page - 1) * limit;
+    
+    const interviews = await this.interviewModel
+      .find({ createdBy: userObjectId })
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit)
+      .select('jobTitle companyName estimatedDuration totalAttempts createdAt interviewType');
+      
+    const total = await this.interviewModel.countDocuments({ createdBy: userObjectId });
+    
+    return {
+      interviews,
+      pagination: {
+        page,
+        limit,
+        total,
+        pages: Math.ceil(total / limit),
+      },
+    };
+  }
+
   /**
    * Obtém tentativas do usuário
    */
