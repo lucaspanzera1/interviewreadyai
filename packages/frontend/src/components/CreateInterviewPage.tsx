@@ -16,6 +16,31 @@ const CreateInterviewPage: React.FC = () => {
     const { user, refreshUser } = useAuth();
     const { showToast } = useToast();
 
+    const [loadingText, setLoadingText] = useState('Iniciando...'); // State for loading messages
+
+    // Cycle through loading messages to keep user engaged
+    React.useEffect(() => {
+        if (!isLoading) return;
+
+        const messages = [
+            'Analisando vaga...',
+            'Identificando requisitos...',
+            'Criando perguntas...',
+            'Elaborando dicas...',
+            'Finalizando...'
+        ];
+
+        let index = 0;
+        setLoadingText(messages[0]);
+
+        const interval = setInterval(() => {
+            index = (index + 1) % messages.length;
+            setLoadingText(messages[index]);
+        }, 2000);
+
+        return () => clearInterval(interval);
+    }, [isLoading]);
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsLoading(true);
@@ -33,7 +58,7 @@ const CreateInterviewPage: React.FC = () => {
             }
 
             // Gerar a simulação de entrevista
-            const result = await apiClient.generateInterview({ 
+            const result = await apiClient.generateInterview({
                 linkedinUrl: jobLink,
                 numberOfQuestions,
                 experienceLevel: experienceLevel || undefined
@@ -78,7 +103,7 @@ const CreateInterviewPage: React.FC = () => {
     return (
         <div className="min-h-full">
             <PageTitle title="Criar Simulação de Entrevista - TreinaVagaAI" />
-            
+
             {/* Header */}
             <header className="sticky top-0 z-20 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 -mx-4 -mt-4 lg:-mx-8 lg:-mt-8 px-4 lg:px-8 py-4 mb-8">
                 <div className="max-w-4xl mx-auto">
@@ -86,8 +111,10 @@ const CreateInterviewPage: React.FC = () => {
                         Simulação de Entrevista com IA
                     </h1>
                     <p className="mt-2 text-sm sm:text-base text-slate-600 dark:text-slate-400">
-                        Gere uma simulação de entrevista personalizada baseada em uma vaga real do LinkedIn. 
+                        Gere uma simulação de entrevista personalizada baseada em uma vaga real do LinkedIn.
                         <span className="font-medium text-primary-600 dark:text-primary-400"> Custa 2 tokens.</span>
+                        <br />
+                        <span className="text-xs text-slate-500 dark:text-slate-400">Após gerar, você poderá escolher entre simulação de texto ou vídeo com análise IA.</span>
                     </p>
                 </div>
             </header>
@@ -95,7 +122,7 @@ const CreateInterviewPage: React.FC = () => {
             {/* Main Content */}
             <main className="max-w-4xl mx-auto">
                 <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 p-6 sm:p-8">
-                    
+
                     {/* Informações importantes */}
                     <div className="mb-8 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
                         <div className="flex items-start gap-3">
@@ -111,7 +138,7 @@ const CreateInterviewPage: React.FC = () => {
                                     <li>• Fornece palavras-chave importantes para suas respostas</li>
                                     <li>• Tempo estimado: {numberOfQuestions * 3}-{numberOfQuestions * 4} minutos</li>
                                 </ul>
-                                
+
                                 {user && (
                                     <div className="mt-3 text-sm font-medium">
                                         <span className="text-slate-700 dark:text-slate-300">Seus tokens: </span>
@@ -143,7 +170,7 @@ const CreateInterviewPage: React.FC = () => {
                                 value={jobLink}
                                 onChange={(e) => setJobLink(e.target.value)}
                                 placeholder="https://linkedin.com/jobs/view/..."
-                                className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 placeholder-slate-500 dark:placeholder-slate-400 focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                                className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 placeholder-slate-500 dark:placeholder-slate-400 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-shadow duration-200"
                                 required
                                 disabled={isLoading}
                             />
@@ -162,7 +189,7 @@ const CreateInterviewPage: React.FC = () => {
                                 id="numberOfQuestions"
                                 value={numberOfQuestions}
                                 onChange={(e) => setNumberOfQuestions(parseInt(e.target.value))}
-                                className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                                className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-shadow duration-200"
                                 disabled={isLoading}
                             >
                                 <option value={5}>5 perguntas (15-20 min)</option>
@@ -183,7 +210,7 @@ const CreateInterviewPage: React.FC = () => {
                                 id="experienceLevel"
                                 value={experienceLevel}
                                 onChange={(e) => setExperienceLevel(e.target.value)}
-                                className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                                className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-shadow duration-200"
                                 disabled={isLoading}
                             >
                                 {experienceLevels.map((level) => (
@@ -199,17 +226,17 @@ const CreateInterviewPage: React.FC = () => {
 
                         {/* Erro */}
                         {error && (
-                            <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 rounded-lg text-sm">
+                            <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 rounded-lg text-sm animate-fade-in">
                                 {error}
                             </div>
                         )}
 
                         {/* Botões */}
-                        <div className="flex gap-4 pt-6">
+                        <div className="flex gap-4 pt-4">
                             <button
                                 type="button"
                                 onClick={() => navigate('/dashboard')}
-                                className="flex-1 sm:flex-none px-6 py-3 border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
+                                className="flex-1 sm:flex-none px-6 py-3.5 border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-700 transition-all duration-200 font-medium"
                                 disabled={isLoading}
                             >
                                 Cancelar
@@ -217,19 +244,35 @@ const CreateInterviewPage: React.FC = () => {
                             <button
                                 type="submit"
                                 disabled={isLoading || !user || !user.tokens || user.tokens < 2}
-                                className="flex-1 sm:flex-auto px-6 py-3 bg-gradient-to-r from-primary-600 to-primary-700 hover:from-primary-700 hover:to-primary-800 disabled:from-slate-400 disabled:to-slate-500 text-white font-medium rounded-lg transition-colors disabled:cursor-not-allowed shadow-sm"
+                                className={`
+                                    relative flex-1 sm:flex-auto px-6 py-3.5 rounded-xl font-bold text-white shadow-lg shadow-primary-500/20
+                                    transition-all duration-300 transform overflow-hidden group
+                                    ${isLoading
+                                        ? 'bg-slate-800 dark:bg-slate-700 cursor-not-allowed scale-[0.98]'
+                                        : 'bg-gradient-to-r from-primary-600 to-indigo-600 hover:from-primary-500 hover:to-indigo-500 hover:scale-[1.02] hover:shadow-primary-500/30'
+                                    }
+                                    disabled:opacity-70 disabled:grayscale disabled:hover:scale-100
+                                `}
                             >
-                                {isLoading ? (
-                                    <span className="flex items-center justify-center gap-2">
-                                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                                        Gerando simulação...
-                                    </span>
-                                ) : (
-                                    <span className="flex items-center justify-center gap-2">
-                                        <ChatBubbleLeftRightIcon className="w-5 h-5" />
-                                        Gerar Simulação (2 tokens)
-                                    </span>
+                                {/* Background Shimmer Effect during loading */}
+                                {isLoading && (
+                                    <div className="absolute inset-0 -translate-x-full animate-[shimmer_1.5s_infinite] bg-gradient-to-r from-transparent via-white/10 to-transparent" />
                                 )}
+
+                                <span className="relative flex items-center justify-center gap-2.5">
+                                    {isLoading ? (
+                                        <>
+                                            <div className="w-5 h-5 border-[2.5px] border-white/30 border-t-white rounded-full animate-spin" />
+                                            <span className="animate-pulse font-medium">{loadingText}</span>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <ChatBubbleLeftRightIcon className="w-5 h-5 transition-transform group-hover:scale-110" />
+                                            <span>Gerar Simulação</span>
+                                            <span className="bg-white/20 px-2 py-0.5 rounded text-xs font-semibold ml-1">2 tokens</span>
+                                        </>
+                                    )}
+                                </span>
                             </button>
                         </div>
                     </form>

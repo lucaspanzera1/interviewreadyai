@@ -11,18 +11,28 @@ import {
   UseInterceptors,
   UploadedFile,
   UploadedFiles,
-  BadRequestException
+  BadRequestException,
+  Res,
+  Req,
+  UnauthorizedException
 } from '@nestjs/common';
+import { Response, Request } from 'express';
 import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 import { InterviewService } from './interview.service';
 import { GenerateInterviewDto, GeneratedInterview, InterviewAttemptDto } from './dto';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
+import { Public } from '../auth/decorators/public.decorator';
 import { UserDocument } from '../user/schemas/user.schema';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { ConfigService } from '@nestjs/config';
+import * as jwt from 'jsonwebtoken';
 
 @Controller('interview')
 export class InterviewController {
-  constructor(private readonly interviewService: InterviewService) {}
+  constructor(
+    private readonly interviewService: InterviewService,
+    private readonly configService: ConfigService
+  ) {}
 
   @Post('generate')
   @UseGuards(JwtAuthGuard)
@@ -158,6 +168,16 @@ export class InterviewController {
       throw new BadRequestException('At least one video file is required');
     }
 
+    // Validar tamanho dos arquivos
+    for (const file of videoFiles) {
+      if (!file.buffer || file.buffer.length === 0) {
+        throw new BadRequestException('One or more video files are empty');
+      }
+      if (file.size > 50 * 1024 * 1024) { // 50MB
+        throw new BadRequestException('Video file too large (max 50MB)');
+      }
+    }
+
     return this.interviewService.recordVideoInterviewAttempt(
       interviewId,
       user._id.toString(),
@@ -173,5 +193,51 @@ export class InterviewController {
     @CurrentUser() user: UserDocument,
   ) {
     return this.interviewService.getVideoAnalysis(attemptId, user._id.toString());
+  }
+
+  @Get('video/:filename')
+  @Public()
+  async getVideoFile(
+    @Param('filename') filename: string,
+    @Query('token') token: string,
+    @Req() req: Request,
+    @Res() res: Response,
+  ) {
+    let userId: string;
+    const jwtSecret = this.configService.get<string>('JWT_SECRET');
+    
+    if (!jwtSecret) {
+      throw new BadRequestException('JWT configuration error');
+    }
+
+    const authHeader = req.headers.authorization;
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+      const jwtToken = authHeader.substring(7);
+      try {
+        const payload = jwt.verify(jwtToken, jwtSecret) as any;
+        if (!payload || !payload.sub) {
+          throw new UnauthorizedException('Invalid token payload');
+        }
+        userId = payload.sub;
+      } catch (error) {
+        console.error('[VideoAuth] Error verifying JWT from Authorization header:', error);
+        throw new UnauthorizedException('Invalid authorization token');
+      }
+    } else if (token) {
+      try {
+        const payload = jwt.verify(token, jwtSecret) as any;
+        if (!payload || !payload.sub) {
+          throw new UnauthorizedException('Invalid token payload');
+        }
+        userId = payload.sub;
+      } catch (error) {
+        console.error('[VideoAuth] Error verifying JWT from query parameter:', error);
+        throw new UnauthorizedException('Invalid query token');
+      }
+    } else {
+      throw new UnauthorizedException('No authentication provided');
+    }
+    
+    return this.interviewService.serveVideoFile(filename, userId, res);
   }
 }

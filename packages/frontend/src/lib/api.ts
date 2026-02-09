@@ -327,7 +327,7 @@ class ApiClient {
 
 
   constructor() {
-    const baseURL = import.meta.env.VITE_API_BASE_URL || '/api';
+    const baseURL = import.meta.env.VITE_API_BASE_URL || '';
     const timeout = parseInt(import.meta.env.VITE_API_TIMEOUT || '10000');
 
     this.client = axios.create({

@@ -1,8 +1,6 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
-    PlayIcon,
-    PauseIcon,
     ArrowPathIcon,
     CheckCircleIcon,
     ExclamationTriangleIcon,
@@ -11,10 +9,15 @@ import {
     ChevronLeftIcon,
     SpeakerWaveIcon,
     VideoCameraIcon,
-    CpuChipIcon
+    CpuChipIcon,
+    LightBulbIcon,
+    ListBulletIcon,
+    ClockIcon,
+    ArrowsPointingOutIcon
 } from '@heroicons/react/24/outline';
+import { PlayIcon as PlayIconSolid, PauseIcon as PauseIconSolid } from '@heroicons/react/24/solid';
 import { apiClient } from '../lib/api';
-import { useToast } from '../contexts/ToastContext';
+
 
 // --- Types ---
 
@@ -48,74 +51,78 @@ interface AnalysisData {
     status: 'pending' | 'processing' | 'completed' | 'failed';
     hasVideo: boolean;
     videoPath?: string;
+    videoPaths?: string[];
     analysis?: VideoAnalysisResult;
     completedAt?: string;
 }
 
 // --- Utility Components ---
 
-const TechBadge = ({ children, color = 'blue' }: { children: React.ReactNode, color?: 'blue' | 'green' | 'red' | 'yellow' | 'purple' }) => {
-    const colors = {
-        blue: 'bg-blue-100 text-blue-700 border-blue-200 dark:bg-blue-500/10 dark:text-blue-400 dark:border-blue-500/20',
-        green: 'bg-emerald-100 text-emerald-700 border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20',
-        red: 'bg-rose-100 text-rose-700 border-rose-200 dark:bg-rose-500/10 dark:text-rose-400 dark:border-rose-500/20',
-        yellow: 'bg-amber-100 text-amber-700 border-amber-200 dark:bg-amber-500/10 dark:text-amber-400 dark:border-amber-500/20',
-        purple: 'bg-purple-100 text-purple-700 border-purple-200 dark:bg-purple-500/10 dark:text-purple-400 dark:border-purple-500/20',
+const cn = (...classes: (string | undefined | null | false)[]) => classes.filter(Boolean).join(' ');
+
+const TechBadge = ({ children, color = 'blue', className }: { children: React.ReactNode, color?: 'blue' | 'green' | 'red' | 'yellow' | 'purple', className?: string }) => {
+    const styles = {
+        blue: 'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-500/10 dark:text-blue-300 dark:border-blue-500/20',
+        green: 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-300 dark:border-emerald-500/20',
+        red: 'bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-500/10 dark:text-rose-300 dark:border-rose-500/20',
+        yellow: 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-500/10 dark:text-amber-300 dark:border-amber-500/20',
+        purple: 'bg-indigo-50 text-indigo-700 border-indigo-200 dark:bg-indigo-500/10 dark:text-indigo-300 dark:border-indigo-500/20',
     };
 
     return (
-        <span className={`px-2 py-0.5 rounded text-xs font-mono border ${colors[color] || colors.blue}`}>
+        <span className={cn(`px-2.5 py-1 rounded-md text-[10px] uppercase font-bold tracking-wider border ${styles[color]}`, className)}>
             {children}
         </span>
     );
 };
 
-const RadialProgress = ({ value, label, icon: Icon, color = 'blue' }: { value: number, label: string, icon: any, color?: string }) => {
-    const radius = 30;
+const AnimatedCircularProgress = ({ value, label, icon: Icon, color }: { value: number, label: string, icon: any, color: 'blue' | 'green' | 'purple' | 'yellow' }) => {
+    const radius = 34;
     const circumference = 2 * Math.PI * radius;
     const offset = circumference - (value / 100) * circumference;
 
-    const colors: Record<string, string> = {
-        blue: 'text-blue-600 dark:text-blue-500',
-        green: 'text-emerald-600 dark:text-emerald-500',
-        yellow: 'text-amber-600 dark:text-amber-500',
-        purple: 'text-purple-600 dark:text-purple-500',
+    const colorMap = {
+        blue: { stroke: 'text-blue-500', bg: 'bg-blue-50 dark:bg-blue-900/10', text: 'text-blue-600 dark:text-blue-400' },
+        green: { stroke: 'text-emerald-500', bg: 'bg-emerald-50 dark:bg-emerald-900/10', text: 'text-emerald-600 dark:text-emerald-400' },
+        purple: { stroke: 'text-indigo-500', bg: 'bg-indigo-50 dark:bg-indigo-900/10', text: 'text-indigo-600 dark:text-indigo-400' },
+        yellow: { stroke: 'text-amber-500', bg: 'bg-amber-50 dark:bg-amber-900/10', text: 'text-amber-600 dark:text-amber-400' },
     };
 
+    const c = colorMap[color];
+
     return (
-        <div className="flex flex-col items-center justify-center p-4 bg-white dark:bg-slate-900/50 rounded-xl border border-gray-200 dark:border-slate-800 relative group hover:border-gray-300 dark:hover:border-slate-700 transition-all shadow-sm dark:shadow-none">
-            <div className="relative w-24 h-24 flex items-center justify-center">
-                <svg className="transform -rotate-90 w-24 h-24">
+        <div className={cn("group relative flex flex-col items-center justify-center p-4 rounded-2xl border transition-all duration-300",
+            "bg-white dark:bg-slate-900/50 border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 hover:shadow-lg dark:hover:shadow-black/20")}>
+
+            <div className="relative w-24 h-24">
+                {/* Background Ring */}
+                <svg className="w-full h-full transform -rotate-90">
                     <circle
-                        cx="48"
-                        cy="48"
-                        r={radius}
-                        stroke="currentColor"
-                        strokeWidth="6"
-                        fill="transparent"
-                        className="text-gray-200 dark:text-slate-800"
+                        cx="48" cy="48" r={radius}
+                        className="text-slate-100 dark:text-slate-800"
+                        strokeWidth="8" fill="transparent" stroke="currentColor"
                     />
+                    {/* Interactive Ring */}
                     <circle
-                        cx="48"
-                        cy="48"
-                        r={radius}
-                        stroke="currentColor"
-                        strokeWidth="6"
+                        cx="48" cy="48" r={radius}
+                        className={cn("transition-all duration-1000 ease-out", c.stroke)}
+                        strokeWidth="8"
+                        strokeLinecap="round"
                         fill="transparent"
                         strokeDasharray={circumference}
                         strokeDashoffset={offset}
-                        strokeLinecap="round"
-                        className={`${colors[color]} transition-all duration-1000 ease-out`}
+                        stroke="currentColor"
                     />
                 </svg>
-                <div className="absolute inset-0 flex items-center justify-center opacity-70 dark:opacity-50 group-hover:opacity-100 transition-opacity">
-                    <Icon className={`w-8 h-8 ${colors[color]}`} />
+
+                {/* Center Icon/Value */}
+                <div className="absolute inset-0 flex flex-col items-center justify-center">
+                    <Icon className={cn("w-6 h-6 mb-1 opacity-50 group-hover:opacity-100 transition-opacity duration-300", c.text)} />
+                    <span className={cn("text-xl font-bold font-mono", c.text)}>{value}</span>
                 </div>
             </div>
-            <div className="mt-2 text-center">
-                <div className="text-2xl font-bold font-mono text-gray-800 dark:text-white">{value}%</div>
-                <div className="text-xs text-gray-500 dark:text-slate-500 uppercase tracking-wider">{label}</div>
-            </div>
+
+            <span className="mt-2 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-widest">{label}</span>
         </div>
     );
 };
@@ -125,9 +132,9 @@ const RadialProgress = ({ value, label, icon: Icon, color = 'blue' }: { value: n
 const VideoTimelineAnalysisPage: React.FC = () => {
     const { attemptId } = useParams<{ attemptId: string }>();
     const navigate = useNavigate();
-    const { /* showToast */ } = useToast();
     const videoRef = useRef<HTMLVideoElement>(null);
     const timelineRef = useRef<HTMLDivElement>(null);
+    const scrollContainerRef = useRef<HTMLDivElement>(null);
 
     const [analysisData, setAnalysisData] = useState<AnalysisData | null>(null);
     const [loading, setLoading] = useState(true);
@@ -135,16 +142,26 @@ const VideoTimelineAnalysisPage: React.FC = () => {
     const [currentTime, setCurrentTime] = useState(0);
     const [duration, setDuration] = useState(0);
     const [isPlaying, setIsPlaying] = useState(false);
+    const [currentVideoIndex, setCurrentVideoIndex] = useState(0);
+
+    // UI States
+    const [activeTab, setActiveTab] = useState<'feed' | 'summary' | 'videos'>('feed');
     const [activeFilter, setActiveFilter] = useState<string>('all');
-    const [showControls, setShowControls] = useState(true);
+    const [isHoveringVideo, setIsHoveringVideo] = useState(false);
+
+    const token = localStorage.getItem('access_token');
+    const currentVideoPath = analysisData?.videoPaths?.[currentVideoIndex] || analysisData?.videoPath;
 
     useEffect(() => {
-        if (attemptId) {
-            fetchAnalysis();
-        }
+        if (attemptId) fetchAnalysis();
     }, [attemptId]);
 
-    // Polling logic
+    useEffect(() => {
+        setCurrentTime(0);
+        setDuration(0);
+        setIsPlaying(false);
+    }, [currentVideoIndex]);
+
     useEffect(() => {
         if (!attemptId) return;
         const interval = setInterval(() => {
@@ -155,23 +172,30 @@ const VideoTimelineAnalysisPage: React.FC = () => {
         return () => clearInterval(interval);
     }, [attemptId, analysisData?.status]);
 
+    // Auto-scroll feedback feed
+    useEffect(() => {
+        if (activeTab === 'feed' && isPlaying && scrollContainerRef.current) {
+            const activeElement = document.getElementById(`moment-card-active`);
+            if (activeElement) {
+                activeElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }
+    }, [currentTime, activeTab, isPlaying]);
+
     const fetchAnalysis = async () => {
         if (!attemptId) {
-            setError('ID da tentativa não encontrado');
+            setError('Attempt ID missing');
             setLoading(false);
             return;
         }
-
         try {
             const response = await apiClient.getVideoAnalysis(attemptId);
             setAnalysisData(response);
-            if (response.analysis) {
-                setDuration(response.analysis.duration);
-            }
+            if (response.analysis) setDuration(response.analysis.duration);
             setError(null);
         } catch (error) {
-            console.error('Error fetching analysis:', error);
-            setError('Erro ao carregar análise');
+            console.error(error);
+            setError('Unable to retrieve analysis data');
         } finally {
             setLoading(false);
         }
@@ -184,21 +208,14 @@ const VideoTimelineAnalysisPage: React.FC = () => {
         }
     };
 
-    const handleLoadedMetadata = () => {
-        if (videoRef.current) {
-            setDuration(videoRef.current.duration);
-        }
-    };
-
     const togglePlayPause = () => {
-        if (videoRef.current) {
-            if (isPlaying) {
-                videoRef.current.pause();
-                setIsPlaying(false);
-            } else {
-                videoRef.current.play();
-                setIsPlaying(true);
-            }
+        if (!videoRef.current) return;
+        if (isPlaying) {
+            videoRef.current.pause();
+            setIsPlaying(false);
+        } else {
+            videoRef.current.play();
+            setIsPlaying(true);
         }
     };
 
@@ -212,12 +229,11 @@ const VideoTimelineAnalysisPage: React.FC = () => {
         }
     };
 
-    const handleTimelineClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    const handleTimelineSeek = (e: React.MouseEvent<HTMLDivElement>) => {
         if (!timelineRef.current || !duration) return;
         const rect = timelineRef.current.getBoundingClientRect();
         const x = e.clientX - rect.left;
-        const width = rect.width;
-        const percentage = x / width;
+        const percentage = Math.max(0, Math.min(1, x / rect.width));
         const newTime = percentage * duration;
 
         if (videoRef.current) {
@@ -226,408 +242,519 @@ const VideoTimelineAnalysisPage: React.FC = () => {
         }
     };
 
-    const formatTime = (seconds: number): string => {
-        const mins = Math.floor(seconds / 60);
-        const secs = Math.floor(seconds % 60);
-        return `${mins}:${secs.toString().padStart(2, '0')}`;
+    const formatTime = (seconds: number) => {
+        const m = Math.floor(seconds / 60);
+        const s = Math.floor(seconds % 60);
+        return `${m}:${s.toString().padStart(2, '0')}`;
     };
 
-    const filteredMoments = analysisData?.analysis?.moments ?
-        analysisData.analysis.moments.filter(moment =>
-            activeFilter === 'all' || moment.category === activeFilter || moment.type === activeFilter
-        ).sort((a, b) => a.timestamp - b.timestamp) : [];
-
-    // --- Render States ---
-
-    if (loading) {
-        return (
-            <div className="min-h-screen bg-gray-50 dark:bg-slate-950 flex items-center justify-center font-mono transition-colors duration-300">
-                <div className="flex flex-col items-center space-y-4">
-                    <div className="w-16 h-16 border-4 border-blue-500/30 border-t-blue-600 dark:border-t-blue-500 rounded-full animate-spin"></div>
-                    <div className="text-blue-600 dark:text-blue-400 animate-pulse font-medium">INITIATING ANALYSIS PROTOCOL...</div>
-                </div>
-            </div>
-        );
-    }
-
-    if (error) {
-        return (
-            <div className="min-h-screen bg-gray-50 dark:bg-slate-950 flex items-center justify-center font-mono transition-colors duration-300">
-                <div className="text-center p-8 border border-red-200 dark:border-red-500/30 bg-red-50 dark:bg-red-900/10 rounded-lg max-w-md shadow-lg dark:shadow-none">
-                    <ExclamationTriangleIcon className="w-12 h-12 text-red-500 mx-auto mb-4" />
-                    <h2 className="text-xl text-red-600 dark:text-red-400 mb-2">SYSTEM ERROR</h2>
-                    <p className="text-gray-600 dark:text-slate-400 mb-6">{error}</p>
-                    <button
-                        onClick={() => navigate('/my-interviews')}
-                        className="px-6 py-2 bg-white dark:bg-red-500/10 hover:bg-gray-50 dark:hover:bg-red-500/20 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-500/50 rounded transition-colors"
-                    >
-                        RETURN TO DASHBOARD
-                    </button>
-                </div>
-            </div>
-        );
-    }
-
-    if (analysisData?.status === 'pending' || analysisData?.status === 'processing') {
-        return (
-            <div className="min-h-screen bg-gray-50 dark:bg-slate-950 font-mono flex flex-col items-center justify-center p-4 transition-colors duration-300">
-                <div className="max-w-xl w-full bg-white dark:bg-slate-900/50 backdrop-blur-md border border-gray-200 dark:border-slate-800 rounded-2xl p-8 relative overflow-hidden shadow-xl dark:shadow-none">
-                    <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-blue-500 to-transparent animate-loading-bar"></div>
-                    <div className="text-center">
-                        <CpuChipIcon className="w-16 h-16 text-blue-600 dark:text-blue-500 mx-auto mb-6 animate-pulse" />
-                        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-                            ANALYZING BIOMETRICS & CONTENT
-                        </h2>
-                        <p className="text-gray-600 dark:text-slate-400 mb-8">
-                            Our AI is processing your video feed to extract behavioral metrics.
-                            <br />Status: <span className="text-blue-600 dark:text-blue-400 uppercase font-medium">{analysisData?.status}</span>
-                        </p>
-
-                        <div className="grid grid-cols-2 gap-4 text-left text-sm text-gray-600 dark:text-slate-500 mb-8">
-                            <div className="flex items-center gap-2">
-                                <span className="w-2 h-2 bg-blue-500 rounded-full animate-ping"></span>
-                                Audio Spectrum Analysis
-                            </div>
-                            <div className="flex items-center gap-2">
-                                <span className="w-2 h-2 bg-emerald-500 rounded-full animate-ping delay-100"></span>
-                                Facial Micro-expressions
-                            </div>
-                            <div className="flex items-center gap-2">
-                                <span className="w-2 h-2 bg-purple-500 rounded-full animate-ping delay-200"></span>
-                                Semantic Content Review
-                            </div>
-                            <div className="flex items-center gap-2">
-                                <span className="w-2 h-2 bg-amber-500 rounded-full animate-ping delay-300"></span>
-                                Engagement Scoring
-                            </div>
-                        </div>
-
-                        <button
-                            onClick={() => navigate('/my-interviews')}
-                            className="text-gray-500 hover:text-gray-800 dark:text-slate-500 dark:hover:text-white transition-colors text-sm flex items-center justify-center gap-2 mx-auto"
-                        >
-                            <ChevronLeftIcon className="w-4 h-4" />
-                            Return to Dashboard
-                        </button>
-                    </div>
-                </div>
-            </div>
-        );
-    }
-
+    // Data Processing
     const analysis = analysisData?.analysis;
+    const moments = useMemo(() => {
+        if (!analysis?.moments) return [];
+        return analysis.moments
+            .filter(m => activeFilter === 'all' || m.type === activeFilter)
+            .sort((a, b) => a.timestamp - b.timestamp);
+    }, [analysis, activeFilter]);
+
+    // Render Logic
+    if (loading) return <LoadingScreen />;
+    if (error) return <ErrorScreen error={error} onBack={() => navigate('/my-interviews')} />;
+    if (analysisData?.status === 'pending' || analysisData?.status === 'processing') return <ProcessingScreen status={analysisData.status} />;
     if (!analysis) return null;
 
+    const currentMoment = moments.find(m => Math.abs(currentTime - m.timestamp) < 2);
+
     return (
-        <div className="min-h-screen bg-gray-50 dark:bg-slate-950 text-gray-600 dark:text-slate-300 font-sans selection:bg-blue-500/30 transition-colors duration-300">
-            {/* Header / Nav */}
-            <div className="border-b border-gray-200 dark:border-slate-800 bg-white/80 dark:bg-slate-950/80 backdrop-blur fixed top-0 w-full z-50 transition-colors duration-300">
-                <div className="max-w-[1600px] mx-auto px-4 h-16 flex items-center justify-between">
-                    <div className="flex items-center gap-4">
+        <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-200 font-sans selection:bg-indigo-500/30">
+            {/* --- Top Navigation Bar --- */}
+            <header className="fixed top-0 left-0 right-0 z-50 h-16 bg-white/80 dark:bg-slate-950/80 backdrop-blur-xl border-b border-slate-200 dark:border-slate-800 transition-colors">
+                <div className="max-w-[1920px] mx-auto px-6 h-full flex items-center justify-between">
+                    <div className="flex items-center gap-6">
                         <button
                             onClick={() => navigate('/my-interviews')}
-                            className="p-2 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-lg text-gray-500 dark:text-slate-400 hover:text-gray-900 dark:hover:text-white transition-colors"
+                            className="group flex items-center gap-2 text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors"
                         >
-                            <ChevronLeftIcon className="w-5 h-5" />
-                        </button>
-                        <div>
-                            <h1 className="text-sm font-mono text-gray-500 dark:text-slate-500 uppercase tracking-widest leading-none">Analysis Protocol</h1>
-                            <div className="font-semibold text-gray-900 dark:text-white flex items-center gap-2 leading-none mt-1">
-                                <span>SESSION #{attemptId?.substring(0, 8).toUpperCase()}</span>
-                                <TechBadge color="green">COMPLETED</TechBadge>
+                            <div className="p-2 rounded-full group-hover:bg-slate-100 dark:group-hover:bg-slate-800 transition-colors">
+                                <ChevronLeftIcon className="w-5 h-5" />
                             </div>
+                            <span className="font-medium text-sm hidden sm:block">Back</span>
+                        </button>
+                        <div className="h-6 w-px bg-slate-200 dark:bg-slate-800" />
+                        <div>
+                            <h1 className="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-wider">Analysis Report</h1>
+                            <p className="text-xs text-slate-500 font-mono">ID: {attemptId?.substring(0, 8).toUpperCase()}</p>
                         </div>
                     </div>
-                    <div className="flex items-center gap-8">
-                        <div className="text-right hidden md:block">
-                            <div className="text-[10px] text-gray-500 dark:text-slate-500 font-mono uppercase tracking-wider">Overall Perf.</div>
-                            <div className={`text-xl font-bold font-mono ${analysis.overall_score >= 80 ? 'text-emerald-600 dark:text-emerald-400' : analysis.overall_score >= 60 ? 'text-amber-600 dark:text-amber-400' : 'text-rose-600 dark:text-rose-400'}`}>
-                                {analysis.overall_score}/100
-                            </div>
+
+                    <div className="flex items-center gap-6">
+                        <div className="flex items-center gap-3 bg-slate-100 dark:bg-slate-900 rounded-lg px-4 py-2 border border-slate-200 dark:border-slate-800">
+                            <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Overall Score</span>
+                            <span className={cn(
+                                "text-lg font-bold font-mono",
+                                analysis.overall_score >= 80 ? 'text-emerald-600 dark:text-emerald-400' :
+                                    analysis.overall_score >= 60 ? 'text-amber-600 dark:text-amber-400' : 'text-rose-600 dark:text-rose-400'
+                            )}>
+                                {analysis.overall_score}<span className="text-sm text-slate-400">/100</span>
+                            </span>
                         </div>
                     </div>
                 </div>
-            </div>
+            </header>
 
-            {/* Main Content */}
-            <div className="pt-20 pb-4 px-4 max-w-[1600px] mx-auto h-screen flex flex-col items-stretch">
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-full pb-4">
+            {/* --- Main Dashboard Content --- */}
+            <main className="pt-24 pb-8 px-6 max-w-[1920px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-6 h-screen">
 
-                    {/* Left Column: Video & Timeline (8 cols) */}
-                    <div className="lg:col-span-8 flex flex-col gap-4 min-h-0">
-                        {/* Video Player Container */}
-                        <div className="relative bg-black rounded-xl overflow-hidden shadow-xl dark:shadow-2xl border border-gray-200 dark:border-slate-800 group flex-grow min-h-0">
-                            {analysisData?.hasVideo && analysisData.videoPath ? (
+                {/* Left Column: Video Player & Metrics (Span 8) */}
+                <div className="lg:col-span-8 flex flex-col gap-6 h-[calc(100vh-8rem)] min-h-[600px]">
+
+                    {/* Video Player Card */}
+                    <div
+                        className="relative flex-1 bg-black rounded-3xl overflow-hidden shadow-2xl border border-slate-200 dark:border-slate-800 group"
+                        onMouseEnter={() => setIsHoveringVideo(true)}
+                        onMouseLeave={() => setIsHoveringVideo(false)}
+                    >
+                        {analysisData.hasVideo && currentVideoPath ? (
+                            <div className="relative w-full h-full flex items-center justify-center bg-zinc-950">
                                 <video
                                     ref={videoRef}
-                                    src={`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080'}${analysisData.videoPath}`}
-                                    className="w-full h-full object-contain bg-gray-50 dark:bg-black"
+                                    src={`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api'}/interview/video/${currentVideoPath.replace('/uploads/videos/', '')}${token ? `?token=${token}` : ''}`}
+                                    className="w-full h-full max-h-full object-contain"
                                     onTimeUpdate={handleTimeUpdate}
-                                    onLoadedMetadata={handleLoadedMetadata}
                                     onPlay={() => setIsPlaying(true)}
                                     onPause={() => setIsPlaying(false)}
                                     onClick={togglePlayPause}
+                                    crossOrigin="use-credentials"
+                                    preload="metadata"
+                                    onError={(e) => {
+                                        console.error('[VideoPlayer] Error loading video:', e);
+                                        console.log('[VideoPlayer] Video source:', e.currentTarget.src);
+                                    }}
+                                    onLoadStart={() => console.log('[VideoPlayer] Started loading video')}
+                                    onCanPlay={() => console.log('[VideoPlayer] Video can play')}
                                 />
-                            ) : (
-                                <div className="w-full h-full flex items-center justify-center text-gray-400 dark:text-slate-600 bg-gray-100 dark:bg-slate-900">
-                                    <div className="text-center">
-                                        <VideoCameraIcon className="w-16 h-16 mx-auto mb-4 opacity-50" />
-                                        <p>No Video Signal</p>
-                                    </div>
-                                </div>
-                            )}
 
-                            {/* Video Overlay Controls */}
-                            <div
-                                className={`absolute inset-0 bg-gradient-to-t from-gray-900/90 dark:from-slate-950/90 via-transparent to-transparent flex flex-col justify-end p-6 transition-opacity duration-300 ${isPlaying && !showControls ? 'opacity-0 hover:opacity-100' : 'opacity-100'}`}
-                                onMouseEnter={() => setShowControls(true)}
-                                onMouseLeave={() => isPlaying && setShowControls(false)}
-                            >
-                                <div className="flex items-center justify-center absolute inset-0 pointer-events-none">
-                                    {!isPlaying && (
-                                        <div className="w-20 h-20 rounded-full bg-white/20 dark:bg-white/10 backdrop-blur-md flex items-center justify-center border border-white/30 dark:border-white/20 shadow-lg pointer-events-auto cursor-pointer hover:bg-white/30 dark:hover:bg-white/20 transition-all group/play" onClick={togglePlayPause}>
-                                            <PlayIcon className="w-10 h-10 text-white ml-2 group-hover/play:scale-110 transition-transform" />
-                                        </div>
-                                    )}
-                                </div>
+                                {/* Overlay Gradient - Only shows when hovering or paused */}
+                                <div className={cn(
+                                    "absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/30 transition-opacity duration-300 pointer-events-none",
+                                    isHoveringVideo || !isPlaying ? 'opacity-100' : 'opacity-0'
+                                )} />
 
-                                <div className="space-y-4 pointer-events-auto">
-                                    {/* Timeline Scrubber */}
-                                    <div
-                                        className="h-8 relative group/timeline cursor-pointer"
-                                        ref={timelineRef}
-                                        onClick={handleTimelineClick}
+                                {/* Center Play Button */}
+                                {!isPlaying && (
+                                    <button
+                                        onClick={togglePlayPause}
+                                        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-20 h-20 bg-white/10 hover:bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center border border-white/20 text-white transition-all transform hover:scale-110 shadow-xl group/btn"
                                     >
-                                        <div className="absolute top-1/2 -translate-y-1/2 left-0 right-0 h-1 bg-gray-400/50 dark:bg-slate-700/50 rounded-full overflow-hidden">
-                                            <div
-                                                className="h-full bg-blue-500 rounded-full relative"
-                                                style={{ width: `${(currentTime / duration) * 100}%` }}
-                                            >
-                                                <div className="absolute right-0 top-1/2 -translate-y-1/2 w-4 h-4 bg-white rounded-full shadow-lg shadow-blue-500/50 scale-0 group-hover/timeline:scale-100 transition-transform border-2 border-blue-500 z-20" />
-                                            </div>
+                                        <PlayIconSolid className="w-8 h-8 ml-1 group-hover/btn:text-indigo-300 transition-colors" />
+                                    </button>
+                                )}
+
+                                {/* Bottom Controls Bar */}
+                                <div className={cn(
+                                    "absolute bottom-0 left-0 right-0 p-6 transition-all duration-300 transform",
+                                    isHoveringVideo || !isPlaying ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'
+                                )}>
+                                    {/* Timeline Slider */}
+                                    <div
+                                        className="relative h-2 w-full bg-white/20 rounded-full cursor-pointer mb-4 group/timeline"
+                                        ref={timelineRef}
+                                        onClick={handleTimelineSeek}
+                                    >
+                                        {/* Progress Bar */}
+                                        <div
+                                            className="absolute top-0 left-0 h-full bg-indigo-500 rounded-full"
+                                            style={{ width: `${(currentTime / duration) * 100}%` }}
+                                        >
+                                            <div className="absolute right-0 top-1/2 -translate-y-1/2 w-4 h-4 bg-white rounded-full shadow-lg scale-0 group-hover/timeline:scale-100 transition-transform" />
                                         </div>
 
-                                        {/* Moment Markers on Timeline */}
-                                        {analysis.moments.map((moment, idx) => (
+                                        {/* Markers */}
+                                        {moments.map((m, i) => (
                                             <div
-                                                key={idx}
-                                                className={`absolute top-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full z-10 hover:scale-150 transition-transform ${moment.type === 'positive' ? 'bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.5)]' :
-                                                    moment.type === 'warning' ? 'bg-rose-500 shadow-[0_0_10px_rgba(244,63,94,0.5)]' :
-                                                        moment.type === 'improvement' ? 'bg-amber-500 shadow-[0_0_10px_rgba(245,158,11,0.5)]' : 'bg-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.5)]'
-                                                    }`}
-                                                style={{ left: `${(moment.timestamp / duration) * 100}%` }}
-                                                title={`${moment.type}: ${moment.message}`}
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    jumpToMoment(moment.timestamp);
-                                                }}
+                                                key={i}
+                                                className={cn(
+                                                    "absolute top-1/2 -translate-y-1/2 w-2 h-2 rounded-full transform transition-all hover:scale-150 cursor-pointer",
+                                                    m.type === 'positive' ? 'bg-emerald-400' :
+                                                        m.type === 'improvement' ? 'bg-amber-400' :
+                                                            m.type === 'warning' ? 'bg-rose-400' : 'bg-blue-400'
+                                                )}
+                                                style={{ left: `${(m.timestamp / duration) * 100}%` }}
+                                                onClick={(e) => { e.stopPropagation(); jumpToMoment(m.timestamp); }}
+                                                title={m.message}
                                             />
                                         ))}
                                     </div>
 
-                                    <div className="flex items-center justify-between font-mono text-xs tracking-wider uppercase text-gray-300 dark:text-slate-400">
+                                    {/* Action Row */}
+                                    <div className="flex items-center justify-between pointer-events-auto">
                                         <div className="flex items-center gap-4">
-                                            <button onClick={togglePlayPause} className="hover:text-white transition-colors">
-                                                {isPlaying ? <PauseIcon className="w-5 h-5" /> : <PlayIcon className="w-5 h-5" />}
+                                            <button onClick={togglePlayPause} className="text-white hover:text-indigo-400 transition-colors">
+                                                {isPlaying ? <PauseIconSolid className="w-6 h-6" /> : <PlayIconSolid className="w-6 h-6" />}
                                             </button>
-                                            <div className="flex gap-1">
-                                                <span className="text-white">{formatTime(currentTime)}</span>
-                                                <span className="text-gray-400 dark:text-slate-600">/</span>
+                                            <div className="text-sm font-mono text-white/80">
+                                                <span>{formatTime(currentTime)}</span>
+                                                <span className="mx-2 text-white/40">/</span>
                                                 <span>{formatTime(duration)}</span>
                                             </div>
+                                        </div>
+
+                                        {/* Current Analysis Pop-up (over video) */}
+                                        {currentMoment && (
+                                            <div className="hidden md:flex items-center gap-3 bg-black/60 backdrop-blur-md px-4 py-2 rounded-full border border-white/10 animate-fade-in-up">
+                                                <div className={cn("w-2 h-2 rounded-full",
+                                                    currentMoment.type === 'positive' ? 'bg-emerald-500' :
+                                                        currentMoment.type === 'improvement' ? 'bg-amber-500' : 'bg-blue-500'
+                                                )} />
+                                                <span className="text-sm text-white/90 max-w-[300px] truncate">{currentMoment.message}</span>
+                                            </div>
+                                        )}
+
+                                        <div className="flex items-center gap-2">
+                                            {/* Could add fullscreen or playback speed here */}
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
-
-                        {/* Metrics Grid */}
-                        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 flex-none h-40">
-                            {[
-                                { key: 'speech_clarity', label: 'Clarity', icon: SpeakerWaveIcon, color: 'blue' },
-                                { key: 'confidence_level', label: 'Confidence', icon: ChartBarIcon, color: 'green' },
-                                { key: 'engagement', label: 'Engagement', icon: CpuChipIcon, color: 'purple' },
-                                { key: 'technical_accuracy', label: 'Accuracy', icon: CheckCircleIcon, color: 'yellow' }
-                            ].map((m) => {
-                                const metrics = analysis.metrics || {};
-                                const value = metrics[m.key as keyof typeof metrics] || 0;
-                                return (
-                                    <RadialProgress
-                                        key={m.key}
-                                        value={value}
-                                        label={m.label}
-                                        icon={m.icon}
-                                        color={m.color}
-                                    />
-                                );
-                            })}
-                        </div>
+                        ) : (
+                            <div className="h-full flex items-center justify-center bg-slate-100 dark:bg-slate-900 text-slate-400">
+                                <div className="text-center">
+                                    <VideoCameraIcon className="w-16 h-16 mx-auto mb-2 opacity-50" />
+                                    <p>No Video Source Available</p>
+                                </div>
+                            </div>
+                        )}
                     </div>
 
-                    {/* Right Column: Analysis Details (4 cols) */}
-                    <div className="lg:col-span-4 flex flex-col h-full gap-4 min-h-0">
-                        {/* Tab/Filter System */}
-                        <div className="grid grid-cols-4 p-1 bg-white dark:bg-slate-900 rounded-xl border border-gray-200 dark:border-slate-800 flex-none shadow-sm dark:shadow-none transition-colors duration-300">
-                            {[
-                                { btn: 'all', icon: ChartBarIcon },
-                                { btn: 'positive', icon: CheckCircleIcon },
-                                { btn: 'improvement', icon: ArrowPathIcon },
-                                { btn: 'warning', icon: ExclamationTriangleIcon }
-                            ].map(filter => (
-                                <button
-                                    key={filter.btn}
-                                    onClick={() => setActiveFilter(filter.btn)}
-                                    className={`flex items-center justify-center py-2.5 rounded-lg transition-all ${activeFilter === filter.btn
-                                        ? 'bg-gray-100 dark:bg-slate-800 text-gray-900 dark:text-white shadow-sm dark:shadow-lg'
-                                        : 'text-gray-400 dark:text-slate-600 hover:text-gray-600 dark:hover:text-slate-400 hover:bg-gray-50 dark:hover:bg-slate-800/50'
-                                        }`}
-                                    title={filter.btn}
-                                >
-                                    <filter.icon className={`w-5 h-5 ${activeFilter === filter.btn
-                                        ? filter.btn === 'positive' ? 'text-emerald-500'
-                                            : filter.btn === 'warning' ? 'text-rose-500'
-                                                : filter.btn === 'improvement' ? 'text-amber-500'
-                                                    : 'text-blue-500'
-                                        : ''
-                                        }`} />
-                                </button>
-                            ))}
-                        </div>
-
-                        {/* Scrollable Feedback Stream */}
-                        <div className="flex-1 overflow-y-auto pr-2 space-y-3 custom-scrollbar min-h-0 bg-white/50 dark:bg-slate-900/20 rounded-xl border border-gray-200 dark:border-slate-800/50 p-2 transition-colors duration-300">
-                            {filteredMoments.length === 0 ? (
-                                <div className="h-full flex flex-col items-center justify-center text-gray-400 dark:text-slate-600 font-mono text-xs border-2 border-dashed border-gray-200 dark:border-slate-800 rounded-xl opacity-50">
-                                    <CpuChipIcon className="w-8 h-8 mb-2" />
-                                    NO DATA POINTS FOUND
-                                </div>
-                            ) : (
-                                filteredMoments.map((moment, idx) => {
-                                    const isActive = Math.abs(currentTime - moment.timestamp) < 2; // Active window
-
-                                    return (
-                                        <div
-                                            key={idx}
-                                            onClick={() => {
-                                                jumpToMoment(moment.timestamp);
-                                            }}
-                                            id={`moment-${moment.timestamp}`}
-                                            className={`p-4 rounded-xl border transition-all cursor-pointer group relative overflow-hidden ${isActive
-                                                ? 'bg-white dark:bg-slate-800 border-blue-200 dark:border-blue-500/50 shadow-md dark:shadow-lg dark:shadow-blue-500/10 scale-[1.02]'
-                                                : 'bg-white/50 dark:bg-slate-900/40 border-gray-100 dark:border-slate-800 hover:border-gray-300 dark:hover:border-slate-700 hover:bg-white dark:hover:bg-slate-800/60'
-                                                }`}
-                                        >
-                                            {isActive && (
-                                                <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-blue-400 to-indigo-500" />
-                                            )}
-
-                                            <div className="flex justify-between items-start mb-2 pl-2">
-                                                <div className="flex items-center gap-2">
-                                                    <span className={`font-mono text-xs px-1.5 py-0.5 rounded ${isActive ? 'bg-blue-100 dark:bg-blue-500/20 text-blue-700 dark:text-blue-300' : 'bg-gray-100 dark:bg-slate-800 text-gray-500 dark:text-slate-500'}`}>
-                                                        {formatTime(moment.timestamp)}
-                                                    </span>
-                                                    <TechBadge color={
-                                                        moment.type === 'positive' ? 'green' :
-                                                            moment.type === 'warning' ? 'red' :
-                                                                moment.type === 'improvement' ? 'yellow' : 'blue'
-                                                    }>{moment.category}</TechBadge>
-                                                </div>
-                                                {moment.type === 'positive' && <CheckCircleIcon className="w-5 h-5 text-emerald-500" />}
-                                                {moment.type === 'warning' && <ExclamationTriangleIcon className="w-5 h-5 text-rose-500" />}
-                                                {moment.type === 'improvement' && <ArrowPathIcon className="w-5 h-5 text-amber-500" />}
-                                                {moment.type === 'neutral' && <InformationCircleIcon className="w-5 h-5 text-blue-500" />}
-                                            </div>
-
-                                            <p className="text-sm text-gray-600 dark:text-slate-300 font-light leading-relaxed pl-2">
-                                                {moment.message}
-                                            </p>
-
-                                            {moment.suggestion && (
-                                                <div className="mt-3 ml-2 text-xs bg-gray-50 dark:bg-slate-950/50 p-3 rounded border border-gray-100 dark:border-slate-800/50 text-gray-500 dark:text-slate-400 flex gap-2">
-                                                    <span className="text-amber-500">💡</span>
-                                                    {moment.suggestion}
-                                                </div>
-                                            )}
-                                        </div>
-                                    );
-                                })
-                            )}
-                        </div>
-
-                        {/* Summary Card */}
-                        <div className="card-glass border-gray-200 dark:border-slate-800 flex-none space-y-3">
-                            {/* Strengths */}
-                            <div className="bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-100 dark:border-emerald-900/30 rounded-lg p-3">
-                                <h4 className="text-xs font-bold text-emerald-600 dark:text-emerald-500 uppercase tracking-wider mb-2 flex items-center gap-2">
-                                    <CheckCircleIcon className="w-3 h-3" /> Strengths
-                                </h4>
-                                <ul className="space-y-1">
-                                    {analysis.summary.strengths.slice(0, 2).map((s, i) => (
-                                        <li key={i} className="text-xs text-emerald-700/80 dark:text-emerald-400/80 truncate">• {s}</li>
-                                    ))}
-                                </ul>
-                            </div>
-
-                            {/* Improvements */}
-                            <div className="bg-amber-50 dark:bg-amber-950/20 border border-amber-100 dark:border-amber-900/30 rounded-lg p-3">
-                                <h4 className="text-xs font-bold text-amber-600 dark:text-amber-500 uppercase tracking-wider mb-2 flex items-center gap-2">
-                                    <ArrowPathIcon className="w-3 h-3" /> Focus Areas
-                                </h4>
-                                <ul className="space-y-1">
-                                    {analysis.summary.improvements.slice(0, 2).map((s, i) => (
-                                        <li key={i} className="text-xs text-amber-700/80 dark:text-amber-400/80 truncate">• {s}</li>
-                                    ))}
-                                </ul>
-                            </div>
-                        </div>
+                    {/* Metrics Strip */}
+                    <div className="h-40 grid grid-cols-2 lg:grid-cols-4 gap-4 flex-none">
+                        <AnimatedCircularProgress value={analysis.metrics?.speech_clarity || 0} label="Clarity" icon={SpeakerWaveIcon} color="blue" />
+                        <AnimatedCircularProgress value={analysis.metrics?.confidence_level || 0} label="Confidence" icon={ChartBarIcon} color="green" />
+                        <AnimatedCircularProgress value={analysis.metrics?.engagement || 0} label="Engagement" icon={CpuChipIcon} color="purple" />
+                        <AnimatedCircularProgress value={analysis.metrics?.technical_accuracy || 0} label="Accuracy" icon={CheckCircleIcon} color="yellow" />
                     </div>
                 </div>
-            </div>
 
+                {/* Right Column: Interactive Sidebar (Span 4) */}
+                <div className="lg:col-span-4 flex flex-col h-[calc(100vh-8rem)] bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-xl overflow-hidden">
+                    {/* Sidebar Tabs */}
+                    <div className="flex border-b border-slate-200 dark:border-slate-800">
+                        <button
+                            onClick={() => setActiveTab('feed')}
+                            className={cn("flex-1 py-4 text-sm font-semibold uppercase tracking-wider transition-colors border-b-2",
+                                activeTab === 'feed'
+                                    ? 'border-indigo-500 text-indigo-600 dark:text-indigo-400 bg-indigo-50/50 dark:bg-indigo-900/10'
+                                    : 'border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'
+                            )}
+                        >
+                            <div className="flex items-center justify-center gap-2">
+                                <ListBulletIcon className="w-4 h-4" /> Feedback
+                            </div>
+                        </button>
+                        <button
+                            onClick={() => setActiveTab('summary')}
+                            className={cn("flex-1 py-4 text-sm font-semibold uppercase tracking-wider transition-colors border-b-2",
+                                activeTab === 'summary'
+                                    ? 'border-indigo-500 text-indigo-600 dark:text-indigo-400 bg-indigo-50/50 dark:bg-indigo-900/10'
+                                    : 'border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'
+                            )}
+                        >
+                            <div className="flex items-center justify-center gap-2">
+                                <LightBulbIcon className="w-4 h-4" /> Insights
+                            </div>
+                        </button>
+                        {analysisData.videoPaths && analysisData.videoPaths.length > 1 && (
+                            <button
+                                onClick={() => setActiveTab('videos')}
+                                className={cn("flex-1 py-4 text-sm font-semibold uppercase tracking-wider transition-colors border-b-2",
+                                    activeTab === 'videos'
+                                        ? 'border-indigo-500 text-indigo-600 dark:text-indigo-400 bg-indigo-50/50 dark:bg-indigo-900/10'
+                                        : 'border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'
+                                )}
+                            >
+                                <div className="flex items-center justify-center gap-2">
+                                    <VideoCameraIcon className="w-4 h-4" /> Clips ({analysisData.videoPaths.length})
+                                </div>
+                            </button>
+                        )}
+                    </div>
+
+                    {/* Sidebar Content */}
+                    <div className="flex-1 overflow-hidden relative bg-slate-50/50 dark:bg-slate-900/50">
+                        {/* Feed Tab */}
+                        {activeTab === 'feed' && (
+                            <div className="h-full flex flex-col">
+                                {/* Filters */}
+                                <div className="p-3 grid grid-cols-4 gap-2 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
+                                    {[
+                                        { id: 'all', icon: ChartBarIcon, label: 'All' },
+                                        { id: 'positive', icon: CheckCircleIcon, label: 'Good' },
+                                        { id: 'improvement', icon: ArrowPathIcon, label: 'Fix' },
+                                        { id: 'warning', icon: ExclamationTriangleIcon, label: 'Alert' }
+                                    ].map(f => (
+                                        <button
+                                            key={f.id}
+                                            onClick={() => setActiveFilter(f.id)}
+                                            className={cn("flex flex-col items-center justify-center py-2 rounded-lg text-xs font-medium transition-all",
+                                                activeFilter === f.id
+                                                    ? 'bg-slate-100 dark:bg-slate-800 text-indigo-600 dark:text-indigo-400 ring-1 ring-indigo-500/20'
+                                                    : 'text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/50'
+                                            )}
+                                        >
+                                            <f.icon className={cn("w-4 h-4 mb-1",
+                                                activeFilter === f.id ? 'text-indigo-500' : 'text-slate-400'
+                                            )} />
+                                            {f.label}
+                                        </button>
+                                    ))}
+                                </div>
+
+                                <div ref={scrollContainerRef} className="flex-1 overflow-y-auto p-4 space-y-4 custom-scrollbar">
+                                    {moments.length === 0 ? (
+                                        <div className="h-64 flex flex-col items-center justify-center text-slate-400 text-center">
+                                            <InformationCircleIcon className="w-10 h-10 mb-2 opacity-50" />
+                                            <p className="text-sm">No moments found for this filter.</p>
+                                        </div>
+                                    ) : (
+                                        moments.map((moment, idx) => {
+                                            const isActive = Math.abs(currentTime - moment.timestamp) < 2;
+                                            return (
+                                                <div
+                                                    key={idx}
+                                                    id={isActive ? "moment-card-active" : undefined}
+                                                    onClick={() => jumpToMoment(moment.timestamp)}
+                                                    className={cn(
+                                                        "relative p-4 rounded-xl border transition-all duration-300 cursor-pointer",
+                                                        isActive
+                                                            ? 'bg-white dark:bg-slate-800 border-indigo-500 shadow-lg shadow-indigo-500/10 scale-105 z-10'
+                                                            : 'bg-white dark:bg-slate-800/50 border-slate-200 dark:border-slate-700/50 hover:border-indigo-300 dark:hover:border-indigo-700 hover:shadow-md'
+                                                    )}
+                                                >
+                                                    {isActive && <div className="absolute left-0 top-3 bottom-3 w-1 bg-indigo-500 rounded-r-full" />}
+
+                                                    <div className="flex justify-between items-start mb-2">
+                                                        <div className="flex items-center gap-2">
+                                                            <div className="flex items-center gap-1 text-xs font-mono text-slate-400">
+                                                                <ClockIcon className="w-3 h-3" />
+                                                                {formatTime(moment.timestamp)}
+                                                            </div>
+                                                            <TechBadge color={
+                                                                moment.type === 'positive' ? 'green' :
+                                                                    moment.type === 'warning' ? 'red' :
+                                                                        moment.type === 'improvement' ? 'yellow' : 'blue'
+                                                            }>{moment.category}</TechBadge>
+                                                        </div>
+                                                        {moment.type === 'positive' && <CheckCircleIcon className="w-5 h-5 text-emerald-500" />}
+                                                        {moment.type === 'warning' && <ExclamationTriangleIcon className="w-5 h-5 text-rose-500" />}
+                                                        {moment.type === 'improvement' && <ArrowPathIcon className="w-5 h-5 text-amber-500" />}
+                                                    </div>
+
+                                                    <p className="text-sm text-slate-700 dark:text-slate-300 leading-relaxed">
+                                                        {moment.message}
+                                                    </p>
+
+                                                    {moment.suggestion && (
+                                                        <div className="mt-3 bg-amber-50 dark:bg-amber-900/10 border border-amber-100 dark:border-amber-900/20 rounded-lg p-3 text-xs text-amber-800 dark:text-amber-200/80 flex gap-2 items-start">
+                                                            <LightBulbIcon className="w-4 h-4 shrink-0 mt-0.5" />
+                                                            <span>{moment.suggestion}</span>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            );
+                                        })
+                                    )}
+                                    <div className="h-8" /> {/* Spacer */}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Summary Tab */}
+                        {activeTab === 'summary' && (
+                            <div className="h-full overflow-y-auto p-6 space-y-8 custom-scrollbar">
+                                <div>
+                                    <h3 className="text-sm font-bold text-emerald-600 dark:text-emerald-500 uppercase tracking-widest mb-4 flex items-center gap-2">
+                                        <CheckCircleIcon className="w-5 h-5" /> Key Strengths
+                                    </h3>
+                                    <ul className="space-y-3">
+                                        {analysis.summary.strengths.map((s, i) => (
+                                            <li key={i} className="flex gap-3 text-sm text-slate-700 dark:text-slate-300">
+                                                <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full mt-2 shrink-0" />
+                                                {s}
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </div>
+
+                                <div className="h-px bg-slate-200 dark:bg-slate-800" />
+
+                                <div>
+                                    <h3 className="text-sm font-bold text-amber-600 dark:text-amber-500 uppercase tracking-widest mb-4 flex items-center gap-2">
+                                        <ArrowPathIcon className="w-5 h-5" /> Areas for Growth
+                                    </h3>
+                                    <ul className="space-y-3">
+                                        {analysis.summary.improvements.map((s, i) => (
+                                            <li key={i} className="flex gap-3 text-sm text-slate-700 dark:text-slate-300">
+                                                <div className="w-1.5 h-1.5 bg-amber-500 rounded-full mt-2 shrink-0" />
+                                                {s}
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </div>
+
+                                {analysis.summary.keyPoints && analysis.summary.keyPoints.length > 0 && (
+                                    <>
+                                        <div className="h-px bg-slate-200 dark:bg-slate-800" />
+                                        <div>
+                                            <h3 className="text-sm font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-widest mb-4 flex items-center gap-2">
+                                                <CpuChipIcon className="w-5 h-5" /> Analysis Notes
+                                            </h3>
+                                            <ul className="space-y-3">
+                                                {analysis.summary.keyPoints.map((s, i) => (
+                                                    <li key={i} className="flex gap-3 text-sm text-slate-700 dark:text-slate-300">
+                                                        <div className="w-1.5 h-1.5 bg-indigo-500 rounded-full mt-2 shrink-0" />
+                                                        {s}
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                        </div>
+                                    </>
+                                )}
+                            </div>
+                        )}
+
+                        {/* Videos Tab */}
+                        {activeTab === 'videos' && analysisData.videoPaths && (
+                            <div className="h-full overflow-y-auto p-4 space-y-3 custom-scrollbar">
+                                {analysisData.videoPaths.map((_, index) => (
+                                    <button
+                                        key={index}
+                                        onClick={() => {
+                                            setCurrentVideoIndex(index);
+                                            setCurrentTime(0);
+                                            setIsPlaying(false);
+                                        }}
+                                        className={cn(
+                                            "w-full text-left p-4 rounded-xl border transition-all hover:shadow-md",
+                                            index === currentVideoIndex
+                                                ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-500/50 ring-1 ring-blue-500/20'
+                                                : 'bg-white dark:bg-slate-800/50 border-slate-200 dark:border-slate-700/50 hover:bg-slate-50 dark:hover:bg-slate-800'
+                                        )}
+                                    >
+                                        <div className="flex items-center gap-4">
+                                            <div className="w-20 h-14 bg-slate-200 dark:bg-slate-800 rounded-lg flex items-center justify-center text-slate-400">
+                                                <VideoCameraIcon className="w-6 h-6" />
+                                            </div>
+                                            <div>
+                                                <h4 className="font-semibold text-slate-900 dark:text-white">Video Segment {index + 1}</h4>
+                                                <p className="text-xs text-slate-500 dark:text-slate-400">Question {index + 1}</p>
+                                            </div>
+                                            {index === currentVideoIndex && (
+                                                <div className="ml-auto w-2 h-2 bg-blue-500 rounded-full animate-pulse" />
+                                            )}
+                                        </div>
+                                    </button>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                </div>
+            </main>
+
+            {/* --- Global Styles for Animations & Scrollbars --- */}
             <style>{`
-                .custom-scrollbar::-webkit-scrollbar {
-                    width: 4px;
+                .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+                .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+                .custom-scrollbar::-webkit-scrollbar-thumb { 
+                    background: #cbd5e1; 
+                    border-radius: 10px; 
                 }
-                .custom-scrollbar::-webkit-scrollbar-track {
-                    background: transparent;
-                }
-                .custom-scrollbar::-webkit-scrollbar-thumb {
-                    background: #cbd5e1; /* slate-300 */
-                    border-radius: 4px;
-                }
-                /* Dark mode scrollbar */
-                @media (prefers-color-scheme: dark) {
-                    .custom-scrollbar::-webkit-scrollbar-thumb {
-                        background: #334155; /* slate-700 */
-                    }
-                }
-                /* Manual dark mode class support if parent has .dark */
-                .dark .custom-scrollbar::-webkit-scrollbar-thumb {
-                    background: #334155;
-                }
+                .dark .custom-scrollbar::-webkit-scrollbar-thumb { background: #334155; }
                 
-                .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-                    background: #94a3b8; /* slate-400 */
+                @keyframes fadeInUp {
+                    from { opacity: 0; transform: translateY(10px); }
+                    to { opacity: 1; transform: translateY(0); }
                 }
-                @media (prefers-color-scheme: dark) {
-                     .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-                         background: #475569; /* slate-600 */
-                     }
-                }
-                 .dark .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-                     background: #475569;
-                 }
-
-                @keyframes loading-bar {
-                    0% { transform: translateX(-100%); }
-                    100% { transform: translateX(100%); }
-                }
-                .animate-loading-bar {
-                    animation: loading-bar 1.5s infinite linear;
+                .animate-fade-in-up {
+                    animation: fadeInUp 0.3s ease-out forwards;
                 }
             `}</style>
         </div>
     );
 };
+
+// --- Helper Screens ---
+
+const LoadingScreen = () => (
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex flex-col items-center justify-center p-4">
+        <div className="relative w-24 h-24 mb-8">
+            <div className="absolute inset-0 border-4 border-indigo-100 dark:border-indigo-900/30 rounded-full"></div>
+            <div className="absolute inset-0 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
+            <CpuChipIcon className="absolute inset-0 m-auto w-8 h-8 text-indigo-500 animate-pulse" />
+        </div>
+        <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-2 tracking-tight">Initializing Analysis Engine</h2>
+        <p className="text-slate-500 dark:text-slate-400">Decryption and biometric processing in progress...</p>
+    </div>
+);
+
+const ProcessingScreen = ({ status }: { status: string }) => (
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex flex-col items-center justify-center p-4">
+        <div className="max-w-md w-full bg-white dark:bg-slate-900 rounded-2xl shadow-xl border border-slate-200 dark:border-slate-800 p-8 text-center relative overflow-hidden">
+            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-indigo-500 via-purple-500 to-indigo-500 animate-gradient-x"></div>
+
+            <div className="w-16 h-16 bg-indigo-50 dark:bg-indigo-900/20 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                <ArrowsPointingOutIcon className="w-8 h-8 text-indigo-600 dark:text-indigo-400 animate-pulse" />
+            </div>
+
+            <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">Analyzing Interview</h2>
+            <p className="text-slate-600 dark:text-slate-400 mb-8">
+                Our AI is currently processing your video content. This usually takes 1-2 minutes.
+            </p>
+
+            <div className="space-y-3">
+                <div className="flex items-center justify-between text-sm">
+                    <span className="text-slate-500">Status</span>
+                    <span className="font-mono font-medium text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/10 px-2 py-1 rounded uppercase">{status}</span>
+                </div>
+                <div className="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-2 overflow-hidden">
+                    <div className="h-full bg-indigo-500 rounded-full w-2/3 animate-loading-bar"></div>
+                </div>
+            </div>
+
+            <button
+                onClick={() => window.location.href = '/my-interviews'}
+                className="mt-8 text-sm text-slate-500 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
+            >
+                Return to Dashboard
+            </button>
+        </div>
+        <style>{`
+            @keyframes loading-bar {
+                0% { transform: translateX(-100%); }
+                100% { transform: translateX(100%); }
+            }
+            .animate-loading-bar {
+                animation: loading-bar 1.5s infinite linear;
+            }
+        `}</style>
+    </div>
+);
+
+const ErrorScreen = ({ error, onBack }: { error: string, onBack: () => void }) => (
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex flex-col items-center justify-center">
+        <div className="bg-white dark:bg-slate-900 p-8 rounded-2xl shadow-xl border border-red-100 dark:border-red-900/30 max-w-md w-full text-center">
+            <div className="w-16 h-16 bg-red-50 dark:bg-red-900/20 rounded-full flex items-center justify-center mx-auto mb-6">
+                <ExclamationTriangleIcon className="w-8 h-8 text-red-500" />
+            </div>
+            <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2">Analysis Failed</h3>
+            <p className="text-slate-500 dark:text-slate-400 mb-6">{error}</p>
+            <button
+                onClick={onBack}
+                className="w-full py-2.5 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-lg hover:opacity-90 transition-opacity font-medium"
+            >
+                Return to Dashboard
+            </button>
+        </div>
+    </div>
+);
 
 export default VideoTimelineAnalysisPage;

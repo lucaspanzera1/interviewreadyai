@@ -687,12 +687,17 @@ gere uma simulação de entrevista realista com {{numberOfQuestions}} perguntas 
     videoFiles: Express.Multer.File[],
     attemptDto: any
   ) {
+    console.log(`[VideoUpload] Starting upload for interview ${interviewId}, user ${userId}, ${videoFiles.length} files`);
+    
     const { Types } = require('mongoose');
     const fs = require('fs');
     const path = require('path');
     
     // Criar diretório de uploads se não existir
-    const uploadDir = path.join(__dirname, '../../../../public/uploads/videos');
+    const uploadDir = path.join(process.cwd(), 'public', 'uploads', 'videos');
+    console.log(`[VideoUpload] process.cwd(): ${process.cwd()}`);
+    console.log(`[VideoUpload] __dirname: ${__dirname}`);
+    console.log(`[VideoUpload] uploadDir: ${uploadDir}`);
     if (!fs.existsSync(uploadDir)) {
       fs.mkdirSync(uploadDir, { recursive: true });
       console.log(`[VideoUpload] Created directory: ${uploadDir}`);
@@ -708,14 +713,28 @@ gere uma simulação de entrevista realista com {{numberOfQuestions}} perguntas 
       
       try {
         fs.writeFileSync(videoPath, videoFile.buffer);
+        
+        // Verificar se o arquivo foi salvo corretamente
+        if (!fs.existsSync(videoPath)) {
+          throw new Error(`File was not saved: ${videoPath}`);
+        }
+        
+        const stats = fs.statSync(videoPath);
+        if (stats.size === 0) {
+          throw new Error(`File saved but is empty: ${videoPath}`);
+        }
+        
         videoPaths.push(`/uploads/videos/${videoFileName}`);
         savedFiles.push(videoPath);
-        console.log(`[VideoUpload] Saved video ${index + 1}/${videoFiles.length}: ${videoFileName}`);
+        console.log(`[VideoUpload] Saved video ${index + 1}/${videoFiles.length}: ${videoFileName} (${stats.size} bytes) at ${videoPath}`);
       } catch (error) {
         console.error(`[VideoUpload] Error saving video ${index}:`, error);
         // Continuar com os outros vídeos mesmo se um falhar
       }
     }
+    
+    console.log(`[VideoUpload] All saved files:`, savedFiles);
+    console.log(`[VideoUpload] All video paths:`, videoPaths);
     
     if (videoPaths.length === 0) {
       throw new Error('Failed to save any video files');
@@ -739,6 +758,8 @@ gere uma simulação de entrevista realista com {{numberOfQuestions}} perguntas 
 
     // Disparar análise de vídeo em background (analisar todos os vídeos)
     this.processVideoAnalysis(attempt._id.toString(), savedFiles, interviewId);
+
+    console.log(`[VideoUpload] Upload completed successfully for attempt ${attempt._id}`);
 
     return {
       attemptId: attempt._id.toString(),
@@ -836,7 +857,7 @@ gere uma simulação de entrevista realista com {{numberOfQuestions}} perguntas 
       // Carregar template de prompt
       let promptTemplate: string;
       try {
-        const promptPath = path.join(__dirname, '../../../../prompt/video-analysis.md');
+        const promptPath = path.join(process.cwd(), 'prompt', 'video-analysis.md');
         promptTemplate = fs.readFileSync(promptPath, 'utf-8');
       } catch (error) {
         // Fallback simplificado se não conseguir ler o template
@@ -1061,8 +1082,103 @@ Responda APENAS com JSON válido seguindo esta estrutura:
       status: attempt.analysisStatus,
       hasVideo: attempt.hasVideo,
       videoPath: attempt.videoPath,
+      videoPaths: attempt.videoPaths,
       analysis: attempt.videoAnalysis,
       completedAt: attempt.completedAt,
     };
+  }
+
+  async serveVideoFile(filename: string, userId: string, res: any) {
+    const { Types } = require('mongoose');
+    const path = require('path');
+    const fs = require('fs');
+
+    try {
+      console.log(`[VideoAccess] Request to access video: ${filename} by user: ${userId}`);
+      
+      // Extract userId from filename
+      // Format: interview_{interviewId}_{userId}_q{questionIndex}_{timestamp}.{ext}
+      const filenameParts = filename.split('_');
+      if (filenameParts.length < 4) {
+        console.error(`[VideoAccess] Invalid filename format: ${filename}`);
+        throw new NotFoundException('Invalid filename format');
+      }
+
+      const fileUserId = filenameParts[2]; // userId is the 3rd part (0-indexed: 0=interview, 1=interviewId, 2=userId)
+      
+      console.log(`[VideoAccess] File belongs to user: ${fileUserId}, requesting user: ${userId}`);
+      console.log(`[VideoAccess] File userId type: ${typeof fileUserId}, User ID type: ${typeof userId}`);
+
+      // Normalize both IDs for comparison (convert to string if needed)
+      const normalizedFileUserId = fileUserId.toString();
+      const normalizedRequestUserId = userId.toString();
+      
+      console.log(`[VideoAccess] Normalized comparison: ${normalizedFileUserId} === ${normalizedRequestUserId}`);
+
+      // Verify that the requesting user owns this video
+      if (normalizedFileUserId !== normalizedRequestUserId) {
+        console.error(`[VideoAccess] Access denied: User ${normalizedRequestUserId} tried to access video owned by ${normalizedFileUserId}`);
+        throw new HttpException('Access denied. You do not own this video.', HttpStatus.FORBIDDEN);
+      }
+
+      console.log(`[VideoAccess] Access granted for user ${userId} to video ${filename}`);
+
+      // Construct file path
+      const uploadDir = path.join(process.cwd(), 'public', 'uploads', 'videos');
+      const filePath = path.join(uploadDir, filename);
+
+      console.log(`[VideoAccess] Looking for file at: ${filePath}`);
+
+      // Check if file exists
+      if (!fs.existsSync(filePath)) {
+        console.error(`[VideoAccess] File not found: ${filePath}`);
+        throw new NotFoundException('Video file not found');
+      }
+
+      console.log(`[VideoAccess] File found, serving: ${filename}`);
+
+      // Get file stats for content type and size
+      const stat = fs.statSync(filePath);
+      const fileSize = stat.size;
+      const range = res.req.headers.range;
+
+      // Handle range requests for video streaming
+      if (res.req && res.req.headers.range) {
+        const parts = res.req.headers.range.replace(/bytes=/, '').split('-');
+        const start = parseInt(parts[0], 10);
+        const end = parts[1] ? parseInt(parts[1], 10) : fileSize - 1;
+        const chunksize = (end - start) + 1;
+        const file = fs.createReadStream(filePath, { start, end });
+
+        const head = {
+          'Content-Range': `bytes ${start}-${end}/${fileSize}`,
+          'Accept-Ranges': 'bytes',
+          'Content-Length': chunksize,
+          'Content-Type': 'video/webm',
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Access-Control-Expose-Headers': 'Content-Range, Accept-Ranges, Content-Length',
+        };
+
+        res.status(206).set(head);
+        file.pipe(res);
+      } else {
+        const head = {
+          'Content-Length': fileSize,
+          'Content-Type': 'video/webm',
+          'Accept-Ranges': 'bytes',
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Access-Control-Expose-Headers': 'Content-Length, Accept-Ranges',
+        };
+
+        res.status(200).set(head);
+        fs.createReadStream(filePath).pipe(res);
+      }
+    } catch (error) {
+      console.error(`[VideoAccess] Error serving video file ${filename}:`, error);
+      if (error instanceof HttpException) {
+        throw error;
+      }
+      throw new HttpException('Error serving video file', HttpStatus.INTERNAL_SERVER_ERROR);
+    }
   }
 }

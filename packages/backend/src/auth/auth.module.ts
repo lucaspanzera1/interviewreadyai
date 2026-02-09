@@ -20,6 +20,7 @@ import { UserModule } from '../user/user.module';
         signOptions: {
           expiresIn: configService.get<string>('JWT_EXPIRES_IN') || '15m',
         },
+        global: true,
       }),
       inject: [ConfigService],
     }),

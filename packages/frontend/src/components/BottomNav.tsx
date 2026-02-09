@@ -65,10 +65,9 @@ const Sidebar: React.FC = () => {
 
     const mainNavItems = [
         { name: 'Início', path: '/', icon: HomeIcon, activeIcon: HomeIconSolid },
-        { name: 'Meus Quizzes', path: '/my-quizzes', icon: DocumentTextIcon, activeIcon: DocumentTextIconSolid },
-        { name: 'Simulação Entrevista', path: '/create-interview', icon: ChatBubbleLeftRightIcon, activeIcon: ChatBubbleLeftRightIconSolid, badge: 'NOVO' },
-        { name: 'Minhas Simulações', path: '/my-interviews', icon: ChatBubbleLeftRightIcon, activeIcon: ChatBubbleLeftRightIconSolid },
-        { name: 'Meus Flashcards', path: '/my-flashcards', icon: RectangleStackIcon, activeIcon: RectangleStackIconSolid, badge: 'BETA' },
+        { name: 'Quizzes', path: '/my-quizzes', icon: DocumentTextIcon, activeIcon: DocumentTextIconSolid },
+        { name: 'Simulações', path: '/my-interviews', icon: ChatBubbleLeftRightIcon, activeIcon: ChatBubbleLeftRightIconSolid, badge: 'BETA' },
+        { name: 'Flashcards', path: '/my-flashcards', icon: RectangleStackIcon, activeIcon: RectangleStackIconSolid, badge: 'BETA' },
         { name: 'Explorar', path: '/free-quizzes', icon: AcademicCapIcon, activeIcon: AcademicCapIconSolid },
 
         { name: 'Comunidade', path: '/search', icon: UsersIconLucide, activeIcon: UsersIconLucide },

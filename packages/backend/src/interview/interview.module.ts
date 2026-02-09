@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { HttpModule } from '@nestjs/axios';
+import { ConfigModule } from '@nestjs/config';
 import { InterviewController } from './interview.controller';
 import { InterviewService } from './interview.service';
 import { Interview, InterviewSchema } from './schemas/interview.schema';
@@ -15,6 +16,7 @@ import { UserModule } from '../user/user.module';
     ]),
     HttpModule,
     UserModule,
+    ConfigModule,
   ],
   controllers: [InterviewController],
   providers: [InterviewService],
