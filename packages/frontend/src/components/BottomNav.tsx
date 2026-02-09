@@ -69,8 +69,8 @@ const Sidebar: React.FC = () => {
     const mainNavItems = [
         { name: 'Início', path: '/', icon: HomeIcon, activeIcon: HomeIconSolid },
         { name: 'Quizzes', path: '/my-quizzes', icon: DocumentTextIcon, activeIcon: DocumentTextIconSolid },
-        { name: 'Simulações', path: '/my-interviews', icon: ChatBubbleLeftRightIcon, activeIcon: ChatBubbleLeftRightIconSolid, badge: 'BETA', locked: !isPro },
-        { name: 'Flashcards', path: '/my-flashcards', icon: RectangleStackIcon, activeIcon: RectangleStackIconSolid, badge: 'BETA', locked: !isPro },
+        { name: 'Simulações', path: '/my-interviews', icon: ChatBubbleLeftRightIcon, activeIcon: ChatBubbleLeftRightIconSolid, badge: 'PRO', locked: !isPro },
+        { name: 'Flashcards', path: '/my-flashcards', icon: RectangleStackIcon, activeIcon: RectangleStackIconSolid, badge: 'PRO', locked: !isPro },
         { name: 'Explorar', path: '/free-quizzes', icon: AcademicCapIcon, activeIcon: AcademicCapIconSolid },
 
         { name: 'Comunidade', path: '/search', icon: UsersIconLucide, activeIcon: UsersIconLucide },
@@ -147,8 +147,8 @@ const Sidebar: React.FC = () => {
                             className={`w-full flex items-center px-3 py-2.5 rounded-xl transition-all duration-200 border-l-4 ${active
                                 ? 'bg-primary-50 dark:bg-primary-900/10 text-primary-700 dark:text-primary-300 font-semibold border-primary-600'
                                 : item.locked
-                                ? 'text-slate-300 dark:text-slate-600 cursor-not-allowed border-transparent'
-                                : 'text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white border-transparent'
+                                    ? 'text-slate-300 dark:text-slate-600 cursor-not-allowed border-transparent'
+                                    : 'text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white border-transparent'
                                 } ${isCollapsed ? 'justify-center px-0' : ''}`}
                             title={isCollapsed ? item.name : undefined}
                             disabled={item.locked}
@@ -164,7 +164,7 @@ const Sidebar: React.FC = () => {
                                     <span className="text-sm pl-3">{item.name}</span>
                                     {/* @ts-ignore */}
                                     {item.badge && (
-                                        <span className="ml-2 text-[10px] px-1.5 py-0.5 rounded shadow-sm font-bold bg-amber-100 text-amber-700 dark:bg-amber-900/50 dark:text-amber-400 border border-amber-200 dark:border-amber-700/50 uppercase tracking-wide">
+                                        <span className="ml-2 text-[10px] px-1.5 py-0.5 rounded shadow-sm font-bold bg-purple-100 text-purple-700 dark:bg-purple-900/50 dark:text-purple-400 border border-purple-200 dark:border-purple-700/50 uppercase tracking-wide">
                                             {/* @ts-ignore */}
                                             {item.badge}
                                         </span>
@@ -379,8 +379,8 @@ const Sidebar: React.FC = () => {
                 className={`flex flex-col items-center justify-center w-full h-full space-y-1 ${active
                     ? 'text-primary-600 dark:text-primary-400'
                     : item.locked
-                    ? 'text-slate-300 dark:text-slate-600 cursor-not-allowed'
-                    : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'
+                        ? 'text-slate-300 dark:text-slate-600 cursor-not-allowed'
+                        : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'
                     }`}
                 disabled={item.locked}
             >
