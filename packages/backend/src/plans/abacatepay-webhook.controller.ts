@@ -60,6 +60,11 @@ export class AbacatePayWebhookController {
           signature !== expectedSignatureNoDevMode &&
           signature !== expectedSignatureDataOnly) {
         console.error('❌ Assinatura inválida');
+        console.error('Received signature:', signature);
+        console.error('Expected full:', expectedSignature);
+        console.error('Expected no dev:', expectedSignatureNoDevMode);
+        console.error('Expected data:', expectedSignatureDataOnly);
+        console.error('Raw body:', rawBody.toString());
         throw new BadRequestException('Assinatura inválida');
       }
     }
