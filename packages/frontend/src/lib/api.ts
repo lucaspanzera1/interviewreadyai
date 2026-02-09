@@ -551,11 +551,6 @@ class ApiClient {
     return res.data.message ? { data: res.data.data, message: res.data.message } : { data: res.data };
   }
 
-  async updatePrivacySettings(isProfilePublic: boolean): Promise<{ data: UserProfile; message?: string }> {
-    const res = await this.client.put('/users/me/privacy', { isProfilePublic });
-    return res.data.message ? { data: res.data.data, message: res.data.message } : { data: res.data };
-  }
-
   async completeOnboarding(profileData: CompleteOnboardingData): Promise<{ data: UserProfile; message?: string }> {
     const res = await this.client.post('/users/me/onboarding', profileData);
     return res.data.message ? { data: res.data.data, message: res.data.message } : { data: res.data };
