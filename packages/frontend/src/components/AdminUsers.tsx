@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState, useMemo, useRef, useCallback } from 'react';
 import PageTitle from './PageTitle';
 import { apiClient, User } from '../lib/api';
 import UserDetailsModal from './UserDetailsModal';
@@ -7,8 +7,6 @@ import {
   FunnelIcon,
   UserGroupIcon,
   UserPlusIcon,
-  ChevronLeftIcon,
-  ChevronRightIcon,
   EllipsisVerticalIcon
 } from '@heroicons/react/24/outline';
 import { CheckCircleIcon, XCircleIcon } from '@heroicons/react/24/solid';
@@ -20,10 +18,11 @@ const AdminUsers: React.FC = () => {
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [selectedUserName, setSelectedUserName] = useState<string>('');
 
-  // Search and Pagination State
+  // Search and Infinite Scroll State
   const [searchTerm, setSearchTerm] = useState('');
-  const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 10;
+  const [visibleCount, setVisibleCount] = useState(20);
+  const observerTarget = useRef<HTMLDivElement>(null);
+  const PAGE_SIZE = 20;
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -50,7 +49,7 @@ const AdminUsers: React.FC = () => {
     return { total, admins, clients };
   }, [users]);
 
-  // Filtering and Pagination Logic
+  // Filtering and Infinite Scroll Logic
   const filteredUsers = useMemo(() => {
     return users.filter(user =>
       user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -58,11 +57,42 @@ const AdminUsers: React.FC = () => {
     );
   }, [users, searchTerm]);
 
-  const totalPages = Math.ceil(filteredUsers.length / itemsPerPage);
-  const paginatedUsers = filteredUsers.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
-  );
+  // Reset visible count when search term changes
+  useEffect(() => {
+    setVisibleCount(PAGE_SIZE);
+  }, [searchTerm]);
+
+  const displayedUsers = useMemo(() => {
+    return filteredUsers.slice(0, visibleCount);
+  }, [filteredUsers, visibleCount]);
+
+  const hasMoreUsers = visibleCount < filteredUsers.length;
+
+  const handleObserver = useCallback((entries: IntersectionObserverEntry[]) => {
+    const [target] = entries;
+    if (target.isIntersecting && hasMoreUsers) {
+      setVisibleCount((prev) => Math.min(prev + PAGE_SIZE, filteredUsers.length));
+    }
+  }, [hasMoreUsers, filteredUsers.length]);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(handleObserver, {
+      root: null,
+      rootMargin: "20px",
+      threshold: 0
+    });
+
+    if (observerTarget.current) {
+      observer.observe(observerTarget.current);
+    }
+
+    return () => {
+      if (observerTarget.current) {
+        observer.unobserve(observerTarget.current);
+      }
+    };
+  }, [handleObserver]);
+
 
   const formatDate = (date?: string) => {
     if (!date) return '-';
@@ -158,7 +188,7 @@ const AdminUsers: React.FC = () => {
                   type="text"
                   placeholder="Buscar por nome ou email..."
                   value={searchTerm}
-                  onChange={(e) => { setSearchTerm(e.target.value); setCurrentPage(1); }}
+                  onChange={(e) => { setSearchTerm(e.target.value); }}
                   className="w-full pl-10 pr-4 py-2 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 dark:text-white transition-all"
                 />
                 <MagnifyingGlassIcon className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
@@ -203,14 +233,14 @@ const AdminUsers: React.FC = () => {
                     </tr>
                   </thead>
                   <tbody className="bg-white dark:bg-slate-900 divide-y divide-slate-100 dark:divide-slate-800">
-                    {paginatedUsers.length === 0 ? (
+                    {displayedUsers.length === 0 ? (
                       <tr>
                         <td colSpan={6} className="px-6 py-12 text-center text-slate-500 dark:text-slate-400">
                           Nenhum usuário encontrado.
                         </td>
                       </tr>
                     ) : (
-                      paginatedUsers.map((user) => {
+                      displayedUsers.map((user) => {
                         const lastLogin = getLastLoginStatus(user.lastLoginAt);
                         return (
                           <tr key={user.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors group">
@@ -227,10 +257,10 @@ const AdminUsers: React.FC = () => {
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap">
                               <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${user.role === 'admin'
-                                  ? 'bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-300 border-purple-100 dark:border-purple-800/50'
-                                  : user.role === 'pro'
-                                    ? 'bg-indigo-50 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-300 border-indigo-100 dark:border-indigo-800/50'
-                                    : 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-300 border-emerald-100 dark:border-emerald-800/50'
+                                ? 'bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-300 border-purple-100 dark:border-purple-800/50'
+                                : user.role === 'pro'
+                                  ? 'bg-indigo-50 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-300 border-indigo-100 dark:border-indigo-800/50'
+                                  : 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-300 border-emerald-100 dark:border-emerald-800/50'
                                 }`}>
                                 {user.role === 'admin' ? 'Administrador' : user.role === 'pro' ? 'Pro / Premium' : 'Aluno'}
                               </span>
@@ -273,26 +303,20 @@ const AdminUsers: React.FC = () => {
                 </table>
               </div>
 
-              {/* Pagination */}
-              <div className="px-6 py-4 border-t border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30 flex items-center justify-between">
-                <div className="text-sm text-slate-500 dark:text-slate-400">
-                  Mostrando <span className="font-medium">{Math.min(filteredUsers.length, (currentPage - 1) * itemsPerPage + 1)}</span> a <span className="font-medium">{Math.min(filteredUsers.length, currentPage * itemsPerPage)}</span> de <span className="font-medium">{filteredUsers.length}</span> resultados
+              {/* Infinite Scroll Sentinel */}
+              {hasMoreUsers && (
+                <div ref={observerTarget} className="p-8 flex justify-center w-full">
+                  <div className="flex flex-col items-center gap-2 text-slate-400 text-sm animate-pulse">
+                    <div className="h-6 w-6 border-2 border-primary-500 border-t-transparent rounded-full animate-spin"></div>
+                    <span className="font-medium">Carregando mais...</span>
+                  </div>
                 </div>
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-                    disabled={currentPage === 1}
-                    className="p-2 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-500 hover:bg-white dark:hover:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                  >
-                    <ChevronLeftIcon className="h-4 w-4" />
-                  </button>
-                  <button
-                    onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-                    disabled={currentPage === totalPages || totalPages === 0}
-                    className="p-2 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-500 hover:bg-white dark:hover:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                  >
-                    <ChevronRightIcon className="h-4 w-4" />
-                  </button>
+              )}
+
+              {/* Footer Info */}
+              <div className="px-6 py-4 border-t border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30 flex items-center justify-between text-sm text-slate-500 dark:text-slate-400">
+                <div>
+                  Mostrando <span className="font-medium">{displayedUsers.length}</span> de <span className="font-medium">{filteredUsers.length}</span> resultados
                 </div>
               </div>
             </>
