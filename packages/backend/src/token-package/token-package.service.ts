@@ -3,6 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { TokenPackage, TokenPackageDocument } from './schemas/token-package.schema';
 import { User } from '../user/schemas/user.schema';
+import { EmailService } from '../common/services/email.service';
 
 @Injectable()
 export class TokenPackageService {
@@ -11,6 +12,7 @@ export class TokenPackageService {
     private tokenPackageModel: Model<TokenPackageDocument>,
     @InjectModel(User.name)
     private userModel: Model<User>,
+    private readonly emailService: EmailService,
   ) {}
 
   async create(createTokenPackageDto: any): Promise<TokenPackage> {
@@ -61,29 +63,25 @@ export class TokenPackageService {
 
     const newRole = (tokenPackage.role as any).name;
 
-    // Verificar se o usuário já tem este plano ativo
-    if (currentUser.role === newRole && currentUser.roleExpiresAt) {
-      const now = new Date();
-      if (currentUser.roleExpiresAt > now) {
-        throw new BadRequestException(
-          `Você já possui o plano ${newRole}. Válido até ${currentUser.roleExpiresAt.toLocaleDateString('pt-BR')}.`
-        );
+    // Lógica de validação baseada no tipo do pacote
+    if (tokenPackage.packageType === 'subscription') {
+      // Para assinaturas, verificar se já tem o plano ativo
+      if (currentUser.role === newRole && currentUser.roleExpiresAt) {
+        const now = new Date();
+        if (currentUser.roleExpiresAt > now) {
+          throw new BadRequestException(
+            `Você já possui o plano ${newRole}. Válido até ${currentUser.roleExpiresAt.toLocaleDateString('pt-BR')}.`
+          );
+        }
       }
     }
+    // Para 'token_boost' e 'test', sempre permitir (não verificar role existente)
 
-    // Adicionar tokens e atualizar role
+    // Adicionar tokens e atualizar role conforme o tipo
     const newTokenBalance = (currentUser.tokens || 0) + tokenPackage.tokenAmount;
-    
-    // Calcular data de expiração se o pacote tiver validade definida
-    let roleExpiresAt: Date | undefined = undefined;
-    if (tokenPackage.validityDays && tokenPackage.validityDays > 0) {
-      roleExpiresAt = new Date();
-      roleExpiresAt.setDate(roleExpiresAt.getDate() + tokenPackage.validityDays);
-    }
     
     const updateData: any = {
       tokens: newTokenBalance,
-      role: newRole,
       $push: {
         rewardHistory: {
           type: 'package',
@@ -93,14 +91,27 @@ export class TokenPackageService {
         }
       }
     };
-    
-    // Adicionar roleExpiresAt apenas se definido
-    if (roleExpiresAt) {
-      updateData.roleExpiresAt = roleExpiresAt;
-    } else {
-      // Remover roleExpiresAt se o plano for vitalício
-      updateData.$unset = { roleExpiresAt: '' };
+
+    // Atualizar role apenas para pacotes do tipo 'subscription'
+    let roleExpiresAt: Date | undefined = undefined;
+    if (tokenPackage.packageType === 'subscription') {
+      // Calcular data de expiração se o pacote tiver validade definida
+      if (tokenPackage.validityDays && tokenPackage.validityDays > 0) {
+        roleExpiresAt = new Date();
+        roleExpiresAt.setDate(roleExpiresAt.getDate() + tokenPackage.validityDays);
+      }
+      
+      updateData.role = newRole;
+      
+      // Adicionar roleExpiresAt apenas se definido
+      if (roleExpiresAt) {
+        updateData.roleExpiresAt = roleExpiresAt;
+      } else {
+        // Remover roleExpiresAt se o plano for vitalício
+        updateData.$unset = { roleExpiresAt: '' };
+      }
     }
+    // Para 'token_boost' e 'test', não alterar a role atual
     
     const updatedUser = await this.userModel.findByIdAndUpdate(
       userId,
@@ -112,10 +123,26 @@ export class TokenPackageService {
       throw new NotFoundException('Usuário não encontrado');
     }
 
-    let message = `Pacote resgatado com sucesso! Você recebeu ${tokenPackage.tokenAmount} tokens e o cargo ${newRole}.`;
-    if (roleExpiresAt) {
-      message += ` Válido até ${roleExpiresAt.toLocaleDateString('pt-BR')}.`;
+    let message = `Pacote resgatado com sucesso! Você recebeu ${tokenPackage.tokenAmount} tokens.`;
+    
+    if (tokenPackage.packageType === 'subscription') {
+      message += ` Cargo atualizado para ${newRole}.`;
+      if (roleExpiresAt) {
+        message += ` Válido até ${roleExpiresAt.toLocaleDateString('pt-BR')}.`;
+      }
     }
+
+    // Enviar email notificando o resgate do plano
+    await this.emailService.sendPlanRedeemedEmail(
+      currentUser.email,
+      currentUser.name || currentUser.email,
+      tokenPackage.name,
+      tokenPackage.description || `Pacote ${tokenPackage.name}`,
+      tokenPackage.tokenAmount,
+      newTokenBalance,
+      tokenPackage.packageType === 'subscription' ? newRole : undefined,
+      roleExpiresAt ? roleExpiresAt.toLocaleDateString('pt-BR') : undefined
+    );
 
     return { message };
   }

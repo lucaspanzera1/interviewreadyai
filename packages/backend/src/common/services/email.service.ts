@@ -27,6 +27,72 @@ export class EmailService {
   }
 
   /**
+   * Envia email informando adição de tokens
+   */
+  async sendTokenAddedEmail(
+    email: string,
+    name: string,
+    amount: number,
+    reason: string,
+    newBalance: number
+  ): Promise<void> {
+    try {
+      await this.mailerService.sendMail({
+        to: email,
+        subject: 'Tokens Adicionados à sua Conta - TreinaVagaAI 🎉',
+        template: 'token-added',
+        context: {
+          name: name,
+          amount: amount,
+          reason: reason,
+          newBalance: newBalance,
+          appUrl: process.env.FRONTEND_URL || 'https://app.treinavaga.ai',
+          year: new Date().getFullYear(),
+        },
+      });
+    } catch (error) {
+      console.error('Erro ao enviar email de adição de tokens:', error);
+      // Não lança erro para não quebrar o fluxo
+    }
+  }
+
+  /**
+   * Envia email informando resgate de plano
+   */
+  async sendPlanRedeemedEmail(
+    email: string,
+    name: string,
+    planName: string,
+    planDescription: string,
+    tokensAdded: number,
+    newTokenBalance: number,
+    newRole?: string,
+    roleExpiresAt?: string
+  ): Promise<void> {
+    try {
+      await this.mailerService.sendMail({
+        to: email,
+        subject: 'Plano Resgatado com Sucesso - TreinaVagaAI 🎉',
+        template: 'plan-redeemed',
+        context: {
+          name: name,
+          planName: planName,
+          planDescription: planDescription,
+          tokensAdded: tokensAdded,
+          newTokenBalance: newTokenBalance,
+          newRole: newRole,
+          roleExpiresAt: roleExpiresAt,
+          appUrl: process.env.FRONTEND_URL || 'https://app.treinavaga.ai',
+          year: new Date().getFullYear(),
+        },
+      });
+    } catch (error) {
+      console.error('Erro ao enviar email de resgate de plano:', error);
+      // Não lança erro para não quebrar o fluxo
+    }
+  }
+
+  /**
    * Envia email genérico
    */
   async sendEmail(

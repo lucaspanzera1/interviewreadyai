@@ -33,6 +33,9 @@ export class TokenPackage {
   @Prop({ type: String })
   externalId?: string; // ID externo para integração com AbacatePay
 
+  @Prop({ type: String, enum: ['subscription', 'token_boost', 'test'], default: 'subscription' })
+  packageType: string; // Tipo do pacote: subscription (assinatura), token_boost (recarga), test (teste)
+
   createdAt: Date;
   updatedAt: Date;
 }

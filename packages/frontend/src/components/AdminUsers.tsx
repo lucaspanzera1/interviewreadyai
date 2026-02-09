@@ -103,13 +103,23 @@ const AdminUsers: React.FC = () => {
 
   const getLastLoginStatus = (lastLoginAt?: string) => {
     if (!lastLoginAt) return { text: 'Nunca', color: 'text-slate-400 bg-slate-100 dark:bg-slate-800' };
-    const diffInDays = Math.floor((new Date().getTime() - new Date(lastLoginAt).getTime()) / (1000 * 60 * 60 * 24));
 
-    if (diffInDays === 0) return { text: 'Hoje', color: 'text-emerald-700 bg-emerald-50 dark:bg-emerald-900/20 dark:text-emerald-400' };
-    if (diffInDays === 1) return { text: 'Ontem', color: 'text-emerald-700 bg-emerald-50 dark:bg-emerald-900/20 dark:text-emerald-400' };
-    if (diffInDays <= 7) return { text: `${diffInDays} dias atrás`, color: 'text-blue-700 bg-blue-50 dark:bg-blue-900/20 dark:text-blue-400' };
-    if (diffInDays <= 30) return { text: `${diffInDays} dias atrás`, color: 'text-amber-700 bg-amber-50 dark:bg-amber-900/20 dark:text-amber-400' };
-    return { text: `${diffInDays} dias atrás`, color: 'text-slate-600 bg-slate-100 dark:bg-slate-800 dark:text-slate-400' };
+    const date = new Date(lastLoginAt);
+    const diffInDays = Math.floor((new Date().getTime() - date.getTime()) / (1000 * 60 * 60 * 24));
+
+    const formattedDate = date.toLocaleString('pt-BR', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+
+    if (diffInDays === 0) return { text: formattedDate, color: 'text-emerald-700 bg-emerald-50 dark:bg-emerald-900/20 dark:text-emerald-400' };
+    if (diffInDays === 1) return { text: formattedDate, color: 'text-emerald-700 bg-emerald-50 dark:bg-emerald-900/20 dark:text-emerald-400' };
+    if (diffInDays <= 7) return { text: formattedDate, color: 'text-blue-700 bg-blue-50 dark:bg-blue-900/20 dark:text-blue-400' };
+    if (diffInDays <= 30) return { text: formattedDate, color: 'text-amber-700 bg-amber-50 dark:bg-amber-900/20 dark:text-amber-400' };
+    return { text: formattedDate, color: 'text-slate-600 bg-slate-100 dark:bg-slate-800 dark:text-slate-400' };
   };
 
   const getInitials = (name: string) => {
@@ -263,7 +273,7 @@ const AdminUsers: React.FC = () => {
                                   ? 'bg-indigo-50 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-300 border-indigo-100 dark:border-indigo-800/50'
                                   : 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-300 border-emerald-100 dark:border-emerald-800/50'
                                 }`}>
-                                {user.role === 'admin' ? 'Administrador' : user.role === 'pro' ? 'Pro / Premium' : 'Aluno'}
+                                {user.role}
                               </span>
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap">

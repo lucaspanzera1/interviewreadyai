@@ -27,6 +27,7 @@ export interface TokenPackage {
   active: boolean;
   validityDays?: number;
   value?: number;
+  packageType: 'subscription' | 'token_boost' | 'test';
   createdAt: string;
   updatedAt: string;
 }
@@ -39,6 +40,7 @@ export interface CreateTokenPackage {
   features: string[];
   validityDays?: number;
   value?: number;
+  packageType?: 'subscription' | 'token_boost' | 'test';
 }
 
 export interface UpdateTokenPackage {
@@ -49,6 +51,7 @@ export interface UpdateTokenPackage {
   features?: string[];
   active?: boolean;
   validityDays?: number;
+  packageType?: 'subscription' | 'token_boost' | 'test';
 }
 
 export interface User {

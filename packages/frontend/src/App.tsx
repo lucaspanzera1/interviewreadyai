@@ -264,7 +264,7 @@ function App() {
         <Route
           path="/create-interview"
           element={
-            <ProtectedRoute requireRole="pro">
+            <ProtectedRoute requireRole="PRO">
               <AppLayout>
                 <CreateInterviewPage />
               </AppLayout>
@@ -276,7 +276,7 @@ function App() {
         <Route
           path="/my-interviews"
           element={
-            <ProtectedRoute requireRole="pro">
+            <ProtectedRoute requireRole="PRO">
               <AppLayout>
                 <MyInterviewsPage />
               </AppLayout>
