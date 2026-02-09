@@ -24,6 +24,7 @@ import CreateQuizByLinkPage from './components/CreateQuizByLinkPage'
 import CreateFlashcardByLinkPage from './components/CreateFlashcardByLinkPage'
 import CreateInterviewPage from './components/CreateInterviewPage'
 import MyInterviewsPage from './components/MyInterviewsPage'
+import MyInterviewAttemptsPage from './components/MyInterviewAttemptsPage'
 import GeneratedInterviewPage from './components/GeneratedInterviewPage'
 import InterviewPlayPage from './components/InterviewPlayPage'
 import InterviewVideoRecorderPage from './components/InterviewVideoRecorderPage'
@@ -278,6 +279,18 @@ function App() {
             <ProtectedRoute>
               <AppLayout>
                 <MyInterviewsPage />
+              </AppLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        {/* My Interview Attempts page */}
+        <Route
+          path="/my-interview-attempts"
+          element={
+            <ProtectedRoute>
+              <AppLayout>
+                <MyInterviewAttemptsPage />
               </AppLayout>
             </ProtectedRoute>
           }

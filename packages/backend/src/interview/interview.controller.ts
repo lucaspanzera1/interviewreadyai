@@ -10,9 +10,10 @@ import {
   Patch,
   UseInterceptors,
   UploadedFile,
+  UploadedFiles,
   BadRequestException
 } from '@nestjs/common';
-import { FileInterceptor } from '@nestjs/platform-express';
+import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 import { InterviewService } from './interview.service';
 import { GenerateInterviewDto, GeneratedInterview, InterviewAttemptDto } from './dto';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
@@ -86,12 +87,14 @@ export class InterviewController {
   async getUserAttempts(
     @Query('page') page: string = '1',
     @Query('limit') limit: string = '10',
+    @Query('interviewId') interviewId: string,
     @CurrentUser() user: UserDocument,
   ) {
     return this.interviewService.getUserAttempts(
       user._id.toString(), 
       parseInt(page), 
-      parseInt(limit)
+      parseInt(limit),
+      interviewId
     );
   }
 
@@ -134,9 +137,9 @@ export class InterviewController {
 
   @Post(':id/video-attempt')
   @UseGuards(JwtAuthGuard)
-  @UseInterceptors(FileInterceptor('video', {
+  @UseInterceptors(FilesInterceptor('videos', 10, { // Aceitar até 10 vídeos
     limits: {
-      fileSize: 50 * 1024 * 1024, // 50MB max
+      fileSize: 50 * 1024 * 1024, // 50MB max por arquivo
     },
     fileFilter: (req, file, callback) => {
       if (!file.mimetype.startsWith('video/')) {
@@ -147,18 +150,18 @@ export class InterviewController {
   }))
   async recordVideoAttempt(
     @Param('id') interviewId: string,
-    @UploadedFile() videoFile: Express.Multer.File,
+    @UploadedFiles() videoFiles: Express.Multer.File[],
     @Body() attemptDto: any,
     @CurrentUser() user: UserDocument,
   ) {
-    if (!videoFile) {
-      throw new BadRequestException('Video file is required');
+    if (!videoFiles || videoFiles.length === 0) {
+      throw new BadRequestException('At least one video file is required');
     }
 
     return this.interviewService.recordVideoInterviewAttempt(
       interviewId,
       user._id.toString(),
-      videoFile,
+      videoFiles,
       attemptDto,
     );
   }

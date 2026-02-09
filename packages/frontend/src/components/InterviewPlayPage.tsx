@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import PageTitle from './PageTitle';
-import { 
+import {
     ArrowRightIcon,
-    ArrowLeftIcon, 
+    ArrowLeftIcon,
     CheckIcon,
-    LightBulbIcon
+    LightBulbIcon,
+    Bars3CenterLeftIcon,
+    ClockIcon,
+    XMarkIcon
 } from '@heroicons/react/24/outline';
 import { apiClient, InterviewQuestion } from '../lib/api';
 import { useToast } from '../contexts/ToastContext';
@@ -25,9 +28,9 @@ const InterviewTimer: React.FC<{ startTime: number }> = ({ startTime }) => {
     const secs = (elapsed % 60).toString().padStart(2, '0');
 
     return (
-        <div className="text-sm font-mono font-bold text-slate-700 dark:text-slate-300 bg-white/50 dark:bg-slate-800/50 px-3 py-1 rounded-full border border-slate-200 dark:border-slate-700 backdrop-blur-sm flex items-center gap-2 shadow-sm min-w-[80px] justify-center">
-            <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
-            {mins}:{secs}
+        <div className="flex items-center gap-2 px-3 py-1.5 bg-slate-100 dark:bg-slate-800 rounded-full font-mono text-sm font-semibold text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700 shadow-sm">
+            <ClockIcon className="w-4 h-4 text-primary-500" />
+            <span>{mins}:{secs}</span>
         </div>
     );
 };
@@ -48,9 +51,9 @@ const InterviewPlayPage: React.FC = () => {
     const [showResults, setShowResults] = useState(false);
     const [startTime] = useState<number>(Date.now());
     const [interviewId, setInterviewId] = useState<string>('');
-    const [showTimer] = useState(true);
+    const [showTips, setShowTips] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const [difficultyRating, setDifficultyRating] = useState<number>(3);
+    const [difficultyRating, setDifficultyRating] = useState<number>(0);
     const [feedback, setFeedback] = useState<string>('');
 
     useEffect(() => {
@@ -80,12 +83,14 @@ const InterviewPlayPage: React.FC = () => {
     const nextQuestion = () => {
         if (interview && currentQuestion < interview.questions.length - 1) {
             setCurrentQuestion(currentQuestion + 1);
+            setShowTips(false);
         }
     };
 
     const prevQuestion = () => {
         if (currentQuestion > 0) {
             setCurrentQuestion(currentQuestion - 1);
+            setShowTips(false);
         }
     };
 
@@ -99,18 +104,19 @@ const InterviewPlayPage: React.FC = () => {
         setIsSubmitting(true);
         try {
             const actualDuration = Math.floor((Date.now() - startTime) / 1000 / 60); // em minutos
-            
+
             await apiClient.recordInterviewAttempt(interviewId, {
                 userAnswers,
                 actualDuration,
-                difficultyRating,
+                difficultyRating: difficultyRating || 3,
                 feedback: feedback.trim() || undefined
             });
 
             await apiClient.completeInterview(interviewId);
 
+            // Celebration effect could go here
             showToast('Simulação concluída com sucesso! 🎉', 'success');
-            
+
             // Limpar localStorage
             localStorage.removeItem('generatedInterview');
             localStorage.removeItem('currentInterviewId');
@@ -118,7 +124,7 @@ const InterviewPlayPage: React.FC = () => {
             // Redirecionar
             setTimeout(() => {
                 navigate('/my-interviews');
-            }, 1000);
+            }, 1500);
 
         } catch (error: any) {
             console.error('Erro ao submeter simulação:', error);
@@ -127,16 +133,6 @@ const InterviewPlayPage: React.FC = () => {
         } finally {
             setIsSubmitting(false);
         }
-    };
-
-    const getQuestionTypeColor = (type: string) => {
-        const colors = {
-            'technical': 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
-            'behavioral': 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
-            'situational': 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200',
-            'company_specific': 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200'
-        };
-        return colors[type as keyof typeof colors] || 'bg-gray-100 text-gray-800';
     };
 
     const getQuestionTypeLabel = (type: string) => {
@@ -151,8 +147,8 @@ const InterviewPlayPage: React.FC = () => {
 
     if (!interview) {
         return (
-            <div className="min-h-full flex items-center justify-center">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
+            <div className="min-h-screen flex items-center justify-center bg-white dark:bg-slate-900">
+                <div className="animate-spin rounded-full h-12 w-12 border-4 border-primary-200 border-t-primary-600"></div>
             </div>
         );
     }
@@ -162,116 +158,83 @@ const InterviewPlayPage: React.FC = () => {
 
     if (showResults) {
         return (
-            <div className="min-h-full">
+            <div className="min-h-screen bg-slate-50 dark:bg-slate-900 flex items-center justify-center p-4">
                 <PageTitle title="Resultados da Simulação - TreinaVagaAI" />
-                
-                <div className="max-w-2xl mx-auto">
-                    {/* Header de Conclusão */}
+
+                <div className="max-w-xl w-full bg-white dark:bg-slate-800 rounded-3xl shadow-2xl p-8 border border-slate-200 dark:border-slate-700 animate-fade-in-up">
                     <div className="text-center mb-8">
-                        <div className="w-16 h-16 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center mx-auto mb-4">
-                            <CheckIcon className="w-8 h-8 text-green-600 dark:text-green-400" />
+                        <div className="w-20 h-20 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mx-auto mb-6 ring-8 ring-green-50 dark:ring-green-900/10">
+                            <CheckIcon className="w-10 h-10 text-green-600 dark:text-green-400" />
                         </div>
-                        <h1 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">
-                            Simulação Concluída!
+                        <h1 className="text-3xl font-bold text-slate-900 dark:text-white mb-2">
+                            Parabéns!
                         </h1>
                         <p className="text-slate-600 dark:text-slate-400">
-                            Você respondeu todas as {interview.questions.length} perguntas da simulação para:
-                        </p>
-                        <p className="text-lg font-semibold text-slate-900 dark:text-white mt-1">
-                            {interview.jobTitle} - {interview.companyName}
+                            Você completou a simulação para <span className="font-semibold text-primary-600 dark:text-primary-400">{interview.jobTitle}</span>.
                         </p>
                     </div>
 
-                    {/* Estatísticas */}
-                    <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 p-6 mb-6">
-                        <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">
-                            Estatísticas da Simulação
-                        </h3>
-                        <div className="grid grid-cols-2 gap-4">
-                            <div>
-                                <p className="text-sm text-slate-500 dark:text-slate-400">Tempo Total</p>
-                                <p className="text-lg font-semibold text-slate-900 dark:text-white">
-                                    {Math.floor((Date.now() - startTime) / 1000 / 60)} min
-                                </p>
-                            </div>
-                            <div>
-                                <p className="text-sm text-slate-500 dark:text-slate-400">Perguntas Respondidas</p>
-                                <p className="text-lg font-semibold text-slate-900 dark:text-white">
-                                    {interview.questions.length}
-                                </p>
-                            </div>
+                    <div className="grid grid-cols-2 gap-4 mb-8">
+                        <div className="bg-slate-50 dark:bg-slate-700/50 p-4 rounded-2xl text-center">
+                            <p className="text-sm text-slate-500 dark:text-slate-400 font-medium uppercase tracking-wider">Tempo</p>
+                            <p className="text-3xl font-bold text-slate-900 dark:text-white mt-1">
+                                {Math.floor((Date.now() - startTime) / 1000 / 60)}<span className="text-sm font-normal text-slate-500 ml-1">min</span>
+                            </p>
+                        </div>
+                        <div className="bg-slate-50 dark:bg-slate-700/50 p-4 rounded-2xl text-center">
+                            <p className="text-sm text-slate-500 dark:text-slate-400 font-medium uppercase tracking-wider">Perguntas</p>
+                            <p className="text-3xl font-bold text-slate-900 dark:text-white mt-1">
+                                {interview.questions.length}
+                            </p>
                         </div>
                     </div>
 
-                    {/* Formulário de Avaliação */}
-                    <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 p-6 mb-6">
-                        <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">
-                            Avalie a Simulação
-                        </h3>
-                        
-                        <div className="space-y-4">
-                            <div>
-                                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                                    Como você avalia a dificuldade da simulação?
-                                </label>
-                                <div className="flex gap-2">
-                                    {[1, 2, 3, 4, 5].map((rating) => (
-                                        <button
-                                            key={rating}
-                                            onClick={() => setDifficultyRating(rating)}
-                                            className={`w-10 h-10 rounded-full border-2 text-sm font-medium transition-colors ${
-                                                difficultyRating >= rating 
-                                                    ? 'bg-primary-600 border-primary-600 text-white' 
-                                                    : 'border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 hover:border-primary-400'
-                                            }`}
-                                        >
-                                            {rating}
-                                        </button>
-                                    ))}
-                                </div>
-                                <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                                    1 = Muito fácil, 5 = Muito difícil
-                                </p>
-                            </div>
-
-                            <div>
-                                <label htmlFor="feedback" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                                    Comentários (opcional)
-                                </label>
-                                <textarea
-                                    id="feedback"
-                                    value={feedback}
-                                    onChange={(e) => setFeedback(e.target.value)}
-                                    placeholder="Como foi sua experiência? Alguma sugestão?"
-                                    className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 placeholder-slate-500 dark:placeholder-slate-400 focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-                                    rows={3}
-                                />
-                            </div>
+                    <div className="mb-8">
+                        <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-3 text-center">
+                            Como foi a dificuldade?
+                        </label>
+                        <div className="flex justify-center gap-3">
+                            {[1, 2, 3, 4, 5].map((rating) => (
+                                <button
+                                    key={rating}
+                                    onClick={() => setDifficultyRating(rating)}
+                                    className={`w-12 h-12 rounded-xl text-lg font-bold transition-all transform hover:scale-110 ${difficultyRating === rating
+                                        ? 'bg-primary-600 text-white shadow-lg shadow-primary-600/30 ring-2 ring-primary-600 ring-offset-2 dark:ring-offset-slate-800'
+                                        : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600'
+                                        }`}
+                                >
+                                    {rating}
+                                </button>
+                            ))}
+                        </div>
+                        <div className="flex justify-between text-xs text-slate-400 mt-2 px-8">
+                            <span>Muito Fácil</span>
+                            <span>Muito Difícil</span>
                         </div>
                     </div>
 
-                    {/* Ações Finais */}
-                    <div className="flex gap-4">
-                        <button
-                            onClick={() => navigate('/my-interviews')}
-                            className="flex-1 px-6 py-3 border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
-                        >
-                            Voltar sem Salvar
-                        </button>
-                        
+                    <div className="mb-8">
+                        <textarea
+                            value={feedback}
+                            onChange={(e) => setFeedback(e.target.value)}
+                            placeholder="Algum comentário sobre a simulação? (Opcional)"
+                            className="w-full bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-700 rounded-xl p-4 text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none resize-none h-24 text-sm"
+                        />
+                    </div>
+
+                    <div className="space-y-3">
                         <button
                             onClick={submitInterview}
                             disabled={isSubmitting}
-                            className="flex-1 px-6 py-3 bg-primary-600 hover:bg-primary-700 disabled:bg-primary-400 text-white font-medium rounded-lg transition-colors"
+                            className="w-full py-4 bg-primary-600 hover:bg-primary-700 disabled:bg-primary-400 text-white font-bold rounded-xl transition-all shadow-lg hover:shadow-primary-600/20 active:translate-y-0.5"
                         >
-                            {isSubmitting ? (
-                                <span className="flex items-center justify-center gap-2">
-                                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                                    Salvando...
-                                </span>
-                            ) : (
-                                'Finalizar e Salvar'
-                            )}
+                            {isSubmitting ? 'Salvando...' : 'Finalizar e Salvar'}
+                        </button>
+                        <button
+                            onClick={() => navigate('/my-interviews')}
+                            className="w-full py-4 bg-transparent hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-400 font-semibold rounded-xl transition-colors"
+                        >
+                            Sair sem salvar
                         </button>
                     </div>
                 </div>
@@ -280,144 +243,153 @@ const InterviewPlayPage: React.FC = () => {
     }
 
     return (
-        <div className="min-h-full">
-            <PageTitle title={`Simulação - ${interview.jobTitle} - TreinaVagaAI`} />
-            
-            {/* Header com progresso */}
-            <header className="sticky top-0 z-20 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 -mx-4 -mt-4 lg:-mx-8 lg:-mt-8 px-4 lg:px-8 py-4 mb-8">
-                <div className="max-w-4xl mx-auto">
-                    <div className="flex items-center justify-between mb-3">
-                        <div>
-                            <h1 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white">
+        <div className="flex flex-col h-screen bg-white dark:bg-slate-900 overflow-hidden">
+            <PageTitle title={`Simulação - ${interview.jobTitle}`} />
+
+            {/* Minimal Header */}
+            <header className="flex-none bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 px-6 py-4 z-20">
+                <div className="max-w-5xl mx-auto flex items-center justify-between">
+                    <div className="flex items-center gap-4">
+                        <button
+                            onClick={() => navigate('/my-interviews')}
+                            className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full text-slate-500 transition-colors"
+                        >
+                            <XMarkIcon className="w-6 h-6" />
+                        </button>
+                        <div className="hidden sm:block">
+                            <h1 className="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-wider">
                                 {interview.jobTitle}
                             </h1>
-                            <p className="text-sm text-slate-600 dark:text-slate-400">
-                                {interview.companyName}
-                            </p>
-                        </div>
-                        
-                        <div className="flex items-center gap-4">
-                            <span className="text-sm text-slate-600 dark:text-slate-400">
-                                {currentQuestion + 1} de {interview.questions.length}
-                            </span>
-                            {showTimer && <InterviewTimer startTime={startTime} />}
+                            <div className="flex items-center gap-2">
+                                <span className="text-xs text-slate-500">{interview.companyName}</span>
+                                <span className="w-1 h-1 bg-slate-300 rounded-full"></span>
+                                <span className="text-xs text-primary-600 dark:text-primary-400 font-medium">
+                                    Pergunta {currentQuestion + 1} de {interview.questions.length}
+                                </span>
+                            </div>
                         </div>
                     </div>
-                    
-                    {/* Barra de progresso */}
-                    <div className="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-2">
-                        <div 
-                            className="bg-primary-600 h-2 rounded-full transition-all duration-300"
-                            style={{ width: `${progress}%` }}
-                        />
-                    </div>
+
+                    <InterviewTimer startTime={startTime} />
                 </div>
             </header>
 
-            {/* Main Content */}
-            <main className="max-w-4xl mx-auto">
-                <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 p-6 sm:p-8">
-                    
-                    {/* Cabeçalho da pergunta */}
-                    <div className="flex items-center justify-between gap-4 mb-6">
-                        <div>
-                            <span className="text-sm font-medium text-slate-500 dark:text-slate-400">
-                                Pergunta {currentQuestion + 1}
-                            </span>
-                        </div>
-                        <div className="flex gap-2">
-                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${getQuestionTypeColor(currentQ.type)}`}>
+            {/* Progress Bar */}
+            <div className="h-1 bg-slate-100 dark:bg-slate-800 w-full">
+                <div
+                    className="h-full bg-primary-600 transition-all duration-500 ease-out"
+                    style={{ width: `${progress}%` }}
+                />
+            </div>
+
+            {/* Main Content Areas */}
+            <div className="flex-1 flex overflow-hidden">
+                <main className="flex-1 overflow-y-auto p-4 sm:p-8 md:p-12 lg:p-16 relative">
+                    <div className="max-w-3xl mx-auto pb-24">
+                        {/* Question Badge */}
+                        <div className="mb-6">
+                            <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400">
                                 {getQuestionTypeLabel(currentQ.type)}
                             </span>
-                            {currentQ.difficulty && (
-                                <span className={`px-2 py-1 rounded-full text-xs font-medium border border-slate-300 dark:border-slate-600`}>
-                                    {currentQ.difficulty === 'easy' ? 'Fácil' : currentQ.difficulty === 'medium' ? 'Médio' : 'Difícil'}
-                                </span>
-                            )}
                         </div>
-                    </div>
 
-                    {/* Pergunta */}
-                    <div className="mb-8">
-                        <h2 className="text-xl font-semibold text-slate-900 dark:text-white mb-4 leading-relaxed">
+                        {/* Question Text */}
+                        <h2 className="text-2xl md:text-4xl font-bold text-slate-900 dark:text-white leading-tight mb-8">
                             {currentQ.question}
                         </h2>
-                    </div>
 
-                    {/* Dicas */}
-                    {currentQ.tips && (
-                        <div className="mb-6 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
-                            <div className="flex items-start gap-3">
-                                <LightBulbIcon className="w-5 h-5 text-blue-600 dark:text-blue-400 mt-0.5 shrink-0" />
+                        {/* Answer Area */}
+                        <div className="relative group">
+                            <div className="absolute top-0 left-0 -ml-12 mt-2 hidden lg:block opacity-0 group-hover:opacity-100 transition-opacity">
+                                <div className="p-2 bg-slate-100 dark:bg-slate-800 rounded-lg text-slate-400">
+                                    <Bars3CenterLeftIcon className="w-6 h-6" />
+                                </div>
+                            </div>
+                            <textarea
+                                value={userAnswers[currentQuestion] || ''}
+                                onChange={(e) => handleAnswerChange(e.target.value)}
+                                placeholder="Digite sua resposta aqui... Sinta-se à vontade para estruturar seus pensamentos."
+                                className="w-full min-h-[300px] bg-transparent border-none text-lg leading-relaxed text-slate-800 dark:text-slate-200 placeholder-slate-300 dark:placeholder-slate-600 focus:ring-0 resize-none outline-none font-serif md:font-sans"
+                            />
+                        </div>
+                    </div>
+                </main>
+
+                {/* Tips Sidebar / Drawer */}
+                <div className={`fixed inset-y-0 right-0 w-80 bg-white dark:bg-slate-800 border-l border-slate-200 dark:border-slate-700 shadow-2xl transform transition-transform duration-300 z-30 ${showTips ? 'translate-x-0' : 'translate-x-full'}`}>
+                    <div className="flex flex-col h-full">
+                        <div className="p-4 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center bg-slate-50 dark:bg-slate-900">
+                            <h3 className="font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                                <LightBulbIcon className="w-5 h-5 text-amber-500" />
+                                Dicas da IA
+                            </h3>
+                            <button onClick={() => setShowTips(false)} className="p-1 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg">
+                                <XMarkIcon className="w-5 h-5" />
+                            </button>
+                        </div>
+                        <div className="p-6 overflow-y-auto space-y-6">
+                            {currentQ.tips && (
                                 <div>
-                                    <h4 className="text-sm font-medium text-blue-900 dark:text-blue-100 mb-1">
-                                        Dica para sua resposta:
-                                    </h4>
-                                    <p className="text-sm text-blue-800 dark:text-blue-200">
+                                    <h4 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-2">Sugestão</h4>
+                                    <p className="text-slate-700 dark:text-slate-300 text-sm leading-relaxed bg-amber-50 dark:bg-amber-900/10 p-4 rounded-xl border border-amber-100 dark:border-amber-800/30">
                                         {currentQ.tips}
                                     </p>
                                 </div>
-                            </div>
-                        </div>
-                    )}
+                            )}
 
-                    {/* Palavras-chave sugeridas */}
-                    {currentQ.keywords && currentQ.keywords.length > 0 && (
-                        <div className="mb-6">
-                            <h4 className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                                💡 Palavras-chave importantes:
-                            </h4>
-                            <div className="flex flex-wrap gap-2">
-                                {currentQ.keywords.map((keyword, index) => (
-                                    <span key={index} className="px-2 py-1 bg-primary-100 dark:bg-primary-900 text-primary-800 dark:text-primary-200 rounded text-sm">
-                                        {keyword}
-                                    </span>
-                                ))}
-                            </div>
+                            {currentQ.keywords && currentQ.keywords.length > 0 && (
+                                <div>
+                                    <h4 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-2">Palavras-chave</h4>
+                                    <div className="flex flex-wrap gap-2">
+                                        {currentQ.keywords.map((kw, i) => (
+                                            <span key={i} className="px-2 py-1 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 text-xs rounded-md">
+                                                {kw}
+                                            </span>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
                         </div>
-                    )}
-
-                    {/* Área de resposta */}
-                    <div className="mb-8">
-                        <label htmlFor="answer" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-3">
-                            Sua resposta:
-                        </label>
-                        <textarea
-                            id="answer"
-                            value={userAnswers[currentQuestion] || ''}
-                            onChange={(e) => handleAnswerChange(e.target.value)}
-                            placeholder="Digite aqui sua resposta para esta pergunta da entrevista..."
-                            className="w-full px-4 py-3 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 placeholder-slate-500 dark:placeholder-slate-400 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 resize-none"
-                            rows={6}
-                        />
-                        <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
-                            Esta é uma simulação. Pratique como se fosse uma entrevista real!
-                        </p>
                     </div>
+                </div>
+            </div>
 
-                    {/* Navegação */}
-                    <div className="flex justify-between items-center">
+            {/* Footer Navigation */}
+            <footer className="flex-none bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 px-6 py-4 z-20">
+                <div className="max-w-5xl mx-auto flex items-center justify-between">
+                    <button
+                        onClick={prevQuestion}
+                        disabled={currentQuestion === 0}
+                        className="flex items-center gap-2 px-4 py-2 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white disabled:opacity-30 transition-colors font-medium"
+                    >
+                        <ArrowLeftIcon className="w-4 h-4" />
+                        Anterior
+                    </button>
+
+                    <div className="flex gap-4">
                         <button
-                            onClick={prevQuestion}
-                            disabled={currentQuestion === 0}
-                            className="flex items-center gap-2 px-4 py-2 border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                            onClick={() => setShowTips(!showTips)}
+                            className={`flex items-center gap-2 px-4 py-2 rounded-xl transition-all ${showTips
+                                    ? 'bg-amber-100 text-amber-900 dark:bg-amber-900/30 dark:text-amber-100'
+                                    : 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
+                                }`}
                         >
-                            <ArrowLeftIcon className="w-4 h-4" />
-                            Anterior
+                            <LightBulbIcon className="w-5 h-5" />
+                            <span className="hidden sm:inline">Dicas</span>
                         </button>
 
                         {currentQuestion === interview.questions.length - 1 ? (
                             <button
                                 onClick={finishInterview}
-                                className="flex items-center gap-2 px-6 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-colors"
+                                className="flex items-center gap-2 px-6 py-2 bg-green-600 hover:bg-green-500 text-white rounded-xl font-bold transition-all shadow-lg shadow-green-600/20 active:translate-y-0.5"
                             >
-                                <CheckIcon className="w-4 h-4" />
-                                Finalizar Simulação
+                                Finalizar
+                                <CheckIcon className="w-5 h-5" />
                             </button>
                         ) : (
                             <button
                                 onClick={nextQuestion}
-                                className="flex items-center gap-2 px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg font-medium transition-colors"
+                                className="flex items-center gap-2 px-6 py-2 bg-primary-600 hover:bg-primary-500 text-white rounded-xl font-bold transition-all shadow-lg shadow-primary-600/20 active:translate-y-0.5"
                             >
                                 Próxima
                                 <ArrowRightIcon className="w-4 h-4" />
@@ -425,7 +397,7 @@ const InterviewPlayPage: React.FC = () => {
                         )}
                     </div>
                 </div>
-            </main>
+            </footer>
         </div>
     );
 };

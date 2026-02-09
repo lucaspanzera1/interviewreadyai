@@ -714,9 +714,13 @@ class ApiClient {
     return res.data;
   }
 
-  async getUserInterviewAttempts(page: number = 1, limit: number = 10) {
+  async getUserInterviewAttempts(page: number = 1, limit: number = 10, interviewId?: string) {
+    const params: any = { page, limit };
+    if (interviewId) {
+      params.interviewId = interviewId;
+    }
     const res = await this.client.get('/interview/my-attempts', {
-      params: { page, limit },
+      params,
     });
     return res.data;
   }

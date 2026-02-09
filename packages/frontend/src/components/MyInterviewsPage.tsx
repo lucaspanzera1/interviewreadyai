@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import PageTitle from './PageTitle';
-import { 
-    PlusCircleIcon, 
-    ChatBubbleLeftRightIcon, 
-    SparklesIcon, 
+import {
+    PlusCircleIcon,
+    ChatBubbleLeftRightIcon,
+    SparklesIcon,
     ClockIcon,
     BuildingOfficeIcon,
     UserIcon,
-    PlayIcon
+    PlayIcon,
+    ChevronRightIcon
 } from '@heroicons/react/24/outline';
 import { useNavigate } from 'react-router-dom';
 import { apiClient, Interview } from '../lib/api';
@@ -73,162 +74,183 @@ const MyInterviewsPage: React.FC = () => {
         return types[type as keyof typeof types] || type;
     };
 
-    const getInterviewTypeColor = (type: string) => {
-        const colors = {
-            'TECHNICAL': 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
-            'BEHAVIORAL': 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
-            'MIXED': 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200'
+    const getInterviewTypeStyles = (type: string) => {
+        const styles = {
+            'TECHNICAL': 'bg-blue-50 text-blue-700 ring-blue-600/20 dark:bg-blue-900/20 dark:text-blue-300 dark:ring-blue-400/20',
+            'BEHAVIORAL': 'bg-emerald-50 text-emerald-700 ring-emerald-600/20 dark:bg-emerald-900/20 dark:text-emerald-300 dark:ring-emerald-400/20',
+            'MIXED': 'bg-violet-50 text-violet-700 ring-violet-600/20 dark:bg-violet-900/20 dark:text-violet-300 dark:ring-violet-400/20'
         };
-        return colors[type as keyof typeof colors] || 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200';
+        return styles[type as keyof typeof styles] || 'bg-slate-50 text-slate-700 ring-slate-600/20 dark:bg-slate-800 dark:text-slate-300 dark:ring-slate-400/20';
     };
 
     const formatDate = (date: string) => {
-        return new Date(date).toLocaleDateString('pt-BR', {
+        const d = new Date(date);
+        const now = new Date();
+        const diffInSeconds = Math.floor((now.getTime() - d.getTime()) / 1000);
+
+        if (diffInSeconds < 60) return 'Agora mesmo';
+        if (diffInSeconds < 3600) return `há ${Math.floor(diffInSeconds / 60)} min`;
+        if (diffInSeconds < 86400) return `há ${Math.floor(diffInSeconds / 3600)} h`;
+
+        return d.toLocaleDateString('pt-BR', {
             day: '2-digit',
             month: '2-digit',
-            year: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit'
+            year: 'numeric'
         });
     };
 
     return (
-        <div className="flex flex-col min-h-full transition-colors duration-300">
+        <div className="flex flex-col min-h-full">
             <PageTitle title="Minhas Simulações - TreinaVagaAI" />
-            
-            {/* Header */}
-            <header className="sticky top-0 z-20 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 -mx-4 -mt-4 lg:-mx-8 lg:-mt-8 px-4 lg:px-8 py-4 mb-8">
-                <div className="max-w-4xl mx-auto flex justify-between items-center gap-4">
-                    <div>
-                        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 dark:text-white">
-                            Minhas Simulações
-                        </h1>
-                        <p className="mt-1 text-sm sm:text-base text-slate-500 dark:text-slate-400">
-                            Gerencie e pratique suas simulações de entrevista.
-                        </p>
+
+            {/* Elegant Header */}
+            <div className="bg-gradient-to-b from-white to-slate-50 dark:from-slate-900 dark:to-slate-900/50 pb-8 pt-6 px-4 sm:px-8 border-b border-slate-200 dark:border-slate-800 -mx-4 -mt-4 lg:-mx-8 lg:-mt-8 mb-8">
+                <div className="max-w-5xl mx-auto">
+                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                        <div>
+                            <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white mb-2">
+                                Minhas Simulações
+                            </h1>
+                            <p className="text-slate-600 dark:text-slate-400 max-w-xl">
+                                Acompanhe seu progresso e continue praticando para conquistar sua vaga dos sonhos.
+                            </p>
+                        </div>
+                        <button
+                            onClick={() => navigate('/create-interview')}
+                            className="group relative inline-flex items-center gap-2 px-5 py-3 bg-primary-600 hover:bg-primary-500 text-white rounded-xl font-medium transition-all duration-200 shadow-lg shadow-primary-600/25 hover:shadow-primary-600/40 hover:-translate-y-0.5"
+                        >
+                            <PlusCircleIcon className="w-5 h-5 transition-transform group-hover:rotate-90" />
+                            <span>Nova Simulação</span>
+                        </button>
                     </div>
-                    <button
-                        onClick={() => navigate('/create-interview')}
-                        className="flex items-center gap-2 px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg font-medium transition-colors shadow-sm shrink-0"
-                    >
-                        <PlusCircleIcon className="w-5 h-5" />
-                        <span className="hidden sm:inline">Nova Simulação</span>
-                        <span className="sm:hidden">Nova</span>
-                    </button>
                 </div>
-            </header>
+            </div>
 
             {/* Main Content */}
-            <main className="flex-1 w-full max-w-4xl mx-auto">
+            <main className="flex-1 w-full max-w-5xl mx-auto px-4 sm:px-6 pb-12">
                 {loading ? (
-                    <div className="flex justify-center items-center py-20">
-                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
+                    <div className="flex flex-col items-center justify-center py-20 space-y-4">
+                        <div className="relative">
+                            <div className="w-12 h-12 border-4 border-slate-200 dark:border-slate-700 rounded-full"></div>
+                            <div className="w-12 h-12 border-4 border-primary-600 rounded-full border-t-transparent animate-spin absolute top-0 left-0"></div>
+                        </div>
+                        <p className="text-slate-500 dark:text-slate-400 animate-pulse font-medium">Carregando suas simulações...</p>
                     </div>
                 ) : (
                     <>
                         {interviews.length === 0 ? (
-                            <div className="text-center py-20 bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700">
-                                <ChatBubbleLeftRightIcon className="mx-auto h-16 w-16 text-slate-400 dark:text-slate-500 mb-4" />
-                                <h3 className="text-xl font-semibold text-slate-900 dark:text-white mb-2">
-                                    Nenhuma simulação encontrada
-                                </h3>
-                                <p className="text-slate-500 dark:text-slate-400 mb-6 max-w-md mx-auto">
-                                    Você ainda não criou simulações de entrevista. Que tal começar criando uma baseada em uma vaga real?
-                                </p>
-                                <button
-                                    onClick={() => navigate('/create-interview')}
-                                    className="inline-flex items-center gap-2 px-6 py-3 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition-colors shadow-sm"
-                                >
-                                    <SparklesIcon className="w-5 h-5" />
-                                    Criar minha primeira simulação
-                                </button>
+                            <div className="flex flex-col items-center justify-center py-20 text-center animate-fade-in-up">
+                                <div className="bg-white dark:bg-slate-800 p-8 rounded-3xl shadow-xl shadow-slate-200/50 dark:shadow-slate-900/50 border border-slate-100 dark:border-slate-700 max-w-lg w-full">
+                                    <div className="w-20 h-20 bg-primary-50 dark:bg-primary-900/30 rounded-full flex items-center justify-center mx-auto mb-6">
+                                        <SparklesIcon className="h-10 w-10 text-primary-600 dark:text-primary-400" />
+                                    </div>
+                                    <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-3">
+                                        Comece sua Jornada
+                                    </h3>
+                                    <p className="text-slate-600 dark:text-slate-400 mb-8 leading-relaxed">
+                                        Você ainda não criou nenhuma simulação. Crie sua primeira entrevista baseada em uma vaga real e comece a treinar agora mesmo!
+                                    </p>
+                                    <button
+                                        onClick={() => navigate('/create-interview')}
+                                        className="w-full inline-flex items-center justify-center gap-2 px-6 py-4 bg-primary-600 hover:bg-primary-500 text-white font-semibold rounded-xl transition-all shadow-lg hover:shadow-xl hover:-translate-y-1"
+                                    >
+                                        <PlusCircleIcon className="w-6 h-6" />
+                                        Criar Primeira Simulação
+                                    </button>
+                                </div>
                             </div>
                         ) : (
-                            <div className="grid gap-6">
+                            <div className="grid gap-4 sm:gap-6">
                                 {interviews.map((interview) => (
-                                    <div 
-                                        key={interview._id} 
-                                        className="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 p-6 hover:shadow-md transition-shadow"
+                                    <div
+                                        key={interview._id}
+                                        className="group bg-white dark:bg-slate-800 rounded-2xl p-5 sm:p-6 border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-md hover:border-primary-200 dark:hover:border-primary-800/50 transition-all duration-300 relative overflow-hidden"
                                     >
-                                        <div className="flex items-start justify-between gap-4">
+                                        {/* Decorative gradient blob on hover */}
+                                        <div className="absolute top-0 right-0 -mt-16 -mr-16 w-32 h-32 bg-primary-500/5 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-500"></div>
+
+                                        <div className="flex flex-col sm:flex-row gap-5 relative z-10">
+                                            {/* Icon/Logo Placeholder */}
+                                            <div className="hidden sm:flex shrink-0 w-12 h-12 bg-slate-100 dark:bg-slate-700/50 rounded-xl items-center justify-center text-2xl">
+                                                <BuildingOfficeIcon className="w-6 h-6 text-slate-400 dark:text-slate-500" />
+                                            </div>
+
                                             <div className="flex-1 min-w-0">
-                                                {/* Header */}
-                                                <div className="flex items-start justify-between gap-4 mb-3">
-                                                    <div className="flex-1">
-                                                        <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-1">
-                                                            {interview.jobTitle}
-                                                        </h3>
-                                                        <div className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400">
-                                                            <BuildingOfficeIcon className="w-4 h-4" />
-                                                            <span>{interview.companyName}</span>
-                                                        </div>
-                                                    </div>
-                                                    <div className="flex items-center gap-2">
-                                                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${getInterviewTypeColor(interview.interviewType)}`}>
-                                                            {getInterviewTypeLabel(interview.interviewType)}
-                                                        </span>
-                                                    </div>
+                                                <div className="flex flex-wrap items-center gap-3 mb-2">
+                                                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ring-1 ring-inset ${getInterviewTypeStyles(interview.interviewType)}`}>
+                                                        {getInterviewTypeLabel(interview.interviewType)}
+                                                    </span>
+                                                    <span className="text-xs text-slate-400 dark:text-slate-500 flex items-center gap-1">
+                                                        <ClockIcon className="w-3.5 h-3.5" />
+                                                        {formatDate(interview.createdAt)}
+                                                    </span>
                                                 </div>
 
-                                                {/* Informações principais */}
-                                                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
-                                                    <div className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400">
-                                                        <ChatBubbleLeftRightIcon className="w-4 h-4" />
-                                                        <span>{interview.numberOfQuestions} perguntas</span>
-                                                    </div>
-                                                    <div className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400">
-                                                        <ClockIcon className="w-4 h-4" />
-                                                        <span>{interview.estimatedDuration} min</span>
-                                                    </div>
+                                                <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-1 group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors truncate">
+                                                    {interview.jobTitle}
+                                                </h3>
+
+                                                <div className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400 mb-4">
+                                                    <span className="font-medium">{interview.companyName}</span>
                                                     {interview.experienceLevel && (
-                                                        <div className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400">
-                                                            <UserIcon className="w-4 h-4" />
-                                                            <span>{interview.experienceLevel}</span>
-                                                        </div>
+                                                        <>
+                                                            <span className="w-1 h-1 rounded-full bg-slate-300 dark:bg-slate-600"></span>
+                                                            <span className="flex items-center gap-1">
+                                                                <UserIcon className="w-3.5 h-3.5" />
+                                                                {interview.experienceLevel}
+                                                            </span>
+                                                        </>
                                                     )}
                                                 </div>
 
-                                                {/* Estatísticas */}
-                                                <div className="flex flex-wrap items-center gap-4 text-xs text-slate-500 dark:text-slate-400 mb-4">
-                                                    <span>Criado em {formatDate(interview.createdAt)}</span>
-                                                    <span>•</span>
-                                                    <span>{interview.totalAccess} acessos</span>
-                                                    <span>•</span>
-                                                    <span>{interview.totalAttempts} tentativas</span>
-                                                    {interview.averageDifficulty > 0 && (
-                                                        <>
-                                                            <span>•</span>
-                                                            <span>Dificuldade média: {interview.averageDifficulty}/5</span>
-                                                        </>
+                                                <div className="flex flex-wrap gap-4 text-xs font-medium text-slate-500 dark:text-slate-400">
+                                                    <div className="flex items-center gap-1.5 bg-slate-50 dark:bg-slate-900/50 px-2.5 py-1.5 rounded-lg">
+                                                        <ChatBubbleLeftRightIcon className="w-4 h-4 text-slate-400" />
+                                                        {interview.numberOfQuestions} perguntas
+                                                    </div>
+                                                    <div className="flex items-center gap-1.5 bg-slate-50 dark:bg-slate-900/50 px-2.5 py-1.5 rounded-lg">
+                                                        <ClockIcon className="w-4 h-4 text-slate-400" />
+                                                        ~{interview.estimatedDuration} min
+                                                    </div>
+                                                    {interview.totalAttempts > 0 ? (
+                                                        <div className="flex items-center gap-1.5 bg-green-50 dark:bg-green-900/10 px-2.5 py-1.5 rounded-lg text-green-700 dark:text-green-400">
+                                                            <SparklesIcon className="w-4 h-4" />
+                                                            {interview.totalAttempts} tentativas
+                                                        </div>
+                                                    ) : (
+                                                        <div className="flex items-center gap-1.5 bg-amber-50 dark:bg-amber-900/10 px-2.5 py-1.5 rounded-lg text-amber-700 dark:text-amber-400">
+                                                            <SparklesIcon className="w-4 h-4" />
+                                                            Nova
+                                                        </div>
                                                     )}
                                                 </div>
                                             </div>
 
-                                            {/* Ações */}
-                                            <div className="flex flex-col gap-2 shrink-0">
+                                            {/* Action Buttons */}
+                                            <div className="flex flex-row sm:flex-col gap-3 shrink-0 pt-4 sm:pt-0 sm:border-l sm:border-slate-100 sm:dark:border-slate-700 sm:pl-6">
                                                 <button
                                                     onClick={() => startInterview(interview)}
                                                     disabled={startingInterview === interview._id}
-                                                    className="flex items-center gap-2 px-4 py-2 bg-primary-600 hover:bg-primary-700 disabled:bg-primary-400 text-white rounded-lg transition-colors text-sm font-medium min-w-0"
+                                                    className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-5 py-2.5 bg-primary-600 hover:bg-primary-500 disabled:bg-primary-400 text-white rounded-xl font-medium transition-all shadow-md shadow-primary-600/20 hover:shadow-lg hover:shadow-primary-600/30 active:scale-95 min-w-[120px]"
                                                 >
                                                     {startingInterview === interview._id ? (
                                                         <>
                                                             <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin shrink-0" />
-                                                            <span className="hidden sm:inline">Iniciando...</span>
+                                                            <span>...</span>
                                                         </>
                                                     ) : (
                                                         <>
-                                                            <PlayIcon className="w-4 h-4 shrink-0" />
-                                                            <span className="hidden sm:inline">Iniciar</span>
+                                                            <PlayIcon className="w-4 h-4" />
+                                                            <span>Praticar</span>
                                                         </>
                                                     )}
                                                 </button>
                                                 <button
                                                     onClick={() => navigate(`/interview/${interview._id}`)}
-                                                    className="flex items-center gap-2 px-4 py-2 border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 rounded-lg transition-colors text-sm min-w-0"
+                                                    className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-5 py-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 rounded-xl font-medium transition-colors"
                                                 >
-                                                    <span className="hidden sm:inline">Detalhes</span>
-                                                    <span className="sm:hidden">Ver</span>
+                                                    <span>Detalhes</span>
+                                                    <ChevronRightIcon className="w-4 h-4" />
                                                 </button>
                                             </div>
                                         </div>
@@ -237,27 +259,26 @@ const MyInterviewsPage: React.FC = () => {
                             </div>
                         )}
 
-                        {/* Paginação */}
+                        {/* Pagination */}
                         {totalPages > 1 && (
-                            <div className="flex justify-center items-center space-x-2 mt-8">
+                            <div className="flex justify-center items-center gap-2 mt-10">
                                 <button
                                     onClick={() => setPage(page - 1)}
                                     disabled={page === 1}
-                                    className="px-3 py-2 text-sm text-slate-600 dark:text-slate-400 hover:text-primary-600 dark:hover:text-primary-400 disabled:opacity-50 disabled:cursor-not-allowed"
+                                    className="px-4 py-2 rounded-lg text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
                                 >
                                     Anterior
                                 </button>
-                                
-                                <div className="flex space-x-1">
+
+                                <div className="flex gap-2">
                                     {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNum) => (
                                         <button
                                             key={pageNum}
                                             onClick={() => setPage(pageNum)}
-                                            className={`px-3 py-2 text-sm rounded-lg ${
-                                                page === pageNum
-                                                    ? 'bg-primary-600 text-white'
-                                                    : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700'
-                                            }`}
+                                            className={`w-10 h-10 rounded-lg text-sm font-medium transition-all ${page === pageNum
+                                                ? 'bg-primary-600 text-white shadow-md shadow-primary-600/20'
+                                                : 'bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700'
+                                                }`}
                                         >
                                             {pageNum}
                                         </button>
@@ -267,7 +288,7 @@ const MyInterviewsPage: React.FC = () => {
                                 <button
                                     onClick={() => setPage(page + 1)}
                                     disabled={page === totalPages}
-                                    className="px-3 py-2 text-sm text-slate-600 dark:text-slate-400 hover:text-primary-600 dark:hover:text-primary-400 disabled:opacity-50 disabled:cursor-not-allowed"
+                                    className="px-4 py-2 rounded-lg text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
                                 >
                                     Próxima
                                 </button>
@@ -276,6 +297,22 @@ const MyInterviewsPage: React.FC = () => {
                     </>
                 )}
             </main>
+
+            <style>{`
+                @keyframes fadeInUp {
+                    from {
+                        opacity: 0;
+                        transform: translate3d(0, 20px, 0);
+                    }
+                    to {
+                        opacity: 1;
+                        transform: translate3d(0, 0, 0);
+                    }
+                }
+                .animate-fade-in-up {
+                    animation: fadeInUp 0.6s ease-out forwards;
+                }
+            `}</style>
         </div>
     );
 };

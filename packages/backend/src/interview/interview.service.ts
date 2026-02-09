@@ -561,20 +561,26 @@ gere uma simulação de entrevista realista com {{numberOfQuestions}} perguntas 
   /**
    * Obtém tentativas do usuário
    */
-  async getUserAttempts(userId: string, page: number, limit: number) {
+  async getUserAttempts(userId: string, page: number, limit: number, interviewId?: string) {
     const { Types } = require('mongoose');
     const userObjectId = new Types.ObjectId(userId);
     
     const skip = (page - 1) * limit;
     
+    // Build query filter
+    const query: any = { userId: userObjectId };
+    if (interviewId) {
+      query.interviewId = new Types.ObjectId(interviewId);
+    }
+    
     const attempts = await this.interviewAttemptModel
-      .find({ userId: userObjectId })
+      .find(query)
       .populate('interviewId', 'jobTitle companyName') 
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit);
       
-    const total = await this.interviewAttemptModel.countDocuments({ userId: userObjectId });
+    const total = await this.interviewAttemptModel.countDocuments(query);
     
     return {
       attempts,
@@ -678,23 +684,42 @@ gere uma simulação de entrevista realista com {{numberOfQuestions}} perguntas 
   async recordVideoInterviewAttempt(
     interviewId: string,
     userId: string,
-    videoFile: Express.Multer.File,
+    videoFiles: Express.Multer.File[],
     attemptDto: any
   ) {
     const { Types } = require('mongoose');
     const fs = require('fs');
     const path = require('path');
     
-    // Salvar arquivo de vídeo
+    // Criar diretório de uploads se não existir
     const uploadDir = path.join(__dirname, '../../../../public/uploads/videos');
     if (!fs.existsSync(uploadDir)) {
       fs.mkdirSync(uploadDir, { recursive: true });
+      console.log(`[VideoUpload] Created directory: ${uploadDir}`);
     }
     
-    const videoFileName = `interview_${interviewId}_${userId}_${Date.now()}.${videoFile.originalname.split('.').pop()}`;
-    const videoPath = path.join(uploadDir, videoFileName);
+    const videoPaths: string[] = [];
+    const savedFiles: string[] = [];
     
-    fs.writeFileSync(videoPath, videoFile.buffer);
+    // Salvar todos os vídeos
+    for (const [index, videoFile] of videoFiles.entries()) {
+      const videoFileName = `interview_${interviewId}_${userId}_q${index}_${Date.now()}.${videoFile.originalname.split('.').pop()}`;
+      const videoPath = path.join(uploadDir, videoFileName);
+      
+      try {
+        fs.writeFileSync(videoPath, videoFile.buffer);
+        videoPaths.push(`/uploads/videos/${videoFileName}`);
+        savedFiles.push(videoPath);
+        console.log(`[VideoUpload] Saved video ${index + 1}/${videoFiles.length}: ${videoFileName}`);
+      } catch (error) {
+        console.error(`[VideoUpload] Error saving video ${index}:`, error);
+        // Continuar com os outros vídeos mesmo se um falhar
+      }
+    }
+    
+    if (videoPaths.length === 0) {
+      throw new Error('Failed to save any video files');
+    }
     
     // Criar tentativa com status pending para análise
     const attempt = await this.interviewAttemptModel.create({
@@ -704,27 +729,31 @@ gere uma simulação de entrevista realista com {{numberOfQuestions}} perguntas 
       difficultyRating: attemptDto.difficultyRating || 3,
       feedback: attemptDto.feedback,
       hasVideo: true,
-      videoPath: `/uploads/videos/${videoFileName}`,
+      videoPath: videoPaths[0], // Caminho do primeiro vídeo (principal)
+      videoPaths: videoPaths, // Todos os vídeos
       analysisStatus: 'pending',
       isCompleted: false,
     });
 
-    // Disparar análise de vídeo em background
-    this.processVideoAnalysis(attempt._id.toString(), videoPath, interviewId);
+    console.log(`[VideoUpload] Created attempt ${attempt._id} with ${videoPaths.length} videos`);
+
+    // Disparar análise de vídeo em background (analisar todos os vídeos)
+    this.processVideoAnalysis(attempt._id.toString(), savedFiles, interviewId);
 
     return {
       attemptId: attempt._id.toString(),
       status: 'uploaded',
-      message: 'Vídeo enviado com sucesso. Análise será processada em breve.',
+      message: `${videoPaths.length} vídeo(s) enviado(s) com sucesso. Análise será processada em breve.`,
+      videosCount: videoPaths.length,
     };
   }
 
   /**
    * Processa análise de vídeo com Google Gemini
    */
-  private async processVideoAnalysis(attemptId: string, videoPath: string, interviewId: string) {
+  private async processVideoAnalysis(attemptId: string, videoPaths: string[], interviewId: string) {
     try {
-      console.log(`[VideoAnalysis] Starting analysis for attempt ${attemptId}`);
+      console.log(`[VideoAnalysis] Starting analysis for attempt ${attemptId} with ${videoPaths.length} videos`);
       
       // Atualizar status para 'processing'
       await this.interviewAttemptModel.findByIdAndUpdate(attemptId, {
@@ -737,10 +766,10 @@ gere uma simulação de entrevista realista com {{numberOfQuestions}} perguntas 
         throw new Error('Interview not found');
       }
 
-      console.log(`[VideoAnalysis] Calling Gemini API for video at: ${videoPath}`);
+      console.log(`[VideoAnalysis] Calling Gemini API for ${videoPaths.length} videos`);
       
-      // Chamar Google Gemini API
-      const analysisResult = await this.analyzeVideoWithGemini(videoPath, interview.questions);
+      // Chamar Google Gemini API com todos os vídeos
+      const analysisResult = await this.analyzeVideoWithGemini(videoPaths, interview.questions);
 
       console.log(`[VideoAnalysis] Analysis completed successfully`);
 
@@ -787,9 +816,9 @@ gere uma simulação de entrevista realista com {{numberOfQuestions}} perguntas 
   }
 
   /**
-   * Analisa vídeo usando Google Gemini
+   * Analisa vídeos usando Google Gemini
    */
-  private async analyzeVideoWithGemini(videoPath: string, questions: any[]): Promise<any> {
+  private async analyzeVideoWithGemini(videoPaths: string[], questions: any[]): Promise<any> {
     try {
       const { GoogleGenerativeAI } = require('@google/generative-ai');
       const fs = require('fs');
@@ -814,53 +843,118 @@ gere uma simulação de entrevista realista com {{numberOfQuestions}} perguntas 
         promptTemplate = this.getVideoAnalysisFallbackPrompt();
       }
 
-      // Construir prompt com dados da entrevista
-      const questionsText = questions.map((q, i) => `${i + 1}. ${q.question} (${q.type})`).join('\n');
-      const prompt = promptTemplate
-        .replace(/{{questions}}/g, questionsText)
-        .replace(/{{jobTitle}}/g, 'Cargo da Entrevista')
-        .replace(/{{companyName}}/g, 'Empresa Simulação');
+      // Processar cada vídeo individualmente e combinar resultados
+      const allMoments = [];
+      let totalDuration = 0;
+      let totalScore = 0;
+      let allStrengths = [];
+      let allImprovements = [];
 
-      // Converter vídeo para base64 (Gemini suporta vídeo diretamente)
-      const videoBuffer = fs.readFileSync(videoPath);
-      const videoBase64 = videoBuffer.toString('base64');
-      
-      // Detectar tipo MIME baseado na extensão
-      const ext = path.extname(videoPath).toLowerCase();
-      const mimeTypes: { [key: string]: string } = {
-        '.mp4': 'video/mp4',
-        '.webm': 'video/webm',
-        '.mov': 'video/quicktime',
-        '.avi': 'video/x-msvideo'
-      };
-      const mimeType = mimeTypes[ext] || 'video/mp4';
+      for (let i = 0; i < videoPaths.length; i++) {
+        const videoPath = videoPaths[i];
+        const question = questions[i];
 
-      const result = await model.generateContent([
-        {
-          inlineData: {
-            data: videoBase64,
-            mimeType: mimeType,
+        console.log(`[VideoAnalysis] Analyzing video ${i + 1}/${videoPaths.length}: ${videoPath}`);
+
+        // Construir prompt específico para essa pergunta
+        const questionsText = `${i + 1}. ${question.question} (${question.type})`;
+        const prompt = promptTemplate
+          .replace(/{{questions}}/g, questionsText)
+          .replace(/{{jobTitle}}/g, 'Cargo da Entrevista')
+          .replace(/{{companyName}}/g, 'Empresa Simulação')
+          + `\n\nNota: Este é o vídeo da pergunta ${i + 1} de ${videoPaths.length}.`;
+
+        // Converter vídeo para base64
+        const videoBuffer = fs.readFileSync(videoPath);
+        const videoBase64 = videoBuffer.toString('base64');
+        
+        // Detectar tipo MIME baseado na extensão
+        const ext = path.extname(videoPath).toLowerCase();
+        const mimeTypes: { [key: string]: string } = {
+          '.mp4': 'video/mp4',
+          '.webm': 'video/webm',
+          '.mov': 'video/quicktime',
+          '.avi': 'video/x-msvideo'
+        };
+        const mimeType = mimeTypes[ext] || 'video/mp4';
+
+        const result = await model.generateContent([
+          {
+            inlineData: {
+              data: videoBase64,
+              mimeType: mimeType,
+            },
           },
-        },
-        { text: prompt }
-      ]);
+          { text: prompt }
+        ]);
 
-      const response = await result.response;
-      const text = response.text();
-      
-      // Parse JSON response
-      let analysisData;
-      try {
-        // Remover possíveis markdown code blocks
-        const cleanJson = text.replace(/```json\s*|\s*```/g, '').trim();
-        // Remover possíveis textos antes/depois do JSON
-        const jsonMatch = cleanJson.match(/\{[\s\S]*\}/);
-        const jsonText = jsonMatch ? jsonMatch[0] : cleanJson;
-        analysisData = JSON.parse(jsonText);
-      } catch (parseError) {
-        // Fallback se não conseguir parsear
-        analysisData = this.createFallbackAnalysis();
+        const response = await result.response;
+        const text = response.text();
+        
+        // Parse JSON response
+        let videoAnalysis;
+        try {
+          // Remover possíveis markdown code blocks
+          const cleanJson = text.replace(/```json\s*|\s*```/g, '').trim();
+          // Remover possíveis textos antes/depois do JSON
+          const jsonMatch = cleanJson.match(/\{[\s\S]*\}/);
+          const jsonText = jsonMatch ? jsonMatch[0] : cleanJson;
+          videoAnalysis = JSON.parse(jsonText);
+        } catch (parseError) {
+          console.error(`[VideoAnalysis] Error parsing JSON for video ${i + 1}:`, parseError);
+          // Criar análise simplificada para este vídeo
+          videoAnalysis = {
+            overall_score: 70,
+            duration: 60,
+            moments: [{
+              timestamp: totalDuration + 30,
+              type: 'neutral',
+              category: 'content',
+              message: `Resposta para pergunta ${i + 1}: ${question.question}`,
+              severity: 'low',
+              suggestion: 'Análise detalhada não disponível'
+            }],
+            summary: {
+              strengths: ['Tentativa de resposta'],
+              improvements: ['Análise detalhada pendente']
+            }
+          };
+        }
+
+        // Ajustar timestamps para considerar vídeos anteriores
+        const adjustedMoments = videoAnalysis.moments?.map(moment => ({
+          ...moment,
+          timestamp: totalDuration + (moment.timestamp || 0),
+          questionIndex: i,
+          questionText: question.question
+        })) || [];
+
+        allMoments.push(...adjustedMoments);
+        totalDuration += videoAnalysis.duration || 60;
+        totalScore += videoAnalysis.overall_score || 70;
+        
+        if (videoAnalysis.summary?.strengths) {
+          allStrengths.push(...videoAnalysis.summary.strengths);
+        }
+        if (videoAnalysis.summary?.improvements) {
+          allImprovements.push(...videoAnalysis.summary.improvements);
+        }
+
+        console.log(`[VideoAnalysis] Video ${i + 1} analyzed successfully`);
       }
+
+      // Combinar resultados
+      const analysisData = {
+        overall_score: Math.round(totalScore / videoPaths.length),
+        duration: totalDuration,
+        moments: allMoments,
+        summary: {
+          strengths: allStrengths,
+          improvements: allImprovements
+        }
+      };
+
+      console.log(`[VideoAnalysis] Combined analysis: ${allMoments.length} moments, ${totalDuration}s total, score ${analysisData.overall_score}`);
 
       return analysisData;
 

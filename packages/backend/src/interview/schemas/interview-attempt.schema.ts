@@ -105,7 +105,10 @@ export class InterviewAttempt {
   hasVideo: boolean;
 
   @Prop()
-  videoPath?: string; // caminho do arquivo de vídeo
+  videoPath?: string; // caminho do arquivo de vídeo principal (primeiro)
+
+  @Prop({ type: [String], default: [] })
+  videoPaths?: string[]; // caminhos de todos os vídeos (um por pergunta)
 
   @Prop()
   videoAnalysis?: VideoAnalysisResult; // resultado da análise do vídeo
