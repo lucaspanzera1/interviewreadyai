@@ -18,6 +18,7 @@ import {
     ClockIcon,
     RectangleStackIcon,
     ChatBubbleLeftRightIcon,
+    LockClosedIcon,
 } from '@heroicons/react/24/outline';
 
 import {
@@ -63,11 +64,13 @@ const Sidebar: React.FC = () => {
         };
     }, [isMobileOpen, setIsMobileOpen]);
 
+    const isPro = user?.role === 'pro';
+
     const mainNavItems = [
         { name: 'Início', path: '/', icon: HomeIcon, activeIcon: HomeIconSolid },
         { name: 'Quizzes', path: '/my-quizzes', icon: DocumentTextIcon, activeIcon: DocumentTextIconSolid },
-        { name: 'Simulações', path: '/my-interviews', icon: ChatBubbleLeftRightIcon, activeIcon: ChatBubbleLeftRightIconSolid, badge: 'BETA' },
-        { name: 'Flashcards', path: '/my-flashcards', icon: RectangleStackIcon, activeIcon: RectangleStackIconSolid, badge: 'BETA' },
+        { name: 'Simulações', path: '/my-interviews', icon: ChatBubbleLeftRightIcon, activeIcon: ChatBubbleLeftRightIconSolid, badge: 'BETA', locked: !isPro },
+        { name: 'Flashcards', path: '/my-flashcards', icon: RectangleStackIcon, activeIcon: RectangleStackIconSolid, badge: 'BETA', locked: !isPro },
         { name: 'Explorar', path: '/free-quizzes', icon: AcademicCapIcon, activeIcon: AcademicCapIconSolid },
 
         { name: 'Comunidade', path: '/search', icon: UsersIconLucide, activeIcon: UsersIconLucide },
@@ -134,14 +137,28 @@ const Sidebar: React.FC = () => {
                     return (
                         <button
                             key={item.name}
-                            onClick={() => handleNavClick(item.path)}
+                            onClick={() => {
+                                if (item.locked) {
+                                    navigate('/tokens');
+                                } else {
+                                    handleNavClick(item.path);
+                                }
+                            }}
                             className={`w-full flex items-center px-3 py-2.5 rounded-xl transition-all duration-200 border-l-4 ${active
                                 ? 'bg-primary-50 dark:bg-primary-900/10 text-primary-700 dark:text-primary-300 font-semibold border-primary-600'
+                                : item.locked
+                                ? 'text-slate-300 dark:text-slate-600 cursor-not-allowed border-transparent'
                                 : 'text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white border-transparent'
                                 } ${isCollapsed ? 'justify-center px-0' : ''}`}
                             title={isCollapsed ? item.name : undefined}
+                            disabled={item.locked}
                         >
-                            <Icon className={`w-5 h-5 flex-shrink-0 transition-colors ${active ? 'text-primary-600 dark:text-primary-400' : 'text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-300'}`} />
+                            <div className="relative">
+                                <Icon className={`w-5 h-5 flex-shrink-0 transition-colors ${active ? 'text-primary-600 dark:text-primary-400' : item.locked ? 'text-slate-300 dark:text-slate-600' : 'text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-300'}`} />
+                                {item.locked && (
+                                    <LockClosedIcon className="w-3 h-3 absolute -top-1 -right-1 text-slate-400 dark:text-slate-500" />
+                                )}
+                            </div>
                             <div className={`overflow-hidden whitespace-nowrap transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] ${isCollapsed ? 'max-w-0 opacity-0' : 'max-w-[200px] opacity-100'} w-full`}>
                                 <div className="flex items-center justify-between">
                                     <span className="text-sm pl-3">{item.name}</span>
@@ -338,7 +355,7 @@ const Sidebar: React.FC = () => {
     const bottomNavItems = [
         { name: 'Início', path: '/', icon: HomeIcon, activeIcon: HomeIconSolid },
         { name: 'Quizzes', path: '/my-quizzes', icon: DocumentTextIcon, activeIcon: DocumentTextIconSolid },
-        { name: 'Entrevista', path: '/create-interview', icon: ChatBubbleLeftRightIcon, activeIcon: ChatBubbleLeftRightIconSolid, badge: 'NOVO' },
+        { name: 'Entrevista', path: '/create-interview', icon: ChatBubbleLeftRightIcon, activeIcon: ChatBubbleLeftRightIconSolid, badge: 'NOVO', locked: !isPro },
         { name: 'Menu', path: '#menu', icon: Bars3Icon, activeIcon: Bars3Icon, action: () => setIsMobileOpen(true) },
     ];
 
@@ -349,7 +366,10 @@ const Sidebar: React.FC = () => {
         return (
             <button
                 onClick={(e) => {
-                    if (item.action) {
+                    if (item.locked) {
+                        e.preventDefault();
+                        navigate('/tokens');
+                    } else if (item.action) {
                         e.preventDefault();
                         item.action();
                     } else {
@@ -358,11 +378,17 @@ const Sidebar: React.FC = () => {
                 }}
                 className={`flex flex-col items-center justify-center w-full h-full space-y-1 ${active
                     ? 'text-primary-600 dark:text-primary-400'
+                    : item.locked
+                    ? 'text-slate-300 dark:text-slate-600 cursor-not-allowed'
                     : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'
                     }`}
+                disabled={item.locked}
             >
                 <div className="relative">
-                    <Icon className={`w-6 h-6 transition-transform duration-200 ${active ? 'scale-110' : ''}`} />
+                    <Icon className={`w-6 h-6 transition-transform duration-200 ${active ? 'scale-110' : item.locked ? 'opacity-50' : ''}`} />
+                    {item.locked && (
+                        <LockClosedIcon className="w-3 h-3 absolute -top-1 -right-1 text-slate-400 dark:text-slate-500" />
+                    )}
                     {/* @ts-ignore */}
                     {item.badge && (
                         <span className="absolute -top-1.5 -right-3 text-[9px] font-bold bg-amber-100 text-amber-700 dark:bg-amber-900/80 dark:text-amber-400 px-1 rounded-sm leading-none border border-amber-200 dark:border-amber-700/50">

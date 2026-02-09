@@ -1106,4 +1106,42 @@ Gere agora 10 questões para preparar o candidato para esta vaga.`;
       }
     }
   }
+
+  /**
+   * Obter estatísticas de atividade do usuário (para heatmap)
+   */
+  async getUserActivityStats(userId: string, days: number = 365) {
+    const { Types } = require('mongoose');
+    const startDate = new Date();
+    startDate.setDate(startDate.getDate() - days);
+
+    const attempts = await this.quizAttemptModel
+      .find({
+        userId: new Types.ObjectId(userId),
+        createdAt: { $gte: startDate }
+      })
+      .select('createdAt score')
+      .exec();
+
+    // Agrupar por data
+    const activityMap = new Map<string, { attempts: number; totalScore: number; avgScore: number }>();
+
+    attempts.forEach(attempt => {
+      const dateKey = (attempt as any).createdAt.toISOString().split('T')[0];
+      const existing = activityMap.get(dateKey) || { attempts: 0, totalScore: 0, avgScore: 0 };
+      existing.attempts += 1;
+      existing.totalScore += attempt.score;
+      activityMap.set(dateKey, existing);
+    });
+
+    // Calcular média por data
+    const activity = Array.from(activityMap.entries()).map(([date, data]) => ({
+      date,
+      attempts: data.attempts,
+      avgScore: data.attempts > 0 ? data.totalScore / data.attempts : 0,
+      intensity: Math.min(data.attempts, 5), // 0-5 baseado no número de tentativas
+    }));
+
+    return activity.sort((a, b) => a.date.localeCompare(b.date));
+  }
 }

@@ -1207,4 +1207,44 @@ Responda APENAS com JSON válido seguindo esta estrutura:
       throw new HttpException('Error serving video file', HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
+
+  /**
+   * Obter estatísticas de atividade do usuário (para heatmap)
+   */
+  async getUserActivityStats(userId: string, days: number = 365) {
+    const { Types } = require('mongoose');
+    const startDate = new Date();
+    startDate.setDate(startDate.getDate() - days);
+
+    const attempts = await this.interviewAttemptModel
+      .find({
+        userId: new Types.ObjectId(userId),
+        createdAt: { $gte: startDate }
+      })
+      .select('createdAt actualDuration difficultyRating')
+      .exec();
+
+    // Agrupar por data
+    const activityMap = new Map<string, { attempts: number; totalDuration: number; avgDifficulty: number }>();
+
+    attempts.forEach(attempt => {
+      const dateKey = (attempt as any).createdAt.toISOString().split('T')[0];
+      const existing = activityMap.get(dateKey) || { attempts: 0, totalDuration: 0, avgDifficulty: 0 };
+      existing.attempts += 1;
+      existing.totalDuration += attempt.actualDuration || 0;
+      existing.avgDifficulty += attempt.difficultyRating || 0;
+      activityMap.set(dateKey, existing);
+    });
+
+    // Calcular médias por data
+    const activity = Array.from(activityMap.entries()).map(([date, data]) => ({
+      date,
+      attempts: data.attempts,
+      avgDuration: data.attempts > 0 ? data.totalDuration / data.attempts : 0,
+      avgDifficulty: data.attempts > 0 ? data.avgDifficulty / data.attempts : 0,
+      intensity: Math.min(data.attempts, 5), // 0-5 baseado no número de tentativas
+    }));
+
+    return activity.sort((a, b) => a.date.localeCompare(b.date));
+  }
 }

@@ -551,6 +551,11 @@ class ApiClient {
     return res.data.message ? { data: res.data.data, message: res.data.message } : { data: res.data };
   }
 
+  async updatePrivacySettings(isProfilePublic: boolean): Promise<{ data: UserProfile; message?: string }> {
+    const res = await this.client.put('/users/me/privacy', { isProfilePublic });
+    return res.data.message ? { data: res.data.data, message: res.data.message } : { data: res.data };
+  }
+
   async completeOnboarding(profileData: CompleteOnboardingData): Promise<{ data: UserProfile; message?: string }> {
     const res = await this.client.post('/users/me/onboarding', profileData);
     return res.data.message ? { data: res.data.data, message: res.data.message } : { data: res.data };
@@ -899,6 +904,35 @@ class ApiClient {
     return res.data;
   }
 
+  // Combined activity and stats
+  async getCombinedActivity(days: number = 365): Promise<Array<{
+    date: string;
+    quizAttempts: number;
+    flashcardSessions: number;
+    interviewAttempts: number;
+    totalActivities: number;
+    engagement: number;
+  }>> {
+    const res = await this.client.get('/users/me/activity', { params: { days } });
+    return res.data;
+  }
+
+  async getGeneralStats(): Promise<{
+    totalAttempts: number;
+    quizAttempts: number;
+    flashcardSessions: number;
+    interviewAttempts: number;
+    averageScore: number;
+    totalFreeQuizzesCompleted: number;
+    quizStats: any;
+    flashcardStats: any;
+    interviewStats: any;
+    combinedStats: any;
+  }> {
+    const res = await this.client.get('/users/me/general-stats');
+    return res.data;
+  }
+
   // Admin user methods
   async getUserDetails(userId: string): Promise<UserDetails> {
     const res = await this.client.get(`/users/${userId}/details`);
@@ -923,6 +957,11 @@ class ApiClient {
     const res = await this.client.get(`/interview/admin/user/${userId}`, {
       params: { page, limit },
     });
+    return res.data;
+  }
+
+  async updateUserByAdmin(userId: string, updateData: Partial<User>): Promise<{ success: boolean; data: User; message: string }> {
+    const res = await this.client.put(`/users/${userId}`, updateData);
     return res.data;
   }
 

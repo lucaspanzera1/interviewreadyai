@@ -18,7 +18,7 @@ import {
 
 const SettingsPage: React.FC = () => {
     const { theme, setTheme } = useTheme(); // Assuming ThemeContext exposes usage like this, checking ThemeContext usage in BottomNav shows: resolvedTheme, toggleTheme. Wait, let me re-check usage in BottomNav.
-    const { user } = useAuth();
+    const { user, refreshUser } = useAuth();
     const { showToast } = useToast();
 
     // Notification states (mock)
@@ -34,7 +34,7 @@ const SettingsPage: React.FC = () => {
 
     // Privacy Settings
     const [isProfilePublic, setIsProfilePublic] = useState(() => {
-        return user?.isProfilePublic !== undefined ? user.isProfilePublic : true;
+        return user?.isProfilePublic !== undefined ? user.isProfilePublic : false;
     });
     const [isUpdatingPrivacy, setIsUpdatingPrivacy] = useState(false);
 
@@ -55,6 +55,7 @@ const SettingsPage: React.FC = () => {
         try {
             await apiClient.updatePrivacySettings(checked);
             setIsProfilePublic(checked);
+            await refreshUser(); // Refresh user data to update context
             showToast(
                 `Perfil ${checked ? 'público' : 'privado'} configurado com sucesso!`, 
                 'success'
