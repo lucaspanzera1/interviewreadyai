@@ -10,6 +10,11 @@ export { default as UserQuizHistoryPage } from './UserQuizHistoryPage';
 export { default as AuthCallback } from './AuthCallback';
 export { default as AdminTokenPackagesPage } from './AdminTokenPackagesPage';
 export { default as AdminRolesPage } from './AdminRolesPage';
+export { default as CreateInterviewPage } from './CreateInterviewPage';
+export { default as MyInterviewsPage } from './MyInterviewsPage';
+export { default as MyInterviewAttemptsPage } from './MyInterviewAttemptsPage';
+export { default as GeneratedInterviewPage } from './GeneratedInterviewPage';
+export { default as InterviewPlayPage } from './InterviewPlayPage';
 
 // Utility Components
 export { default as Loading } from './Loading';

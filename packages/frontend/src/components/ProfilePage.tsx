@@ -124,7 +124,7 @@ const ProfilePage: React.FC = () => {
   useEffect(() => {
     const loadStats = async () => {
       try {
-        const data = await apiClient.getUserStats();
+        const data = await apiClient.getGeneralStats();
         if (data) {
           setStats({
             totalAttempts: data.totalAttempts || 0,
@@ -139,17 +139,10 @@ const ProfilePage: React.FC = () => {
 
     const loadActivity = async () => {
       try {
-        // Fetch up to 1000 last attempts for the heatmap
-        const result = await apiClient.getUserAttempts(1, 1000);
-        if (result && result.attempts) {
-          const counts: Record<string, number> = {};
-          result.attempts.forEach((a: any) => {
-            // Assuming createdAt is ISO string
-            const date = new Date(a.createdAt).toISOString().split('T')[0];
-            counts[date] = (counts[date] || 0) + 1;
-          });
-
-          const data = Object.entries(counts).map(([date, count]) => ({ date, count }));
+        // Fetch combined activity for the heatmap
+        const result = await apiClient.getCombinedActivity(1000);
+        if (result && result.length > 0) {
+          const data = result.map((a: any) => ({ date: a.date, count: a.totalActivities }));
           setActivityData(data);
         }
       } catch (error) {

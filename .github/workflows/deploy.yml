@@ -35,6 +35,7 @@ jobs:
           cd TreinaVaga
           echo "[info] Fazendo git pull..."
           git pull origin main || { echo "[error] Falha no git pull"; exit 1; }
+          git reset --hard origin/main
           echo "[info] Git pull concluído."
 
           echo "[info] Reiniciando aplicação..."

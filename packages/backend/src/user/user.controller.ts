@@ -190,6 +190,59 @@ export class UserController {
     };
   }
 
+  /**
+   * Atualizar usuário por admin
+   * @param userId ID do usuário a ser atualizado
+   * @param updateData Dados para atualização
+   * @returns Usuário atualizado
+   */
+  @Put(':userId')
+  @UseGuards(RolesGuard)
+  @Roles(UserRole.ADMIN)
+  @ApiBearerAuth()
+  @ApiParam({
+    name: 'userId',
+    description: 'ID do usuário a ser atualizado'
+  })
+  @ApiOperation({
+    summary: 'Atualizar usuário (Admin)',
+    description: 'Atualiza dados de um usuário específico (apenas para administradores)'
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Usuário atualizado com sucesso',
+    schema: {
+      type: 'object',
+      properties: {
+        success: { type: 'boolean' },
+        data: { $ref: '#/components/schemas/UserDto' },
+        message: { type: 'string' }
+      }
+    }
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Token de acesso inválido ou expirado',
+    type: UnauthorizedErrorDto
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'Acesso negado - apenas administradores',
+    type: ForbiddenErrorDto
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Usuário não encontrado',
+    type: NotFoundErrorDto
+  })
+  async updateUserByAdmin(
+    @Param('userId') userId: string,
+    @Body() updateData: UpdateUserDto,
+  ): Promise<{ success: boolean; data: UserDto; message: string }> {
+    const updatedUser = await this.userService.updateUser(userId, updateData);
+    return { success: true, data: this.userService.toDto(updatedUser), message: "Usuário atualizado com sucesso!" };
+  }
+
 
   /**
    * Busca quantidade de tokens do usuário atual

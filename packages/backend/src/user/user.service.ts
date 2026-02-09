@@ -630,24 +630,49 @@ export class UserService {
       console.log('FlashcardService não encontrado para estatísticas');
     }
 
+    // Buscar interview service
+    let interviewStats = null;
+    try {
+      const interviewService = this.moduleRef.get('InterviewService', { strict: false });
+      if (interviewService) {
+        interviewStats = await interviewService.getUserStats(userId);
+      }
+    } catch (error) {
+      console.log('InterviewService não encontrado para estatísticas');
+      interviewStats = {
+        totalAttempts: 0,
+        totalInterviewsGenerated: 0,
+        avgDifficulty: 0,
+        avgDuration: 0,
+      };
+    }
+
     // Obter dados do usuário para estatísticas de tokens
     const tokenStats = await this.getTokenStats(userId);
 
     // Calcular estatísticas combinadas
-    const totalLearningActivities = (quizStats?.totalAttempts || 0); // totalAttempts já inclui flashcards
+    const totalLearningActivities = (quizStats?.totalAttempts || 0) + (flashcardStats?.totalSessions || 0) + (interviewStats?.totalAttempts || 0);
     const totalTokensSpent = tokenStats.totalSpent;
     
     // Calcular engajamento geral (baseado em atividades e consistência)
     const overallEngagement = this.calculateOverallEngagement(
       quizStats, 
       flashcardStats,
+      interviewStats,
       totalLearningActivities,
       totalTokensSpent
     );
 
     return {
+      totalAttempts: totalLearningActivities,
+      quizAttempts: quizStats?.totalAttempts || 0,
+      flashcardSessions: flashcardStats?.totalSessions || 0,
+      interviewAttempts: interviewStats?.totalAttempts || 0,
+      averageScore: quizStats?.averageScore || 0,
+      totalFreeQuizzesCompleted: quizStats?.totalFreeQuizzesCompleted || 0,
       quizStats,
       flashcardStats,
+      interviewStats,
       combinedStats: {
         totalLearningActivities,
         totalTokensSpent,
@@ -659,7 +684,7 @@ export class UserService {
   /**
    * Calcular score de engajamento geral do usuário
    */
-  private calculateOverallEngagement(quizStats: any, flashcardStats: any, totalActivities: number, tokensSpent: number): number {
+  private calculateOverallEngagement(quizStats: any, flashcardStats: any, interviewStats: any, totalActivities: number, tokensSpent: number): number {
     let engagementScore = 0;
     
     // Pontos por atividade (máximo 40 pontos)
@@ -674,6 +699,11 @@ export class UserService {
     if (flashcardStats && flashcardStats.totalStudyTime > 0) {
       engagementScore += Math.min(flashcardStats.totalStudyTime / 10, 20); // 10 minutos = 1 ponto
     }
+
+    // Pontos por entrevistas realizadas (máximo 10 pontos)
+    if (interviewStats && interviewStats.totalAttempts > 0) {
+      engagementScore += Math.min(interviewStats.totalAttempts, 10);
+    }
     
     // Pontos por uso de tokens (máximo 10 pontos)
     engagementScore += Math.min(tokensSpent, 10);
@@ -687,9 +717,12 @@ export class UserService {
   }
 
   /**
-   * Obter atividade combinada do usuário (quizzes + flashcards)
+   * Obter atividade combinada do usuário (quizzes + flashcards + interviews)
    */
   async getCombinedActivity(userId: string, days: number = 365) {
+    const startDate = new Date();
+    startDate.setDate(startDate.getDate() - days);
+
     // Buscar atividade de flashcards
     let flashcardActivity = [];
     try {
@@ -701,30 +734,82 @@ export class UserService {
       console.log('FlashcardService não encontrado para atividade');
     }
 
-    // Buscar atividade de quizzes (implementar se necessário)
-    // Por ora, vamos usar os dados que já temos
-    const startDate = new Date();
-    startDate.setDate(startDate.getDate() - days);
+    // Buscar atividade de quizzes
+    let quizActivity = [];
+    try {
+      const quizService = this.moduleRef.get('QuizService', { strict: false });
+      if (quizService) {
+        // Assumindo que há um método getUserActivityStats no QuizService
+        quizActivity = await quizService.getUserActivityStats(userId, days);
+      }
+    } catch (error) {
+      console.log('QuizService não encontrado para atividade');
+    }
 
-    // Para quizzes, precisaríamos buscar por data, mas como não temos essa estrutura,
-    // vamos focar nos flashcards e expandir conforme necessário
-    
-    // Mapear atividade de flashcards para formato combinado
+    // Buscar atividade de interviews
+    let interviewActivity = [];
+    try {
+      const interviewService = this.moduleRef.get('InterviewService', { strict: false });
+      if (interviewService) {
+        // Assumindo que há um método getUserActivityStats no InterviewService
+        interviewActivity = await interviewService.getUserActivityStats(userId, days);
+      }
+    } catch (error) {
+      console.log('InterviewService não encontrado para atividade');
+    }
+
+    // Mapear todas as atividades para formato combinado
     const activityMap = new Map<string, {
       quizAttempts: number;
       flashcardSessions: number;
+      interviewAttempts: number;
       totalActivities: number;
       engagement: number;
     }>();
 
     // Adicionar dados de flashcards
     flashcardActivity.forEach(activity => {
-      activityMap.set(activity.date, {
-        quizAttempts: 0, // TODO: implementar quando tivermos dados por data
-        flashcardSessions: activity.sessions,
-        totalActivities: activity.sessions,
-        engagement: Math.min(activity.sessions + Math.round(activity.intensity), 5)
-      });
+      const existing = activityMap.get(activity.date) || {
+        quizAttempts: 0,
+        flashcardSessions: 0,
+        interviewAttempts: 0,
+        totalActivities: 0,
+        engagement: 0
+      };
+      existing.flashcardSessions = activity.sessions;
+      existing.totalActivities += activity.sessions;
+      existing.engagement = Math.max(existing.engagement, Math.min(activity.sessions + Math.round(activity.intensity), 5));
+      activityMap.set(activity.date, existing);
+    });
+
+    // Adicionar dados de quizzes
+    quizActivity.forEach(activity => {
+      const existing = activityMap.get(activity.date) || {
+        quizAttempts: 0,
+        flashcardSessions: 0,
+        interviewAttempts: 0,
+        totalActivities: 0,
+        engagement: 0
+      };
+      existing.quizAttempts = activity.attempts;
+      existing.totalActivities += activity.attempts;
+      existing.engagement = Math.max(existing.engagement, Math.min(activity.attempts * 2, 5));
+      activityMap.set(activity.date, existing);
+    });
+
+    // Adicionar dados de interviews
+    interviewActivity.forEach(activity => {
+      const existing = activityMap.get(activity.date) || {
+        quizAttempts: 0,
+        flashcardSessions: 0,
+        interviewAttempts: 0,
+        totalActivities: 0,
+        engagement: 0
+      };
+      existing.interviewAttempts = activity.attempts;
+      existing.totalActivities += activity.attempts;
+      existing.engagement = Math.max(existing.engagement, Math.min(activity.attempts * 2, 5));
+      activityMap.set(activity.date, existing);
     });
 
     // Converter para array ordenado

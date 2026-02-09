@@ -6,7 +6,7 @@ import Loading from './Loading';
 interface ProtectedRouteProps {
   children: React.ReactNode;
   requireAuth?: boolean;
-  // ...existing code...
+  requireRole?: string;
 }
 
 /**
@@ -15,9 +15,9 @@ interface ProtectedRouteProps {
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   children,
   requireAuth = true,
-  // ...existing code...
+  requireRole,
 }) => {
-  const { isLoading, isAuthenticated } = useAuth();
+  const { isLoading, isAuthenticated, user } = useAuth();
   const location = useLocation();
 
   // Mostrar loading enquanto verifica autenticação
@@ -40,6 +40,11 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   // Se não está autenticado, redireciona para login
   if (!isAuthenticated) {
     return <Navigate to="/login" state={{ from: location }} replace />;
+  }
+
+  // Verificar role se necessário
+  if (requireRole && user?.role !== requireRole) {
+    return <Navigate to="/tokens" replace />;
   }
 
   // ...existing code...

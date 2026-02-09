@@ -108,3 +108,6 @@ Thumbs.db
 
 # Docker
 .dockerignore
+
+# Uploaded videos
+packages/backend/public/uploads/videos/

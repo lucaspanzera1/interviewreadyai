@@ -154,6 +154,17 @@ export class FlashcardController {
     return this.flashcardService.toggleActive(flashcardId);
   }
 
+  @Get('admin/user/:userId')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN)
+  async getUserFlashcardsByAdmin(
+    @Param('userId') userId: string,
+    @Query('page') page: string = '1',
+    @Query('limit') limit: string = '100',
+  ) {
+    return this.flashcardService.getUserFlashcardsByAdmin(userId, parseInt(page), parseInt(limit));
+  }
+
   /**
    * Obter estatísticas do usuário sobre flashcards
    */

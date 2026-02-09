@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsOptional, IsString, IsBoolean } from 'class-validator';
+import { IsOptional, IsString, IsBoolean, IsEnum } from 'class-validator';
+import { UserRole } from '../schemas/user.schema';
 
 /**
  * DTO para atualização de usuário
@@ -24,4 +25,9 @@ export class UpdateUserDto {
   @IsOptional()
   @IsBoolean()
   isProfilePublic?: boolean;
+
+  @ApiProperty({ description: 'Cargo do usuário', enum: UserRole, required: false })
+  @IsOptional()
+  @IsEnum(UserRole)
+  role?: UserRole;
 }

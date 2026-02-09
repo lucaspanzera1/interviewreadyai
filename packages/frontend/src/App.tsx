@@ -22,6 +22,13 @@ import AdminQuizDetailsPage from './components/AdminQuizDetailsPage'
 import UserQuizAttemptDetailsPage from './components/UserQuizAttemptDetailsPage'
 import CreateQuizByLinkPage from './components/CreateQuizByLinkPage'
 import CreateFlashcardByLinkPage from './components/CreateFlashcardByLinkPage'
+import CreateInterviewPage from './components/CreateInterviewPage'
+import MyInterviewsPage from './components/MyInterviewsPage'
+import MyInterviewAttemptsPage from './components/MyInterviewAttemptsPage'
+import GeneratedInterviewPage from './components/GeneratedInterviewPage'
+import InterviewPlayPage from './components/InterviewPlayPage'
+import InterviewVideoRecorderPage from './components/InterviewVideoRecorderPage'
+import VideoTimelineAnalysisPage from './components/VideoTimelineAnalysisPage'
 import MyFlashcardsPage from './components/MyFlashcardsPage'
 import FlashcardStudyPage from './components/FlashcardStudyPage'
 import MyQuizzesPage from './components/MyQuizzesPage'
@@ -253,6 +260,96 @@ function App() {
           }
         />
 
+        {/* Create Interview page */}
+        <Route
+          path="/create-interview"
+          element={
+            <ProtectedRoute requireRole="pro">
+              <AppLayout>
+                <CreateInterviewPage />
+              </AppLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        {/* My Interviews page */}
+        <Route
+          path="/my-interviews"
+          element={
+            <ProtectedRoute requireRole="pro">
+              <AppLayout>
+                <MyInterviewsPage />
+              </AppLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        {/* My Interview Attempts page */}
+        <Route
+          path="/my-interview-attempts"
+          element={
+            <ProtectedRoute>
+              <AppLayout>
+                <MyInterviewAttemptsPage />
+              </AppLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Generated Interview Details page */}
+        <Route
+          path="/interview/generated/:id"
+          element={
+            <ProtectedRoute>
+              <AppLayout>
+                <GeneratedInterviewPage />
+              </AppLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Interview Details page */}
+        <Route
+          path="/interview/:id"
+          element={
+            <ProtectedRoute>
+              <AppLayout>
+                <GeneratedInterviewPage />
+              </AppLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Interview Play page */}
+        <Route
+          path="/interview/play"
+          element={
+            <ProtectedRoute>
+              <InterviewPlayPage />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Interview Video Recorder page */}
+        <Route
+          path="/interview/video"
+          element={
+            <ProtectedRoute>
+              <InterviewVideoRecorderPage />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Video Analysis page */}
+        <Route
+          path="/interview-analysis/:attemptId"
+          element={
+            <ProtectedRoute>
+              <VideoTimelineAnalysisPage />
+            </ProtectedRoute>
+          }
+        />
+
         {/* Create Flashcard by Link page */}
         <Route
           path="/create-flashcard"
@@ -269,7 +366,7 @@ function App() {
         <Route
           path="/my-flashcards"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute requireRole="pro">
               <AppLayout>
                 <MyFlashcardsPage />
               </AppLayout>

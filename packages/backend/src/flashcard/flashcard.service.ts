@@ -499,6 +499,38 @@ IMPORTANTE:
     };
   }
 
+  async getUserFlashcardsByAdmin(
+    userId: string,
+    page: number = 1,
+    limit: number = 100
+  ) {
+    const skip = (page - 1) * limit;
+    const { Types } = require('mongoose');
+    
+    const filter: any = { 
+      createdBy: new Types.ObjectId(userId)
+    };
+
+    const [flashcards, total] = await Promise.all([
+      this.flashcardModel
+        .find(filter)
+        .select('-cards') // Não retornar os cards na listagem
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit)
+        .lean(),
+      this.flashcardModel.countDocuments(filter)
+    ]);
+
+    return {
+      flashcards,
+      currentPage: page,
+      totalItems: total,
+      itemsPerPage: limit,
+      totalPages: Math.ceil(total / limit),
+    };
+  }
+
   /**
    * Busca flashcards públicos
    */
