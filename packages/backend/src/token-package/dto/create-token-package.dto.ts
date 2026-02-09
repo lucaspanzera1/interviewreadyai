@@ -1,4 +1,4 @@
-import { IsString, IsOptional, IsNumber, IsMongoId, IsArray, Min, IsBoolean } from 'class-validator';
+import { IsString, IsOptional, IsNumber, IsMongoId, IsArray, Min, IsBoolean, IsEnum } from 'class-validator';
 
 export class CreateTokenPackageDto {
   @IsString()
@@ -33,4 +33,8 @@ export class CreateTokenPackageDto {
   @IsOptional()
   @IsBoolean()
   active?: boolean; // Se o plano está ativo
+
+  @IsOptional()
+  @IsEnum(['subscription', 'token_boost', 'test'])
+  packageType?: string; // Tipo do pacote
 }

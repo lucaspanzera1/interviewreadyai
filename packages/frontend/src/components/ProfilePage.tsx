@@ -27,6 +27,7 @@ import {
 } from '@heroicons/react/24/outline';
 import ActivityHeatmap from './ActivityHeatmap';
 import SocialConnectionsComponent from './SocialConnectionsComponent';
+import { maskCPF, maskPhone, unmask } from '../utils/masks';
 
 const LinkedInIcon = (props: React.ComponentProps<'svg'>) => (
   <svg fill="currentColor" viewBox="0 0 24 24" {...props}>
@@ -107,8 +108,8 @@ const ProfilePage: React.FC = () => {
     location: user?.location || '',
     linkedinUrl: user?.linkedinUrl || '',
     githubUrl: user?.githubUrl || '',
-    cellphone: user?.cellphone || '',
-    taxid: user?.taxid || '',
+    cellphone: maskPhone(user?.cellphone || ''),
+    taxid: maskCPF(user?.taxid || ''),
   });
 
   const [stats, setStats] = useState({
@@ -169,7 +170,14 @@ const ProfilePage: React.FC = () => {
   }, [user]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
+    let { name, value } = e.target;
+
+    if (name === 'cellphone') {
+      value = maskPhone(value);
+    } else if (name === 'taxid') {
+      value = maskCPF(value);
+    }
+
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
@@ -231,8 +239,8 @@ const ProfilePage: React.FC = () => {
     setIsLoadingPayment(true);
     try {
       const dataToUpdate = {
-        cellphone: formData.cellphone,
-        taxid: formData.taxid,
+        cellphone: unmask(formData.cellphone),
+        taxid: unmask(formData.taxid),
       };
       await updateProfile(dataToUpdate);
       setIsEditingPayment(false);
@@ -282,8 +290,8 @@ const ProfilePage: React.FC = () => {
   const handleCancelPayment = () => {
     setFormData(prev => ({
       ...prev,
-      cellphone: user?.cellphone || '',
-      taxid: user?.taxid || '',
+      cellphone: maskPhone(user?.cellphone || ''),
+      taxid: maskCPF(user?.taxid || ''),
     }));
     setIsEditingPayment(false);
   };
@@ -583,7 +591,7 @@ const ProfilePage: React.FC = () => {
                           </svg>
                         </div>
                         <span className="text-slate-700 dark:text-slate-200 font-medium text-sm">
-                          {user?.cellphone || 'Não informado'}
+                          {user?.cellphone ? maskPhone(user.cellphone) : 'Não informado'}
                         </span>
                       </div>
                     )}
@@ -614,7 +622,7 @@ const ProfilePage: React.FC = () => {
                           </svg>
                         </div>
                         <span className="text-slate-700 dark:text-slate-200 font-medium text-sm">
-                          {user?.taxid || 'Não informado'}
+                          {user?.taxid ? maskCPF(user.taxid) : 'Não informado'}
                         </span>
                       </div>
                     )}
