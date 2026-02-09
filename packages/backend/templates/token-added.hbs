@@ -4,7 +4,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Bem-vindo ao TreinaVagaAI!</title>
+  <title>Tokens Adicionados</title>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
 
@@ -49,6 +49,10 @@
       h1 {
         font-size: 22px !important;
       }
+
+      .token-amount {
+        font-size: 36px !important;
+      }
     }
   </style>
 </head>
@@ -75,9 +79,6 @@
                       TreinaVaga<span style="color: #7f00ff;">AI</span>
                     </span>
                   </td>
-                  <td align="right">
-                    <!-- Date or decorative element can go here -->
-                  </td>
                 </tr>
               </table>
             </td>
@@ -88,71 +89,67 @@
             <td class="content" style="padding: 48px;">
               <h1
                 style="font-family: 'Inter', Helvetica, Arial, sans-serif; font-size: 24px; font-weight: 600; color: #111827; margin: 0 0 24px; letter-spacing: -0.5px; line-height: 1.3;">
-                Bem-vindo(a), {{name}}
+                Tokens Adicionados
               </h1>
 
               <p
                 style="font-family: 'Inter', Helvetica, Arial, sans-serif; font-size: 15px; line-height: 1.6; color: #374151; margin: 0 0 32px;">
-                Você acaba de dar um passo importante para a sua carreira. No TreinaVagaAI, conectamos você às melhores
-                ferramentas de preparação com inteligência artificial.
+                Olá {{name}}, temos novidades para você. Um administrador adicionou novos tokens à sua conta para
+                impulsionar seu aprendizado.
               </p>
 
-              <!-- Fine Line Divider with Label -->
-              <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin-bottom: 24px;">
+              <!-- Token Details Card -->
+              <table border="0" cellpadding="0" cellspacing="0" width="100%"
+                style="margin-bottom: 32px; border: 1px solid #e5e7eb; background-color: #ffffff;">
                 <tr>
-                  <td style="border-bottom: 1px solid #e5e7eb; padding-bottom: 8px;">
+                  <td align="center" style="padding: 32px 24px;">
                     <span
                       style="font-family: 'Inter', Helvetica, Arial, sans-serif; font-size: 11px; font-weight: 600; color: #9ca3af; text-transform: uppercase; letter-spacing: 1px;">
-                      Primeiros Passos
+                      Quantidade Adicionada
                     </span>
+                    <div class="token-amount"
+                      style="font-family: 'Inter', Helvetica, Arial, sans-serif; font-size: 48px; font-weight: 600; color: #111827; margin: 16px 0; letter-spacing: -1px;">
+                      +{{amount}}
+                    </div>
+
+                    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+                      <tr>
+                        <td align="center" style="padding-top: 8px;">
+                          <span
+                            style="font-family: 'Inter', Helvetica, Arial, sans-serif; font-size: 14px; color: #4b5563;">
+                            Novo Saldo: <strong style="color: #111827; font-weight: 600;">{{newBalance}} tokens</strong>
+                          </span>
+                        </td>
+                      </tr>
+                      {{#if reason}}
+                      <tr>
+                        <td align="center" style="padding-top: 16px; padding-bottom: 0;">
+                          <p
+                            style="font-family: 'Inter', Helvetica, Arial, sans-serif; font-size: 13px; color: #6b7280; background-color: #f9fafb; display: inline-block; padding: 6px 12px; margin: 0; border-radius: 4px;">
+                            Motivo: {{reason}}
+                          </p>
+                        </td>
+                      </tr>
+                      {{/if}}
+                    </table>
+
                   </td>
                 </tr>
               </table>
 
-              <!-- Action Items List (Clean, bordered) -->
-              <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin-bottom: 40px;">
-                <tr>
-                  <td style="padding: 16px 0; border-bottom: 1px solid #f3f4f6;">
-                    <span
-                      style="font-family: 'Inter', Helvetica, Arial, sans-serif; font-size: 14px; color: #111827; font-weight: 500;">01.
-                      Pratique</span>
-                    <br>
-                    <span
-                      style="font-family: 'Inter', Helvetica, Arial, sans-serif; font-size: 13px; color: #6b7280; display: block; margin-top: 4px;">Realize
-                      simulados de entrevista com nossa IA avançada.</span>
-                  </td>
-                </tr>
-                <tr>
-                  <td style="padding: 16px 0; border-bottom: 1px solid #f3f4f6;">
-                    <span
-                      style="font-family: 'Inter', Helvetica, Arial, sans-serif; font-size: 14px; color: #111827; font-weight: 500;">02.
-                      Analise</span>
-                    <br>
-                    <span
-                      style="font-family: 'Inter', Helvetica, Arial, sans-serif; font-size: 13px; color: #6b7280; display: block; margin-top: 4px;">Receba
-                      feedback detalhado sobre sua performance e pontos de melhoria.</span>
-                  </td>
-                </tr>
-                <tr>
-                  <td style="padding: 16px 0;">
-                    <span
-                      style="font-family: 'Inter', Helvetica, Arial, sans-serif; font-size: 14px; color: #111827; font-weight: 500;">03.
-                      Evolua</span>
-                    <br>
-                    <span
-                      style="font-family: 'Inter', Helvetica, Arial, sans-serif; font-size: 13px; color: #6b7280; display: block; margin-top: 4px;">Acompanhe
-                      seu progresso e conquiste sua vaga dos sonhos.</span>
-                  </td>
-                </tr>
-              </table>
+              <p
+                style="font-family: 'Inter', Helvetica, Arial, sans-serif; font-size: 15px; line-height: 1.6; color: #374151; margin: 0 0 32px;">
+                Use seus tokens para realizar novos simulados de entrevista, acessar quizzes exclusivos e desbloquear
+                recursos premium da plataforma.
+              </p>
 
-              <!-- Primary Button (Sharp corners) -->
+              <!-- Primary Button -->
               <table border="0" cellpadding="0" cellspacing="0" width="100%">
                 <tr>
                   <td align="left">
-                    <a href="http://localhost:8080"
+                    <a href="{{appUrl}}"
                       style="display: inline-block; padding: 14px 36px; background-color: #111827; color: #ffffff; text-decoration: none; font-family: 'Inter', Helvetica, Arial, sans-serif; font-weight: 500; font-size: 14px; border: 1px solid #111827; letter-spacing: 0.2px;">
-                      Começar Agora &rarr;
+                      Acessar Plataforma &rarr;
                     </a>
                   </td>
                 </tr>
@@ -173,11 +170,8 @@
                     </p>
                   </td>
                   <td align="right" style="padding-bottom: 16px;">
-                    <!-- Social icons could go here, keeping it text for now -->
                     <a href="#"
                       style="font-family: 'Inter', Helvetica, Arial, sans-serif; font-size: 12px; color: #6b7280; text-decoration: none; margin-left: 16px;">Suporte</a>
-                    <a href="#"
-                      style="font-family: 'Inter', Helvetica, Arial, sans-serif; font-size: 12px; color: #6b7280; text-decoration: none; margin-left: 16px;">Privacidade</a>
                   </td>
                 </tr>
                 <tr>
@@ -197,6 +191,7 @@
       </td>
     </tr>
   </table>
+
 </body>
 
 </html>

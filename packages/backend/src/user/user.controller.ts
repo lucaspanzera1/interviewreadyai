@@ -19,6 +19,7 @@ import {
   ValidationErrorDto,
   ForbiddenErrorDto
 } from '../common/dto';
+import { EmailService } from '../common/services/email.service';
 
 /**
  * Controller de usuários
@@ -31,6 +32,7 @@ export class UserController {
   constructor(
     private readonly userService: UserService,
     private readonly userSocialService: UserSocialService,
+    private readonly emailService: EmailService,
   ) { }
 
   /**
@@ -703,8 +705,23 @@ export class UserController {
       throw new Error('Amount must be a positive number');
     }
 
+    // Buscar o usuário para obter email e nome
+    const user = await this.userService.findById(id);
+    if (!user) {
+      throw new Error('User not found');
+    }
+
     await this.userService.addTokensToUser(id, amount, reason);
     const newBalance = await this.userService.getUserTokens(id);
+
+    // Enviar email notificando a adição de tokens
+    await this.emailService.sendTokenAddedEmail(
+      user.email,
+      user.name || user.email,
+      amount,
+      reason,
+      newBalance
+    );
 
     return {
       success: true,
