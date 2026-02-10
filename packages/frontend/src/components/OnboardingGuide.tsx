@@ -6,7 +6,10 @@ import {
     SparklesIcon,
     BoltIcon,
     ChartBarIcon,
-    CurrencyDollarIcon
+    CurrencyDollarIcon,
+    AcademicCapIcon,
+    VideoCameraIcon,
+    UserGroupIcon
 } from '@heroicons/react/24/outline';
 
 interface OnboardingGuideProps {
@@ -30,11 +33,32 @@ const steps = [
         image: "quizzes"
     },
     {
+        title: "Flashcards Dinâmicos",
+        description: "Aprenda com flashcards interativos gerados por IA. Revise conceitos importantes e fixe conhecimentos de forma eficiente.",
+        icon: AcademicCapIcon,
+        color: "from-cyan-400 to-blue-500",
+        image: "flashcards"
+    },
+    {
+        title: "Simulações de Entrevista",
+        description: "Pratique entrevistas técnicas com IA. Receba feedback detalhado sobre suas respostas e melhore sua performance.",
+        icon: VideoCameraIcon,
+        color: "from-rose-400 to-red-500",
+        image: "interviews"
+    },
+    {
         title: "Sistema de Tokens",
-        description: "Ganhe tokens completando desafios e mantendo sua ofensiva. Use-os para gerar simulados avançados e mentorias.",
+        description: "Ganhe tokens completando desafios e mantendo sua ofensiva. Compre mais tokens ou use-os para gerar simulados avançados e mentorias.",
         icon: CurrencyDollarIcon,
         color: "from-emerald-400 to-teal-500",
         image: "tokens"
+    },
+    {
+        title: "Comunidade TreinaVaga",
+        description: "Conecte-se com outros usuários, veja o progresso da comunidade e compartilhe conquistas. Aprenda colaborativamente!",
+        icon: UserGroupIcon,
+        color: "from-violet-400 to-purple-500",
+        image: "community"
     },
     {
         title: "Métricas e Evolução",
