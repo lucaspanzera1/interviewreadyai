@@ -5,16 +5,27 @@ import { IoAdapter } from '@nestjs/platform-socket.io';
 import { AppModule } from './app.module';
 import { GlobalExceptionFilter } from './common/filters/global-exception.filter';
 import * as bodyParser from 'body-parser';
+import { NestExpressApplication } from '@nestjs/platform-express';
+import { join } from 'path';
 
 /**
  * Bootstrap da aplicação NestJS
  * Configura validação, CORS, Swagger e inicia o servidor
  */
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
   // Prefixo global para todas as rotas
   app.setGlobalPrefix('api');
+
+  // Configuração de arquivos estáticos
+  const publicPath = process.env.NODE_ENV === 'production' 
+    ? join(__dirname, 'public')
+    : join(process.cwd(), 'public');
+  
+  app.useStaticAssets(publicPath, {
+    prefix: '/api/uploads/',
+  });
 
   // Captura o rawBody para validação de assinatura do webhook AbacatePay
   app.use(bodyParser.json({

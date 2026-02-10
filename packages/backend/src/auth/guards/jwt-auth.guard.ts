@@ -20,6 +20,14 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
    * @returns true se autorizado, false caso contrário
    */
   async canActivate(context: ExecutionContext) {
+    const request = context.switchToHttp().getRequest();
+    const url = request.url;
+
+    // Permite acesso a arquivos estáticos em /api/uploads/*
+    if (url && url.startsWith('/api/uploads/')) {
+      return true;
+    }
+
     // Verifica se a rota é pública (marcada com @Public())
     const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
       context.getHandler(),
@@ -35,7 +43,6 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
       return false;
     }
 
-    const request = context.switchToHttp().getRequest();
     const user = request.user;
 
     // ...existing code...

@@ -93,11 +93,17 @@ const ProfilePage: React.FC = () => {
   const [isEditingPersonal, setIsEditingPersonal] = useState(false);
   const [isEditingPayment, setIsEditingPayment] = useState(false);
   const [isEditingProfessional, setIsEditingProfessional] = useState(false);
+  const [isEditingHeader, setIsEditingHeader] = useState(false);
 
   // Estados de loading separados para cada seção
   const [isLoadingPersonal, setIsLoadingPersonal] = useState(false);
   const [isLoadingPayment, setIsLoadingPayment] = useState(false);
   const [isLoadingProfessional, setIsLoadingProfessional] = useState(false);
+  const [isLoadingHeader, setIsLoadingHeader] = useState(false);
+
+  // Estados para header
+  const [headerImageFile, setHeaderImageFile] = useState<File | null>(null);
+  const [headerImagePreview, setHeaderImagePreview] = useState<string | null>(null);
 
   const [formData, setFormData] = useState<FormData>({
     name: user?.name || '',
@@ -274,6 +280,54 @@ const ProfilePage: React.FC = () => {
     }
   };
 
+  const handleSaveHeader = async () => {
+    if (!headerImageFile) {
+      setIsEditingHeader(false);
+      return;
+    }
+
+    setIsLoadingHeader(true);
+    try {
+      const formDataToSend = new FormData();
+      formDataToSend.append('headerImage', headerImageFile);
+      await updateProfile(formDataToSend);
+      setIsEditingHeader(false);
+      setHeaderImageFile(null);
+      setHeaderImagePreview(null);
+    } catch {
+      showToast('Erro ao atualizar imagem do header', 'error');
+    } finally {
+      setIsLoadingHeader(false);
+    }
+  };
+
+  const handleCancelHeader = () => {
+    setIsEditingHeader(false);
+    setHeaderImageFile(null);
+    setHeaderImagePreview(null);
+  };
+
+  const handleHeaderFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        showToast('Por favor, selecione um arquivo de imagem válido', 'error');
+        return;
+      }
+      // Validate file size (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        showToast('A imagem deve ter no máximo 5MB', 'error');
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = () => setHeaderImagePreview(reader.result as string);
+      reader.readAsDataURL(file);
+      setHeaderImageFile(file);
+    }
+  };
+
   // Funções de cancelar para cada seção
   const handleCancelPersonal = () => {
     setFormData(prev => ({
@@ -324,6 +378,14 @@ const ProfilePage: React.FC = () => {
     });
   };
 
+  const getImageUrl = (imagePath?: string) => {
+    if (!imagePath) return '';
+    const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8081';
+    // Remove /api from the start of the path if it exists
+    const cleanPath = imagePath.replace(/^\/api/, '');
+    return `${baseUrl}${cleanPath}`;
+  };
+
   const careerTimeOptions = [
     { value: '0-1', label: '0-1 ano' },
     { value: '1-3', label: '1-3 anos' },
@@ -347,6 +409,111 @@ const ProfilePage: React.FC = () => {
       <PageTitle title="Perfil - TreinaVagaAI" />
 
       <div className="space-y-8 pb-32">
+        {/* Hero Section with Header & Avatar */}
+        <div className="relative mb-24 md:mb-32 group">
+          <div className="relative w-full aspect-[3/1] max-h-[500px] min-h-[200px] rounded-2xl overflow-hidden shadow-sm ring-1 ring-slate-900/5 dark:ring-white/10">
+            {/* Header Image */}
+            {(headerImagePreview || user?.headerImage) ? (
+              <img
+                src={headerImagePreview || getImageUrl(user?.headerImage)}
+                alt="Header"
+                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+              />
+            ) : (
+              <div className="w-full h-full bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600"></div>
+            )}
+
+            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent"></div>
+
+            {/* Header Edit Controls */}
+            <div className="absolute top-4 right-4 z-20 flex flex-col items-end">
+              {!isEditingHeader ? (
+                <button
+                  onClick={() => setIsEditingHeader(true)}
+                  className="flex items-center text-sm font-medium text-white bg-black/20 hover:bg-black/40 backdrop-blur-md px-4 py-2 rounded-full transition-all border border-white/10"
+                >
+                  <PencilIcon className="h-4 w-4 mr-2" />
+                  Editar Capa
+                </button>
+              ) : (
+                <div className="flex flex-col items-end gap-2 animate-in fade-in slide-in-from-top-2 duration-200">
+                  <div className="px-3 py-1.5 bg-black/60 backdrop-blur-md rounded-lg border border-white/10 text-xs font-medium text-white shadow-lg">
+                    Recomendado: 1500x500px
+                  </div>
+                  <div className="flex gap-2 p-1.5 bg-black/40 backdrop-blur-md rounded-xl border border-white/10">
+                    <label className="cursor-pointer flex items-center justify-center px-4 py-2 text-sm font-medium text-white bg-white/10 hover:bg-white/20 rounded-lg transition-colors">
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleHeaderFileChange}
+                        className="hidden"
+                      />
+                      Escolher
+                    </label>
+                    <button
+                      onClick={handleSaveHeader}
+                      className="flex items-center justify-center w-10 h-10 text-white bg-green-600 hover:bg-green-500 rounded-lg transition-colors shadow-lg shadow-green-600/20"
+                      disabled={isLoadingHeader}
+                      title="Salvar"
+                    >
+                      <CheckIcon className="h-5 w-5" />
+                    </button>
+                    <button
+                      onClick={handleCancelHeader}
+                      className="flex items-center justify-center w-10 h-10 text-white bg-red-600 hover:bg-red-500 rounded-lg transition-colors"
+                      disabled={isLoadingHeader}
+                      title="Cancelar"
+                    >
+                      <XMarkIcon className="h-5 w-5" />
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Overlapping Profile Info */}
+          <div className="absolute -bottom-16 md:-bottom-24 left-0 w-full px-6 md:px-10 flex flex-col md:flex-row items-end gap-6 z-10 pointer-events-none">
+            <div className="relative shrink-0 pointer-events-auto group/avatar">
+              {user?.picture ? (
+                <img
+                  src={user.picture}
+                  alt={user.name}
+                  className="w-32 h-32 md:w-48 md:h-48 rounded-full border-[6px] border-white dark:border-slate-900 shadow-2xl object-cover bg-white dark:bg-slate-900 group-hover/avatar:scale-105 transition-transform duration-300"
+                />
+              ) : (
+                <div className="w-32 h-32 md:w-48 md:h-48 rounded-full border-[6px] border-white dark:border-slate-900 shadow-2xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-300 group-hover/avatar:scale-105 transition-transform duration-300">
+                  <UserCircleIcon className="w-20 h-20" />
+                </div>
+              )}
+            </div>
+
+            <div className="flex-1 pb-4 md:pb-6 text-center md:text-left pointer-events-auto">
+              <h1 className="text-3xl md:text-5xl font-bold text-slate-900 dark:text-white mb-2">
+                {user?.name}
+              </h1>
+
+              <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 mt-3 text-sm font-medium text-slate-500 dark:text-slate-400">
+                <div className="flex items-center gap-1.5 px-3 py-1 bg-slate-100 dark:bg-slate-800 rounded-full">
+                  <span className="text-primary-600 dark:text-primary-400">@{user?.email?.split('@')[0]}</span>
+                </div>
+                {user?.location && (
+                  <div className="flex items-center gap-1.5">
+                    <MapPinIcon className="w-4 h-4" />
+                    {user.location}
+                  </div>
+                )}
+                {user?.techArea && (
+                  <div className="flex items-center gap-1.5">
+                    <BriefcaseIcon className="w-4 h-4" />
+                    {techAreaOptions.find(opt => opt.value === user.techArea)?.label || user.techArea}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
 
           {/* Left Column Group */}
@@ -387,21 +554,12 @@ const ProfilePage: React.FC = () => {
               </div>
 
               <div className="p-6">
-                <div className="flex items-center mb-8">
-                  {user?.picture ? (
-                    <img
-                      src={user.picture}
-                      alt={user.name}
-                      className="h-20 w-20 rounded-full object-cover border border-slate-200 dark:border-slate-700 p-1"
-                    />
-                  ) : (
-                    <div className="h-20 w-20 rounded-full bg-slate-50 dark:bg-slate-800 flex items-center justify-center border border-slate-100 dark:border-slate-700 text-slate-400 dark:text-slate-500">
-                      <UserCircleIcon className="h-12 w-12" />
-                    </div>
-                  )}
-                  <div className="ml-5">
-                    <h3 className="text-lg font-semibold text-slate-900 dark:text-white">{user?.name}</h3>
-                    <p className="text-slate-500 dark:text-slate-400 text-sm mt-0.5">{user?.email}</p>
+                <div className="mb-6">
+                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                    Email
+                  </label>
+                  <div className="flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 rounded-md">
+                    <span className="text-slate-700 dark:text-slate-200 font-medium text-sm">{user?.email}</span>
                   </div>
                 </div>
 

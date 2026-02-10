@@ -122,8 +122,39 @@ const Footer: React.FC = () => {
                         <div>
                             <h4 className="text-sm font-bold uppercase tracking-wider text-slate-900 dark:text-white mb-4">Legal</h4>
                             <ul className="space-y-3">
-                                <FooterLink to="/terms">Termos de Uso</FooterLink>
-                                <FooterLink to="/privacy">Política de Privacidade</FooterLink>
+                                <li>
+                                    <a
+                                        href="https://www.treinavaga.tech/terms"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="text-slate-500 dark:text-slate-400 hover:text-primary-600 dark:hover:text-primary-400 text-sm font-medium transition-colors duration-200 flex items-center gap-1 group"
+                                    >
+                                        <span className="w-0 group-hover:w-1.5 h-1.5 bg-primary-500 rounded-full transition-all duration-200 opacity-0 group-hover:opacity-100"></span>
+                                        <span className="transform group-hover:translate-x-1 transition-transform duration-200">Termos de Uso</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a
+                                        href="https://www.treinavaga.tech/privacy"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="text-slate-500 dark:text-slate-400 hover:text-primary-600 dark:hover:text-primary-400 text-sm font-medium transition-colors duration-200 flex items-center gap-1 group"
+                                    >
+                                        <span className="w-0 group-hover:w-1.5 h-1.5 bg-primary-500 rounded-full transition-all duration-200 opacity-0 group-hover:opacity-100"></span>
+                                        <span className="transform group-hover:translate-x-1 transition-transform duration-200">Política de Privacidade</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a
+                                        href="https://www.treinavaga.tech/faq"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="text-slate-500 dark:text-slate-400 hover:text-primary-600 dark:hover:text-primary-400 text-sm font-medium transition-colors duration-200 flex items-center gap-1 group"
+                                    >
+                                        <span className="w-0 group-hover:w-1.5 h-1.5 bg-primary-500 rounded-full transition-all duration-200 opacity-0 group-hover:opacity-100"></span>
+                                        <span className="transform group-hover:translate-x-1 transition-transform duration-200">FAQ</span>
+                                    </a>
+                                </li>
                             </ul>
                         </div>
                     </div>

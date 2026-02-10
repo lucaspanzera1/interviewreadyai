@@ -25,6 +25,9 @@ export class User {
   @Prop()
   picture?: string;
 
+  @Prop()
+  headerImage?: string;
+
   @Prop({ maxlength: 20 })
   taxid?: string;
 
