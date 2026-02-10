@@ -1,5 +1,6 @@
-import { Controller, Get, Put, Body, Param, UseGuards, Post, Delete, Query } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiParam, ApiQuery } from '@nestjs/swagger';
+import { Controller, Get, Put, Body, Param, UseGuards, Post, Delete, Query, UseInterceptors, UploadedFile, BadRequestException } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiParam, ApiQuery, ApiConsumes, ApiBody } from '@nestjs/swagger';
 import { UserService } from './user.service';
 import { UserSocialService } from './user-social.service';
 import { UserDto, UpdateUserDto, ProfileDto, CompleteOnboardingDto } from './dto';
@@ -506,6 +507,7 @@ export class UserController {
       githubUrl: userDoc.githubUrl,
       cellphone: userDoc.cellphone,
       taxid: this.maskTaxid(userDoc.taxid),
+      headerImage: userDoc.headerImage,
     };
   }
 
@@ -514,9 +516,38 @@ export class UserController {
    * @param profileData Dados do perfil
    */
   @Put('me/profile')
+  @UseInterceptors(FileInterceptor('headerImage', {
+    limits: {
+      fileSize: 5 * 1024 * 1024, // 5MB max
+    },
+    fileFilter: (req, file, callback) => {
+      if (!file.mimetype.startsWith('image/')) {
+        return callback(new BadRequestException('Only image files are allowed'), false);
+      }
+      callback(null, true);
+    },
+  }))
   @ApiOperation({
     summary: 'Atualizar perfil do usuário',
     description: 'Atualiza os dados de perfil do usuário atual'
+  })
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        careerTime: { type: 'string', example: '1-3' },
+        techArea: { type: 'string', example: 'frontend' },
+        techStack: { type: 'array', items: { type: 'string' }, example: ['React', 'TypeScript'] },
+        bio: { type: 'string', example: 'Desenvolvedor apaixonado por tecnologia' },
+        location: { type: 'string', example: 'São Paulo, SP' },
+        linkedinUrl: { type: 'string', example: 'https://linkedin.com/in/username' },
+        githubUrl: { type: 'string', example: 'https://github.com/username' },
+        cellphone: { type: 'string', example: '+5511999999999' },
+        taxid: { type: 'string', example: '12345678901' },
+        headerImage: { type: 'string', format: 'binary', description: 'Imagem do header (opcional)' }
+      }
+    }
   })
   @ApiResponse({
     status: 200,
@@ -530,9 +561,9 @@ export class UserController {
       }
     }
   })
-  async updateMyProfile(@CurrentUser() user: any, @Body() profileData: ProfileDto): Promise<{ success: boolean; data: any; message: string }> {
+  async updateMyProfile(@CurrentUser() user: any, @Body() profileData: ProfileDto, @UploadedFile() headerImage?: Express.Multer.File): Promise<{ success: boolean; data: any; message: string }> {
     const userId = this.getUserId(user);
-    const updatedUser = await this.userService.updateProfile(userId, profileData);
+    const updatedUser = await this.userService.updateProfile(userId, profileData, headerImage);
     return {
       success: true,
       data: {
@@ -544,6 +575,7 @@ export class UserController {
         location: updatedUser.location,
         linkedinUrl: updatedUser.linkedinUrl,
         githubUrl: updatedUser.githubUrl,
+        headerImage: updatedUser.headerImage,
       },
       message: "Perfil atualizado com sucesso!"
     };

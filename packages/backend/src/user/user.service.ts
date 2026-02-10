@@ -5,6 +5,8 @@ import { Model } from 'mongoose';
 import { HttpService } from '@nestjs/axios';
 import { ModuleRef } from '@nestjs/core';
 import { firstValueFrom } from 'rxjs';
+import * as fs from 'fs';
+import * as path from 'path';
 import { User, UserDocument, UserRole } from './schemas/user.schema';
 import { UpdateUserDto, UserDto } from './dto';
 import { NotFoundException, DatabaseException } from '../common/exceptions';
@@ -255,6 +257,7 @@ export class UserService {
       email: user.email,
       name: user.name,
       picture: user.picture,
+      headerImage: user.headerImage,
       role: user.role,
       roleExpiresAt: user.roleExpiresAt,
       active: user.active,
@@ -408,8 +411,27 @@ export class UserService {
    * @param userId ID do usuário
    * @param profileData Dados do perfil
    */
-  async updateProfile(userId: string, profileData: any): Promise<UserDocument> {
+  async updateProfile(userId: string, profileData: any, headerImage?: Express.Multer.File): Promise<UserDocument> {
     const user = await this.findById(userId);
+
+    // Handle header image upload
+    if (headerImage) {
+      const uploadDir = path.join(process.cwd(), 'public', 'uploads', 'headers');
+      if (!fs.existsSync(uploadDir)) {
+        fs.mkdirSync(uploadDir, { recursive: true });
+      }
+
+      const fileName = `${userId}_${Date.now()}_${headerImage.originalname}`;
+      const filePath = path.join(uploadDir, fileName);
+
+      fs.writeFileSync(filePath, headerImage.buffer);
+      profileData.headerImage = `/api/uploads/headers/${fileName}`;
+    }
+
+    // Fix old headerImage paths that don't have /api/ prefix
+    if (user.headerImage && !user.headerImage.startsWith('/api/')) {
+      profileData.headerImage = `/api${user.headerImage}`;
+    }
 
     // Verificar se deve criar cliente na AbacatePay
     const shouldCreateAbacatePayCustomer =

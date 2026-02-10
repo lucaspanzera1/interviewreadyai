@@ -135,7 +135,19 @@ const PublicProfilePage: React.FC = () => {
     <div className="space-y-6">
       {/* Profile Header Card */}
       <div className="card relative overflow-hidden bg-white dark:bg-slate-800">
-        <div className="h-32 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600"></div>
+        <div className="h-32 relative">
+          {profile.headerImage ? (
+            <img
+              src={profile.headerImage}
+              alt="Header"
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            <div className="w-full h-full bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600"></div>
+          )}
+          {/* Overlay para melhorar legibilidade do texto */}
+          <div className="absolute inset-0 bg-black/20"></div>
+        </div>
         <div className="px-6 pb-6">
           <div className="relative flex flex-col md:flex-row items-end -mt-12 mb-4 gap-6">
             <div className="relative">

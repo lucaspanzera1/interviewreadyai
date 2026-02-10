@@ -42,6 +42,7 @@ export class PublicUserDto {
   id: string;
   name: string;
   picture?: string;
+  headerImage?: string;
   bio?: string;
   location?: string;
   careerTime?: string;

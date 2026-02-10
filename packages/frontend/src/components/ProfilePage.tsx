@@ -93,11 +93,17 @@ const ProfilePage: React.FC = () => {
   const [isEditingPersonal, setIsEditingPersonal] = useState(false);
   const [isEditingPayment, setIsEditingPayment] = useState(false);
   const [isEditingProfessional, setIsEditingProfessional] = useState(false);
+  const [isEditingHeader, setIsEditingHeader] = useState(false);
 
   // Estados de loading separados para cada seção
   const [isLoadingPersonal, setIsLoadingPersonal] = useState(false);
   const [isLoadingPayment, setIsLoadingPayment] = useState(false);
   const [isLoadingProfessional, setIsLoadingProfessional] = useState(false);
+  const [isLoadingHeader, setIsLoadingHeader] = useState(false);
+
+  // Estados para header
+  const [headerImageFile, setHeaderImageFile] = useState<File | null>(null);
+  const [headerImagePreview, setHeaderImagePreview] = useState<string | null>(null);
 
   const [formData, setFormData] = useState<FormData>({
     name: user?.name || '',
@@ -274,6 +280,54 @@ const ProfilePage: React.FC = () => {
     }
   };
 
+  const handleSaveHeader = async () => {
+    if (!headerImageFile) {
+      setIsEditingHeader(false);
+      return;
+    }
+
+    setIsLoadingHeader(true);
+    try {
+      const formDataToSend = new FormData();
+      formDataToSend.append('headerImage', headerImageFile);
+      await updateProfile(formDataToSend);
+      setIsEditingHeader(false);
+      setHeaderImageFile(null);
+      setHeaderImagePreview(null);
+    } catch {
+      showToast('Erro ao atualizar imagem do header', 'error');
+    } finally {
+      setIsLoadingHeader(false);
+    }
+  };
+
+  const handleCancelHeader = () => {
+    setIsEditingHeader(false);
+    setHeaderImageFile(null);
+    setHeaderImagePreview(null);
+  };
+
+  const handleHeaderFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        showToast('Por favor, selecione um arquivo de imagem válido', 'error');
+        return;
+      }
+      // Validate file size (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        showToast('A imagem deve ter no máximo 5MB', 'error');
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = () => setHeaderImagePreview(reader.result as string);
+      reader.readAsDataURL(file);
+      setHeaderImageFile(file);
+    }
+  };
+
   // Funções de cancelar para cada seção
   const handleCancelPersonal = () => {
     setFormData(prev => ({
@@ -324,6 +378,12 @@ const ProfilePage: React.FC = () => {
     });
   };
 
+  const getImageUrl = (imagePath?: string) => {
+    if (!imagePath) return '';
+    const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8081';
+    return `${baseUrl}${imagePath}`;
+  };
+
   const careerTimeOptions = [
     { value: '0-1', label: '0-1 ano' },
     { value: '1-3', label: '1-3 anos' },
@@ -347,6 +407,53 @@ const ProfilePage: React.FC = () => {
       <PageTitle title="Perfil - TreinaVagaAI" />
 
       <div className="space-y-8 pb-32">
+        {/* Header Personalizável */}
+        <div className="relative h-32 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 overflow-hidden rounded-lg">
+          {(headerImagePreview || user?.headerImage) && (
+            <img
+              src={headerImagePreview || getImageUrl(user?.headerImage)}
+              alt="Header"
+              className="w-full h-full object-cover"
+            />
+          )}
+          <div className="absolute top-4 right-4">
+            {!isEditingHeader ? (
+              <button
+                onClick={() => setIsEditingHeader(true)}
+                className="flex items-center text-sm font-medium text-white bg-black/20 hover:bg-black/30 backdrop-blur-sm px-3 py-1.5 rounded-md transition-colors"
+              >
+                <PencilIcon className="h-4 w-4 mr-1.5 opacity-70" />
+                Editar Header
+              </button>
+            ) : (
+              <div className="flex gap-2">
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleHeaderFileChange}
+                  className="text-sm text-white file:mr-2 file:py-1 file:px-2 file:rounded file:border-0 file:text-sm file:font-medium file:bg-white/20 file:text-white hover:file:bg-white/30 file:backdrop-blur-sm"
+                />
+                <button
+                  onClick={handleSaveHeader}
+                  className="flex items-center px-3 py-1.5 text-sm font-semibold text-white bg-green-600 hover:bg-green-500 rounded-md transition-all shadow-md active:scale-95"
+                  disabled={isLoadingHeader}
+                >
+                  <CheckIcon className="h-4 w-4 mr-1" />
+                  Salvar
+                </button>
+                <button
+                  onClick={handleCancelHeader}
+                  className="flex items-center px-3 py-1.5 text-sm font-medium text-white bg-red-600 hover:bg-red-500 rounded-md transition-all active:scale-95"
+                  disabled={isLoadingHeader}
+                >
+                  <XMarkIcon className="h-4 w-4 mr-1" />
+                  Cancelar
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
 
           {/* Left Column Group */}

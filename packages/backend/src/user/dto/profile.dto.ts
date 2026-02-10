@@ -37,6 +37,10 @@ export class ProfileDto {
   @IsOptional()
   @IsString()
   taxid?: string;
+
+  @IsOptional()
+  @IsString()
+  headerImage?: string;
 }
 
 export class CompleteOnboardingDto extends ProfileDto {

@@ -82,7 +82,7 @@ export class UserSocialService {
   async getPublicProfile(userId: string, currentUserId: string): Promise<PublicUserDto> {
     const user = await this.userModel
       .findOne({ _id: userId, active: true, isProfilePublic: true })
-      .select('name email picture bio location careerTime techArea techStack linkedinUrl githubUrl')
+      .select('name email picture bio location careerTime techArea techStack linkedinUrl githubUrl headerImage')
       .lean();
 
     if (!user) {
@@ -211,6 +211,9 @@ export class UserSocialService {
       id: userId,
       name: user.name,
       picture: user.picture,
+      headerImage: user.headerImage && !user.headerImage.startsWith('/api/') 
+        ? `/api${user.headerImage}` 
+        : user.headerImage,
       bio: user.bio,
       location: user.location,
       careerTime: user.careerTime,

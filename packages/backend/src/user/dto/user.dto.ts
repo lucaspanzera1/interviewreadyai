@@ -23,6 +23,11 @@ export class UserDto {
   @IsString()
   picture?: string;
 
+  @ApiProperty({ description: 'URL da imagem do header do perfil', required: false })
+  @IsOptional()
+  @IsString()
+  headerImage?: string;
+
   @ApiProperty({ description: 'Role do usuário no sistema', required: false })
   role?: string;
 

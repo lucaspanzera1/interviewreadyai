@@ -60,6 +60,7 @@ export interface User {
   email: string;
   name: string;
   picture?: string;
+  headerImage?: string;
   role: UserRole;
   roleExpiresAt?: string;
   active: boolean;
@@ -154,6 +155,7 @@ export interface UserProfile {
   githubUrl?: string;
   cellphone?: string | null;
   taxid?: string | null;
+  headerImage?: string;
 }
 
 export interface CompleteOnboardingData {
@@ -549,8 +551,13 @@ class ApiClient {
     return res.data;
   }
 
-  async updateUserProfileData(profileData: Partial<UserProfile>): Promise<{ data: UserProfile; message?: string }> {
-    const res = await this.client.put('/users/me/profile', profileData);
+  async updateUserProfileData(profileData: Partial<UserProfile> | FormData): Promise<{ data: UserProfile; message?: string }> {
+    const config = profileData instanceof FormData ? {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      }
+    } : {};
+    const res = await this.client.put('/users/me/profile', profileData, config);
     return res.data.message ? { data: res.data.data, message: res.data.message } : { data: res.data };
   }
 

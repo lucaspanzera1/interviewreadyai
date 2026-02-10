@@ -12,6 +12,7 @@ export interface PublicUser {
   id: string;
   name: string;
   picture?: string;
+  headerImage?: string;
   bio?: string;
   location?: string;
   careerTime?: string;

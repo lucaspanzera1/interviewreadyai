@@ -750,7 +750,7 @@ gere uma simulação de entrevista realista com {{numberOfQuestions}} perguntas 
           throw new Error(`File saved but is empty: ${videoPath}`);
         }
         
-        videoPaths.push(`/uploads/videos/${videoFileName}`);
+        videoPaths.push(`/api/uploads/videos/${videoFileName}`);
         savedFiles.push(videoPath);
         console.log(`[VideoUpload] Saved video ${index + 1}/${videoFiles.length}: ${videoFileName} (${stats.size} bytes) at ${videoPath}`);
       } catch (error) {

@@ -10,7 +10,7 @@ interface AuthContextType {
   login: (provider?: 'google' | 'github') => Promise<void>;
   logout: () => Promise<void>;
   refreshUser: () => Promise<void>;
-  updateProfile: (userData: Partial<User>) => Promise<void>;
+  updateProfile: (userData: Partial<User> | FormData) => Promise<void>;
   handleAuthCallback: (accessToken: string, refreshToken: string) => Promise<void>;
   completeOnboarding: () => void;
 }
@@ -108,8 +108,21 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
-  const updateProfile = async (userData: Partial<User>): Promise<void> => {
+  const updateProfile = async (userData: Partial<User> | FormData): Promise<void> => {
     try {
+      // Handle FormData for file uploads
+      if (userData instanceof FormData) {
+        const result = await apiClient.updateUserProfileData(userData);
+        if (result.message) {
+          showToast(result.message, 'success');
+        }
+        // Clear cache and refresh user data
+        apiClient.clearUserProfileCache();
+        const updatedUser = await apiClient.getUserProfile();
+        setUser(updatedUser);
+        return;
+      }
+
       // Separate basic profile fields from onboarding/profile fields
       const basicFields = ['name'];
       const profileFields = ['careerTime', 'techArea', 'techStack', 'bio', 'location', 'linkedinUrl', 'githubUrl', 'cellphone', 'taxid'];
