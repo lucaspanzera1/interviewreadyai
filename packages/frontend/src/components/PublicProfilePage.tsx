@@ -134,8 +134,8 @@ const PublicProfilePage: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Profile Header Card */}
-      <div className="card relative overflow-hidden bg-white dark:bg-slate-800">
-        <div className="h-32 relative">
+      <div className="card relative overflow-hidden bg-white dark:bg-slate-800 border-0 ring-1 ring-slate-200 dark:ring-slate-700">
+        <div className="relative w-full aspect-[3/1] max-h-[500px] min-h-[200px]">
           {profile.headerImage ? (
             <img
               src={profile.headerImage}
@@ -146,25 +146,25 @@ const PublicProfilePage: React.FC = () => {
             <div className="w-full h-full bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600"></div>
           )}
           {/* Overlay para melhorar legibilidade do texto */}
-          <div className="absolute inset-0 bg-black/20"></div>
+          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent"></div>
         </div>
         <div className="px-6 pb-6">
-          <div className="relative flex flex-col md:flex-row items-end -mt-12 mb-4 gap-6">
-            <div className="relative">
+          <div className="relative flex flex-col md:flex-row items-end -mt-20 md:-mt-24 mb-6 gap-6">
+            <div className="relative shrink-0">
               <img
                 src={profile.picture || `https://ui-avatars.com/api/?name=${encodeURIComponent(profile.name)}&background=3B82F6&color=ffffff&size=128`}
                 alt={profile.name}
-                className="w-32 h-32 rounded-2xl border-4 border-white dark:border-slate-800 shadow-lg object-cover bg-white dark:bg-slate-900"
+                className="w-32 h-32 md:w-40 md:h-40 rounded-2xl border-4 border-white dark:border-slate-800 shadow-xl object-cover bg-white dark:bg-slate-900"
               />
               {profile.isFollowing && (
                 <div className="absolute -bottom-2 -right-2 bg-green-500 p-1.5 rounded-full border-4 border-white dark:border-slate-800 shadow-sm" title="Seguindo">
-                  <UserPlus size={16} className="text-white" />
+                  <UserPlus size={20} className="text-white" />
                 </div>
               )}
             </div>
 
-            <div className="flex-1 text-center md:text-left mb-2">
-              <h1 className="text-3xl font-bold text-slate-900 dark:text-white mb-1">
+            <div className="flex-1 text-center md:text-left mb-2 min-w-0">
+              <h1 className="text-3xl md:text-4xl font-bold text-slate-900 dark:text-white mb-2">
                 {profile.name}
               </h1>
               <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 text-sm text-slate-600 dark:text-slate-400">

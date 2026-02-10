@@ -421,6 +421,23 @@ export class UserService {
         fs.mkdirSync(uploadDir, { recursive: true });
       }
 
+      // Delete old header image if exists
+      if (user.headerImage) {
+        try {
+          // Extract filename from the headerImage path
+          const oldImagePath = user.headerImage.replace('/api/uploads/headers/', '');
+          const oldFilePath = path.join(uploadDir, oldImagePath);
+          
+          if (fs.existsSync(oldFilePath)) {
+            fs.unlinkSync(oldFilePath);
+            console.log(`[UserService] Deleted old header image: ${oldFilePath}`);
+          }
+        } catch (error) {
+          console.error('[UserService] Error deleting old header image:', error);
+          // Continue with the update even if deletion fails
+        }
+      }
+
       const fileName = `${userId}_${Date.now()}_${headerImage.originalname}`;
       const filePath = path.join(uploadDir, fileName);
 
