@@ -420,7 +420,7 @@ const ProfilePage: React.FC = () => {
                 className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
               />
             ) : (
-              <div className="w-full h-full bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600"></div>
+              <div className="w-full h-full bg-gradient-to-r from-blue-600 via-indigo-600 to-primary-600"></div>
             )}
 
             <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent"></div>
@@ -961,7 +961,7 @@ const ProfilePage: React.FC = () => {
                     <span className="text-sm font-medium text-slate-500 dark:text-slate-400">Plano</span>
                   </div>
                   <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium border ${user?.role === 'admin'
-                    ? 'bg-purple-50 dark:bg-purple-900/20 border-purple-100 dark:border-purple-800 text-purple-700 dark:text-purple-300'
+                    ? 'bg-primary-50 dark:bg-primary-900/20 border-primary-100 dark:border-primary-800 text-primary-700 dark:text-primary-300'
                     : user?.role === 'client'
                       ? 'bg-emerald-50 dark:bg-emerald-900/20 border-emerald-100 dark:border-emerald-800 text-emerald-700 dark:text-emerald-300'
                       : 'bg-blue-50 dark:bg-blue-900/20 border-blue-100 dark:border-blue-800 text-blue-700 dark:text-blue-300'
@@ -1094,7 +1094,7 @@ const ProfilePage: React.FC = () => {
                                 {reward.type === 'token' ? (
                                   <TicketIcon className="h-4 w-4 text-amber-600 dark:text-amber-400" />
                                 ) : reward.type === 'badge' ? (
-                                  <TrophyIcon className="h-4 w-4 text-purple-600 dark:text-purple-400" />
+                                  <TrophyIcon className="h-4 w-4 text-primary-600 dark:text-primary-400" />
                                 ) : isPackage ? (
                                   <ShoppingBagIcon className="h-4 w-4 text-rose-500" />
                                 ) : isRole ? (

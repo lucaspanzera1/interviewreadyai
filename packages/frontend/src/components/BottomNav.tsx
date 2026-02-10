@@ -44,9 +44,11 @@ const Sidebar: React.FC = () => {
     const location = useLocation();
     const { user, logout } = useAuth();
     const { isCollapsed, toggleCollapsed, isMobileOpen, setIsMobileOpen } = useSidebar();
-    const { resolvedTheme, toggleTheme } = useTheme();
+    const { theme, resolvedTheme, toggleTheme } = useTheme();
     const sidebarRef = useRef<HTMLDivElement>(null);
     const { isSearchOpen, closeSearch } = useSearchModal();
+
+    const logoSrc = theme.includes('orange') ? '/logo-orange.png' : '/logo.png';
 
     // Close mobile menu when clicking outside
     useEffect(() => {
@@ -120,7 +122,7 @@ const Sidebar: React.FC = () => {
         <div className="flex flex-col h-full">
             {/* Logo */}
             <div className={`flex items-center py-6 border-b border-subtle dark:border-slate-800 transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] ${isCollapsed ? 'justify-center px-2' : 'px-4'}`}>
-                <img src="/logo.png" alt="TreinaVaga" className="h-12 w-12 object-contain shrink-0" />
+                <img src={logoSrc} alt="TreinaVaga" className="h-12 w-12 object-contain shrink-0" />
                 <div className={`overflow-hidden whitespace-nowrap transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] ${isCollapsed ? 'max-w-0 opacity-0' : 'max-w-[200px] opacity-100'}`}>
                     <span className="text-base font-bold bg-clip-text text-transparent bg-gradient-to-r from-slate-900 to-slate-600 dark:from-white dark:to-slate-300 tracking-tight pl-3 block">
                         TreinaVaga<span className="text-primary-600 dark:text-primary-400">AI</span>
@@ -164,7 +166,7 @@ const Sidebar: React.FC = () => {
                                     <span className="text-sm pl-3">{item.name}</span>
                                     {/* @ts-ignore */}
                                     {item.badge && (
-                                        <span className="ml-2 text-[10px] px-1.5 py-0.5 rounded shadow-sm font-bold bg-purple-100 text-purple-700 dark:bg-purple-900/50 dark:text-purple-400 border border-purple-200 dark:border-purple-700/50 uppercase tracking-wide">
+                                        <span className="ml-2 text-[10px] px-1.5 py-0.5 rounded shadow-sm font-bold bg-primary-100 text-primary-700 dark:bg-primary-900/50 dark:text-primary-400 border border-primary-200 dark:border-primary-700/50 uppercase tracking-wide">
                                             {/* @ts-ignore */}
                                             {item.badge}
                                         </span>

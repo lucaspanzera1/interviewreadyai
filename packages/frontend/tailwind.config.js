@@ -10,17 +10,17 @@ export default {
       colors: {
         // TreinaVaga: Violet Evolution Palette
         primary: {
-          50: '#f3e8ff',
-          100: '#e9d5ff',
-          200: '#d8b4fe',
-          300: '#c084fc',
-          400: '#a855f7',
-          500: '#8a2be2', // Light Mode Hero
-          600: '#7f00ff', // Vivid Purple
-          700: '#6a0dad', // Dark Mode Deep
-          800: '#5d00b8',
-          900: '#4c1d95',
-          950: '#2e1065',
+          50: 'rgb(var(--color-primary-50) / <alpha-value>)',
+          100: 'rgb(var(--color-primary-100) / <alpha-value>)',
+          200: 'rgb(var(--color-primary-200) / <alpha-value>)',
+          300: 'rgb(var(--color-primary-300) / <alpha-value>)',
+          400: 'rgb(var(--color-primary-400) / <alpha-value>)',
+          500: 'rgb(var(--color-primary-500) / <alpha-value>)', // Light Mode Hero
+          600: 'rgb(var(--color-primary-600) / <alpha-value>)', // Vivid Purple
+          700: 'rgb(var(--color-primary-700) / <alpha-value>)', // Dark Mode Deep
+          800: 'rgb(var(--color-primary-800) / <alpha-value>)',
+          900: 'rgb(var(--color-primary-900) / <alpha-value>)',
+          950: 'rgb(var(--color-primary-950) / <alpha-value>)',
         },
         // Secondary Colors (Feedback & Accents)
         success: {
@@ -53,9 +53,9 @@ export default {
           500: '#9089b0',
           600: '#70698f',
           700: '#585270',
-          800: '#1a1a2e', // Dark Mode Background
-          900: '#121217', // Deeper Background
-          950: '#0a0a0d',
+          800: 'rgb(var(--color-slate-800) / <alpha-value>)', // Dark Mode Background
+          900: 'rgb(var(--color-slate-900) / <alpha-value>)', // Deeper Background
+          950: 'rgb(var(--color-slate-950) / <alpha-value>)',
         }
       },
       fontFamily: {

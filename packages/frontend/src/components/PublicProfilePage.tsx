@@ -144,7 +144,7 @@ const PublicProfilePage: React.FC = () => {
               className="w-full h-full object-cover"
             />
           ) : (
-            <div className="w-full h-full bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600"></div>
+            <div className="w-full h-full bg-gradient-to-r from-blue-600 via-indigo-600 to-primary-600"></div>
           )}
           {/* Overlay para melhorar legibilidade do texto */}
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent"></div>

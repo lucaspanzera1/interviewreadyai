@@ -13,11 +13,12 @@ import {
     ComputerDesktopIcon,
     ClockIcon,
     EyeIcon,
-    EyeSlashIcon
+    EyeSlashIcon,
+    FireIcon
 } from '@heroicons/react/24/outline';
 
 const SettingsPage: React.FC = () => {
-    const { theme, setTheme } = useTheme(); // Assuming ThemeContext exposes usage like this, checking ThemeContext usage in BottomNav shows: resolvedTheme, toggleTheme. Wait, let me re-check usage in BottomNav.
+    const { theme, setTheme } = useTheme();
     const { user, refreshUser } = useAuth();
     const { showToast } = useToast();
 
@@ -57,7 +58,7 @@ const SettingsPage: React.FC = () => {
             setIsProfilePublic(checked);
             await refreshUser(); // Refresh user data to update context
             showToast(
-                `Perfil ${checked ? 'público' : 'privado'} configurado com sucesso!`, 
+                `Perfil ${checked ? 'público' : 'privado'} configurado com sucesso!`,
                 'success'
             );
         } catch (error) {
@@ -68,7 +69,7 @@ const SettingsPage: React.FC = () => {
         }
     };
 
-    const handleThemeChange = (newTheme: 'light' | 'dark' | 'system') => {
+    const handleThemeChange = (newTheme: 'light' | 'dark' | 'system' | 'dark-orange' | 'light-orange') => {
         setTheme(newTheme);
     };
 
@@ -100,7 +101,7 @@ const SettingsPage: React.FC = () => {
                         </p>
                     </div>
                     <div className="p-6">
-                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                             <button
                                 onClick={() => handleThemeChange('light')}
                                 className={`flex flex-col items-center p-4 border rounded-xl transition-all ${theme === 'light'
@@ -120,6 +121,26 @@ const SettingsPage: React.FC = () => {
                             >
                                 <MoonIcon className="w-8 h-8 mb-3" />
                                 <span className="font-medium">Escuro</span>
+                            </button>
+                            <button
+                                onClick={() => handleThemeChange('dark-orange')}
+                                className={`flex flex-col items-center p-4 border rounded-xl transition-all ${theme === 'dark-orange'
+                                    ? 'border-orange-500 bg-orange-50 dark:bg-orange-900/10 text-orange-700 dark:text-orange-500 ring-1 ring-orange-500'
+                                    : 'border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600'
+                                    }`}
+                            >
+                                <FireIcon className="w-8 h-8 mb-3 text-orange-500" />
+                                <span className="font-medium">Laranja Dark</span>
+                            </button>
+                            <button
+                                onClick={() => handleThemeChange('light-orange')}
+                                className={`flex flex-col items-center p-4 border rounded-xl transition-all ${theme === 'light-orange'
+                                    ? 'border-orange-500 bg-orange-50 text-orange-700 ring-1 ring-orange-500'
+                                    : 'border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600'
+                                    }`}
+                            >
+                                <SunIcon className="w-8 h-8 mb-3 text-orange-500" />
+                                <span className="font-medium">Laranja Light</span>
                             </button>
                             <button
                                 onClick={() => handleThemeChange('system')}
@@ -205,24 +226,24 @@ const SettingsPage: React.FC = () => {
                                     Perfil Público
                                 </label>
                                 <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                                    {isProfilePublic 
+                                    {isProfilePublic
                                         ? 'Seu perfil pode ser encontrado e visualizado por outros usuários.'
                                         : 'Seu perfil está privado e não pode ser encontrado por outros usuários.'
                                     }
                                 </p>
                             </div>
                             <label className="relative inline-flex items-center cursor-pointer ml-4">
-                                <input 
-                                    type="checkbox" 
-                                    checked={isProfilePublic} 
+                                <input
+                                    type="checkbox"
+                                    checked={isProfilePublic}
                                     onChange={(e) => handlePrivacyChange(e.target.checked)}
                                     disabled={isUpdatingPrivacy}
-                                    className="sr-only peer" 
+                                    className="sr-only peer"
                                 />
                                 <div className={`w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600 ${isUpdatingPrivacy ? 'opacity-50 cursor-not-allowed' : ''}`}></div>
                             </label>
                         </div>
-                        
+
                         {!isProfilePublic && (
                             <div className="mt-4 p-3 bg-yellow-50 dark:bg-yellow-900/10 border border-yellow-200 dark:border-yellow-800 rounded-lg">
                                 <p className="text-sm text-yellow-800 dark:text-yellow-300">
