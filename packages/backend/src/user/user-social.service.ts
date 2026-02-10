@@ -38,7 +38,7 @@ export class UserSocialService {
     page: number;
     limit: number;
   }> {
-    const { page = 1, limit = 10, email, name, techArea } = searchDto;
+    const { page = 1, limit = 10, email, name, niche } = searchDto;
     const skip = (page - 1) * limit;
 
     // Construir filtros de busca
@@ -52,15 +52,15 @@ export class UserSocialService {
       filters.name = { $regex: name, $options: 'i' };
     }
 
-    if (techArea) {
-      filters.techArea = techArea;
+    if (niche) {
+      filters.niche = niche;
     }
 
     // Buscar usuários
     const [users, total] = await Promise.all([
       this.userModel
         .find(filters)
-        .select('name email picture bio location careerTime techArea techStack linkedinUrl githubUrl')
+        .select('name email picture bio location careerTime niche techStack linkedinUrl githubUrl')
         .skip(skip)
         .limit(limit)
         .lean(),
@@ -86,7 +86,7 @@ export class UserSocialService {
   async getPublicProfile(userId: string, currentUserId: string): Promise<PublicUserDto> {
     const user = await this.userModel
       .findOne({ _id: userId, active: true, isProfilePublic: true })
-      .select('name email picture bio location careerTime techArea techStack linkedinUrl githubUrl headerImage')
+      .select('name email picture bio location careerTime niche techStack linkedinUrl githubUrl headerImage')
       .lean();
 
     if (!user) {
@@ -155,12 +155,12 @@ export class UserSocialService {
       // Seguidores
       this.userFollowModel
         .find({ followingId: userId, active: true })
-        .populate('followerId', 'name picture bio location careerTime techArea')
+        .populate('followerId', 'name picture bio location careerTime niche')
         .lean(),
       // Seguindo
       this.userFollowModel
         .find({ followerId: userId, active: true })
-        .populate('followingId', 'name picture bio location careerTime techArea')
+        .populate('followingId', 'name picture bio location careerTime niche')
         .lean(),
     ]);
 
@@ -228,7 +228,7 @@ export class UserSocialService {
       bio: user.bio,
       location: user.location,
       careerTime: user.careerTime,
-      techArea: user.techArea,
+      niche: user.niche,
       techStack: user.techStack || [],
       linkedinUrl: user.linkedinUrl,
       githubUrl: user.githubUrl,

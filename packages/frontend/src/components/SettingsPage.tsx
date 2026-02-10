@@ -101,57 +101,130 @@ const SettingsPage: React.FC = () => {
                         </p>
                     </div>
                     <div className="p-6">
-                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                            <button
-                                onClick={() => handleThemeChange('light')}
-                                className={`flex flex-col items-center p-4 border rounded-xl transition-all ${theme === 'light'
-                                    ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/10 text-primary-700 dark:text-primary-300 ring-1 ring-primary-500'
-                                    : 'border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600'
-                                    }`}
-                            >
-                                <SunIcon className="w-8 h-8 mb-3" />
-                                <span className="font-medium">Claro</span>
-                            </button>
-                            <button
-                                onClick={() => handleThemeChange('dark')}
-                                className={`flex flex-col items-center p-4 border rounded-xl transition-all ${theme === 'dark'
-                                    ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/10 text-primary-700 dark:text-primary-300 ring-1 ring-primary-500'
-                                    : 'border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600'
-                                    }`}
-                            >
-                                <MoonIcon className="w-8 h-8 mb-3" />
-                                <span className="font-medium">Escuro</span>
-                            </button>
-                            <button
-                                onClick={() => handleThemeChange('dark-orange')}
-                                className={`flex flex-col items-center p-4 border rounded-xl transition-all ${theme === 'dark-orange'
-                                    ? 'border-orange-500 bg-orange-50 dark:bg-orange-900/10 text-orange-700 dark:text-orange-500 ring-1 ring-orange-500'
-                                    : 'border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600'
-                                    }`}
-                            >
-                                <FireIcon className="w-8 h-8 mb-3 text-orange-500" />
-                                <span className="font-medium">Laranja Dark</span>
-                            </button>
-                            <button
-                                onClick={() => handleThemeChange('light-orange')}
-                                className={`flex flex-col items-center p-4 border rounded-xl transition-all ${theme === 'light-orange'
-                                    ? 'border-orange-500 bg-orange-50 text-orange-700 ring-1 ring-orange-500'
-                                    : 'border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600'
-                                    }`}
-                            >
-                                <SunIcon className="w-8 h-8 mb-3 text-orange-500" />
-                                <span className="font-medium">Laranja Light</span>
-                            </button>
-                            <button
-                                onClick={() => handleThemeChange('system')}
-                                className={`flex flex-col items-center p-4 border rounded-xl transition-all ${theme === 'system'
-                                    ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/10 text-primary-700 dark:text-primary-300 ring-1 ring-primary-500'
-                                    : 'border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600'
-                                    }`}
-                            >
-                                <ComputerDesktopIcon className="w-8 h-8 mb-3" />
-                                <span className="font-medium">Sistema</span>
-                            </button>
+                        <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
+                            {[
+                                {
+                                    id: 'light',
+                                    label: 'Claro',
+                                    icon: SunIcon,
+                                    activeBorder: 'border-primary-500',
+                                    activeRing: 'ring-primary-500/20',
+                                    activeText: 'text-primary-700 dark:text-primary-400 shadow-sm',
+                                    preview: (
+                                        <div className="w-full h-full bg-slate-50 flex flex-col gap-2 p-3">
+                                            <div className="h-2 w-2/3 bg-slate-200 rounded-full" />
+                                            <div className="h-2 w-full bg-slate-200 rounded-full opacity-60" />
+                                            <div className="flex-1 bg-white rounded-md border border-slate-200 shadow-sm" />
+                                        </div>
+                                    )
+                                },
+                                {
+                                    id: 'dark',
+                                    label: 'Escuro',
+                                    icon: MoonIcon,
+                                    activeBorder: 'border-primary-500',
+                                    activeRing: 'ring-primary-500/20',
+                                    activeText: 'text-primary-700 dark:text-primary-400',
+                                    preview: (
+                                        <div className="w-full h-full bg-slate-900 flex flex-col gap-2 p-3">
+                                            <div className="h-2 w-2/3 bg-slate-700 rounded-full" />
+                                            <div className="h-2 w-full bg-slate-700 rounded-full opacity-60" />
+                                            <div className="flex-1 bg-slate-800 rounded-md border border-slate-700 shadow-sm" />
+                                        </div>
+                                    )
+                                },
+                                {
+                                    id: 'dark-orange',
+                                    label: 'Laranja Dark',
+                                    icon: FireIcon,
+                                    activeBorder: 'border-orange-500',
+                                    activeRing: 'ring-orange-500/20',
+                                    activeText: 'text-orange-600 dark:text-orange-400',
+                                    preview: (
+                                        <div className="w-full h-full bg-slate-950 flex flex-col gap-2 p-3">
+                                            <div className="h-2 w-2/3 bg-orange-900 rounded-full" />
+                                            <div className="h-2 w-full bg-orange-900/50 rounded-full" />
+                                            <div className="flex-1 bg-slate-900 rounded-md border border-orange-900/30 shadow-sm relative overflow-hidden">
+                                                <div className="absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r from-orange-500 to-red-500" />
+                                            </div>
+                                        </div>
+                                    )
+                                },
+                                {
+                                    id: 'light-orange',
+                                    label: 'Laranja Light',
+                                    icon: SunIcon,
+                                    activeBorder: 'border-orange-500',
+                                    activeRing: 'ring-orange-500/20',
+                                    activeText: 'text-orange-600 dark:text-orange-500',
+                                    preview: (
+                                        <div className="w-full h-full bg-orange-50 flex flex-col gap-2 p-3">
+                                            <div className="h-2 w-2/3 bg-orange-200 rounded-full" />
+                                            <div className="h-2 w-full bg-orange-200/60 rounded-full" />
+                                            <div className="flex-1 bg-white rounded-md border border-orange-100 shadow-sm relative overflow-hidden">
+                                                <div className="absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r from-orange-400 to-amber-400" />
+                                            </div>
+                                        </div>
+                                    )
+                                },
+                                {
+                                    id: 'system',
+                                    label: 'Sistema',
+                                    icon: ComputerDesktopIcon,
+                                    activeBorder: 'border-slate-500',
+                                    activeRing: 'ring-slate-500/20',
+                                    activeText: 'text-slate-700 dark:text-slate-300',
+                                    preview: (
+                                        <div className="w-full h-full relative flex rounded-md overflow-hidden">
+                                            <div className="w-1/2 h-full bg-slate-50 border-r border-slate-200" />
+                                            <div className="w-1/2 h-full bg-slate-900" />
+                                            <div className="absolute inset-0 flex items-center justify-center">
+                                                <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm rounded-lg p-1.5 shadow-sm border border-slate-200 dark:border-slate-700">
+                                                    <ComputerDesktopIcon className="w-4 h-4 text-slate-500 dark:text-slate-400" />
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )
+                                }
+                            ].map((option) => (
+                                <button
+                                    key={option.id}
+                                    onClick={() => handleThemeChange(option.id as any)}
+                                    className={`
+                                        group relative flex flex-col overflow-hidden rounded-xl border-2 text-left transition-all duration-200 ease-in-out
+                                        ${theme === option.id
+                                            ? `${option.activeBorder} ${option.activeRing} ring-4 scale-[1.02] shadow-md`
+                                            : 'border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 hover:shadow-lg hover:-translate-y-0.5'
+                                        }
+                                    `}
+                                >
+                                    <div className="h-24 w-full bg-slate-100 dark:bg-slate-900/50 relative border-b border-inherit">
+                                        {option.preview}
+                                        {theme === option.id && (
+                                            <div className="absolute top-2 right-2 animate-in fade-in zoom-in duration-200">
+                                                <div className={`rounded-full p-0.5 shadow-sm ${option.id.includes('orange') ? 'bg-orange-500 text-white' : 'bg-primary-500 text-white'
+                                                    }`}>
+                                                    <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                                                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                                                    </svg>
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+                                    <div className="p-3">
+                                        <div className="flex items-center gap-2">
+                                            <option.icon className={`w-4 h-4 transition-colors ${theme === option.id
+                                                    ? option.id.includes('orange') ? 'text-orange-500' : 'text-primary-500'
+                                                    : 'text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-300'
+                                                }`} />
+                                            <span className={`text-sm font-medium transition-colors ${theme === option.id ? option.activeText : 'text-slate-600 dark:text-slate-400 group-hover:text-slate-900 dark:group-hover:text-slate-200'
+                                                }`}>
+                                                {option.label}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </button>
+                            ))}
                         </div>
                     </div>
                 </div>

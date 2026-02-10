@@ -33,6 +33,10 @@ const NICHE_LABELS: Record<string, string> = {
   'saude': 'Saúde',
   'vendas': 'Vendas',
   'marketing': 'Marketing',
+  'juridico': 'Jurídico',
+  'engenharia': 'Engenharia',
+  'design': 'Design',
+  'produto': 'Produto',
   'outro': 'Outro'
 };
 
@@ -145,10 +149,20 @@ const PublicProfilePage: React.FC = () => {
               className="w-full h-full object-cover"
             />
           ) : (
-            <div className="w-full h-full bg-gradient-to-r from-blue-600 via-indigo-600 to-primary-600"></div>
+            <div className="w-full h-full bg-slate-50 dark:bg-slate-900 relative overflow-hidden group">
+              <div className="absolute inset-0 bg-gradient-to-br from-indigo-50/80 via-white to-blue-50/80 dark:from-slate-900 dark:via-slate-900 dark:to-slate-800"></div>
+
+              {/* Abstract Shapes */}
+              <div className="absolute top-0 right-0 -mr-32 -mt-32 w-96 h-96 bg-indigo-500/10 dark:bg-primary-500/20 rounded-full blur-3xl group-hover:bg-indigo-500/15 dark:group-hover:bg-primary-500/30 transition-all duration-1000"></div>
+              <div className="absolute bottom-0 left-0 -ml-32 -mb-32 w-96 h-96 bg-fuchsia-500/10 dark:bg-purple-500/20 rounded-full blur-3xl group-hover:bg-fuchsia-500/15 dark:group-hover:bg-purple-500/30 transition-all duration-1000"></div>
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-gradient-to-tr from-indigo-500/5 via-transparent to-purple-500/5 dark:from-blue-500/10 dark:to-pink-500/10"></div>
+
+              {/* Grid Pattern */}
+              <div className="absolute inset-0 bg-[linear-gradient(to_right,#6366f112_1px,transparent_1px),linear-gradient(to_bottom,#6366f112_1px,transparent_1px)] dark:bg-[linear-gradient(to_right,#ffffff08_1px,transparent_1px),linear-gradient(to_bottom,#ffffff08_1px,transparent_1px)] bg-[size:24px_24px]"></div>
+            </div>
           )}
           {/* Overlay para melhorar legibilidade do texto */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent"></div>
+          <div className="absolute inset-0 bg-gradient-to-t from-black/10 via-transparent to-transparent dark:from-black/60 dark:via-black/20"></div>
         </div>
         <div className="px-6 pb-6">
           <div className="relative flex flex-col md:flex-row items-end -mt-20 md:-mt-24 mb-6 gap-6">
@@ -227,7 +241,7 @@ const PublicProfilePage: React.FC = () => {
                 </div>
               )}
 
-              {profile.techStack && profile.techStack.length > 0 && (
+              {profile.niche === 'tecnologia' && profile.techStack && profile.techStack.length > 0 && (
                 <div>
                   <h3 className="text-sm font-semibold text-slate-900 dark:text-white mb-2">Tech Stack</h3>
                   <div className="flex flex-wrap gap-2">
@@ -246,7 +260,7 @@ const PublicProfilePage: React.FC = () => {
 
             <div className="md:w-72 flex-shrink-0 flex flex-col gap-4">
               <div className="flex gap-2">
-                {profile.githubUrl && (
+                {profile.niche === 'tecnologia' && profile.githubUrl && (
                   <a
                     href={profile.githubUrl}
                     target="_blank"

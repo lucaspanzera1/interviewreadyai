@@ -2,10 +2,7 @@
 
 echo "[info] Instalando novas dependêcias"
 pnpm install
-cd packages/backend/
-npm run migrate:techarea-to-niche
-sleep 1
-cd ../../
+
 echo "[info] Reiniciando aplicação..."
 launchctl stop com.treinavaga.app
 sleep 2

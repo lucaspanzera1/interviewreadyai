@@ -8,6 +8,7 @@ interface ThemeContextType {
     resolvedTheme: 'light' | 'dark';
     setTheme: (theme: Theme) => void;
     toggleTheme: () => void;
+    cycleTheme: () => void;
 }
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
@@ -127,8 +128,21 @@ export const ThemeProvider: React.FC<{ children: ReactNode }> = ({ children }) =
         applyTheme(newTheme, true);
     };
 
+    const cycleTheme = () => {
+        let newTheme: Theme;
+        // Cycle: system -> dark -> light -> dark-orange -> light-orange -> system
+        if (theme === 'system') newTheme = 'dark';
+        else if (theme === 'dark') newTheme = 'light';
+        else if (theme === 'light') newTheme = 'dark-orange';
+        else if (theme === 'dark-orange') newTheme = 'light-orange';
+        else newTheme = 'system';
+
+        setThemeState(newTheme);
+        applyTheme(newTheme, true);
+    };
+
     return (
-        <ThemeContext.Provider value={{ theme, resolvedTheme, setTheme, toggleTheme }}>
+        <ThemeContext.Provider value={{ theme, resolvedTheme, setTheme, toggleTheme, cycleTheme }}>
             {children}
         </ThemeContext.Provider>
     );

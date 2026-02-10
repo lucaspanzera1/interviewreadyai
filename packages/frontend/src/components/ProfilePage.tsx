@@ -17,13 +17,13 @@ import {
   BriefcaseIcon,
   MapPinIcon,
   DocumentTextIcon,
-  CpuChipIcon,
   AcademicCapIcon,
   ChartBarIcon,
   Cog6ToothIcon,
   GiftIcon,
   TrophyIcon,
-  ShoppingBagIcon
+  ShoppingBagIcon,
+  ClockIcon
 } from '@heroicons/react/24/outline';
 import ActivityHeatmap from './ActivityHeatmap';
 import SocialConnectionsComponent from './SocialConnectionsComponent';
@@ -402,8 +402,14 @@ const ProfilePage: React.FC = () => {
     { value: 'saude', label: 'Saúde' },
     { value: 'vendas', label: 'Vendas' },
     { value: 'marketing', label: 'Marketing' },
+    { value: 'juridico', label: 'Jurídico' },
+    { value: 'engenharia', label: 'Engenharia' },
+    { value: 'design', label: 'Design' },
+    { value: 'produto', label: 'Produto' },
     { value: 'outro', label: 'Outro' },
   ];
+
+  const isTechNiche = (isEditingProfessional ? formData.niche : user?.niche) === 'tecnologia';
 
   return (
     <>
@@ -421,10 +427,20 @@ const ProfilePage: React.FC = () => {
                 className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
               />
             ) : (
-              <div className="w-full h-full bg-gradient-to-r from-blue-600 via-indigo-600 to-primary-600"></div>
+              <div className="w-full h-full bg-slate-50 dark:bg-slate-900 relative overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-br from-indigo-50/80 via-white to-blue-50/80 dark:from-slate-900 dark:via-slate-900 dark:to-slate-800"></div>
+
+                {/* Abstract Shapes */}
+                <div className="absolute top-0 right-0 -mr-32 -mt-32 w-96 h-96 bg-indigo-500/10 dark:bg-primary-500/20 rounded-full blur-3xl group-hover:bg-indigo-500/15 dark:group-hover:bg-primary-500/30 transition-all duration-1000"></div>
+                <div className="absolute bottom-0 left-0 -ml-32 -mb-32 w-96 h-96 bg-fuchsia-500/10 dark:bg-purple-500/20 rounded-full blur-3xl group-hover:bg-fuchsia-500/15 dark:group-hover:bg-purple-500/30 transition-all duration-1000"></div>
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-gradient-to-tr from-indigo-500/5 via-transparent to-purple-500/5 dark:from-blue-500/10 dark:to-pink-500/10"></div>
+
+                {/* Grid Pattern */}
+                <div className="absolute inset-0 bg-[linear-gradient(to_right,#6366f112_1px,transparent_1px),linear-gradient(to_bottom,#6366f112_1px,transparent_1px)] dark:bg-[linear-gradient(to_right,#ffffff08_1px,transparent_1px),linear-gradient(to_bottom,#ffffff08_1px,transparent_1px)] bg-[size:24px_24px]"></div>
+              </div>
             )}
 
-            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent"></div>
+            <div className="absolute inset-0 bg-gradient-to-t from-black/10 via-transparent to-transparent dark:from-black/60 dark:via-black/20"></div>
 
             {/* Header Edit Controls */}
             <div className="absolute top-4 right-4 z-20 flex flex-col items-end">
@@ -633,7 +649,7 @@ const ProfilePage: React.FC = () => {
                   </div>
 
                   {/* Links */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className={`grid grid-cols-1 ${user?.niche === 'tecnologia' ? 'md:grid-cols-2' : ''} gap-4`}>
                     <div>
                       <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                         LinkedIn
@@ -657,29 +673,31 @@ const ProfilePage: React.FC = () => {
                         </div>
                       )}
                     </div>
-                    <div>
-                      <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                        GitHub
-                      </label>
-                      {isEditingPersonal ? (
-                        <input
-                          type="url"
-                          name="githubUrl"
-                          value={formData.githubUrl}
-                          onChange={handleInputChange}
-                          className="block w-full px-4 py-2 text-sm bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:border-primary-500 dark:text-white"
-                        />
-                      ) : (
-                        <div className="flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 rounded-md">
-                          <GitHubIcon className="h-5 w-5 text-[#24292f] dark:text-white" />
-                          {user?.githubUrl ? (
-                            <a href={user.githubUrl} target="_blank" rel="noopener noreferrer" className="text-primary-600 dark:text-primary-400 hover:underline text-sm font-medium">
-                              {extractUsername(user.githubUrl)}
-                            </a>
-                          ) : <span className="text-slate-500 text-sm">N/A</span>}
-                        </div>
-                      )}
-                    </div>
+                    {user?.niche === 'tecnologia' && (
+                      <div>
+                        <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                          GitHub
+                        </label>
+                        {isEditingPersonal ? (
+                          <input
+                            type="url"
+                            name="githubUrl"
+                            value={formData.githubUrl}
+                            onChange={handleInputChange}
+                            className="block w-full px-4 py-2 text-sm bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:border-primary-500 dark:text-white"
+                          />
+                        ) : (
+                          <div className="flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 rounded-md">
+                            <GitHubIcon className="h-5 w-5 text-[#24292f] dark:text-white" />
+                            {user?.githubUrl ? (
+                              <a href={user.githubUrl} target="_blank" rel="noopener noreferrer" className="text-primary-600 dark:text-primary-400 hover:underline text-sm font-medium">
+                                {extractUsername(user.githubUrl)}
+                              </a>
+                            ) : <span className="text-slate-500 text-sm">N/A</span>}
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </div>
 
                 </div>
@@ -746,7 +764,7 @@ const ProfilePage: React.FC = () => {
                       <div className="flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 rounded-md">
                         <div className="p-1 bg-green-100 dark:bg-green-900/30 rounded text-green-600 dark:text-green-400">
                           <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
                           </svg>
                         </div>
                         <span className="text-slate-700 dark:text-slate-200 font-medium text-sm">
@@ -813,10 +831,10 @@ const ProfilePage: React.FC = () => {
               </div>
             </div>
 
-            {/* 2. PROFESSIONAL PROFILE CARD (NEW SECTION) */}
+            {/* 2. PROFESSIONAL DATA CARD */}
             <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg shadow-sm">
               <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
-                <h2 className="text-base font-semibold text-slate-900 dark:text-white">Perfil Profissional</h2>
+                <h2 className="text-base font-semibold text-slate-900 dark:text-white">Dados Profissionais</h2>
                 {!isEditingProfessional ? (
                   <button
                     onClick={() => setIsEditingProfessional(true)}
@@ -847,89 +865,106 @@ const ProfilePage: React.FC = () => {
                 )}
               </div>
               <div className="p-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                  {/* Tech Area */}
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                      Nicho
-                    </label>
-                    {isEditingProfessional ? (
-                      <select
-                        name="niche"
-                        value={formData.niche}
-                        onChange={handleInputChange}
-                        className="block w-full px-4 py-2 text-sm bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:border-primary-500 dark:text-white"
-                      >
-                        <option value="">Selecione...</option>
-                        {nicheOptions.map(opt => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
-                      </select>
-                    ) : (
-                      <div className="text-base font-medium text-slate-900 dark:text-white flex items-center gap-2">
-                        <AcademicCapIcon className="w-5 h-5 text-primary-500" />
-                        {nicheOptions.find(opt => opt.value === user?.niche)?.label || 'Não informado'}
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Career Time */}
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                      Experiência
-                    </label>
-                    {isEditingProfessional ? (
-                      <select
-                        name="careerTime"
-                        value={formData.careerTime}
-                        onChange={handleInputChange}
-                        className="block w-full px-4 py-2 text-sm bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:border-primary-500 dark:text-white"
-                      >
-                        <option value="">Selecione...</option>
-                        {careerTimeOptions.map(opt => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
-                      </select>
-                    ) : (
-                      <div className="text-base font-medium text-slate-900 dark:text-white flex items-center gap-2">
-                        <BriefcaseIcon className="w-5 h-5 text-primary-500" />
-                        {careerTimeOptions.find(opt => opt.value === user?.careerTime)?.label || 'Não informado'}
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                {/* Tech Stack */}
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-3 flex items-center gap-2">
-                    <CpuChipIcon className="w-4 h-4" />
-                    Stack e Tecnologias
-                  </label>
-                  {isEditingProfessional ? (
-                    <div className="flex flex-wrap gap-2 max-h-[300px] overflow-y-auto p-2 border border-slate-200 dark:border-slate-700 rounded-xl">
-                      {TECH_STACK_OPTIONS.map((tech) => {
-                        const isSelected = formData.techStack.includes(tech);
-                        return (
-                          <button
-                            key={tech}
-                            onClick={() => handleTechStackToggle(tech)}
-                            className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-200
-                              ${isSelected
-                                ? 'bg-primary-600 text-white shadow-sm shadow-primary-500/30'
-                                : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
-                              }`}
-                          >
-                            {tech}
-                          </button>
-                        );
-                      })}
-                    </div>
-                  ) : (
-                    <div className="flex flex-wrap gap-2">
-                      {user?.techStack && user.techStack.length > 0 ? (
-                        user.techStack.map((tech, i) => (
-                          <span key={i} className="px-3 py-1 bg-primary-600 text-white shadow-sm shadow-primary-500/30 rounded-full text-xs font-medium">
-                            {tech}
-                          </span>
-                        ))
+                <div className="space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {/* Area/Niche */}
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                        Área de Atuação
+                      </label>
+                      {isEditingProfessional ? (
+                        <select
+                          name="niche"
+                          value={formData.niche}
+                          onChange={handleInputChange}
+                          className="block w-full px-4 py-2 text-sm bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:border-primary-500 dark:text-white"
+                        >
+                          <option value="">Selecione...</option>
+                          {nicheOptions.map((option) => (
+                            <option key={option.value} value={option.value}>
+                              {option.label}
+                            </option>
+                          ))}
+                        </select>
                       ) : (
-                        <span className="text-slate-500 text-sm">Nenhuma tecnologia listada</span>
+                        <div className="flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 rounded-md">
+                          <BriefcaseIcon className="h-5 w-5 text-slate-400 dark:text-slate-500" />
+                          <span className="text-slate-700 dark:text-slate-200 font-medium text-sm">
+                            {nicheOptions.find(opt => opt.value === user?.niche)?.label || user?.niche || 'Não informado'}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Career Time */}
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                        {isTechNiche ? 'Experiência na área tech' : 'Experiência profissional'}
+                      </label>
+                      {isEditingProfessional ? (
+                        <select
+                          name="careerTime"
+                          value={formData.careerTime}
+                          onChange={handleInputChange}
+                          className="block w-full px-4 py-2 text-sm bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:border-primary-500 dark:text-white"
+                        >
+                          <option value="">Selecione...</option>
+                          {careerTimeOptions.map((option) => (
+                            <option key={option.value} value={option.value}>
+                              {option.label}
+                            </option>
+                          ))}
+                        </select>
+                      ) : (
+                        <div className="flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 rounded-md">
+                          <ClockIcon className="h-5 w-5 text-slate-400 dark:text-slate-500" />
+                          <span className="text-slate-700 dark:text-slate-200 font-medium text-sm">
+                            {careerTimeOptions.find(opt => opt.value === user?.careerTime)?.label || user?.careerTime || 'Não informado'}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Tech Stack - Only show if niche is tecnologia */}
+                  {isTechNiche && (
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                        Tech Stack
+                      </label>
+                      {isEditingProfessional ? (
+                        <div className="flex flex-wrap gap-2 p-4 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl max-h-60 overflow-y-auto">
+                          {TECH_STACK_OPTIONS.map((tech) => {
+                            const isSelected = formData.techStack.includes(tech);
+                            return (
+                              <button
+                                key={tech}
+                                onClick={() => handleTechStackToggle(tech)}
+                                className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-all ${isSelected
+                                  ? 'bg-primary-600 text-white shadow-md shadow-primary-600/20'
+                                  : 'bg-white dark:bg-slate-700 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-600 hover:border-primary-300'
+                                  }`}
+                              >
+                                {tech}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      ) : (
+                        <div className="flex flex-wrap gap-2">
+                          {user?.techStack && user.techStack.length > 0 ? (
+                            user.techStack.map((tech, index) => (
+                              <span
+                                key={index}
+                                className="px-3 py-1 bg-slate-50 dark:bg-slate-800/50 text-slate-700 dark:text-slate-300 text-xs font-medium rounded-lg border border-slate-200 dark:border-slate-700"
+                              >
+                                {tech}
+                              </span>
+                            ))
+                          ) : (
+                            <span className="text-slate-500 text-sm italic">Nenhuma tecnologia selecionada</span>
+                          )}
+                        </div>
                       )}
                     </div>
                   )}
