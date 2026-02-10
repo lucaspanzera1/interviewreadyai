@@ -24,6 +24,10 @@ export interface PublicUser {
   followingCount: number;
   isFollowing: boolean;
   quizStats: QuizStats;
+  activityData: Array<{
+    date: string;
+    count: number;
+  }>;
 }
 
 export interface UserConnections {

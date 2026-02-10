@@ -59,6 +59,10 @@ export class PublicUserDto {
     bestScore: number;
     totalTimeSpent: number;
   };
+  activityData: Array<{
+    date: string;
+    count: number;
+  }>;
 }
 
 export class UserConnectionsDto {

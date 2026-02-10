@@ -17,6 +17,7 @@ export class EmailService {
         context: {
           name: name,
           email: email,
+          appUrl: process.env.FRONTEND_URL || 'https://app.treinavaga.ai',
           year: new Date().getFullYear(),
         },
       });

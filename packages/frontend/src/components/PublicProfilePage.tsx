@@ -15,6 +15,7 @@ import { socialApi, PublicUser, UserConnections } from '../lib/socialApi';
 import { useAuth } from '../contexts/AuthContext';
 import { toast } from 'react-toastify';
 import Loading from './Loading';
+import ActivityHeatmap from './ActivityHeatmap';
 
 const CAREER_TIME_LABELS: Record<string, string> = {
   '0-1': 'Menos de 1 ano',
@@ -357,14 +358,28 @@ const PublicProfilePage: React.FC = () => {
 
             <div className="p-6 min-h-[300px]">
               {activeTab === 'profile' && (
-                <div className="flex flex-col items-center justify-center h-full text-center py-10">
-                  <div className="w-16 h-16 bg-slate-50 dark:bg-slate-800 rounded-full flex items-center justify-center mb-4">
-                    <Target size={32} className="text-slate-300" />
-                  </div>
-                  <h3 className="text-lg font-medium text-slate-900 dark:text-white">Atividade Recente</h3>
-                  <p className="text-slate-500 dark:text-slate-400 max-w-sm mt-2">
-                    Este usuário ainda não decidiu compartilhar sua atividade recente publicamente.
-                  </p>
+                <div className="py-6">
+                  {profile.activityData && profile.activityData.length > 0 ? (
+                    <div className="space-y-6">
+                      <h3 className="text-lg font-medium text-slate-900 dark:text-white px-4">Atividade Recente</h3>
+                      <div className="px-4 pb-4">
+                        <ActivityHeatmap
+                          data={profile.activityData}
+                          totalActivities={profile.activityData.reduce((acc, curr) => acc + curr.count, 0)}
+                        />
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="flex flex-col items-center justify-center h-full text-center py-10">
+                      <div className="w-16 h-16 bg-slate-50 dark:bg-slate-800 rounded-full flex items-center justify-center mb-4">
+                        <Target size={32} className="text-slate-300" />
+                      </div>
+                      <h3 className="text-lg font-medium text-slate-900 dark:text-white">Atividade Recente</h3>
+                      <p className="text-slate-500 dark:text-slate-400 max-w-sm mt-2">
+                        Este usuário ainda não tem atividades registradas.
+                      </p>
+                    </div>
+                  )}
                 </div>
               )}
 
