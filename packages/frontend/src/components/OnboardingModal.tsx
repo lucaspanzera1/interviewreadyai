@@ -8,14 +8,15 @@ interface OnboardingModalProps {
   onComplete: () => void;
 }
 
-const TECH_AREAS = [
-  { value: 'frontend', label: 'Frontend' },
-  { value: 'backend', label: 'Backend' },
-  { value: 'fullstack', label: 'Fullstack' },
-  { value: 'mobile', label: 'Mobile' },
-  { value: 'devops', label: 'DevOps' },
-  { value: 'data', label: 'Data Science/Analytics' },
-  { value: 'other', label: 'Outro' },
+const NICHOS = [
+  { value: 'tecnologia', label: 'Tecnologia' },
+  { value: 'educacao', label: 'Educação' },
+  { value: 'recursos_humanos', label: 'Recursos Humanos' },
+  { value: 'financeiro', label: 'Financeiro' },
+  { value: 'saude', label: 'Saúde' },
+  { value: 'vendas', label: 'Vendas' },
+  { value: 'marketing', label: 'Marketing' },
+  { value: 'outro', label: 'Outro' },
 ];
 
 const CAREER_TIMES = [
@@ -40,7 +41,7 @@ const OnboardingModal = ({ isOpen, onComplete }: OnboardingModalProps) => {
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState<CompleteOnboardingData>({
     careerTime: '',
-    techArea: '',
+    niche: '',
     techStack: [],
     bio: '',
     location: '',
@@ -182,12 +183,12 @@ const OnboardingModal = ({ isOpen, onComplete }: OnboardingModalProps) => {
                   Selecione sua área de atuação principal
                 </label>
                 <div className="grid grid-cols-2 gap-4">
-                  {TECH_AREAS.map((area) => {
-                    const isSelected = formData.techArea === area.value;
+                  {NICHOS.map((area) => {
+                    const isSelected = formData.niche === area.value;
                     return (
                       <button
                         key={area.value}
-                        onClick={() => setFormData(prev => ({ ...prev, techArea: area.value }))}
+                        onClick={() => setFormData(prev => ({ ...prev, niche: area.value }))}
                         className={`flex flex-col items-center justify-center p-6 rounded-xl border-2 transition-all duration-200 text-center gap-3
                           ${isSelected
                             ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20'
@@ -313,7 +314,7 @@ const OnboardingModal = ({ isOpen, onComplete }: OnboardingModalProps) => {
                 onClick={handleNext}
                 disabled={
                   (currentStep === 1 && !formData.careerTime) ||
-                  (currentStep === 2 && !formData.techArea) ||
+                  (currentStep === 2 && !formData.niche) ||
                   (currentStep === 3 && (formData.techStack?.length || 0) === 0)
                 }
                 className="px-6 py-2.5 bg-primary-600 hover:bg-primary-500 text-white rounded-xl font-medium shadow-lg shadow-primary-600/20 disabled:opacity-50 disabled:cursor-not-allowed transition-all active:scale-95"

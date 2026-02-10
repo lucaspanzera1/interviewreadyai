@@ -6,14 +6,15 @@ import { useAuth } from '../contexts/AuthContext';
 import { toast } from 'react-toastify';
 import Loading from './Loading';
 
-const TECH_AREAS = [
-  { value: 'frontend', label: 'Frontend' },
-  { value: 'backend', label: 'Backend' },
-  { value: 'fullstack', label: 'Fullstack' },
-  { value: 'mobile', label: 'Mobile' },
-  { value: 'devops', label: 'DevOps' },
-  { value: 'data', label: 'Data Science' },
-  { value: 'other', label: 'Outro' }
+const NICHOS = [
+  { value: 'tecnologia', label: 'Tecnologia' },
+  { value: 'educacao', label: 'Educação' },
+  { value: 'recursos_humanos', label: 'Recursos Humanos' },
+  { value: 'financeiro', label: 'Financeiro' },
+  { value: 'saude', label: 'Saúde' },
+  { value: 'vendas', label: 'Vendas' },
+  { value: 'marketing', label: 'Marketing' },
+  { value: 'outro', label: 'Outro' }
 ];
 
 const UserSearchPage: React.FC = () => {
@@ -28,7 +29,7 @@ const UserSearchPage: React.FC = () => {
   const [searchFilters, setSearchFilters] = useState({
     name: '',
     email: '',
-    techArea: ''
+    niche: ''
   });
   const [showFilters, setShowFilters] = useState(false);
 
@@ -64,7 +65,7 @@ const UserSearchPage: React.FC = () => {
 
   // Limpar filtros
   const clearFilters = () => {
-    setSearchFilters({ name: '', email: '', techArea: '' });
+    setSearchFilters({ name: '', email: '', niche: '' });
     setSearchParams({ page: 1, limit: 12 });
   };
 
@@ -156,14 +157,14 @@ const UserSearchPage: React.FC = () => {
               </div>
 
               <div className="md:col-span-4">
-                <label className="label">Área Tech</label>
+                <label className="label">Nicho</label>
                 <select
                   className="input appearance-none"
-                  value={searchFilters.techArea}
-                  onChange={(e) => setSearchFilters({ ...searchFilters, techArea: e.target.value })}
+                  value={searchFilters.niche}
+                  onChange={(e) => setSearchFilters({ ...searchFilters, niche: e.target.value })}
                 >
-                  <option value="">Todas as áreas</option>
-                  {TECH_AREAS.map((area) => (
+                  <option value="">Todos os nichos</option>
+                  {NICHOS.map((area) => (
                     <option key={area.value} value={area.value}>
                       {area.label}
                     </option>
@@ -322,10 +323,10 @@ const UserCard: React.FC<{
             {user.name}
           </h3>
           <div className="flex flex-wrap gap-2 text-xs text-slate-500 dark:text-slate-400 mt-1">
-            {user.techArea && (
+            {user.niche && (
               <span className="flex items-center gap-1">
                 <Briefcase size={12} />
-                <span className="capitalize">{user.techArea}</span>
+                <span className="capitalize">{user.niche}</span>
               </span>
             )}
             {user.location && (

@@ -34,7 +34,7 @@ const CreateFlashcardByLinkPage: React.FC = () => {
             }
 
             // Gerar os flashcards
-            await apiClient.generateJobFlashcard({ 
+            await apiClient.generateJobFlashcard({
                 linkedinUrl: jobLink,
                 nivel: selectedLevel,
                 quantidade_cards: cardCount
@@ -64,7 +64,7 @@ const CreateFlashcardByLinkPage: React.FC = () => {
     return (
         <div className="flex flex-col min-h-full transition-colors duration-300">
             <PageTitle title="Criar Flashcards com IA - TreinaVagaAI" />
-            
+
             {/* Header */}
             <header className="sticky top-0 z-20 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 -mx-4 -mt-4 lg:-mx-8 lg:-mt-8 px-4 lg:px-8 py-4 mb-8">
                 <div className="max-w-4xl mx-auto">
@@ -89,17 +89,17 @@ const CreateFlashcardByLinkPage: React.FC = () => {
                         <div className="relative z-10">
                             <form onSubmit={handleSubmit} className="space-y-6">
                                 {/* Token Info Card */}
-                                <div className="bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-700/50 rounded-xl p-4 mb-6 flex items-start gap-4">
-                                    <div className="p-2 bg-purple-100 dark:bg-purple-900/30 rounded-lg text-purple-600 dark:text-purple-400 shrink-0">
+                                <div className="bg-primary-50 dark:bg-primary-900/20 border border-primary-200 dark:border-primary-700/50 rounded-xl p-4 mb-6 flex items-start gap-4">
+                                    <div className="p-2 bg-primary-100 dark:bg-primary-900/30 rounded-lg text-primary-600 dark:text-primary-400 shrink-0">
                                         <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                         </svg>
                                     </div>
                                     <div className="flex-1">
-                                        <h3 className="text-lg font-bold text-purple-800 dark:text-purple-200">
-                                            Custa 2 Tokens
+                                        <h3 className="text-lg font-bold text-primary-800 dark:text-primary-200">
+                                            Link Detectado
                                         </h3>
-                                        <p className="text-purple-700 dark:text-purple-300 mt-1">
+                                        <p className="text-primary-700 dark:text-primary-300 mt-1">
                                             Você tem <span className="font-bold">{user?.tokens || 0} tokens</span> disponíveis. Cada conjunto de flashcards personalizado custa 2 tokens.
                                         </p>
                                     </div>
@@ -168,11 +168,10 @@ const CreateFlashcardByLinkPage: React.FC = () => {
                                         ].map((level) => (
                                             <label
                                                 key={level.value}
-                                                className={`relative p-4 rounded-xl border-2 cursor-pointer transition-all ${
-                                                    selectedLevel === level.value
+                                                className={`relative p-4 rounded-xl border-2 cursor-pointer transition-all ${selectedLevel === level.value
                                                         ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20'
                                                         : 'border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600'
-                                                }`}
+                                                    }`}
                                             >
                                                 <input
                                                     type="radio"

@@ -499,7 +499,7 @@ export class UserController {
     return {
       hasCompletedOnboarding: userDoc.hasCompletedOnboarding,
       careerTime: userDoc.careerTime,
-      techArea: userDoc.techArea,
+      niche: userDoc.niche,
       techStack: userDoc.techStack,
       bio: userDoc.bio,
       location: userDoc.location,
@@ -569,7 +569,7 @@ export class UserController {
       data: {
         hasCompletedOnboarding: updatedUser.hasCompletedOnboarding,
         careerTime: updatedUser.careerTime,
-        techArea: updatedUser.techArea,
+        niche: updatedUser.niche,
         techStack: updatedUser.techStack,
         bio: updatedUser.bio,
         location: updatedUser.location,
@@ -609,7 +609,7 @@ export class UserController {
       success: true, data: {
         hasCompletedOnboarding: updatedUser.hasCompletedOnboarding,
         careerTime: updatedUser.careerTime,
-        techArea: updatedUser.techArea,
+        niche: updatedUser.niche,
         techStack: updatedUser.techStack,
         bio: updatedUser.bio,
         location: updatedUser.location,

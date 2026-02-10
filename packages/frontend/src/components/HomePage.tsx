@@ -136,19 +136,19 @@ const HomePage: React.FC = () => {
     { label: 'Estatísticas', value: 'Preview', icon: DocumentTextIcon, color: 'indigo', blur: true },
     { label: 'Taxa de Acerto', value: '85%', icon: CheckCircleIcon, color: 'green', blur: true },
     { label: 'Tempo Médio', value: '12min', icon: ClockIcon, color: 'amber', blur: true },
-    { label: 'Evolução', value: '+15%', icon: ArrowTrendingUpIcon, color: 'purple', blur: true },
+    { label: 'Evolução', value: '+15%', icon: ArrowTrendingUpIcon, color: 'primary', blur: true },
   ] : userStats ? [
     // Real User Stats
     { label: 'Simulados', value: (userStats.totalAttempts ?? 0).toString(), icon: DocumentTextIcon, color: 'indigo', blur: false },
     { label: 'Taxa de Acerto', value: `${((userStats.averageScore ?? 0) * 10).toFixed(0)}%`, icon: CheckCircleIcon, color: 'green', blur: false },
     { label: 'Tempo Médio', value: `${Math.floor((userStats.averageTime ?? 0) / 60)}min`, icon: ClockIcon, color: 'amber', blur: false },
-    { label: 'Evolução', value: `${(userStats.evolution ?? 0) >= 0 ? '+' : ''}${(userStats.evolution ?? 0).toFixed(0)}%`, icon: ArrowTrendingUpIcon, color: 'purple', blur: false },
+    { label: 'Evolução', value: `${(userStats.evolution ?? 0) >= 0 ? '+' : ''}${(userStats.evolution ?? 0).toFixed(0)}%`, icon: ArrowTrendingUpIcon, color: 'primary', blur: false },
   ] : [
     // Empty User Stats
     { label: 'Simulados', value: '0', icon: DocumentTextIcon, color: 'indigo', blur: false },
     { label: 'Taxa de Acerto', value: '0%', icon: CheckCircleIcon, color: 'green', blur: false },
     { label: 'Tempo Médio', value: '0min', icon: ClockIcon, color: 'amber', blur: false },
-    { label: 'Evolução', value: '0%', icon: ArrowTrendingUpIcon, color: 'purple', blur: false },
+    { label: 'Evolução', value: '0%', icon: ArrowTrendingUpIcon, color: 'primary', blur: false },
   ];
 
   const quickActions = isGuest ? [
@@ -158,7 +158,7 @@ const HomePage: React.FC = () => {
       icon: SparklesIcon,
       action: () => navigate('/login'),
       primary: true,
-      bg: 'bg-violet-600',
+      bg: 'bg-primary-600',
       text: 'text-white'
     },
     {
@@ -167,8 +167,8 @@ const HomePage: React.FC = () => {
       icon: PlayIcon,
       action: () => navigate('/free-quizzes'),
       primary: false,
-      bg: 'bg-violet-50 dark:bg-violet-900/20',
-      text: 'text-violet-600 dark:text-violet-400'
+      bg: 'bg-primary-50 dark:bg-primary-900/20',
+      text: 'text-primary-600 dark:text-primary-400'
     },
     {
       label: 'Ver Planos Premium',
@@ -213,8 +213,8 @@ const HomePage: React.FC = () => {
       icon: ArrowTrendingUpIcon,
       action: () => navigate('/desempenho'),
       primary: false,
-      bg: 'bg-purple-50 dark:bg-purple-900/20',
-      text: 'text-purple-600 dark:text-purple-400'
+      bg: 'bg-primary-50 dark:bg-primary-900/20',
+      text: 'text-primary-600 dark:text-primary-400'
     },
     {
       label: 'Ranking',
@@ -278,30 +278,30 @@ const HomePage: React.FC = () => {
 
           {/* Guest Hero Section */}
           {isGuest && (
-            <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-violet-50 via-blue-50 to-slate-50 dark:from-violet-950/30 dark:via-blue-950/20 dark:to-slate-900 border border-violet-100 dark:border-violet-900/30 p-8 lg:p-12 mb-8">
+            <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-primary-50 via-blue-50 to-slate-50 dark:from-primary-950/30 dark:via-blue-950/20 dark:to-slate-900 border border-primary-100 dark:border-primary-900/30 p-8 lg:p-12 mb-8">
               {/* Decorative Network Background */}
               <div className="absolute inset-0 opacity-30 dark:opacity-20">
-                <div className="absolute top-10 left-10 w-3 h-3 bg-violet-500 rounded-full animate-pulse"></div>
-                <div className="absolute top-20 right-20 w-2 h-2 bg-violet-400 rounded-full animate-pulse delay-100"></div>
-                <div className="absolute bottom-20 left-1/4 w-2.5 h-2.5 bg-violet-600 rounded-full animate-pulse delay-200"></div>
-                <div className="absolute bottom-10 right-1/3 w-2 h-2 bg-violet-500 rounded-full animate-pulse delay-300"></div>
+                <div className="absolute top-10 left-10 w-3 h-3 bg-primary-500 rounded-full animate-pulse"></div>
+                <div className="absolute top-20 right-20 w-2 h-2 bg-primary-400 rounded-full animate-pulse delay-100"></div>
+                <div className="absolute bottom-20 left-1/4 w-2.5 h-2.5 bg-primary-600 rounded-full animate-pulse delay-200"></div>
+                <div className="absolute bottom-10 right-1/3 w-2 h-2 bg-primary-500 rounded-full animate-pulse delay-300"></div>
                 <svg className="absolute inset-0 w-full h-full" xmlns="http://www.w3.org/2000/svg">
-                  <line x1="10%" y1="20%" x2="80%" y2="30%" stroke="rgb(139, 92, 246)" strokeWidth="1" opacity="0.2" strokeDasharray="4,4" />
-                  <line x1="25%" y1="80%" x2="70%" y2="40%" stroke="rgb(139, 92, 246)" strokeWidth="1" opacity="0.2" strokeDasharray="4,4" />
+                  <line x1="10%" y1="20%" x2="80%" y2="30%" stroke="var(--color-primary-500)" strokeWidth="1" opacity="0.2" strokeDasharray="4,4" />
+                  <line x1="25%" y1="80%" x2="70%" y2="40%" stroke="var(--color-primary-500)" strokeWidth="1" opacity="0.2" strokeDasharray="4,4" />
                 </svg>
               </div>
 
               {/* Content */}
               <div className="relative z-10">
                 <div className="max-w-3xl">
-                  <div className="inline-flex items-center gap-2 px-4 py-2 bg-violet-100 dark:bg-violet-900/30 text-violet-700 dark:text-violet-300 rounded-full text-sm font-semibold mb-6 border border-violet-200 dark:border-violet-800">
+                  <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 rounded-full text-sm font-semibold mb-6 border border-primary-200 dark:border-primary-800">
                     <SparklesIcon className="w-4 h-4" />
                     <span>Bem-vindo ao TreinaVagaAI</span>
                   </div>
 
                   <h1 className="text-4xl lg:text-5xl font-black mb-4 leading-tight">
                     <span className="text-slate-900 dark:text-white">Pronto para dominar sua </span>
-                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-600 to-violet-800 dark:from-violet-400 dark:to-violet-600">
+                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary-600 to-primary-800 dark:from-primary-400 dark:to-primary-600">
                       vaga tech?
                     </span>
                   </h1>
@@ -315,14 +315,14 @@ const HomePage: React.FC = () => {
                   <div className="flex flex-col sm:flex-row gap-4 mb-8">
                     <button
                       onClick={() => navigate('/login')}
-                      className="group px-8 py-4 bg-violet-600 hover:bg-violet-700 text-white rounded-full font-bold text-lg shadow-lg shadow-violet-500/30 hover:shadow-xl hover:shadow-violet-500/40 transition-all duration-300 hover:scale-105 active:scale-95 flex items-center justify-center gap-2"
+                      className="group px-8 py-4 bg-primary-600 hover:bg-primary-700 text-white rounded-full font-bold text-lg shadow-lg shadow-primary-500/30 hover:shadow-xl hover:shadow-primary-500/40 transition-all duration-300 hover:scale-105 active:scale-95 flex items-center justify-center gap-2"
                     >
                       <span>Treinar Agora</span>
                       <ArrowRightOnRectangleIcon className="w-5 h-5 -rotate-45 group-hover:translate-x-1 transition-transform" />
                     </button>
                     <button
                       onClick={() => navigate('/free-quizzes')}
-                      className="px-8 py-4 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-900 dark:text-white rounded-full font-bold text-lg border-2 border-slate-200 dark:border-slate-700 hover:border-violet-300 dark:hover:border-violet-600 transition-all duration-300 hover:scale-105 active:scale-95 flex items-center justify-center gap-2"
+                      className="px-8 py-4 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-900 dark:text-white rounded-full font-bold text-lg border-2 border-slate-200 dark:border-slate-700 hover:border-primary-300 dark:hover:border-primary-600 transition-all duration-300 hover:scale-105 active:scale-95 flex items-center justify-center gap-2"
                     >
                       <PlayIcon className="w-5 h-5" />
                       <span>Quiz Gratuito</span>
@@ -332,19 +332,19 @@ const HomePage: React.FC = () => {
                   {/* Social Proof Stats */}
                   <div className="flex flex-wrap gap-6 lg:gap-8">
                     <div className="flex items-center gap-2">
-                      <div className="text-3xl font-black text-violet-600 dark:text-violet-400">+150</div>
+                      <div className="text-3xl font-black text-primary-600 dark:text-primary-400">+150</div>
                       <div className="text-sm text-slate-600 dark:text-slate-400 font-medium">
                         Stacks<br />Disponíveis
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
-                      <div className="text-3xl font-black text-violet-600 dark:text-violet-400">30s</div>
+                      <div className="text-3xl font-black text-primary-600 dark:text-primary-400">30s</div>
                       <div className="text-sm text-slate-600 dark:text-slate-400 font-medium">
                         Geração<br />Instantânea
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
-                      <div className="text-3xl font-black text-violet-600 dark:text-violet-400">IA</div>
+                      <div className="text-3xl font-black text-primary-600 dark:text-primary-400">IA</div>
                       <div className="text-sm text-slate-600 dark:text-slate-400 font-medium">
                         Feedback<br />Personalizado
                       </div>
@@ -363,9 +363,9 @@ const HomePage: React.FC = () => {
               </h2>
               <div className="grid md:grid-cols-3 gap-6">
                 {/* Feature 1: Simulados IA */}
-                <div className="group bg-white dark:bg-slate-900 border-2 border-dashed border-slate-200 dark:border-slate-800 hover:border-violet-300 dark:hover:border-violet-600 rounded-2xl p-6 transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
-                  <div className="w-14 h-14 bg-violet-100 dark:bg-violet-900/30 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                    <BoltIcon className="w-7 h-7 text-violet-600 dark:text-violet-400" />
+                <div className="group bg-white dark:bg-slate-900 border-2 border-dashed border-slate-200 dark:border-slate-800 hover:border-primary-300 dark:hover:border-primary-600 rounded-2xl p-6 transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
+                  <div className="w-14 h-14 bg-primary-100 dark:bg-primary-900/30 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                    <BoltIcon className="w-7 h-7 text-primary-600 dark:text-primary-400" />
                   </div>
                   <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-2">
                     Simulados com IA
@@ -376,9 +376,9 @@ const HomePage: React.FC = () => {
                 </div>
 
                 {/* Feature 2: Roadmaps */}
-                <div className="group bg-white dark:bg-slate-900 border-2 border-dashed border-slate-200 dark:border-slate-800 hover:border-violet-300 dark:hover:border-violet-600 rounded-2xl p-6 transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
-                  <div className="w-14 h-14 bg-violet-100 dark:bg-violet-900/30 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                    <ArrowTrendingUpIcon className="w-7 h-7 text-violet-600 dark:text-violet-400" />
+                <div className="group bg-white dark:bg-slate-900 border-2 border-dashed border-slate-200 dark:border-slate-800 hover:border-primary-300 dark:hover:border-primary-600 rounded-2xl p-6 transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
+                  <div className="w-14 h-14 bg-primary-100 dark:bg-primary-900/30 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                    <ArrowTrendingUpIcon className="w-7 h-7 text-primary-600 dark:text-primary-400" />
                   </div>
                   <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-2">
                     Roadmaps Focados
@@ -389,9 +389,9 @@ const HomePage: React.FC = () => {
                 </div>
 
                 {/* Feature 3: Flashcards */}
-                <div className="group bg-white dark:bg-slate-900 border-2 border-dashed border-slate-200 dark:border-slate-800 hover:border-violet-300 dark:hover:border-violet-600 rounded-2xl p-6 transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
-                  <div className="w-14 h-14 bg-violet-100 dark:bg-violet-900/30 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                    <DocumentTextIcon className="w-7 h-7 text-violet-600 dark:text-violet-400" />
+                <div className="group bg-white dark:bg-slate-900 border-2 border-dashed border-slate-200 dark:border-slate-800 hover:border-primary-300 dark:hover:border-primary-600 rounded-2xl p-6 transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
+                  <div className="w-14 h-14 bg-primary-100 dark:bg-primary-900/30 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                    <DocumentTextIcon className="w-7 h-7 text-primary-600 dark:text-primary-400" />
                   </div>
                   <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-2">
                     Flashcards SRS
@@ -447,8 +447,8 @@ const HomePage: React.FC = () => {
                         className={`w-full p-4 rounded-xl border transition-all text-left group relative overflow-hidden ${isDisabled
                           ? 'opacity-60 cursor-not-allowed bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-800'
                           : action.primary
-                            ? 'bg-violet-600 border-violet-500 text-white shadow-lg shadow-violet-500/20 hover:bg-violet-700 hover:shadow-xl hover:shadow-violet-500/30'
-                            : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:border-violet-400 dark:hover:border-violet-500'
+                            ? 'bg-primary-600 border-primary-500 text-white shadow-lg shadow-primary-500/20 hover:bg-primary-700 hover:shadow-xl hover:shadow-primary-500/30'
+                            : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:border-primary-400 dark:hover:border-primary-500'
                           }`}
                       >
                         <div className="relative z-10 flex items-center justify-between">
@@ -472,11 +472,11 @@ const HomePage: React.FC = () => {
               </section>
 
               {/* Tip Card */}
-              <div className="p-5 bg-gradient-to-br from-violet-50 to-white dark:from-violet-950/30 dark:to-slate-900 border border-violet-100 dark:border-slate-800 rounded-2xl">
+              <div className="p-5 bg-gradient-to-br from-primary-50 to-white dark:from-primary-950/30 dark:to-slate-900 border border-primary-100 dark:border-slate-800 rounded-2xl">
                 <div className="flex items-start gap-3">
-                  <SparklesIcon className="w-5 h-5 text-violet-500 dark:text-violet-400 mt-0.5 shrink-0" />
+                  <SparklesIcon className="w-5 h-5 text-primary-500 dark:text-primary-400 mt-0.5 shrink-0" />
                   <div>
-                    <p className="text-xs font-bold text-violet-900 dark:text-violet-300 uppercase tracking-wide mb-1">{isGuest ? '💡 Por que criar conta?' : 'Dica Pro'}</p>
+                    <p className="text-xs font-bold text-primary-900 dark:text-primary-300 uppercase tracking-wide mb-1">{isGuest ? '💡 Por que criar conta?' : 'Dica Pro'}</p>
                     <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
                       {isGuest
                         ? 'Acompanhe sua evolução, receba feedback personalizado de IA e tenha acesso a roadmaps completos. Tudo 100% grátis para começar!'
@@ -543,14 +543,14 @@ const HomePage: React.FC = () => {
                 </div>
 
                 {isGuest ? (
-                  <div className="bg-gradient-to-br from-violet-50 via-white to-slate-50 dark:from-violet-950/20 dark:via-slate-900 dark:to-slate-900 border-2 border-dashed border-violet-200 dark:border-violet-900/30 rounded-2xl p-10 text-center relative overflow-hidden">
+                  <div className="bg-gradient-to-br from-primary-50 via-white to-slate-50 dark:from-primary-950/20 dark:via-slate-900 dark:to-slate-900 border-2 border-dashed border-primary-200 dark:border-primary-900/30 rounded-2xl p-10 text-center relative overflow-hidden">
                     {/* Decorative elements */}
-                    <div className="absolute top-0 right-0 w-32 h-32 bg-violet-200/30 dark:bg-violet-800/10 rounded-full blur-3xl"></div>
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-primary-200/30 dark:bg-primary-800/10 rounded-full blur-3xl"></div>
                     <div className="absolute bottom-0 left-0 w-32 h-32 bg-blue-200/30 dark:bg-blue-800/10 rounded-full blur-3xl"></div>
 
                     <div className="relative z-10">
-                      <div className="w-16 h-16 bg-violet-100 dark:bg-violet-900/30 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                        <ChartBarIcon className="w-8 h-8 text-violet-600 dark:text-violet-400" />
+                      <div className="w-16 h-16 bg-primary-100 dark:bg-primary-900/30 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                        <ChartBarIcon className="w-8 h-8 text-primary-600 dark:text-primary-400" />
                       </div>
                       <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2">
                         Acompanhe Sua Evolução
@@ -560,7 +560,7 @@ const HomePage: React.FC = () => {
                       </p>
                       <button
                         onClick={() => navigate('/login')}
-                        className="inline-flex items-center gap-2 px-6 py-3 bg-violet-600 hover:bg-violet-700 text-white font-bold rounded-full transition-all duration-300 hover:scale-105 active:scale-95 shadow-lg shadow-violet-500/30"
+                        className="inline-flex items-center gap-2 px-6 py-3 bg-primary-600 hover:bg-primary-700 text-white font-bold rounded-full transition-all duration-300 hover:scale-105 active:scale-95 shadow-lg shadow-primary-500/30"
                       >
                         <SparklesIcon className="w-5 h-5" />
                         <span>Criar Conta Grátis</span>

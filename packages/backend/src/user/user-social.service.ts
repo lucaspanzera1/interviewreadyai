@@ -9,6 +9,8 @@ import {
   PublicUserDto,
   UserConnectionsDto,
 } from './dto/social.dto';
+import { UserService } from './user.service';
+import { forwardRef, Inject } from '@nestjs/common';
 
 /**
  * Service para funcionalidades de rede social
@@ -23,7 +25,9 @@ export class UserSocialService {
     private readonly userFollowModel: Model<UserFollowDocument>,
     @InjectModel(QuizAttempt.name)
     private readonly quizAttemptModel: Model<QuizAttemptDocument>,
-  ) {}
+    @Inject(forwardRef(() => UserService))
+    private readonly userService: UserService,
+  ) { }
 
   /**
    * Busca usuários com filtros
@@ -39,15 +43,15 @@ export class UserSocialService {
 
     // Construir filtros de busca
     const filters: any = { active: true, isProfilePublic: true };
-    
+
     if (email) {
       filters.email = { $regex: email, $options: 'i' };
     }
-    
+
     if (name) {
       filters.name = { $regex: name, $options: 'i' };
     }
-    
+
     if (techArea) {
       filters.techArea = techArea;
     }
@@ -200,19 +204,26 @@ export class UserSocialService {
       followingCount,
       isFollowing,
       quizStats,
+      combinedActivity,
     ] = await Promise.all([
       this.userFollowModel.countDocuments({ followingId: userId, active: true }),
       this.userFollowModel.countDocuments({ followerId: userId, active: true }),
       this.isFollowing(currentUserId, userId),
       this.getUserQuizStats(userId),
+      this.userService.getCombinedActivity(userId, 365),
     ]);
+
+    const activityData = (combinedActivity || []).map(a => ({
+      date: a.date,
+      count: a.totalActivities
+    }));
 
     return {
       id: userId,
       name: user.name,
       picture: user.picture,
-      headerImage: user.headerImage && !user.headerImage.startsWith('/api/') 
-        ? `/api${user.headerImage}` 
+      headerImage: user.headerImage && !user.headerImage.startsWith('/api/')
+        ? `/api${user.headerImage}`
         : user.headerImage,
       bio: user.bio,
       location: user.location,
@@ -225,6 +236,7 @@ export class UserSocialService {
       followingCount,
       isFollowing,
       quizStats,
+      activityData,
     };
   }
 

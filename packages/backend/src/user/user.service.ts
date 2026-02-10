@@ -300,7 +300,7 @@ export class UserService {
       profile: {
         hasCompletedOnboarding: user.hasCompletedOnboarding,
         careerTime: user.careerTime,
-        techArea: user.techArea,
+        niche: user.niche,
         techStack: user.techStack,
         bio: user.bio,
         location: user.location,

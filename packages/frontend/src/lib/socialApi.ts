@@ -16,7 +16,7 @@ export interface PublicUser {
   bio?: string;
   location?: string;
   careerTime?: string;
-  techArea?: string;
+  niche?: string;
   techStack?: string[];
   linkedinUrl?: string;
   githubUrl?: string;
@@ -24,6 +24,10 @@ export interface PublicUser {
   followingCount: number;
   isFollowing: boolean;
   quizStats: QuizStats;
+  activityData: Array<{
+    date: string;
+    count: number;
+  }>;
 }
 
 export interface UserConnections {
@@ -36,7 +40,7 @@ export interface UserConnections {
 export interface SearchUsersParams {
   email?: string;
   name?: string;
-  techArea?: string;
+  niche?: string;
   page?: number;
   limit?: number;
 }

@@ -10,6 +10,65 @@
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+
+    /* Default Theme (Purple) */
+    --color-primary-50: 243 232 255;
+    --color-primary-100: 233 213 255;
+    --color-primary-200: 216 180 254;
+    --color-primary-300: 192 132 252;
+    --color-primary-400: 168 85 247;
+    --color-primary-500: 138 43 226;
+    --color-primary-600: 127 0 255;
+    --color-primary-700: 106 13 173;
+    --color-primary-800: 93 0 184;
+    /* Default Backgrounds (Slate/Purple Tinted) */
+    --color-slate-800: 26 26 46;
+    /* #1a1a2e */
+    --color-slate-900: 18 18 23;
+    /* #121217 */
+    --color-slate-950: 10 10 13;
+    /* #0a0a0d */
+    --color-primary-900: 76 29 149;
+    --color-primary-950: 46 16 101;
+  }
+
+  /* Orange Theme Override - Gamified Vibe */
+  html.theme-orange {
+    /* Lighter shades: More vibrant/saturated */
+    --color-primary-50: 255 241 230 !important;
+    /* Warm tint */
+    --color-primary-100: 255 224 200 !important;
+    /* Soft peach */
+    --color-primary-200: 255 190 140 !important;
+    /* Melão */
+    --color-primary-300: 255 145 70 !important;
+    /* Bright Tangerine */
+    --color-primary-400: 255 100 20 !important;
+    /* Vivid Orange */
+
+    /* Main brand color: Energetic Orange */
+    --color-primary-500: 255 69 0 !important;
+    /* Orange Red - High Energy */
+
+    /* Darker shades: Deep, rich tones for Dark Mode */
+    --color-primary-600: 220 50 0 !important;
+    /* Deep Orange */
+    --color-primary-700: 180 30 0 !important;
+    /* Rust */
+    --color-primary-800: 140 20 5 !important;
+    /* Dark Rust */
+    --color-primary-900: 100 15 5 !important;
+    /* Very Dark Rust */
+    --color-primary-950: 50 5 0 !important;
+    /* Almost Black/Brown */
+
+    /* Gamified Dark Backgrounds (Warm/Neutral Dark to match Orange) */
+    --color-slate-800: 24 20 18 !important;
+    /* Deep Warm Charcoal */
+    --color-slate-900: 15 10 8 !important;
+    /* Almost Black w/ Orange tint */
+    --color-slate-950: 8 5 4 !important;
+    /* Deepest Warm Dark */
   }
 
   body {
@@ -51,15 +110,15 @@
   .search-modal-enter {
     @apply opacity-0 scale-95 translate-y-4;
   }
-  
+
   .search-modal-enter-active {
     @apply opacity-100 scale-100 translate-y-0 transition-all duration-200 ease-out;
   }
-  
+
   .search-modal-exit {
     @apply opacity-100 scale-100 translate-y-0;
   }
-  
+
   .search-modal-exit-active {
     @apply opacity-0 scale-95 translate-y-4 transition-all duration-150 ease-in;
   }

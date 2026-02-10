@@ -73,17 +73,18 @@ const UserDetailsModal: React.FC<UserDetailsModalProps> = ({ userId, userName, o
     });
   };
 
-  const getTechAreaLabel = (area?: string) => {
+  const getNicheLabel = (niche?: string) => {
     const labels: Record<string, string> = {
-      frontend: 'Frontend',
-      backend: 'Backend',
-      fullstack: 'Full Stack',
-      mobile: 'Mobile',
-      devops: 'DevOps',
-      data: 'Dados/IA',
-      other: 'Outro'
+      tecnologia: 'Tecnologia',
+      educacao: 'Educação',
+      recursos_humanos: 'Recursos Humanos',
+      financeiro: 'Financeiro',
+      saude: 'Saúde',
+      vendas: 'Vendas',
+      marketing: 'Marketing',
+      outro: 'Outro'
     };
-    return area ? labels[area] || area : '-';
+    return niche ? labels[niche] || niche : '-';
   };
 
   const getCareerTimeLabel = (time?: string) => {
@@ -273,8 +274,8 @@ const UserDetailsModal: React.FC<UserDetailsModalProps> = ({ userId, userName, o
                           <span className="text-slate-900 dark:text-white font-medium">{getCareerTimeLabel(details.profile.careerTime)}</span>
                         </div>
                         <div>
-                          <span className="text-xs text-slate-400 block mb-1">Área Técnica</span>
-                          <span className="text-slate-900 dark:text-white font-medium">{getTechAreaLabel(details.profile.techArea)}</span>
+                          <span className="text-xs text-slate-400 block mb-1">Nicho</span>
+                          <span className="text-slate-900 dark:text-white font-medium">{getNicheLabel(details.profile.niche)}</span>
                         </div>
                       </div>
                     </div>

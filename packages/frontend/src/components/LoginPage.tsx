@@ -3,6 +3,8 @@ import { useLocation, Link } from 'react-router-dom';
 import PageTitle from './PageTitle';
 import { useAuth } from '../contexts/AuthContext';
 
+import { useTheme } from '../contexts/ThemeContext';
+
 import AIVisualization3D from './ui/AIVisualization3D';
 
 /**
@@ -10,7 +12,9 @@ import AIVisualization3D from './ui/AIVisualization3D';
  */
 const LoginPage: React.FC = () => {
   const { login, isLoading } = useAuth();
+  const { theme } = useTheme();
   const location = useLocation();
+  const logoSrc = theme.includes('orange') ? '/logo-orange.png' : '/logo.png';
 
   const handleGoogleLogin = async () => {
     try {
@@ -54,7 +58,7 @@ const LoginPage: React.FC = () => {
 
             {/* Logo */}
             <Link to="/" className="flex flex-col items-start gap-4 hover:opacity-80 transition-opacity group">
-              <img src="/logo.png" alt="TreinaVaga" className="h-20 w-20 object-contain group-hover:scale-105 transition-transform duration-300" />
+              <img src={logoSrc} alt="TreinaVaga" className="h-20 w-20 object-contain group-hover:scale-105 transition-transform duration-300" />
               <div>
                 <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-slate-900 to-slate-600 dark:from-white dark:to-slate-300 tracking-tight">
                   TreinaVaga<span className="text-primary-600 dark:text-primary-400">AI</span>
@@ -152,7 +156,7 @@ const LoginPage: React.FC = () => {
 
         {/* Right Side - AI Visualization */}
         <div className="hidden lg:block relative bg-slate-50 dark:bg-slate-900 overflow-hidden transition-colors duration-200">
-          <div className="absolute inset-0 bg-gradient-to-br from-primary-50/50 to-purple-50/30 dark:from-primary-900/20 dark:to-slate-900 z-0 transition-colors duration-200">
+          <div className="absolute inset-0 bg-gradient-to-br from-primary-50/50 to-primary-50/30 dark:from-primary-900/20 dark:to-slate-900 z-0 transition-colors duration-200">
             {/* Subtle grid pattern */}
             <div className="absolute inset-0 opacity-30 dark:opacity-20 bg-[linear-gradient(rgba(139,92,246,0.1)_1px,transparent_1px),linear-gradient(90deg,rgba(139,92,246,0.1)_1px,transparent_1px)] bg-[size:32px_32px]"></div>
           </div>

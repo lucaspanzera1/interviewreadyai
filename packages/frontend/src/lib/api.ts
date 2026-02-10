@@ -74,7 +74,7 @@ export interface User {
   // Campos de perfil
   hasCompletedOnboarding?: boolean;
   careerTime?: string;
-  techArea?: string;
+  niche?: string;
   techStack?: string[];
   bio?: string;
   location?: string;
@@ -92,7 +92,7 @@ export interface UserDetails {
   profile: {
     hasCompletedOnboarding?: boolean;
     careerTime?: string;
-    techArea?: string;
+    niche?: string;
     techStack?: string[];
     bio?: string;
     location?: string;
@@ -147,7 +147,7 @@ export interface RefreshTokenResponse {
 export interface UserProfile {
   hasCompletedOnboarding: boolean;
   careerTime?: string;
-  techArea?: string;
+  niche?: string;
   techStack?: string[];
   bio?: string;
   location?: string;
@@ -160,7 +160,7 @@ export interface UserProfile {
 
 export interface CompleteOnboardingData {
   careerTime?: string;
-  techArea?: string;
+  niche?: string;
   techStack?: string[];
   bio?: string;
   location?: string;

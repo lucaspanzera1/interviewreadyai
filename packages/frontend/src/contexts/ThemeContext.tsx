@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
 
-type Theme = 'light' | 'dark' | 'system';
+type Theme = 'light' | 'dark' | 'system' | 'dark-orange' | 'light-orange';
+
 
 interface ThemeContextType {
     theme: Theme;
@@ -57,7 +58,9 @@ export const ThemeProvider: React.FC<{ children: ReactNode }> = ({ children }) =
 
     const [resolvedTheme, setResolvedTheme] = useState<'light' | 'dark'>(() => {
         if (theme === 'system') return getSystemTheme();
-        return theme;
+        if (theme === 'dark-orange') return 'dark';
+        if (theme === 'light-orange') return 'light';
+        return theme as 'light' | 'dark';
     });
 
     const applyTheme = useCallback((newTheme: Theme, instant: boolean = true) => {
@@ -68,11 +71,23 @@ export const ThemeProvider: React.FC<{ children: ReactNode }> = ({ children }) =
             disableTransitionsTemporarily();
         }
 
-        // Remove old class
-        root.classList.remove('light', 'dark');
+        // Remove old classes
+        root.classList.remove('light', 'dark', 'theme-orange');
 
-        // Resolve actual theme
-        const resolved = newTheme === 'system' ? getSystemTheme() : newTheme;
+        let resolved: 'light' | 'dark';
+
+        if (newTheme === 'system') {
+            resolved = getSystemTheme();
+        } else if (newTheme === 'dark-orange') {
+            resolved = 'dark';
+            root.classList.add('theme-orange');
+        } else if (newTheme === 'light-orange') {
+            resolved = 'light';
+            root.classList.add('theme-orange');
+        } else {
+            resolved = newTheme as 'light' | 'dark';
+        }
+
         setResolvedTheme(resolved);
 
         // Add new class
@@ -93,7 +108,7 @@ export const ThemeProvider: React.FC<{ children: ReactNode }> = ({ children }) =
         const handleChange = (e: MediaQueryListEvent) => {
             disableTransitionsTemporarily();
             setResolvedTheme(e.matches ? 'dark' : 'light');
-            document.documentElement.classList.remove('light', 'dark');
+            document.documentElement.classList.remove('light', 'dark', 'theme-orange');
             document.documentElement.classList.add(e.matches ? 'dark' : 'light');
         };
 

@@ -15,6 +15,7 @@ import { socialApi, PublicUser, UserConnections } from '../lib/socialApi';
 import { useAuth } from '../contexts/AuthContext';
 import { toast } from 'react-toastify';
 import Loading from './Loading';
+import ActivityHeatmap from './ActivityHeatmap';
 
 const CAREER_TIME_LABELS: Record<string, string> = {
   '0-1': 'Menos de 1 ano',
@@ -24,14 +25,15 @@ const CAREER_TIME_LABELS: Record<string, string> = {
   '10+': 'Mais de 10 anos'
 };
 
-const TECH_AREA_LABELS: Record<string, string> = {
-  'frontend': 'Frontend',
-  'backend': 'Backend',
-  'fullstack': 'Fullstack',
-  'mobile': 'Mobile',
-  'devops': 'DevOps',
-  'data': 'Data Science',
-  'other': 'Outro'
+const NICHE_LABELS: Record<string, string> = {
+  'tecnologia': 'Tecnologia',
+  'educacao': 'Educação',
+  'recursos_humanos': 'Recursos Humanos',
+  'financeiro': 'Financeiro',
+  'saude': 'Saúde',
+  'vendas': 'Vendas',
+  'marketing': 'Marketing',
+  'outro': 'Outro'
 };
 
 const PublicProfilePage: React.FC = () => {
@@ -143,7 +145,7 @@ const PublicProfilePage: React.FC = () => {
               className="w-full h-full object-cover"
             />
           ) : (
-            <div className="w-full h-full bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600"></div>
+            <div className="w-full h-full bg-gradient-to-r from-blue-600 via-indigo-600 to-primary-600"></div>
           )}
           {/* Overlay para melhorar legibilidade do texto */}
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent"></div>
@@ -168,10 +170,10 @@ const PublicProfilePage: React.FC = () => {
                 {profile.name}
               </h1>
               <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 text-sm text-slate-600 dark:text-slate-400">
-                {profile.techArea && (
+                {profile.niche && (
                   <div className="flex items-center gap-1.5">
                     <Briefcase size={16} className="text-primary-500" />
-                    <span>{TECH_AREA_LABELS[profile.techArea] || profile.techArea}</span>
+                    <span>{NICHE_LABELS[profile.niche] || profile.niche}</span>
                   </div>
                 )}
                 {profile.location && (
@@ -357,14 +359,28 @@ const PublicProfilePage: React.FC = () => {
 
             <div className="p-6 min-h-[300px]">
               {activeTab === 'profile' && (
-                <div className="flex flex-col items-center justify-center h-full text-center py-10">
-                  <div className="w-16 h-16 bg-slate-50 dark:bg-slate-800 rounded-full flex items-center justify-center mb-4">
-                    <Target size={32} className="text-slate-300" />
-                  </div>
-                  <h3 className="text-lg font-medium text-slate-900 dark:text-white">Atividade Recente</h3>
-                  <p className="text-slate-500 dark:text-slate-400 max-w-sm mt-2">
-                    Este usuário ainda não decidiu compartilhar sua atividade recente publicamente.
-                  </p>
+                <div className="py-6">
+                  {profile.activityData && profile.activityData.length > 0 ? (
+                    <div className="space-y-6">
+                      <h3 className="text-lg font-medium text-slate-900 dark:text-white px-4">Atividade Recente</h3>
+                      <div className="px-4 pb-4">
+                        <ActivityHeatmap
+                          data={profile.activityData}
+                          totalActivities={profile.activityData.reduce((acc, curr) => acc + curr.count, 0)}
+                        />
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="flex flex-col items-center justify-center h-full text-center py-10">
+                      <div className="w-16 h-16 bg-slate-50 dark:bg-slate-800 rounded-full flex items-center justify-center mb-4">
+                        <Target size={32} className="text-slate-300" />
+                      </div>
+                      <h3 className="text-lg font-medium text-slate-900 dark:text-white">Atividade Recente</h3>
+                      <p className="text-slate-500 dark:text-slate-400 max-w-sm mt-2">
+                        Este usuário ainda não tem atividades registradas.
+                      </p>
+                    </div>
+                  )}
                 </div>
               )}
 

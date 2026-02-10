@@ -173,14 +173,14 @@ const AdminUsers: React.FC = () => {
           </div>
 
           {/* Admins - Purple */}
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6 rounded-2xl shadow-sm relative overflow-hidden group hover:border-purple-300 transition-colors">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6 rounded-2xl shadow-sm relative overflow-hidden group hover:border-primary-300 transition-colors">
             <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-              <UserPlusIcon className="h-16 w-16 text-purple-600" />
+              <UserPlusIcon className="h-16 w-16 text-primary-600" />
             </div>
             <div>
               <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Administradores</p>
-              <p className="text-3xl font-bold text-purple-600 dark:text-purple-400 mt-2">{stats.admins}</p>
-              <p className="text-xs text-purple-600 mt-2 font-medium">Permissão total</p>
+              <p className="text-3xl font-bold text-primary-600 dark:text-primary-400 mt-2">{stats.admins}</p>
+              <p className="text-xs text-primary-600 mt-2 font-medium">Permissão total</p>
             </div>
           </div>
         </div>
@@ -268,7 +268,7 @@ const AdminUsers: React.FC = () => {
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap">
                               <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${user.role === 'admin'
-                                ? 'bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-300 border-purple-100 dark:border-purple-800/50'
+                                ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-300 border-primary-100 dark:border-primary-800/50'
                                 : user.role === 'pro'
                                   ? 'bg-indigo-50 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-300 border-indigo-100 dark:border-indigo-800/50'
                                   : 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-300 border-emerald-100 dark:border-emerald-800/50'

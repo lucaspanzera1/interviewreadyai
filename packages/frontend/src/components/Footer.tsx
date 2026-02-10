@@ -1,11 +1,15 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 
+import { useTheme } from '../contexts/ThemeContext';
+
 
 const Footer: React.FC = () => {
+    const { theme } = useTheme();
     const currentYear = new Date().getFullYear();
     // Using default if env isn't loaded for some reason, though it should be
     const appVersion = import.meta.env.VITE_APP_VERSION || 'Beta';
+    const logoSrc = theme.includes('orange') ? '/logo-orange.png' : '/logo.png';
 
     const mainNavItems = [
         { name: 'Início', path: '/' },
@@ -30,7 +34,7 @@ const Footer: React.FC = () => {
                     {/* Brand Section - Wider */}
                     <div className="lg:col-span-2">
                         <Link to="/" className="inline-flex items-center gap-2.5 mb-6 group">
-                            <img src="/logo.png" alt="TreinaVaga" className="h-16 w-16 object-contain group-hover:scale-110 transition-transform duration-300" />
+                            <img src={logoSrc} alt="TreinaVaga" className="h-16 w-16 object-contain group-hover:scale-110 transition-transform duration-300" />
                             <span className="text-2xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-slate-900 via-slate-700 to-slate-900 dark:from-white dark:via-slate-200 dark:to-white">
                                 TreinaVaga<span className="text-primary-600 dark:text-primary-400">AI</span>
                             </span>

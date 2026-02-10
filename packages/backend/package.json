@@ -13,6 +13,7 @@
     "dev": "nest start --watch --preserveWatchOutput --port 8080",
     "dev:debug": "nest start --debug --watch --preserveWatchOutput",
     "start:prod": "node dist/main",
+    "migrate:techarea-to-niche": "ts-node src/scripts/migrate-techarea-to-niche.ts",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\"",
     "lint:fix": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
     "test": "jest --passWithNoTests",

@@ -200,7 +200,7 @@ const ConnectionItem: React.FC<ConnectionItemProps> = ({ user, isFollowingTab, o
           {user.name}
         </h3>
         <p className="text-xs text-slate-500 dark:text-slate-400 truncate">
-          {user.techArea ? user.techArea : `${user.quizStats.totalCompleted} quizzes`}
+          {user.niche ? user.niche : `${user.quizStats.totalCompleted} quizzes`}
         </p>
       </div>
 
