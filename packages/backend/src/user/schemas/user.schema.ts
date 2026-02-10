@@ -63,7 +63,7 @@ export class User {
   careerTime?: string; // '0-1', '1-3', '3-5', '5-10', '10+'
 
   @Prop()
-  techArea?: string; // 'frontend', 'backend', 'fullstack', 'mobile', 'devops', 'data', 'other'
+  niche?: string; // 'tecnologia', 'educacao', 'recursos_humanos', 'financeiro', 'saude', 'vendas', 'marketing', 'outro'
 
   @Prop({ type: [String] })
   techStack?: string[];

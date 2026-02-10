@@ -25,14 +25,15 @@ const CAREER_TIME_LABELS: Record<string, string> = {
   '10+': 'Mais de 10 anos'
 };
 
-const TECH_AREA_LABELS: Record<string, string> = {
-  'frontend': 'Frontend',
-  'backend': 'Backend',
-  'fullstack': 'Fullstack',
-  'mobile': 'Mobile',
-  'devops': 'DevOps',
-  'data': 'Data Science',
-  'other': 'Outro'
+const NICHE_LABELS: Record<string, string> = {
+  'tecnologia': 'Tecnologia',
+  'educacao': 'Educação',
+  'recursos_humanos': 'Recursos Humanos',
+  'financeiro': 'Financeiro',
+  'saude': 'Saúde',
+  'vendas': 'Vendas',
+  'marketing': 'Marketing',
+  'outro': 'Outro'
 };
 
 const PublicProfilePage: React.FC = () => {
@@ -169,10 +170,10 @@ const PublicProfilePage: React.FC = () => {
                 {profile.name}
               </h1>
               <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 text-sm text-slate-600 dark:text-slate-400">
-                {profile.techArea && (
+                {profile.niche && (
                   <div className="flex items-center gap-1.5">
                     <Briefcase size={16} className="text-primary-500" />
-                    <span>{TECH_AREA_LABELS[profile.techArea] || profile.techArea}</span>
+                    <span>{NICHE_LABELS[profile.niche] || profile.niche}</span>
                   </div>
                 )}
                 {profile.location && (

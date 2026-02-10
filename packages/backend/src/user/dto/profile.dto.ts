@@ -7,7 +7,7 @@ export class ProfileDto {
 
   @IsOptional()
   @IsString()
-  techArea?: string;
+  niche?: string;
 
   @IsOptional()
   @IsArray()

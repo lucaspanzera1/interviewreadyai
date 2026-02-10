@@ -16,7 +16,7 @@ export interface PublicUser {
   bio?: string;
   location?: string;
   careerTime?: string;
-  techArea?: string;
+  niche?: string;
   techStack?: string[];
   linkedinUrl?: string;
   githubUrl?: string;
@@ -40,7 +40,7 @@ export interface UserConnections {
 export interface SearchUsersParams {
   email?: string;
   name?: string;
-  techArea?: string;
+  niche?: string;
   page?: number;
   limit?: number;
 }

@@ -64,7 +64,7 @@ const TECH_STACK_OPTIONS = [
 interface FormData {
   name: string;
   careerTime: string;
-  techArea: string;
+  niche: string;
   techStack: string[];
   bio: string;
   location: string;
@@ -108,7 +108,7 @@ const ProfilePage: React.FC = () => {
   const [formData, setFormData] = useState<FormData>({
     name: user?.name || '',
     careerTime: user?.careerTime || '',
-    techArea: user?.techArea || '',
+    niche: user?.niche || '',
     techStack: user?.techStack || [],
     bio: user?.bio || '',
     location: user?.location || '',
@@ -258,7 +258,7 @@ const ProfilePage: React.FC = () => {
   };
 
   const handleSaveProfessional = async () => {
-    const fields: (keyof FormData)[] = ['careerTime', 'techArea', 'techStack'];
+    const fields: (keyof FormData)[] = ['careerTime', 'niche', 'techStack'];
     if (!hasChanges(fields)) {
       setIsEditingProfessional(false);
       return;
@@ -268,7 +268,7 @@ const ProfilePage: React.FC = () => {
     try {
       const dataToUpdate = {
         careerTime: formData.careerTime,
-        techArea: formData.techArea,
+        niche: formData.niche,
         techStack: formData.techStack.filter(s => s),
       };
       await updateProfile(dataToUpdate);
@@ -354,7 +354,7 @@ const ProfilePage: React.FC = () => {
     setFormData(prev => ({
       ...prev,
       careerTime: user?.careerTime || '',
-      techArea: user?.techArea || '',
+      niche: user?.niche || '',
       techStack: user?.techStack || [],
     }));
     setIsEditingProfessional(false);
@@ -394,14 +394,15 @@ const ProfilePage: React.FC = () => {
     { value: '10+', label: '10+ anos' },
   ];
 
-  const techAreaOptions = [
-    { value: 'frontend', label: 'Frontend' },
-    { value: 'backend', label: 'Backend' },
-    { value: 'fullstack', label: 'Fullstack' },
-    { value: 'mobile', label: 'Mobile' },
-    { value: 'devops', label: 'DevOps' },
-    { value: 'data', label: 'Data Science/Analytics' },
-    { value: 'other', label: 'Outro' },
+  const nicheOptions = [
+    { value: 'tecnologia', label: 'Tecnologia' },
+    { value: 'educacao', label: 'Educação' },
+    { value: 'recursos_humanos', label: 'Recursos Humanos' },
+    { value: 'financeiro', label: 'Financeiro' },
+    { value: 'saude', label: 'Saúde' },
+    { value: 'vendas', label: 'Vendas' },
+    { value: 'marketing', label: 'Marketing' },
+    { value: 'outro', label: 'Outro' },
   ];
 
   return (
@@ -503,10 +504,10 @@ const ProfilePage: React.FC = () => {
                     {user.location}
                   </div>
                 )}
-                {user?.techArea && (
+                {user?.niche && (
                   <div className="flex items-center gap-1.5">
                     <BriefcaseIcon className="w-4 h-4" />
-                    {techAreaOptions.find(opt => opt.value === user.techArea)?.label || user.techArea}
+                    {nicheOptions.find(opt => opt.value === user.niche)?.label || user.niche}
                   </div>
                 )}
               </div>
@@ -850,22 +851,22 @@ const ProfilePage: React.FC = () => {
                   {/* Tech Area */}
                   <div>
                     <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                      Área de Atuação
+                      Nicho
                     </label>
                     {isEditingProfessional ? (
                       <select
-                        name="techArea"
-                        value={formData.techArea}
+                        name="niche"
+                        value={formData.niche}
                         onChange={handleInputChange}
                         className="block w-full px-4 py-2 text-sm bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:border-primary-500 dark:text-white"
                       >
                         <option value="">Selecione...</option>
-                        {techAreaOptions.map(opt => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
+                        {nicheOptions.map(opt => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
                       </select>
                     ) : (
                       <div className="text-base font-medium text-slate-900 dark:text-white flex items-center gap-2">
                         <AcademicCapIcon className="w-5 h-5 text-primary-500" />
-                        {techAreaOptions.find(opt => opt.value === user?.techArea)?.label || 'Não informado'}
+                        {nicheOptions.find(opt => opt.value === user?.niche)?.label || 'Não informado'}
                       </div>
                     )}
                   </div>
