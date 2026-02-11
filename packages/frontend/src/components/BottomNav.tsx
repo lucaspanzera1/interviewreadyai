@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
     HomeIcon,
@@ -19,6 +19,8 @@ import {
     RectangleStackIcon,
     ChatBubbleLeftRightIcon,
     LockClosedIcon,
+    FireIcon,
+    ComputerDesktopIcon,
 } from '@heroicons/react/24/outline';
 
 import {
@@ -44,9 +46,14 @@ const Sidebar: React.FC = () => {
     const location = useLocation();
     const { user, logout } = useAuth();
     const { isCollapsed, toggleCollapsed, isMobileOpen, setIsMobileOpen } = useSidebar();
-    const { theme, resolvedTheme, toggleTheme } = useTheme();
+    const { theme, resolvedTheme, toggleTheme, setTheme } = useTheme();
     const sidebarRef = useRef<HTMLDivElement>(null);
     const { isSearchOpen, closeSearch } = useSearchModal();
+
+    // Theme Long Press Logic
+    const [showThemeMenu, setShowThemeMenu] = useState(false);
+    const [pressProgress, setPressProgress] = useState(0);
+    const animationRef = useRef<number | null>(null);
 
     const logoSrc = theme.includes('orange') ? '/logo-orange.png' : '/logo.png';
 
@@ -243,20 +250,130 @@ const Sidebar: React.FC = () => {
                     </div>
                 )}
                 {/* Theme Toggle */}
-                <button
-                    onClick={toggleTheme}
-                    className={`w-full flex items-center px-3 py-2 rounded-md text-slate-500 hover:bg-slate-50 hover:text-slate-900 transition-colors ${isCollapsed ? 'justify-center' : ''}`}
-                    title={isCollapsed ? (resolvedTheme === 'dark' ? 'Modo Claro' : 'Modo Escuro') : undefined}
-                >
-                    {resolvedTheme === 'dark' ? (
-                        <SunIcon className="w-4 h-4 flex-shrink-0" />
-                    ) : (
-                        <MoonIcon className="w-4 h-4 flex-shrink-0" />
+                {/* Theme Toggle - Long Press for Menu */}
+                <div className="relative">
+                    <button
+                        onMouseDown={() => {
+                            const start = Date.now();
+                            const animate = () => {
+                                const now = Date.now();
+                                const elapsed = now - start;
+                                const progress = Math.min((elapsed / 800) * 100, 100);
+
+                                setPressProgress(progress);
+
+                                if (progress < 100) {
+                                    animationRef.current = requestAnimationFrame(animate);
+                                } else {
+                                    setShowThemeMenu(true);
+                                    setPressProgress(0);
+                                }
+                            };
+                            animationRef.current = requestAnimationFrame(animate);
+                        }}
+                        onMouseUp={() => {
+                            if (animationRef.current) {
+                                cancelAnimationFrame(animationRef.current);
+                                animationRef.current = null;
+                            }
+                            if (pressProgress < 100 && !showThemeMenu) {
+                                toggleTheme();
+                            }
+                            setPressProgress(0);
+                        }}
+                        onMouseLeave={() => {
+                            if (animationRef.current) {
+                                cancelAnimationFrame(animationRef.current);
+                                animationRef.current = null;
+                            }
+                            setPressProgress(0);
+                        }}
+                        onTouchStart={() => {
+                            const start = Date.now();
+                            const animate = () => {
+                                const now = Date.now();
+                                const elapsed = now - start;
+                                const progress = Math.min((elapsed / 800) * 100, 100);
+
+                                setPressProgress(progress);
+
+                                if (progress < 100) {
+                                    animationRef.current = requestAnimationFrame(animate);
+                                } else {
+                                    setShowThemeMenu(true);
+                                    setPressProgress(0);
+                                }
+                            };
+                            animationRef.current = requestAnimationFrame(animate);
+                        }}
+                        onTouchEnd={(e) => {
+                            e.preventDefault(); // Prevent ghost click
+                            if (animationRef.current) {
+                                cancelAnimationFrame(animationRef.current);
+                                animationRef.current = null;
+                            }
+                            if (pressProgress < 100 && !showThemeMenu) {
+                                toggleTheme();
+                            }
+                            setPressProgress(0);
+                        }}
+                        className={`relative w-full flex items-center px-3 py-2 rounded-md text-slate-500 hover:bg-slate-50 hover:text-slate-900 transition-colors overflow-hidden ${isCollapsed ? 'justify-center' : ''}`}
+                        title={isCollapsed ? (resolvedTheme === 'dark' ? 'Modo Claro' : 'Modo Escuro') : undefined}
+                    >
+                        {/* Progress Background */}
+                        <div
+                            className="absolute left-0 top-0 bottom-0 bg-primary-100 dark:bg-primary-900/20 transition-all duration-75 ease-linear pointer-events-none"
+                            style={{ width: `${pressProgress}%`, opacity: pressProgress > 0 ? 1 : 0 }}
+                        />
+
+                        <div className="relative z-10 flex items-center">
+                            {resolvedTheme === 'dark' ? (
+                                <SunIcon className="w-4 h-4 flex-shrink-0" />
+                            ) : (
+                                <MoonIcon className="w-4 h-4 flex-shrink-0" />
+                            )}
+                            <div className={`overflow-hidden whitespace-nowrap transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] ${isCollapsed ? 'max-w-0 opacity-0' : 'max-w-[200px] opacity-100'}`}>
+                                <span className="text-sm font-medium pl-3 block">{resolvedTheme === 'dark' ? 'Modo Claro' : 'Modo Escuro'}</span>
+                            </div>
+                        </div>
+                    </button>
+
+                    {/* Popup Menu */}
+                    {showThemeMenu && (
+                        <>
+                            <div
+                                className="fixed inset-0 z-40"
+                                onClick={() => setShowThemeMenu(false)}
+                            />
+                            <div className={`absolute bottom-full ${isCollapsed ? 'left-1/2 -translate-x-1/2 mb-2' : 'left-0 mb-2 w-full'} z-50 bg-white dark:bg-slate-800 rounded-xl shadow-xl border border-slate-200 dark:border-slate-700 p-1.5 animate-in fade-in slide-in-from-bottom-2 duration-200 min-w-[200px]`}>
+                                <div className="text-xs font-semibold text-slate-400 px-2 py-1 uppercase tracking-wider mb-1">
+                                    Temas Especiais
+                                </div>
+                                <button
+                                    onClick={() => { setTheme('light-orange'); setShowThemeMenu(false); }}
+                                    className={`w-full flex items-center px-3 py-2 rounded-lg mb-1 transition-colors ${theme === 'light-orange' ? 'bg-orange-50 text-orange-700' : 'hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300'}`}
+                                >
+                                    <SunIcon className="w-4 h-4 mr-3 text-orange-500" />
+                                    <span className="text-sm font-medium">Laranja Light</span>
+                                </button>
+                                <button
+                                    onClick={() => { setTheme('dark-orange'); setShowThemeMenu(false); }}
+                                    className={`w-full flex items-center px-3 py-2 rounded-lg mb-1 transition-colors ${theme === 'dark-orange' ? 'bg-orange-900/20 text-orange-500' : 'hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300'}`}
+                                >
+                                    <FireIcon className="w-4 h-4 mr-3 text-orange-500" />
+                                    <span className="text-sm font-medium">Laranja Dark</span>
+                                </button>
+                                <button
+                                    onClick={() => { setTheme('system'); setShowThemeMenu(false); }}
+                                    className={`w-full flex items-center px-3 py-2 rounded-lg transition-colors ${theme === 'system' ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400' : 'hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300'}`}
+                                >
+                                    <ComputerDesktopIcon className="w-4 h-4 mr-3" />
+                                    <span className="text-sm font-medium">Sistema</span>
+                                </button>
+                            </div>
+                        </>
                     )}
-                    <div className={`overflow-hidden whitespace-nowrap transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] ${isCollapsed ? 'max-w-0 opacity-0' : 'max-w-[200px] opacity-100'}`}>
-                        <span className="text-sm font-medium pl-3 block">{resolvedTheme === 'dark' ? 'Modo Claro' : 'Modo Escuro'}</span>
-                    </div>
-                </button>
+                </div>
 
                 {/* Configurações - só para usuários logados */}
                 {user && (

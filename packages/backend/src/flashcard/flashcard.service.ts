@@ -49,8 +49,8 @@ export class FlashcardService {
     try {
       console.log('Starting flashcard generation for user:', userId);
       
-      // Fazer scraping da vaga do LinkedIn
-      const jobData = await this.scrapeLinkedInJob(dto.linkedinUrl);
+      // Detectar o site da vaga e fazer scraping apropriado
+      const jobData = await this.scrapeJob(dto.jobUrl);
 
       // Gerar os flashcards baseados nos dados da vaga
       const flashcards = await this.generateFlashcardsFromJobData(jobData, dto, userId);
@@ -69,6 +69,25 @@ export class FlashcardService {
         'Failed to generate flashcards. Please check the LinkedIn URL and try again.',
         HttpStatus.INTERNAL_SERVER_ERROR
       );
+    }
+  }
+
+  /**
+   * Detecta o site da vaga e chama o scraper apropriado
+   */
+  private async scrapeJob(url: string): Promise<any> {
+    if (url.includes('linkedin.com')) {
+      return this.scrapeLinkedInJob(url);
+    } else if (url.includes('gupy.io') || url.includes('gupy.com.br')) {
+      return this.scrapeGupyJob(url);
+    } else if (url.includes('infojobs.com') || url.includes('infojobs.net')) {
+      return this.scrapeInfojobsJob(url);
+    } else if (url.includes('glassdoor.com') || url.includes('glassdoor.com.br')) {
+      return this.scrapeGlassdoorJob(url);
+    } else if (url.includes('indeed.com') || url.includes('indeed.com.br')) {
+      return this.scrapeIndeedJob(url);
+    } else {
+      throw new HttpException('Unsupported job site. Currently supported: LinkedIn, Gupy, Infojobs, Glassdoor, Indeed.', HttpStatus.BAD_REQUEST);
     }
   }
 
@@ -129,6 +148,222 @@ export class FlashcardService {
       console.error('Error scraping LinkedIn job:', error);
       throw new HttpException(
         'Unable to scrape LinkedIn job. Please check if the URL is accessible.',
+        HttpStatus.BAD_REQUEST
+      );
+    }
+  }
+
+  /**
+   * Faz scraping de uma vaga do Gupy
+   */
+  private async scrapeGupyJob(url: string): Promise<any> {
+    try {
+      if (!url.includes('gupy.io') && !url.includes('gupy.com.br')) {
+        throw new HttpException('Invalid Gupy job URL', HttpStatus.BAD_REQUEST);
+      }
+
+      console.log('Scraping Gupy job:', url);
+
+      const response = await axios.get(url, {
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+          'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+          'Accept-Language': 'pt-BR,pt;q=0.9,en-US;q=0.8,en;q=0.7',
+        },
+        timeout: 10000,
+      });
+
+      const $ = cheerio.load(response.data);
+
+      const jobTitle = $('h1[data-testid="job-title"], .job-title, h1').first().text().trim() ||
+                       $('h1').first().text().trim() ||
+                       'Título da Vaga Não Encontrado';
+
+      const companyName = $('[data-testid="company-name"], .company-name, .employer-name').first().text().trim() ||
+                         $('.company-info a').first().text().trim() ||
+                         'Empresa Não Encontrada';
+
+      const location = $('[data-testid="job-location"], .job-location, .location').first().text().trim() ||
+                      $('.location-info').first().text().trim() ||
+                      'Localização Não Encontrada';
+
+      const description = $('[data-testid="job-description"], .job-description, .description').text().trim() ||
+                         $('.job-details-content').text().trim() ||
+                         'Descrição não disponível';
+
+      return {
+        title: jobTitle,
+        company: companyName,
+        location: location,
+        description: description,
+        url: url
+      };
+    } catch (error) {
+      console.error('Error scraping Gupy job:', error);
+      throw new HttpException(
+        'Unable to scrape Gupy job. Please check if the URL is accessible.',
+        HttpStatus.BAD_REQUEST
+      );
+    }
+  }
+
+  /**
+   * Faz scraping de uma vaga do Infojobs
+   */
+  private async scrapeInfojobsJob(url: string): Promise<any> {
+    try {
+      if (!url.includes('infojobs.com') && !url.includes('infojobs.net')) {
+        throw new HttpException('Invalid Infojobs job URL', HttpStatus.BAD_REQUEST);
+      }
+
+      console.log('Scraping Infojobs job:', url);
+
+      const response = await axios.get(url, {
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+          'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+          'Accept-Language': 'pt-BR,pt;q=0.9,en-US;q=0.8,en;q=0.7',
+        },
+        timeout: 10000,
+      });
+
+      const $ = cheerio.load(response.data);
+
+      const jobTitle = $('h1[data-testid="job-title"], .job-title, h1').first().text().trim() ||
+                       $('h1').first().text().trim() ||
+                       'Título da Vaga Não Encontrado';
+
+      const companyName = $('[data-testid="company-name"], .company-name, .company').first().text().trim() ||
+                         $('.company-info a').first().text().trim() ||
+                         'Empresa Não Encontrada';
+
+      const location = $('[data-testid="job-location"], .job-location, .location').first().text().trim() ||
+                      $('.location-info').first().text().trim() ||
+                      'Localização Não Encontrada';
+
+      const description = $('[data-testid="job-description"], .job-description, .description').text().trim() ||
+                         $('.job-content').text().trim() ||
+                         'Descrição não disponível';
+
+      return {
+        title: jobTitle,
+        company: companyName,
+        location: location,
+        description: description,
+        url: url
+      };
+    } catch (error) {
+      console.error('Error scraping Infojobs job:', error);
+      throw new HttpException(
+        'Unable to scrape Infojobs job. Please check if the URL is accessible.',
+        HttpStatus.BAD_REQUEST
+      );
+    }
+  }
+
+  /**
+   * Faz scraping de uma vaga do Glassdoor
+   */
+  private async scrapeGlassdoorJob(url: string): Promise<any> {
+    try {
+      if (!url.includes('glassdoor.com') && !url.includes('glassdoor.com.br')) {
+        throw new HttpException('Invalid Glassdoor job URL', HttpStatus.BAD_REQUEST);
+      }
+
+      console.log('Scraping Glassdoor job:', url);
+
+      const response = await axios.get(url, {
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+          'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+          'Accept-Language': 'en-US,en;q=0.5',
+        },
+        timeout: 10000,
+      });
+
+      const $ = cheerio.load(response.data);
+
+      const jobTitle = $('[data-test="job-title"], .job-title, h1').first().text().trim() ||
+                       $('h1').first().text().trim() ||
+                       'Job Title Not Found';
+
+      const companyName = $('[data-test="employer-name"], .employer-name, .company').first().text().trim() ||
+                         $('.company-info a').first().text().trim() ||
+                         'Company Not Found';
+
+      const location = $('[data-test="location"], .job-location, .location').first().text().trim() ||
+                      $('.location-info').first().text().trim() ||
+                      'Location Not Found';
+
+      const description = $('[data-test="job-description"], .job-description, .description').text().trim() ||
+                         $('.job-content').text().trim() ||
+                         'Description not available';
+
+      return {
+        title: jobTitle,
+        company: companyName,
+        location: location,
+        description: description,
+        url: url
+      };
+    } catch (error) {
+      console.error('Error scraping Glassdoor job:', error);
+      throw new HttpException(
+        'Unable to scrape Glassdoor job. Please check if the URL is accessible.',
+        HttpStatus.BAD_REQUEST
+      );
+    }
+  }
+
+  /**
+   * Faz scraping de uma vaga do Indeed
+   */
+  private async scrapeIndeedJob(url: string): Promise<any> {
+    try {
+      if (!url.includes('indeed.com') && !url.includes('indeed.com.br')) {
+        throw new HttpException('Invalid Indeed job URL', HttpStatus.BAD_REQUEST);
+      }
+
+      console.log('Scraping Indeed job:', url);
+
+      const response = await axios.get(url, {
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+          'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+          'Accept-Language': 'en-US,en;q=0.5',
+        },
+        timeout: 10000,
+      });
+
+      const $ = cheerio.load(response.data);
+
+      const jobTitle = $('[data-testid="job-title"], .job-title, h1').first().text().trim() ||
+                       $('h1').first().text().trim() ||
+                       'Job Title Not Found';
+
+      const companyName = $('[data-testid="company-name"], .company-name, .company').first().text().trim() ||
+                         $('.company-info a').first().text().trim() ||
+                         'Company Not Found';
+
+      const location = $('[data-testid="job-location"], .job-location, .location').first().text().trim() ||
+                      $('.location-info').first().text().trim() ||
+                      'Location Not Found';
+
+      const description = $('[data-testid="job-description"], .job-description, .description').text().trim() ||
+                         $('.job-content').text().trim() ||
+                         'Description not available';
+
+      return {
+        title: jobTitle,
+        company: companyName,
+        location: location,
+        description: description,
+        url: url
+      };
+    } catch (error) {
+      console.error('Error scraping Indeed job:', error);
+      throw new HttpException(
+        'Unable to scrape Indeed job. Please check if the URL is accessible.',
         HttpStatus.BAD_REQUEST
       );
     }

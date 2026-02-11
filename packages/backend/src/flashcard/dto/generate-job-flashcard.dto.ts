@@ -4,7 +4,7 @@ import { FlashcardLevel } from '../schemas/flashcard.schema';
 export class GenerateJobFlashcardDto {
   @IsString()
   @IsUrl()
-  linkedinUrl: string;
+  jobUrl: string;
 
   @IsEnum(FlashcardLevel)
   nivel: FlashcardLevel;

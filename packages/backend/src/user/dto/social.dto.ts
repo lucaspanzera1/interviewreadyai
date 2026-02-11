@@ -12,7 +12,7 @@ export class SearchUsersDto {
 
   @IsOptional()
   @IsString()
-  techArea?: string;
+  niche?: string;
 
   @IsOptional()
   @IsInt()
@@ -46,7 +46,7 @@ export class PublicUserDto {
   bio?: string;
   location?: string;
   careerTime?: string;
-  techArea?: string;
+  niche?: string;
   techStack?: string[];
   linkedinUrl?: string;
   githubUrl?: string;

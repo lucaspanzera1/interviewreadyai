@@ -537,7 +537,7 @@ export class UserController {
       type: 'object',
       properties: {
         careerTime: { type: 'string', example: '1-3' },
-        techArea: { type: 'string', example: 'frontend' },
+        niche: { type: 'string', example: 'tecnologia' },
         techStack: { type: 'array', items: { type: 'string' }, example: ['React', 'TypeScript'] },
         bio: { type: 'string', example: 'Desenvolvedor apaixonado por tecnologia' },
         location: { type: 'string', example: 'São Paulo, SP' },

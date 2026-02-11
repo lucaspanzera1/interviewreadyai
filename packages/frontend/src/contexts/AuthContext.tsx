@@ -125,7 +125,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
       // Separate basic profile fields from onboarding/profile fields
       const basicFields = ['name'];
-      const profileFields = ['careerTime', 'techArea', 'techStack', 'bio', 'location', 'linkedinUrl', 'githubUrl', 'cellphone', 'taxid'];
+      const profileFields = ['careerTime', 'niche', 'techStack', 'bio', 'location', 'linkedinUrl', 'githubUrl', 'cellphone', 'taxid'];
 
       const basicData: Partial<User> = {};
       const profileData: Partial<User> = {};

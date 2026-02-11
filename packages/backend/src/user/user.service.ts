@@ -265,6 +265,7 @@ export class UserService {
       updatedAt: user.updatedAt,
       lastLoginAt: user.lastLoginAt,
       hasCompletedOnboarding: user.hasCompletedOnboarding,
+      isProfilePublic: user.isProfilePublic,
     };
   }
 
