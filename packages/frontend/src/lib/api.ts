@@ -187,7 +187,7 @@ export interface GenerateQuizDto {
 }
 
 export interface GenerateJobQuizDto {
-  linkedinUrl: string;
+  jobUrl: string;
 }
 
 export interface QuizQuestion {
@@ -210,7 +210,7 @@ export enum FlashcardLevel {
 }
 
 export interface GenerateJobFlashcardDto {
-  linkedinUrl: string;
+  jobUrl: string;
   nivel: FlashcardLevel;
   quantidade_cards?: number;
 }
@@ -248,7 +248,7 @@ export interface StudySessionDto {
 
 // Interview interfaces
 export interface GenerateInterviewDto {
-  linkedinUrl: string;
+  jobUrl: string;
   numberOfQuestions?: number;
   experienceLevel?: string;
 }

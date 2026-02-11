@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { apiClient, CompleteOnboardingData } from '../lib/api';
 import { useToast } from '../contexts/ToastContext';
 import { XMarkIcon } from '@heroicons/react/24/outline';
+import { getNicheIcon } from '../utils/nicheIcons';
 
 interface OnboardingModalProps {
   isOpen: boolean;
@@ -180,6 +181,7 @@ const OnboardingModal = ({ isOpen, onComplete }: OnboardingModalProps) => {
                             : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:border-primary-200 dark:hover:border-primary-800 hover:bg-slate-50 dark:hover:bg-slate-800/80'
                           }`}
                       >
+                        {getNicheIcon(area.value, isSelected ? "w-8 h-8 text-primary-600 mb-2" : "w-8 h-8 text-slate-400 mb-2")}
                         <span className={`font-semibold text-sm ${isSelected ? 'text-primary-700 dark:text-primary-300' : 'text-slate-700 dark:text-slate-200'}`}>
                           {area.label}
                         </span>

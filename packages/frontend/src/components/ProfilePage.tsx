@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Listbox, ListboxButton, ListboxOption, ListboxOptions, Transition } from '@headlessui/react';
 import { useNavigate } from 'react-router-dom';
 import PageTitle from './PageTitle';
 import { useAuth } from '../contexts/AuthContext';
@@ -23,8 +24,10 @@ import {
   GiftIcon,
   TrophyIcon,
   ShoppingBagIcon,
-  ClockIcon
+  ClockIcon,
+  ChevronUpDownIcon
 } from '@heroicons/react/24/outline';
+import { getNicheIcon } from '../utils/nicheIcons';
 import ActivityHeatmap from './ActivityHeatmap';
 import SocialConnectionsComponent from './SocialConnectionsComponent';
 import { maskCPF, maskPhone, unmask } from '../utils/masks';
@@ -522,7 +525,7 @@ const ProfilePage: React.FC = () => {
                 )}
                 {user?.niche && (
                   <div className="flex items-center gap-1.5">
-                    <BriefcaseIcon className="w-4 h-4" />
+                    {getNicheIcon(user.niche, "w-4 h-4")}
                     {nicheOptions.find(opt => opt.value === user.niche)?.label || user.niche}
                   </div>
                 )}
@@ -873,22 +876,65 @@ const ProfilePage: React.FC = () => {
                         Área de Atuação
                       </label>
                       {isEditingProfessional ? (
-                        <select
-                          name="niche"
-                          value={formData.niche}
-                          onChange={handleInputChange}
-                          className="block w-full px-4 py-2 text-sm bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:border-primary-500 dark:text-white"
-                        >
-                          <option value="">Selecione...</option>
-                          {nicheOptions.map((option) => (
-                            <option key={option.value} value={option.value}>
-                              {option.label}
-                            </option>
-                          ))}
-                        </select>
+                        <div className="relative">
+                          <Listbox value={formData.niche} onChange={(val) => setFormData(prev => ({ ...prev, niche: val }))}>
+                            <div className="relative mt-1">
+                              <ListboxButton className="relative w-full cursor-default rounded-xl bg-white dark:bg-slate-900 py-2.5 pl-4 pr-10 text-left text-sm border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500 shadow-sm transition-all">
+                                <span className="flex items-center gap-2 truncate text-slate-700 dark:text-white">
+                                  {formData.niche ? (
+                                    <>
+                                      {getNicheIcon(formData.niche, "h-4 w-4 text-primary-500")}
+                                      <span>{nicheOptions.find(opt => opt.value === formData.niche)?.label}</span>
+                                    </>
+                                  ) : (
+                                    <span className="text-slate-400">Selecione...</span>
+                                  )}
+                                </span>
+                                <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
+                                  <ChevronUpDownIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
+                                </span>
+                              </ListboxButton>
+                              <Transition
+                                as={React.Fragment}
+                                leave="transition ease-in duration-100"
+                                leaveFrom="opacity-100"
+                                leaveTo="opacity-0"
+                              >
+                                <ListboxOptions className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-xl bg-white dark:bg-slate-800 py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm border border-slate-100 dark:border-slate-700">
+                                  {nicheOptions.map((option) => (
+                                    <ListboxOption
+                                      key={option.value}
+                                      value={option.value}
+                                      className={({ active }) =>
+                                        `relative cursor-pointer select-none py-2.5 pl-4 pr-4 transition-colors ${active ? 'bg-primary-50 dark:bg-primary-900/30' : ''
+                                        }`
+                                      }
+                                    >
+                                      {({ selected }) => (
+                                        <div className="flex items-center justify-between">
+                                          <div className="flex items-center gap-2">
+                                            {getNicheIcon(option.value, `h-4 w-4 ${selected ? 'text-primary-600 dark:text-primary-400' : 'text-slate-500 dark:text-slate-400'}`)}
+                                            <span className={`block truncate ${selected ? 'font-medium text-primary-900 dark:text-primary-100' : 'text-slate-700 dark:text-slate-300'}`}>
+                                              {option.label}
+                                            </span>
+                                          </div>
+                                          {selected ? (
+                                            <span className="flex items-center text-primary-600 dark:text-primary-400">
+                                              <CheckIcon className="h-4 w-4" aria-hidden="true" />
+                                            </span>
+                                          ) : null}
+                                        </div>
+                                      )}
+                                    </ListboxOption>
+                                  ))}
+                                </ListboxOptions>
+                              </Transition>
+                            </div>
+                          </Listbox>
+                        </div>
                       ) : (
                         <div className="flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 rounded-md">
-                          <BriefcaseIcon className="h-5 w-5 text-slate-400 dark:text-slate-500" />
+                          {user?.niche ? getNicheIcon(user.niche, "h-5 w-5 text-slate-400 dark:text-slate-500") : <BriefcaseIcon className="h-5 w-5 text-slate-400 dark:text-slate-500" />}
                           <span className="text-slate-700 dark:text-slate-200 font-medium text-sm">
                             {nicheOptions.find(opt => opt.value === user?.niche)?.label || user?.niche || 'Não informado'}
                           </span>

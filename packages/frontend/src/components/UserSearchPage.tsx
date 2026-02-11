@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, MapPin, Briefcase, Github, Linkedin, UserPlus, UserMinus, Filter, X } from 'lucide-react';
+import { Search, MapPin, Briefcase, Github, Linkedin, UserPlus, UserMinus, Filter, X, ChevronLeft, ChevronRight, Sparkles, User } from 'lucide-react';
 import { socialApi, PublicUser, SearchUsersParams } from '../lib/socialApi';
 import { useAuth } from '../contexts/AuthContext';
 import { toast } from 'react-toastify';
-import Loading from './Loading';
+import { getNicheIcon } from '../utils/nicheIcons';
 
 const NICHOS = [
   { value: 'tecnologia', label: 'Tecnologia' },
@@ -17,204 +17,219 @@ const NICHOS = [
   { value: 'outro', label: 'Outro' }
 ];
 
+// Hook de Debounce
+function useDebounce<T>(value: T, delay: number): T {
+  const [debouncedValue, setDebouncedValue] = useState(value);
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedValue(value);
+    }, delay);
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [value, delay]);
+  return debouncedValue;
+}
+
 const UserSearchPage: React.FC = () => {
   const { user: currentUser } = useAuth();
   const [users, setUsers] = useState<PublicUser[]>([]);
   const [loading, setLoading] = useState(false);
-  const [searchParams, setSearchParams] = useState<SearchUsersParams>({
+
+  // Estados de Filtro
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedNiche, setSelectedNiche] = useState('');
+  const debouncedSearchTerm = useDebounce(searchTerm, 500);
+
+  const [pagination, setPagination] = useState({
     page: 1,
-    limit: 12
+    limit: 12,
+    total: 0
   });
-  const [totalResults, setTotalResults] = useState(0);
-  const [searchFilters, setSearchFilters] = useState({
-    name: '',
-    email: '',
-    niche: ''
-  });
+
   const [showFilters, setShowFilters] = useState(false);
+  const isFirstRender = useRef(true);
 
   // Buscar usuários
-  const searchUsers = async (params: SearchUsersParams) => {
+  const searchUsers = async (page = 1, term = '', niche = '') => {
     setLoading(true);
     try {
+      const params: SearchUsersParams = {
+        page,
+        limit: pagination.limit,
+        name: term,
+        niche: niche
+      };
+
       const response = await socialApi.searchUsers(params);
       setUsers(response.users);
-      setTotalResults(response.total);
+      setPagination(prev => ({ ...prev, total: response.total, page }));
     } catch (error) {
       console.error('Erro ao buscar usuários:', error);
-      toast.error('Erro ao buscar usuários');
+      toast.error('Não foi possível carregar os estudantes.');
     } finally {
       setLoading(false);
     }
   };
 
-  // Carregar usuários iniciais
+  // Efeito para busca automática quando filtros mudam
   useEffect(() => {
-    searchUsers(searchParams);
-  }, [searchParams]);
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
+    }
+    // Reset para página 1 quando filtros mudam
+    searchUsers(1, debouncedSearchTerm, selectedNiche);
+  }, [debouncedSearchTerm, selectedNiche]);
 
-  // Aplicar filtros
-  const handleSearch = () => {
-    const params = {
-      ...searchParams,
-      ...searchFilters,
-      page: 1
-    };
-    setSearchParams(params);
+  // Carga inicial
+  useEffect(() => {
+    searchUsers(1);
+  }, []);
+
+  const handlePageChange = (newPage: number) => {
+    searchUsers(newPage, debouncedSearchTerm, selectedNiche);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  // Limpar filtros
   const clearFilters = () => {
-    setSearchFilters({ name: '', email: '', niche: '' });
-    setSearchParams({ page: 1, limit: 12 });
+    setSearchTerm('');
+    setSelectedNiche('');
   };
 
-  // Seguir/deixar de seguir usuário
   const toggleFollow = async (user: PublicUser) => {
+    // Otimistic UI Update
+    const originalUsers = [...users];
+    const updatedUsers = users.map(u =>
+      u.id === user.id
+        ? {
+          ...u,
+          isFollowing: !u.isFollowing,
+          followersCount: u.isFollowing ? u.followersCount - 1 : u.followersCount + 1
+        }
+        : u
+    );
+    setUsers(updatedUsers);
+
     try {
       if (user.isFollowing) {
         await socialApi.unfollowUser(user.id);
-        toast.success(`Deixou de seguir ${user.name}`);
+        toast.info(`Você deixou de seguir ${user.name.split(' ')[0]}`);
       } else {
         await socialApi.followUser(user.id);
-        toast.success(`Agora você segue ${user.name}`);
+        toast.success(`Você agora segue ${user.name.split(' ')[0]}`);
       }
-
-      // Atualizar lista local
-      setUsers(users.map(u =>
-        u.id === user.id
-          ? {
-            ...u,
-            isFollowing: !u.isFollowing,
-            followersCount: u.isFollowing
-              ? u.followersCount - 1
-              : u.followersCount + 1
-          }
-          : u
-      ));
     } catch (error) {
-      console.error('Erro ao seguir/deixar de seguir:', error);
-      toast.error('Erro ao atualizar seguimento');
+      // Revert on error
+      setUsers(originalUsers);
+      toast.error('Erro ao atualizar. Tente novamente.');
     }
   };
 
-  // Ir para próxima página
-  const nextPage = () => {
-    if (searchParams.page! * searchParams.limit! < totalResults) {
-      setSearchParams({ ...searchParams, page: searchParams.page! + 1 });
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-  };
-
-  // Ir para página anterior
-  const prevPage = () => {
-    if (searchParams.page! > 1) {
-      setSearchParams({ ...searchParams, page: searchParams.page! - 1 });
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-  };
+  const totalPages = Math.ceil(pagination.total / pagination.limit);
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-900 p-4 md:p-8">
-      <div className="max-w-7xl mx-auto space-y-8">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-900 pb-20">
+      {/* Hero Header */}
+      <div className="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 sticky top-0 z-30 shadow-sm">
+        <div className="max-w-7xl mx-auto px-4 md:px-8 py-6">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div>
+              <h1 className="text-2xl md:text-3xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                <Sparkles className="text-yellow-500" size={24} />
+                Explorar Comunidade
+              </h1>
+              <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">
+                Conecte-se com {pagination.total > 0 ? pagination.total : 'outros'} estudantes incríveis
+              </p>
+            </div>
 
-        {/* Header */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div>
-            <h1 className="text-3xl font-bold text-slate-900 dark:text-white mb-2">
-              Explorar Comunidade
-            </h1>
-            <p className="text-slate-500 dark:text-slate-400">
-              Conecte-se com outros desenvolvedores e expanda sua rede
-            </p>
+            {/* Search Bar Desktop */}
+            <div className="flex items-center gap-2 w-full md:w-auto">
+              <div className="relative flex-1 md:w-80 group">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-500 transition-colors" size={18} />
+                <input
+                  type="text"
+                  placeholder="Buscar por nome..."
+                  className="w-full bg-slate-100 dark:bg-slate-900 border border-transparent focus:border-indigo-500 focus:bg-white dark:focus:bg-slate-800 text-slate-900 dark:text-white rounded-xl py-2.5 pl-10 pr-4 transition-all outline-none"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
+                {searchTerm && (
+                  <button onClick={() => setSearchTerm('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
+                    <X size={16} />
+                  </button>
+                )}
+              </div>
+              <button
+                onClick={() => setShowFilters(!showFilters)}
+                className={`p-2.5 rounded-xl border transition-colors ${showFilters || selectedNiche
+                  ? 'bg-indigo-50 border-indigo-200 text-indigo-600 dark:bg-indigo-900/20 dark:border-indigo-800 dark:text-indigo-400'
+                  : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700'
+                  }`}
+                title="Filtros"
+              >
+                <Filter size={20} />
+              </button>
+            </div>
           </div>
 
-          <button
-            onClick={() => setShowFilters(!showFilters)}
-            className={`btn ${showFilters ? 'btn-primary' : 'btn-secondary'} md:hidden`}
-          >
-            <Filter size={18} className="mr-2" />
-            Filtros
-          </button>
-        </div>
-
-        {/* Filtros de busca */}
-        <div className={`card overflow-hidden transition-all duration-300 ${showFilters ? 'block' : 'hidden md:block'}`}>
-          <div className="card-body">
-            <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-end">
-              <div className="md:col-span-4">
-                <label className="label">Nome</label>
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-                  <input
-                    type="text"
-                    placeholder="Buscar por nome..."
-                    className="input pl-10"
-                    value={searchFilters.name}
-                    onChange={(e) => setSearchFilters({ ...searchFilters, name: e.target.value })}
-                  />
-                </div>
-              </div>
-
-              <div className="md:col-span-4">
-                <label className="label">Nicho</label>
-                <select
-                  className="input appearance-none"
-                  value={searchFilters.niche}
-                  onChange={(e) => setSearchFilters({ ...searchFilters, niche: e.target.value })}
-                >
-                  <option value="">Todos os nichos</option>
-                  {NICHOS.map((area) => (
-                    <option key={area.value} value={area.value}>
-                      {area.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="md:col-span-4 flex gap-3">
+          {/* Expanded Filters */}
+          <div className={`overflow-hidden transition-all duration-300 ease-in-out ${showFilters || selectedNiche ? 'max-h-20 opacity-100 mt-4' : 'max-h-0 opacity-0'}`}>
+            <div className="flex items-center gap-2 overflow-x-auto pb-2 no-scrollbar">
+              <button
+                onClick={() => setSelectedNiche('')}
+                className={`whitespace-nowrap px-4 py-1.5 rounded-full text-sm font-medium transition-colors border ${selectedNiche === ''
+                  ? 'bg-slate-900 text-white border-slate-900 dark:bg-white dark:text-slate-900 dark:border-white'
+                  : 'bg-white text-slate-600 border-slate-200 hover:border-slate-300 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700'
+                  }`}
+              >
+                Todos
+              </button>
+              {NICHOS.map((niche) => (
                 <button
-                  onClick={handleSearch}
-                  className="btn btn-primary flex-1"
+                  key={niche.value}
+                  onClick={() => setSelectedNiche(selectedNiche === niche.value ? '' : niche.value)}
+                  className={`whitespace-nowrap px-4 py-1.5 rounded-full text-sm font-medium transition-colors border flex items-center gap-2 ${selectedNiche === niche.value
+                    ? 'bg-indigo-100 text-indigo-700 border-indigo-200 dark:bg-indigo-900/40 dark:text-indigo-300 dark:border-indigo-700'
+                    : 'bg-white text-slate-600 border-slate-200 hover:border-slate-300 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700'
+                    }`}
                 >
-                  <Search size={18} className="mr-2" />
-                  Buscar
+                  {getNicheIcon(niche.value, "w-4 h-4")}
+                  {niche.label}
                 </button>
-                <button
-                  onClick={clearFilters}
-                  className="btn btn-ghost"
-                  title="Limpar filtros"
-                >
-                  <X size={18} />
-                </button>
-              </div>
+              ))}
             </div>
           </div>
         </div>
+      </div>
 
-        {/* Resultados */}
+      <div className="max-w-7xl mx-auto px-4 md:px-8 py-8">
+
+        {/* Loading State */}
         {loading ? (
-          <div className="py-12">
-            <Loading size="lg" text="Buscando usuários..." />
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {Array.from({ length: 8 }).map((_, i) => (
+              <UserCardSkeleton key={i} />
+            ))}
           </div>
         ) : (
           <>
-            <div className="flex items-center justify-between">
-              <div className="text-sm font-medium text-slate-500 dark:text-slate-400">
-                Encontrados <span className="text-slate-900 dark:text-white font-bold">{totalResults}</span> usuários
-              </div>
-            </div>
-
             {users.length === 0 ? (
-              <div className="card p-12 text-center">
-                <div className="bg-slate-50 dark:bg-slate-800/50 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Search size={40} className="text-slate-300 dark:text-slate-600" />
+              <div className="flex flex-col items-center justify-center py-20 text-center">
+                <div className="w-24 h-24 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center mb-6">
+                  <User size={48} className="text-slate-400" />
                 </div>
-                <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2">Nenhum usuário encontrado</h3>
-                <p className="text-slate-500 dark:text-slate-400 mb-6">
-                  Tente ajustar os filtros de busca para encontrar mais pessoas.
+                <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2">
+                  Nenhum estudante encontrado
+                </h3>
+                <p className="text-slate-500 dark:text-slate-400 max-w-md mx-auto mb-8">
+                  Não encontramos ninguém com os critérios atuais. Tente buscar por outro nome ou limpar os filtros.
                 </p>
-                <button onClick={clearFilters} className="btn btn-secondary">
+                <button
+                  onClick={clearFilters}
+                  className="px-6 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium transition-colors shadow-lg shadow-indigo-500/20"
+                >
                   Limpar Filtros
                 </button>
               </div>
@@ -231,25 +246,27 @@ const UserSearchPage: React.FC = () => {
               </div>
             )}
 
-            {/* Paginação */}
-            {totalResults > searchParams.limit! && (
-              <div className="flex justify-center items-center gap-4 py-4">
+            {/* Pagination */}
+            {pagination.total > pagination.limit && (
+              <div className="flex justify-center items-center gap-2 mt-12">
                 <button
-                  onClick={prevPage}
-                  disabled={searchParams.page === 1}
-                  className="btn btn-outline disabled:opacity-50"
+                  onClick={() => handlePageChange(pagination.page - 1)}
+                  disabled={pagination.page === 1}
+                  className="p-2 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 >
-                  Anterior
+                  <ChevronLeft size={20} />
                 </button>
-                <span className="text-sm font-medium text-slate-600 dark:text-slate-400">
-                  Página {searchParams.page} de {Math.ceil(totalResults / searchParams.limit!)}
+
+                <span className="text-sm font-medium px-4 text-slate-600 dark:text-slate-400">
+                  Página <span className="text-slate-900 dark:text-white font-bold">{pagination.page}</span> de {totalPages}
                 </span>
+
                 <button
-                  onClick={nextPage}
-                  disabled={searchParams.page! * searchParams.limit! >= totalResults}
-                  className="btn btn-outline disabled:opacity-50"
+                  onClick={() => handlePageChange(pagination.page + 1)}
+                  disabled={pagination.page >= totalPages}
+                  className="p-2 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 >
-                  Próxima
+                  <ChevronRight size={20} />
                 </button>
               </div>
             )}
@@ -260,7 +277,33 @@ const UserSearchPage: React.FC = () => {
   );
 };
 
-// Componente para card do usuário
+// Skeleton Loader
+const UserCardSkeleton = () => (
+  <div className="bg-white dark:bg-slate-800 rounded-2xl p-5 border border-slate-100 dark:border-slate-700 shadow-sm">
+    <div className="flex items-start justify-between mb-4">
+      <div className="w-16 h-16 rounded-xl bg-slate-200 dark:bg-slate-700 animate-pulse" />
+      <div className="flex gap-2">
+        <div className="w-8 h-8 rounded-lg bg-slate-200 dark:bg-slate-700 animate-pulse" />
+        <div className="w-8 h-8 rounded-lg bg-slate-200 dark:bg-slate-700 animate-pulse" />
+      </div>
+    </div>
+    <div className="space-y-2 mb-4">
+      <div className="h-5 w-3/4 bg-slate-200 dark:bg-slate-700 rounded animate-pulse" />
+      <div className="h-3 w-1/2 bg-slate-200 dark:bg-slate-700 rounded animate-pulse" />
+    </div>
+    <div className="space-y-2 mb-6">
+      <div className="h-3 w-full bg-slate-200 dark:bg-slate-700 rounded animate-pulse" />
+      <div className="h-3 w-2/3 bg-slate-200 dark:bg-slate-700 rounded animate-pulse" />
+    </div>
+    <div className="grid grid-cols-2 gap-2 mb-4">
+      <div className="h-12 bg-slate-200 dark:bg-slate-700 rounded-lg animate-pulse" />
+      <div className="h-12 bg-slate-200 dark:bg-slate-700 rounded-lg animate-pulse" />
+    </div>
+    <div className="h-10 w-full bg-slate-200 dark:bg-slate-700 rounded-lg animate-pulse" />
+  </div>
+);
+
+// Improved User Card
 const UserCard: React.FC<{
   user: PublicUser;
   currentUserId?: string;
@@ -269,117 +312,127 @@ const UserCard: React.FC<{
   const isOwnProfile = currentUserId === user.id;
   const navigate = useNavigate();
 
-  const handleCardClick = () => {
-    navigate(`/profile/${user.id}`);
-  };
-
   return (
     <div
-      onClick={handleCardClick}
-      className="card group hover:scale-[1.02] transition-transform duration-300 flex flex-col h-full cursor-pointer"
+      onClick={() => navigate(`/profile/${user.id}`)}
+      className="group bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 p-5 hover:shadow-xl hover:shadow-slate-200/50 dark:hover:shadow-slate-900/50 hover:-translate-y-1 transition-all duration-300 cursor-pointer flex flex-col h-full relative overflow-hidden"
     >
-      <div className="card-body flex flex-col h-full">
-        {/* Header do Card */}
-        <div className="flex items-start justify-between mb-4">
-          <div className="relative">
-            <img
-              src={user.picture || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}&background=3B82F6&color=ffffff`}
-              alt={user.name}
-              className="w-16 h-16 rounded-2xl object-cover shadow-sm group-hover:shadow-md transition-shadow"
-            />
-            {user.isFollowing && (
-              <span className="absolute -bottom-2 -right-2 bg-green-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full border-2 border-white dark:border-slate-800">
-                SEGUINDO
-              </span>
-            )}
-          </div>
-          <div className="flex gap-1" onClick={(e) => e.stopPropagation()}>
-            {user.githubUrl && (
-              <a
-                href={user.githubUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="p-2 text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors"
-              >
-                <Github size={18} />
-              </a>
-            )}
-            {user.linkedinUrl && (
-              <a
-                href={user.linkedinUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="p-2 text-slate-400 hover:text-blue-600 transition-colors"
-              >
-                <Linkedin size={18} />
-              </a>
-            )}
-          </div>
-        </div>
+      {/* Decorative Gradient Overlay on Hover */}
+      <div className="absolute inset-0 bg-gradient-to-b from-indigo-50/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none dark:from-indigo-900/10" />
 
-        {/* Info do Usuário */}
-        <div className="mb-4">
-          <h3 className="font-bold text-lg text-slate-900 dark:text-white truncate" title={user.name}>
-            {user.name}
-          </h3>
-          <div className="flex flex-wrap gap-2 text-xs text-slate-500 dark:text-slate-400 mt-1">
-            {user.niche && (
-              <span className="flex items-center gap-1">
-                <Briefcase size={12} />
-                <span className="capitalize">{user.niche}</span>
-              </span>
-            )}
-            {user.location && (
-              <span className="flex items-center gap-1">
-                <MapPin size={12} />
-                <span className="truncate max-w-[100px]">{user.location}</span>
-              </span>
-            )}
-          </div>
+      <div className="relative flex items-start justify-between mb-4 z-10">
+        <div className="relative">
+          <img
+            src={user.picture || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}&background=6366f1&color=ffffff&bold=true`}
+            alt={user.name}
+            className="w-16 h-16 rounded-2xl object-cover shadow-sm ring-4 ring-white dark:ring-slate-800 group-hover:scale-105 transition-transform duration-300"
+          />
+          {user.isFollowing && (
+            <div className="absolute -bottom-1 -right-1 bg-green-500 text-white p-1 rounded-full border-2 border-white dark:border-slate-800 shadow-sm" title="Você segue este estudante">
+              <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            </div>
+          )}
         </div>
+        <div className="flex gap-1" onClick={(e) => e.stopPropagation()}>
+          {user.githubUrl && (
+            <a
+              href={user.githubUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="p-2 rounded-lg text-slate-400 hover:text-slate-900 hover:bg-slate-100 dark:hover:text-white dark:hover:bg-slate-700 transition-all"
+              title="GitHub"
+            >
+              <Github size={18} />
+            </a>
+          )}
+          {user.linkedinUrl && (
+            <a
+              href={user.linkedinUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="p-2 rounded-lg text-slate-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-all"
+              title="LinkedIn"
+            >
+              <Linkedin size={18} />
+            </a>
+          )}
+        </div>
+      </div>
 
-        {/* Bio */}
-        <p className="text-sm text-slate-600 dark:text-slate-300 mb-6 line-clamp-2 min-h-[40px]">
-          {user.bio || "Sem descrição disponível."}
+      <div className="z-10 mb-4">
+        <h3 className="font-bold text-lg text-slate-900 dark:text-white truncate leading-tight group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+          {user.name}
+        </h3>
+        <div className="flex flex-wrap gap-2 mt-2">
+          {user.niche ? (
+            <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-md bg-slate-100 dark:bg-slate-700/50 text-xs font-medium text-slate-600 dark:text-slate-300">
+              {getNicheIcon(user.niche, "w-3 h-3 text-slate-500")}
+              <span className="capitalize">{user.niche.replace('_', ' ')}</span>
+            </span>
+          ) : (
+            <span className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-slate-50 dark:bg-slate-800/50 text-xs text-slate-400">
+              <Briefcase size={10} />
+              <span>Sem nicho</span>
+            </span>
+          )}
+          {user.location && (
+            <span className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-slate-50 dark:bg-slate-800/50 text-xs text-slate-500 dark:text-slate-400">
+              <MapPin size={10} />
+              <span className="truncate max-w-[80px]">{user.location}</span>
+            </span>
+          )}
+        </div>
+      </div>
+
+      <div className="z-10 flex-grow mb-6">
+        <p className="text-sm text-slate-600 dark:text-slate-400 line-clamp-2 min-h-[40px] leading-relaxed">
+          {user.bio || <span className="italic opacity-50">Sem descrição disponível para este perfil.</span>}
         </p>
+      </div>
 
-        {/* Stats Grid */}
-        <div className="grid grid-cols-2 gap-2 mb-6 mt-auto">
-          <div className="bg-slate-50 dark:bg-slate-800/50 rounded-lg p-2 text-center">
-            <div className="text-lg font-bold text-slate-900 dark:text-white">{user.quizStats.totalCompleted}</div>
-            <div className="text-xs text-slate-500 dark:text-slate-400">Quizzes</div>
+      <div className="z-10 mt-auto space-y-4">
+        <div className="grid grid-cols-2 gap-3">
+          <div className="bg-slate-50 dark:bg-slate-700/30 rounded-xl p-2.5 text-center border border-slate-100 dark:border-slate-700">
+            <div className="text-lg font-bold text-slate-900 dark:text-white leading-none mb-1">
+              {user.quizStats.totalCompleted}
+            </div>
+            <div className="text-[10px] uppercase font-bold tracking-wider text-slate-500 dark:text-slate-400">
+              Quizzes
+            </div>
           </div>
-          <div className="bg-slate-50 dark:bg-slate-800/50 rounded-lg p-2 text-center">
-            <div className={`text-lg font-bold ${user.quizStats.averageScore >= 70 ? 'text-green-600' :
-              user.quizStats.averageScore >= 50 ? 'text-yellow-600' : 'text-slate-900 dark:text-white'
+          <div className="bg-slate-50 dark:bg-slate-700/30 rounded-xl p-2.5 text-center border border-slate-100 dark:border-slate-700">
+            <div className={`text-lg font-bold leading-none mb-1 ${user.quizStats.averageScore >= 80 ? 'text-green-500' :
+              user.quizStats.averageScore >= 50 ? 'text-orange-500' :
+                'text-slate-900 dark:text-white'
               }`}>
               {user.quizStats.averageScore}%
             </div>
-            <div className="text-xs text-slate-500 dark:text-slate-400">Média</div>
+            <div className="text-[10px] uppercase font-bold tracking-wider text-slate-500 dark:text-slate-400">
+              Média
+            </div>
           </div>
         </div>
 
-        {/* Botão de Ação */}
         {!isOwnProfile && (
           <button
             onClick={(e) => {
               e.stopPropagation();
               onToggleFollow(user);
             }}
-            className={`w-full btn ${user.isFollowing
-              ? 'btn-outline border-slate-200 hover:border-red-500 hover:text-red-500 hover:bg-red-50 dark:border-slate-700 dark:hover:bg-red-900/20'
-              : 'btn-primary'
-              } gap-2`}
+            className={`w-full py-2.5 px-4 rounded-xl font-medium text-sm flex items-center justify-center gap-2 transition-all duration-200 ${user.isFollowing
+              ? 'bg-transparent border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:border-red-500 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20'
+              : 'bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg shadow-indigo-500/20 hover:shadow-indigo-500/40 active:scale-[0.98]'
+              }`}
           >
             {user.isFollowing ? (
               <>
-                <UserMinus size={18} />
-                Deixar de Seguir
+                <UserMinus size={16} />
+                <span>Deixar de Seguir</span>
               </>
             ) : (
               <>
-                <UserPlus size={18} />
-                Seguir
+                <UserPlus size={16} />
+                <span>Seguir</span>
               </>
             )}
           </button>

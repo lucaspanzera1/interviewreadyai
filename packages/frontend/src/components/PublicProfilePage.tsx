@@ -16,6 +16,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { toast } from 'react-toastify';
 import Loading from './Loading';
 import ActivityHeatmap from './ActivityHeatmap';
+import { getNicheIcon } from '../utils/nicheIcons';
 
 const CAREER_TIME_LABELS: Record<string, string> = {
   '0-1': 'Menos de 1 ano',
@@ -186,7 +187,7 @@ const PublicProfilePage: React.FC = () => {
               <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 text-sm text-slate-600 dark:text-slate-400">
                 {profile.niche && (
                   <div className="flex items-center gap-1.5">
-                    <Briefcase size={16} className="text-primary-500" />
+                    {getNicheIcon(profile.niche, "w-4 h-4 text-primary-500")}
                     <span>{NICHE_LABELS[profile.niche] || profile.niche}</span>
                   </div>
                 )}

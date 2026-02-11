@@ -47,9 +47,12 @@ const CreateInterviewPage: React.FC = () => {
         setError(null);
 
         try {
-            // Validar que é uma URL do LinkedIn
-            if (!jobLink.includes('linkedin.com/jobs')) {
-                throw new Error('Por favor, insira um link válido de vaga do LinkedIn');
+            // Validar que é uma URL válida de um dos sites suportados
+            const supportedSites = ['linkedin.com', 'gupy.io', 'gupy.com.br', 'infojobs.com', 'infojobs.net', 'glassdoor.com', 'glassdoor.com.br', 'indeed.com', 'indeed.com.br'];
+            const isValidUrl = supportedSites.some(site => jobLink.includes(site));
+
+            if (!isValidUrl) {
+                throw new Error('Por favor, insira um link válido de vaga de um dos sites suportados: LinkedIn, Gupy, Infojobs, Glassdoor ou Indeed');
             }
 
             // Verificar se o usuário tem tokens suficientes (2 tokens)
@@ -59,7 +62,7 @@ const CreateInterviewPage: React.FC = () => {
 
             // Gerar a simulação de entrevista
             const result = await apiClient.generateInterview({
-                linkedinUrl: jobLink,
+                jobUrl: jobLink,
                 numberOfQuestions,
                 experienceLevel: experienceLevel || undefined
             });
@@ -169,13 +172,13 @@ const CreateInterviewPage: React.FC = () => {
                                 id="jobLink"
                                 value={jobLink}
                                 onChange={(e) => setJobLink(e.target.value)}
-                                placeholder="https://linkedin.com/jobs/view/..."
+                                placeholder="https://www.linkedin.com/jobs/view/... ou outros sites suportados"
                                 className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 placeholder-slate-500 dark:placeholder-slate-400 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-shadow duration-200"
                                 required
                                 disabled={isLoading}
                             />
                             <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-                                Cole o link completo da vaga do LinkedIn aqui
+                                Cole o link completo da vaga (LinkedIn, Gupy, Infojobs, Glassdoor, Indeed)
                             </p>
                         </div>
 

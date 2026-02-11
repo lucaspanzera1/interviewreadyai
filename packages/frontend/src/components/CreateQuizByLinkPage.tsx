@@ -16,15 +16,26 @@ const CreateQuizByLinkPage: React.FC = () => {
     const { user, refreshUser } = useAuth();
     const { showToast } = useToast();
 
+    const platforms = [
+        { id: 'linkedin', name: 'LinkedIn', logo: 'https://upload.wikimedia.org/wikipedia/commons/c/ca/LinkedIn_logo_initials.png' },
+        { id: 'gupy', name: 'Gupy', logo: 'https://cdn.worldvectorlogo.com/logos/gupy-1.svg' },
+        { id: 'infojobs', name: 'InfoJobs', logo: 'https://cdn.worldvectorlogo.com/logos/infojobs.svg' },
+        { id: 'glassdoor', name: 'Glassdoor', logo: 'https://cdn.worldvectorlogo.com/logos/glassdoor.svg' },
+        { id: 'indeed', name: 'Indeed', logo: 'https://cdn.worldvectorlogo.com/logos/indeed-1.svg' },
+    ];
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsLoading(true);
         setError(null);
 
         try {
-            // Validar que é uma URL do LinkedIn
-            if (!jobLink.includes('linkedin.com/jobs')) {
-                throw new Error('Por favor, insira um link válido de vaga do LinkedIn');
+            // Validar que é uma URL válida de um dos sites suportados
+            const supportedSites = ['linkedin.com', 'gupy.io', 'gupy.com.br', 'infojobs.com', 'infojobs.net', 'glassdoor.com', 'glassdoor.com.br', 'indeed.com', 'indeed.com.br'];
+            const isValidUrl = supportedSites.some(site => jobLink.includes(site));
+
+            if (!isValidUrl) {
+                throw new Error('Por favor, insira um link válido de vaga de um dos sites suportados: LinkedIn, Gupy, Infojobs, Glassdoor ou Indeed');
             }
 
             // Verificar se o usuário tem tokens
@@ -33,7 +44,7 @@ const CreateQuizByLinkPage: React.FC = () => {
             }
 
             // Gerar o quiz
-            await apiClient.generateJobQuiz({ linkedinUrl: jobLink });
+            await apiClient.generateJobQuiz({ jobUrl: jobLink });
 
             // Atualizar dados do usuário (para atualizar saldo de tokens)
             await refreshUser();
@@ -54,7 +65,8 @@ const CreateQuizByLinkPage: React.FC = () => {
         }
     };
 
-    const isValidLinkedInUrl = jobLink.includes('linkedin.com/jobs');
+    const supportedSites = ['linkedin.com', 'gupy.io', 'gupy.com.br', 'infojobs.com', 'infojobs.net', 'glassdoor.com', 'glassdoor.com.br', 'indeed.com', 'indeed.com.br'];
+    const isValidJobUrl = supportedSites.some(site => jobLink.includes(site));
 
     return (
         <div className="flex flex-col min-h-full transition-colors duration-300">
@@ -124,55 +136,42 @@ const CreateQuizByLinkPage: React.FC = () => {
                                     <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">
                                         Selecione a Plataforma
                                     </label>
-                                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                                        {/* LinkedIn Option */}
-                                        <div
-                                            className={`relative flex items-center justify-center p-4 rounded-xl border-2 cursor-pointer transition-all ${selectedPlatform === 'linkedin'
-                                                ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20 shadow-md transform scale-[1.02]'
-                                                : 'border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600'
-                                                }`}
-                                            onClick={() => setSelectedPlatform('linkedin')}
-                                        >
-                                            <div className="flex flex-col items-center gap-3">
-                                                <img
-                                                    src="https://upload.wikimedia.org/wikipedia/commons/c/ca/LinkedIn_logo_initials.png"
-                                                    alt="LinkedIn"
-                                                    className="h-10 w-10 object-contain"
-                                                />
-                                                <span className="font-bold text-slate-900 dark:text-white">LinkedIn</span>
-                                                {selectedPlatform === 'linkedin' && (
-                                                    <div className="absolute top-2 right-2 text-primary-600">
-                                                        <div className="w-2 h-2 rounded-full bg-primary-600"></div>
-                                                    </div>
-                                                )}
+                                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+                                        {platforms.map((platform) => (
+                                            <div
+                                                key={platform.id}
+                                                className={`relative flex items-center justify-center p-4 rounded-xl border-2 cursor-pointer transition-all ${selectedPlatform === platform.id
+                                                    ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20 shadow-md transform scale-[1.02]'
+                                                    : 'border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600'
+                                                    }`}
+                                                onClick={() => setSelectedPlatform(platform.id)}
+                                            >
+                                                <div className="flex flex-col items-center gap-3">
+                                                    <img
+                                                        src={platform.logo}
+                                                        alt={platform.name}
+                                                        className="h-8 w-8 object-contain"
+                                                        onError={(e) => {
+                                                            // Fallback to text if logo fails to load
+                                                            e.currentTarget.style.display = 'none';
+                                                            e.currentTarget.nextElementSibling!.textContent = platform.name.charAt(0);
+                                                        }}
+                                                    />
+                                                    <span className="font-bold text-slate-900 dark:text-white text-sm">{platform.name}</span>
+                                                    {selectedPlatform === platform.id && (
+                                                        <div className="absolute top-2 right-2 text-primary-600">
+                                                            <div className="w-2 h-2 rounded-full bg-primary-600"></div>
+                                                        </div>
+                                                    )}
+                                                </div>
                                             </div>
-                                        </div>
-
-                                        {/* Gupy Option (Disabled) */}
-                                        <div className="relative flex items-center justify-center p-4 rounded-xl border border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 opacity-60 cursor-not-allowed">
-                                            <div className="flex flex-col items-center gap-2">
-                                                <span className="font-semibold text-slate-500 dark:text-slate-400">Gupy</span>
-                                                <span className="text-[10px] uppercase font-bold px-2 py-0.5 bg-slate-200 dark:bg-slate-700 text-slate-500 rounded-full">
-                                                    Em Breve
-                                                </span>
-                                            </div>
-                                        </div>
-
-                                        {/* InfoJobs Option (Disabled) */}
-                                        <div className="relative flex items-center justify-center p-4 rounded-xl border border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 opacity-60 cursor-not-allowed">
-                                            <div className="flex flex-col items-center gap-2">
-                                                <span className="font-semibold text-slate-500 dark:text-slate-400">InfoJobs</span>
-                                                <span className="text-[10px] uppercase font-bold px-2 py-0.5 bg-slate-200 dark:bg-slate-700 text-slate-500 rounded-full">
-                                                    Em Breve
-                                                </span>
-                                            </div>
-                                        </div>
+                                        ))}
                                     </div>
                                 </div>
 
                                 <div className="space-y-2">
                                     <label htmlFor="job-link" className="block text-sm font-medium text-slate-700 dark:text-slate-300">
-                                        Link da Vaga do LinkedIn
+                                        Link da Vaga
                                     </label>
                                     <div className="relative rounded-xl shadow-sm">
                                         <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
@@ -184,21 +183,21 @@ const CreateQuizByLinkPage: React.FC = () => {
                                             id="job-link"
                                             disabled={isLoading}
                                             className="block w-full pl-11 pr-4 py-4 sm:text-lg border-slate-200 dark:border-slate-600 rounded-xl bg-white dark:bg-slate-900/50 text-slate-900 dark:text-white placeholder-slate-400 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-                                            placeholder="https://www.linkedin.com/jobs/view/..."
+                                            placeholder={`https://www.${selectedPlatform === 'linkedin' ? 'linkedin.com/jobs/view' : selectedPlatform === 'gupy' ? 'gupy.io' : selectedPlatform === 'infojobs' ? 'infojobs.com' : selectedPlatform === 'glassdoor' ? 'glassdoor.com' : 'indeed.com'}/...`}
                                             value={jobLink}
                                             onChange={(e) => setJobLink(e.target.value)}
                                             required
                                         />
                                     </div>
                                     <p className="text-xs text-slate-500 dark:text-slate-400 mt-2">
-                                        Cole aqui o link completo de uma vaga do LinkedIn
+                                        Cole aqui o link completo de uma vaga do {platforms.find(p => p.id === selectedPlatform)?.name}
                                     </p>
                                 </div>
 
                                 <button
                                     type="submit"
-                                    disabled={isLoading || !isValidLinkedInUrl || !user?.tokens || user.tokens < 1}
-                                    className={`w-full flex items-center justify-center gap-3 px-8 py-4 border border-transparent text-lg font-bold rounded-xl text-white transition-all duration-300 ${isLoading || !isValidLinkedInUrl || !user?.tokens || user.tokens < 1
+                                    disabled={isLoading || !isValidJobUrl || !user?.tokens || user.tokens < 1}
+                                    className={`w-full flex items-center justify-center gap-3 px-8 py-4 border border-transparent text-lg font-bold rounded-xl text-white transition-all duration-300 ${isLoading || !isValidJobUrl || !user?.tokens || user.tokens < 1
                                         ? 'bg-slate-400 dark:bg-slate-600 cursor-not-allowed'
                                         : 'bg-gradient-to-r from-primary-600 to-indigo-600 hover:from-primary-700 hover:to-indigo-700 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5'
                                         }`}

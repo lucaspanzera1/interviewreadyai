@@ -3,7 +3,7 @@ import { IsString, IsUrl, IsNumber, IsOptional, Min, Max } from 'class-validator
 export class GenerateInterviewDto {
   @IsString()
   @IsUrl()
-  linkedinUrl: string;
+  jobUrl: string;
 
   @IsOptional()
   @IsNumber()

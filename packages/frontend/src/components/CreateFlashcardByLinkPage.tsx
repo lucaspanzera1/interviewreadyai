@@ -23,9 +23,12 @@ const CreateFlashcardByLinkPage: React.FC = () => {
         setError(null);
 
         try {
-            // Validar que é uma URL do LinkedIn
-            if (!jobLink.includes('linkedin.com/jobs')) {
-                throw new Error('Por favor, insira um link válido de vaga do LinkedIn');
+            // Validar que é uma URL válida de um dos sites suportados
+            const supportedSites = ['linkedin.com', 'gupy.io', 'gupy.com.br', 'infojobs.com', 'infojobs.net', 'glassdoor.com', 'glassdoor.com.br', 'indeed.com', 'indeed.com.br'];
+            const isValidUrl = supportedSites.some(site => jobLink.includes(site));
+
+            if (!isValidUrl) {
+                throw new Error('Por favor, insira um link válido de vaga de um dos sites suportados: LinkedIn, Gupy, Infojobs, Glassdoor ou Indeed');
             }
 
             // Verificar se o usuário tem tokens
@@ -35,7 +38,7 @@ const CreateFlashcardByLinkPage: React.FC = () => {
 
             // Gerar os flashcards
             await apiClient.generateJobFlashcard({
-                linkedinUrl: jobLink,
+                jobUrl: jobLink,
                 nivel: selectedLevel,
                 quantidade_cards: cardCount
             });
@@ -59,7 +62,8 @@ const CreateFlashcardByLinkPage: React.FC = () => {
         }
     };
 
-    const isValidLinkedInUrl = jobLink.includes('linkedin.com/jobs');
+    const supportedSites = ['linkedin.com', 'gupy.io', 'gupy.com.br', 'infojobs.com', 'infojobs.net', 'glassdoor.com', 'glassdoor.com.br', 'indeed.com', 'indeed.com.br'];
+    const isValidJobUrl = supportedSites.some(site => jobLink.includes(site));
 
     return (
         <div className="flex flex-col min-h-full transition-colors duration-300">
@@ -143,7 +147,7 @@ const CreateFlashcardByLinkPage: React.FC = () => {
                                             className="w-full px-4 py-3 rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white placeholder-slate-500 dark:placeholder-slate-400 focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
                                             required
                                         />
-                                        {isValidLinkedInUrl && (
+                                        {isValidJobUrl && (
                                             <div className="absolute right-3 top-1/2 -translate-y-1/2">
                                                 <div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
                                                     <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -234,7 +238,7 @@ const CreateFlashcardByLinkPage: React.FC = () => {
                                 <div className="pt-4">
                                     <button
                                         type="submit"
-                                        disabled={isLoading || !jobLink || !isValidLinkedInUrl || !user?.tokens || user.tokens < 2}
+                                        disabled={isLoading || !jobLink || !isValidJobUrl || !user?.tokens || user.tokens < 2}
                                         className="w-full py-3 px-6 bg-gradient-to-r from-primary-600 to-primary-700 hover:from-primary-700 hover:to-primary-800 disabled:from-slate-400 disabled:to-slate-500 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-[1.02] disabled:scale-100 disabled:cursor-not-allowed flex items-center justify-center gap-3"
                                     >
                                         {isLoading ? (
