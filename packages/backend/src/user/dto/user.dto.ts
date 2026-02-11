@@ -56,4 +56,8 @@ export class UserDto {
   @IsOptional()
   hasCompletedOnboarding?: boolean;
 
+  @ApiProperty({ description: 'Indica se o perfil do usuário é público', required: false })
+  @IsOptional()
+  isProfilePublic?: boolean;
+
 }

@@ -20,13 +20,28 @@ const DISPLAY_DIFFICULTY: Record<string, string> = {
     'EXPERT': 'Expert'
 };
 
+const NICHOS = [
+  { value: 'tecnologia', label: 'Tecnologia' },
+  { value: 'educacao', label: 'Educação' },
+  { value: 'recursos_humanos', label: 'Recursos Humanos' },
+  { value: 'financeiro', label: 'Financeiro' },
+  { value: 'saude', label: 'Saúde' },
+  { value: 'vendas', label: 'Vendas' },
+  { value: 'marketing', label: 'Marketing' },
+  { value: 'juridico', label: 'Jurídico' },
+  { value: 'engenharia', label: 'Engenharia' },
+  { value: 'design', label: 'Design' },
+  { value: 'produto', label: 'Produto' },
+  { value: 'outro', label: 'Outro' },
+];
+
 const FreeQuizzesPage: React.FC = () => {
     const navigate = useNavigate();
     const { user, refreshUser } = useAuth();
     const { showToast } = useToast();
-    const [categories, setCategories] = useState<string[]>([]);
+    const [categories, setCategories] = useState<{value: string, label: string}[]>([]);
     const [difficulties, setDifficulties] = useState<string[]>([]);
-    const [selectedCategory, setSelectedCategory] = useState('Todas');
+    const [selectedCategoryValue, setSelectedCategoryValue] = useState('Todas');
     const [selectedDifficulty, setSelectedDifficulty] = useState('Todas');
     const [searchQuery, setSearchQuery] = useState('');
     const [publicQuizzes, setPublicQuizzes] = useState<any[]>([]);
@@ -86,22 +101,22 @@ const FreeQuizzesPage: React.FC = () => {
     useEffect(() => {
         setCurrentPage(1);
         setPublicQuizzes([]);
-    }, [selectedCategory, selectedDifficulty, debouncedSearch]);
+    }, [selectedCategoryValue, selectedDifficulty, debouncedSearch]);
 
     // Load public quizzes when filters or page change
     useEffect(() => {
         loadPublicQuizzes();
-    }, [selectedCategory, selectedDifficulty, currentPage, debouncedSearch]);
+    }, [selectedCategoryValue, selectedDifficulty, currentPage, debouncedSearch]);
 
     const loadFilters = async () => {
         try {
-            const { categories, levels } = await apiClient.getPublicFilters();
-            setCategories(['Todas', ...categories]);
+            const { levels } = await apiClient.getPublicFilters();
+            setCategories([{value: 'Todas', label: 'Todas'}, ...NICHOS]);
             setDifficulties(['Todas', ...levels]);
         } catch (error) {
             console.error('Erro ao carregar filtros:', error);
             // Fallbacks in case API fails
-            setCategories(['Todas', 'Fundamentos', 'Frontend', 'Backend', 'DevOps']);
+            setCategories([{value: 'Todas', label: 'Todas'}, ...NICHOS]);
             setDifficulties(['Todas', 'INICIANTE', 'MEDIO', 'DIFÍCIL', 'EXPERT']);
         }
     };
@@ -144,7 +159,7 @@ const FreeQuizzesPage: React.FC = () => {
             const response = await apiClient.getPublicQuizzes(
                 currentPage,
                 12,
-                selectedCategory,
+                selectedCategoryValue,
                 selectedDifficulty,
                 debouncedSearch
             );
@@ -308,14 +323,14 @@ const FreeQuizzesPage: React.FC = () => {
                     </div>
 
                     <select
-                        value={selectedCategory}
+                        value={selectedCategoryValue}
                         onChange={(e) => {
-                            setSelectedCategory(e.target.value);
+                            setSelectedCategoryValue(e.target.value);
                             setCurrentPage(1);
                         }}
                         className="text-sm border-slate-200 dark:border-slate-700 rounded-lg bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-200"
                     >
-                        {categories.map(cat => <option key={cat} value={cat}>{cat}</option>)}
+                        {categories.map(cat => <option key={cat.value} value={cat.value}>{cat.label}</option>)}
                     </select>
 
                     <select
@@ -421,7 +436,7 @@ const FreeQuizzesPage: React.FC = () => {
                     <h3 className="text-lg font-medium text-slate-900 dark:text-white">Nenhum quiz encontrado</h3>
                     <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">Tente ajustar os filtros ou sua busca.</p>
                     <button
-                        onClick={() => { setSearchQuery(''); setSelectedCategory('Todas'); setSelectedDifficulty('Todas'); }}
+                        onClick={() => { setSearchQuery(''); setSelectedCategoryValue('Todas'); setSelectedDifficulty('Todas'); }}
                         className="mt-4 text-primary-600 font-medium text-sm hover:underline"
                     >
                         Limpar filtros

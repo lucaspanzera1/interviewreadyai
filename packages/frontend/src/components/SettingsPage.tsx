@@ -35,7 +35,7 @@ const SettingsPage: React.FC = () => {
 
     // Privacy Settings
     const [isProfilePublic, setIsProfilePublic] = useState(() => {
-        return user?.isProfilePublic !== undefined ? user.isProfilePublic : false;
+        return user?.isProfilePublic !== undefined ? user.isProfilePublic : true;
     });
     const [isUpdatingPrivacy, setIsUpdatingPrivacy] = useState(false);
 
