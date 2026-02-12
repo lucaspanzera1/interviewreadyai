@@ -21,6 +21,7 @@ import {
     LockClosedIcon,
     FireIcon,
     ComputerDesktopIcon,
+    UserIcon,
 } from '@heroicons/react/24/outline';
 
 import {
@@ -95,6 +96,65 @@ const Sidebar: React.FC = () => {
         { name: 'Pacotes de Tokens', path: '/token-packages', icon: Gift, activeIcon: Gift },
     ];
 
+    const [subItems, setSubItems] = useState<Record<string, { label: string, icon: React.ElementType, path?: string } | null>>({});
+    const [hoveredItem, setHoveredItem] = useState<string | null>(null);
+    const hoverTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+    const handleMouseEnter = (name: string) => {
+        if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
+        hoverTimeoutRef.current = setTimeout(() => {
+            setHoveredItem(name);
+        }, 2000);
+    };
+
+    const handleMouseLeave = () => {
+        if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
+        setHoveredItem(null);
+    };
+
+    const hoverActions: Record<string, { label: string, icon: React.ElementType, path: string }> = {
+        'Quizzes': { label: 'Novo Quiz', icon: PlusCircleIcon, path: '/create-quiz' },
+        'Simulações': { label: 'Nova Simulação', icon: PlusCircleIcon, path: '/create-interview' },
+        'Flashcards': { label: 'Novo Flashcard', icon: PlusCircleIcon, path: '/create-flashcard' },
+    };
+
+    useEffect(() => {
+        const updateSubItems = async () => {
+            const newSubItems: Record<string, { label: string, icon: React.ElementType, path?: string } | null> = {};
+
+            // 1. Profile Context
+            const profileMatch = location.pathname.match(/^\/profile\/([^/]+)$/);
+            if (profileMatch) {
+                const userId = profileMatch[1];
+                // Ignore specific non-user routes
+                if (userId !== 'reward-history' && userId !== 'quiz-history') {
+                    try {
+                        const { socialApi } = await import('../lib/socialApi');
+                        const profile = await socialApi.getPublicProfile(userId);
+                        newSubItems['Comunidade'] = { label: profile.name, icon: UserIcon, path: `/profile/${userId}` };
+                    } catch (error) {
+                        console.error('Error fetching viewed user:', error);
+                    }
+                }
+            }
+
+            // 2. Creation Contexts
+            if (location.pathname === '/create-quiz') {
+                newSubItems['Quizzes'] = { label: 'Novo Quiz', icon: PlusCircleIcon, path: '/create-quiz' };
+            }
+            if (location.pathname === '/create-interview') {
+                newSubItems['Simulações'] = { label: 'Nova Simulação', icon: PlusCircleIcon, path: '/create-interview' };
+            }
+            if (location.pathname === '/create-flashcard') {
+                newSubItems['Flashcards'] = { label: 'Novo Flashcard', icon: PlusCircleIcon, path: '/create-flashcard' };
+            }
+
+            setSubItems(newSubItems);
+        };
+
+        updateSubItems();
+    }, [location.pathname]);
+
     const handleNavClick = (path: string, action?: () => void) => {
         if (action) {
             action();
@@ -142,45 +202,93 @@ const Sidebar: React.FC = () => {
                 {mainNavItems.map((item) => {
                     const active = isActive(item.path);
                     const Icon = active ? item.activeIcon : item.icon;
+                    // potentialSubItem: The data to display (if any exists for this item)
+                    const potentialSubItem = subItems[item.name] || hoverActions[item.name];
+                    // isActiveSubItem: Whether it should be fully visible
+                    const isActiveSubItem = !!subItems[item.name] || (hoveredItem === item.name);
 
                     return (
-                        <button
+                        <div
                             key={item.name}
-                            onClick={() => {
-                                if (item.locked) {
-                                    navigate('/tokens');
-                                } else {
-                                    handleNavClick(item.path);
-                                }
-                            }}
-                            className={`w-full flex items-center px-3 py-2.5 rounded-xl transition-all duration-200 border-l-4 ${active
-                                ? 'bg-primary-50 dark:bg-primary-900/10 text-primary-700 dark:text-primary-300 font-semibold border-primary-600'
-                                : item.locked
-                                    ? 'text-slate-300 dark:text-slate-600 cursor-not-allowed border-transparent'
-                                    : 'text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white border-transparent'
-                                } ${isCollapsed ? 'justify-center px-0' : ''}`}
-                            title={isCollapsed ? item.name : undefined}
-                            disabled={item.locked}
+                            className="w-full relative"
+                            onMouseEnter={() => handleMouseEnter(item.name)}
+                            onMouseLeave={handleMouseLeave}
                         >
-                            <div className="relative">
-                                <Icon className={`w-5 h-5 flex-shrink-0 transition-colors ${active ? 'text-primary-600 dark:text-primary-400' : item.locked ? 'text-slate-300 dark:text-slate-600' : 'text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-300'}`} />
-                                {item.locked && (
-                                    <LockClosedIcon className="w-3 h-3 absolute -top-1 -right-1 text-slate-400 dark:text-slate-500" />
-                                )}
-                            </div>
-                            <div className={`overflow-hidden whitespace-nowrap transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] ${isCollapsed ? 'max-w-0 opacity-0' : 'max-w-[200px] opacity-100'} w-full`}>
-                                <div className="flex items-center justify-between">
-                                    <span className="text-sm pl-3">{item.name}</span>
-                                    {/* @ts-ignore */}
-                                    {item.badge && (
-                                        <span className="ml-2 text-[10px] px-1.5 py-0.5 rounded shadow-sm font-bold bg-primary-100 text-primary-700 dark:bg-primary-900/50 dark:text-primary-400 border border-primary-200 dark:border-primary-700/50 uppercase tracking-wide">
-                                            {/* @ts-ignore */}
-                                            {item.badge}
-                                        </span>
+                            <button
+                                onClick={() => {
+                                    if (item.locked) {
+                                        navigate('/tokens');
+                                    } else {
+                                        handleNavClick(item.path);
+                                    }
+                                }}
+                                className={`w-full flex items-center px-3 py-2.5 rounded-xl transition-all duration-200 border-l-4 ${active
+                                    ? 'bg-primary-50 dark:bg-primary-900/10 text-primary-700 dark:text-primary-300 font-semibold border-primary-600'
+                                    : item.locked
+                                        ? 'text-slate-300 dark:text-slate-600 cursor-not-allowed border-transparent'
+                                        : 'text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white border-transparent'
+                                    } ${isCollapsed ? 'justify-center px-0' : ''}`}
+                                title={isCollapsed ? item.name : undefined}
+                                disabled={item.locked}
+                            >
+                                <div className="relative">
+                                    <Icon className={`w-5 h-5 flex-shrink-0 transition-colors ${active ? 'text-primary-600 dark:text-primary-400' : item.locked ? 'text-slate-300 dark:text-slate-600' : 'text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-300'}`} />
+                                    {item.locked && (
+                                        <LockClosedIcon className="w-3 h-3 absolute -top-1 -right-1 text-slate-400 dark:text-slate-500" />
                                     )}
                                 </div>
-                            </div>
-                        </button>
+                                <div className={`overflow-hidden whitespace-nowrap transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] ${isCollapsed ? 'max-w-0 opacity-0' : 'max-w-[200px] opacity-100'} w-full`}>
+                                    <div className="flex items-center justify-between">
+                                        <span className="text-sm pl-3">{item.name}</span>
+                                        {/* @ts-ignore */}
+                                        {item.badge && (
+                                            <span className="ml-2 text-[10px] px-1.5 py-0.5 rounded shadow-sm font-bold bg-primary-100 text-primary-700 dark:bg-primary-900/50 dark:text-primary-400 border border-primary-200 dark:border-primary-700/50 uppercase tracking-wide">
+                                                {/* @ts-ignore */}
+                                                {item.badge}
+                                            </span>
+                                        )}
+                                    </div>
+                                </div>
+                            </button>
+
+                            {/* Sub-item via Context or Hover */}
+                            {potentialSubItem && !isCollapsed && (
+                                <div
+                                    className={`overflow-hidden transition-all duration-300 ease-in-out ${isActiveSubItem ? 'max-h-14 mt-2 opacity-100' : 'max-h-0 mt-0 opacity-0'}`}
+                                >
+                                    <div
+                                        onClick={(e) => {
+                                            if (potentialSubItem.path) {
+                                                e.stopPropagation();
+                                                handleNavClick(potentialSubItem.path);
+                                            }
+                                        }}
+                                        className={`ml-9 pl-3 border-l-2 cursor-pointer hover:opacity-80 transition-transform duration-300 ease-in-out ${isActiveSubItem ? 'translate-y-0' : '-translate-y-2'} ${theme.includes('orange')
+                                            ? 'border-orange-300 dark:border-orange-500'
+                                            : 'border-purple-300 dark:border-purple-500'
+                                            }`}
+                                    >
+                                        <div className="flex items-center gap-2 py-1">
+                                            {(() => {
+                                                const SubIcon = potentialSubItem.icon;
+                                                return SubIcon && (
+                                                    <SubIcon className={`w-3.5 h-3.5 ${theme.includes('orange')
+                                                        ? 'text-orange-600 dark:text-orange-400'
+                                                        : 'text-purple-600 dark:text-purple-400'
+                                                        }`} />
+                                                );
+                                            })()}
+                                            <span className={`text-xs font-semibold truncate max-w-[140px] ${theme.includes('orange')
+                                                ? 'text-orange-600 dark:text-orange-400'
+                                                : 'text-purple-600 dark:text-purple-400'
+                                                }`}>
+                                                {potentialSubItem.label}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
                     );
                 })}
 

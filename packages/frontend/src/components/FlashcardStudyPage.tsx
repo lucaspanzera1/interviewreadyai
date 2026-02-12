@@ -4,10 +4,7 @@ import PageTitle from './PageTitle';
 import CardHistoryModal from './CardHistoryModal';
 import {
     ArrowLeftIcon,
-    ArrowRightIcon,
     ArrowPathIcon,
-    CheckIcon,
-    XMarkIcon,
     ExclamationTriangleIcon,
     ClockIcon,
     InformationCircleIcon,
