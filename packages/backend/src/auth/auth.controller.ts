@@ -71,7 +71,7 @@ export class AuthController {
       const loginData = await this.authService.googleLogin(req.user);
       
       // Redireciona para o frontend com os tokens como query parameters
-      const frontendUrl = process.env.CORS_ORIGIN || 'http://localhost:3000';
+      const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
       const callbackUrl = new URL('/auth/callback', frontendUrl);
       
       callbackUrl.searchParams.set('access_token', loginData.accessToken);
@@ -81,7 +81,7 @@ export class AuthController {
       res.redirect(callbackUrl.toString());
     } catch (error) {
       // Redireciona para o frontend com erro
-      const frontendUrl = process.env.CORS_ORIGIN || 'http://localhost:3000';
+      const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
       const callbackUrl = new URL('/auth/callback', frontendUrl);
       callbackUrl.searchParams.set('error', 'authentication_failed');
       
@@ -126,7 +126,7 @@ export class AuthController {
       const loginData = await this.authService.githubLogin(req.user);
       
       // Redireciona para o frontend com os tokens como query parameters
-      const frontendUrl = process.env.CORS_ORIGIN || 'http://localhost:3000';
+      const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
       const callbackUrl = new URL('/auth/callback', frontendUrl);
       
       callbackUrl.searchParams.set('access_token', loginData.accessToken);
@@ -136,7 +136,7 @@ export class AuthController {
       res.redirect(callbackUrl.toString());
     } catch (error) {
       // Redireciona para o frontend com erro
-      const frontendUrl = process.env.CORS_ORIGIN || 'http://localhost:3000';
+      const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
       const callbackUrl = new URL('/auth/callback', frontendUrl);
       callbackUrl.searchParams.set('error', 'authentication_failed');
       
