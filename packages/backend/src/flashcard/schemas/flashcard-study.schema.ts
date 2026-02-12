@@ -27,6 +27,32 @@ export class CardProgress {
 
   @Prop({ type: Number, default: 1 })
   interval: number; // Intervalo em dias para próxima revisão
+
+  @Prop({ type: Number, default: 2.5 })
+  easeFactor: number; // Fator de facilidade (inicial 2.5)
+
+  @Prop({ type: Number, default: 0 })
+  repetitions: number; // Número de repetições consecutivas corretas
+
+  @Prop({ type: [Object], default: [] })
+  history: ReviewHistory[]; // Histórico de revisões
+}
+
+export class ReviewHistory {
+  @Prop({ type: Date, required: true })
+  reviewedAt: Date;
+
+  @Prop({ type: String, enum: CardDifficulty, required: true })
+  difficulty: CardDifficulty;
+
+  @Prop({ type: Number, required: true })
+  intervalBefore: number;
+
+  @Prop({ type: Number, required: true })
+  intervalAfter: number;
+
+  @Prop({ type: Number, required: true })
+  easeFactor: number;
 }
 
 @Schema({ timestamps: true })

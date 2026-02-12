@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, MapPin, Briefcase, Github, Linkedin, UserPlus, UserMinus, Filter, X, ChevronLeft, ChevronRight, Sparkles, User } from 'lucide-react';
+import { Search, MapPin, Briefcase, Github, Linkedin, UserPlus, UserMinus, Filter, X, Sparkles, User, Loader2 } from 'lucide-react';
 import { socialApi, PublicUser, SearchUsersParams } from '../lib/socialApi';
 import { useAuth } from '../contexts/AuthContext';
 import { toast } from 'react-toastify';
@@ -50,9 +50,14 @@ const UserSearchPage: React.FC = () => {
   const [showFilters, setShowFilters] = useState(false);
   const isFirstRender = useRef(true);
 
+  const loadMoreRef = useRef<HTMLDivElement>(null);
+
   // Buscar usuários
-  const searchUsers = async (page = 1, term = '', niche = '') => {
+  const searchUsers = async (page = 1, term = '', niche = '', append = false) => {
     setLoading(true);
+    if (!append) {
+      setUsers([]);
+    }
     try {
       const params: SearchUsersParams = {
         page,
@@ -62,7 +67,13 @@ const UserSearchPage: React.FC = () => {
       };
 
       const response = await socialApi.searchUsers(params);
-      setUsers(response.users);
+
+      if (append) {
+        setUsers(prev => [...prev, ...response.users]);
+      } else {
+        setUsers(response.users);
+      }
+
       setPagination(prev => ({ ...prev, total: response.total, page }));
     } catch (error) {
       console.error('Erro ao buscar usuários:', error);
@@ -87,10 +98,24 @@ const UserSearchPage: React.FC = () => {
     searchUsers(1);
   }, []);
 
-  const handlePageChange = (newPage: number) => {
-    searchUsers(newPage, debouncedSearchTerm, selectedNiche);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
+  // Infinite Scroll Observer
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const first = entries[0];
+        if (first.isIntersecting && !loading && users.length < pagination.total) {
+          searchUsers(pagination.page + 1, debouncedSearchTerm, selectedNiche, true);
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    if (loadMoreRef.current) {
+      observer.observe(loadMoreRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, [loading, pagination, debouncedSearchTerm, selectedNiche, users.length]);
 
   const clearFilters = () => {
     setSearchTerm('');
@@ -126,20 +151,18 @@ const UserSearchPage: React.FC = () => {
     }
   };
 
-  const totalPages = Math.ceil(pagination.total / pagination.limit);
-
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-900 pb-20">
       {/* Hero Header */}
-      <div className="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 sticky top-0 z-30 shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 md:px-8 py-6">
+      <div className="sticky top-0 z-30 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 transition-all duration-300">
+        <div className="max-w-7xl mx-auto px-4 md:px-8 py-4">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
-              <h1 className="text-2xl md:text-3xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
+              <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white tracking-tight flex items-center gap-2">
                 <Sparkles className="text-yellow-500" size={24} />
                 Explorar Comunidade
               </h1>
-              <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">
+              <p className="text-slate-500 dark:text-slate-400 font-medium text-sm mt-1">
                 Conecte-se com {pagination.total > 0 ? pagination.total : 'outros'} estudantes incríveis
               </p>
             </div>
@@ -207,7 +230,7 @@ const UserSearchPage: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 md:px-8 py-8">
 
         {/* Loading State */}
-        {loading ? (
+        {loading && users.length === 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {Array.from({ length: 8 }).map((_, i) => (
               <UserCardSkeleton key={i} />
@@ -246,30 +269,15 @@ const UserSearchPage: React.FC = () => {
               </div>
             )}
 
-            {/* Pagination */}
-            {pagination.total > pagination.limit && (
-              <div className="flex justify-center items-center gap-2 mt-12">
-                <button
-                  onClick={() => handlePageChange(pagination.page - 1)}
-                  disabled={pagination.page === 1}
-                  className="p-2 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                >
-                  <ChevronLeft size={20} />
-                </button>
-
-                <span className="text-sm font-medium px-4 text-slate-600 dark:text-slate-400">
-                  Página <span className="text-slate-900 dark:text-white font-bold">{pagination.page}</span> de {totalPages}
-                </span>
-
-                <button
-                  onClick={() => handlePageChange(pagination.page + 1)}
-                  disabled={pagination.page >= totalPages}
-                  className="p-2 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                >
-                  <ChevronRight size={20} />
-                </button>
+            {/* Infinite Scroll Loader */}
+            {(loading && users.length > 0) && (
+              <div className="flex justify-center items-center py-8">
+                <Loader2 className="w-8 h-8 text-indigo-500 animate-spin" />
               </div>
             )}
+
+            {/* Sentinel element for infinite scroll */}
+            <div ref={loadMoreRef} className="h-4 w-full" />
           </>
         )}
       </div>

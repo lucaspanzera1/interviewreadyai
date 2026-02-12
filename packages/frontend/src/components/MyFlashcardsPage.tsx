@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import PageTitle from './PageTitle';
-import { PlusCircleIcon, SparklesIcon, AcademicCapIcon } from '@heroicons/react/24/outline';
+import { PlusCircleIcon, SparklesIcon, AcademicCapIcon, ClockIcon, ChartBarIcon } from '@heroicons/react/24/outline';
 import { useNavigate } from 'react-router-dom';
 import { apiClient } from '../lib/api';
 import { useToast } from '../contexts/ToastContext';
@@ -19,6 +19,14 @@ interface Flashcard {
     vaga_localizacao?: string;
 }
 
+interface StudyStats {
+    totalReviews: number;
+    totalStudyTime: number;
+    streak: number;
+    lastStudySession?: string;
+    cardsStudied: number;
+}
+
 const MyFlashcardsPage: React.FC = () => {
     const navigate = useNavigate();
     const { showToast } = useToast();
@@ -27,6 +35,7 @@ const MyFlashcardsPage: React.FC = () => {
     const [page, setPage] = useState(1);
     const [totalPages, setTotalPages] = useState(0);
     const [startingFlashcard, setStartingFlashcard] = useState<string | null>(null);
+    const [studyStats, setStudyStats] = useState<Record<string, StudyStats>>({});
 
     useEffect(() => {
         loadFlashcards();
@@ -38,6 +47,41 @@ const MyFlashcardsPage: React.FC = () => {
             const response = await apiClient.getUserFlashcards(page, 10);
             setFlashcards(response.flashcards);
             setTotalPages(response.totalPages);
+
+            // Load study stats for each flashcard
+            const statsPromises = response.flashcards.map(async (flashcard: Flashcard) => {
+                try {
+                    const progress = await apiClient.getStudyProgress(flashcard._id);
+                    return {
+                        flashcardId: flashcard._id,
+                        stats: {
+                            totalReviews: progress.totalReviews || 0,
+                            totalStudyTime: progress.totalStudyTime || 0,
+                            streak: progress.streak || 0,
+                            lastStudySession: progress.lastStudySession,
+                            cardsStudied: progress.cardProgress?.filter((cp: any) => cp.timesStudied > 0).length || 0
+                        }
+                    };
+                } catch (error) {
+                    // If no progress exists yet, return default stats
+                    return {
+                        flashcardId: flashcard._id,
+                        stats: {
+                            totalReviews: 0,
+                            totalStudyTime: 0,
+                            streak: 0,
+                            cardsStudied: 0
+                        }
+                    };
+                }
+            });
+
+            const statsResults = await Promise.all(statsPromises);
+            const statsMap: Record<string, StudyStats> = {};
+            statsResults.forEach(({ flashcardId, stats }) => {
+                statsMap[flashcardId] = stats;
+            });
+            setStudyStats(statsMap);
         } catch (error) {
             console.error('Error loading flashcards:', error);
         } finally {
@@ -186,6 +230,48 @@ const MyFlashcardsPage: React.FC = () => {
                                             {flashcard.tags.length > 3 && (
                                                 <div className="bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-400 px-2 py-1 rounded text-xs">
                                                     +{flashcard.tags.length - 3}
+                                                </div>
+                                            )}
+                                        </div>
+                                    )}
+
+                                    {/* Study Stats */}
+                                    {studyStats[flashcard._id] && (
+                                        <div className="bg-slate-50 dark:bg-slate-700/50 rounded-lg p-3 mb-4">
+                                            <div className="grid grid-cols-3 gap-4 text-center">
+                                                <div>
+                                                    <div className="flex items-center justify-center gap-1 text-slate-600 dark:text-slate-400 mb-1">
+                                                        <AcademicCapIcon className="w-3 h-3" />
+                                                        <span className="text-xs">Estudados</span>
+                                                    </div>
+                                                    <div className="text-sm font-semibold text-slate-900 dark:text-white">
+                                                        {studyStats[flashcard._id].cardsStudied}/{flashcard.quantidade_cards}
+                                                    </div>
+                                                </div>
+                                                <div>
+                                                    <div className="flex items-center justify-center gap-1 text-slate-600 dark:text-slate-400 mb-1">
+                                                        <ClockIcon className="w-3 h-3" />
+                                                        <span className="text-xs">Tempo</span>
+                                                    </div>
+                                                    <div className="text-sm font-semibold text-slate-900 dark:text-white">
+                                                        {Math.floor(studyStats[flashcard._id].totalStudyTime / 60)}min
+                                                    </div>
+                                                </div>
+                                                <div>
+                                                    <div className="flex items-center justify-center gap-1 text-slate-600 dark:text-slate-400 mb-1">
+                                                        <ChartBarIcon className="w-3 h-3" />
+                                                        <span className="text-xs">Revisões</span>
+                                                    </div>
+                                                    <div className="text-sm font-semibold text-slate-900 dark:text-white">
+                                                        {studyStats[flashcard._id].totalReviews}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            {studyStats[flashcard._id].lastStudySession && (
+                                                <div className="mt-2 pt-2 border-t border-slate-200 dark:border-slate-600">
+                                                    <div className="text-xs text-slate-500 dark:text-slate-400 text-center">
+                                                        Último estudo: {new Date(studyStats[flashcard._id].lastStudySession!).toLocaleDateString('pt-BR')}
+                                                    </div>
                                                 </div>
                                             )}
                                         </div>

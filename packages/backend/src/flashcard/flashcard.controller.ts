@@ -100,6 +100,16 @@ export class FlashcardController {
     return this.flashcardService.getStudyProgress(flashcardId, user._id.toString());
   }
 
+  @Get(':id/card/:cardIndex/history')
+  @UseGuards(JwtAuthGuard)
+  async getCardHistory(
+    @Param('id') flashcardId: string,
+    @Param('cardIndex') cardIndex: string,
+    @CurrentUser() user: UserDocument,
+  ) {
+    return this.flashcardService.getCardHistory(flashcardId, user._id.toString(), parseInt(cardIndex));
+  }
+
   @Get('user/study-stats')
   @UseGuards(JwtAuthGuard)
   async getStudyStats(

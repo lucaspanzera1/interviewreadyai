@@ -18,6 +18,7 @@ import {
 } from '@nestjs/common';
 import { Response, Request } from 'express';
 import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
+import * as multer from 'multer';
 import { InterviewService } from './interview.service';
 import { GenerateInterviewDto, GeneratedInterview, InterviewAttemptDto } from './dto';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
@@ -162,6 +163,7 @@ export class InterviewController {
   @Post(':id/video-attempt')
   @UseGuards(JwtAuthGuard)
   @UseInterceptors(FilesInterceptor('videos', 10, { // Aceitar até 10 vídeos
+    storage: multer.memoryStorage(),
     limits: {
       fileSize: 50 * 1024 * 1024, // 50MB max por arquivo
     },
