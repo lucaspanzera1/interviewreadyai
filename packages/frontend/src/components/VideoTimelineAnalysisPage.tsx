@@ -318,7 +318,7 @@ const VideoTimelineAnalysisPage: React.FC = () => {
                             <div className="relative w-full h-full flex items-center justify-center bg-zinc-950">
                                 <video
                                     ref={videoRef}
-                                    src={`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api'}/interview/video/${currentVideoPath.replace('/uploads/videos/', '')}${token ? `?token=${token}` : ''}`}
+                                    src={`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api'}/interview/video/${currentVideoPath.replace('/api/uploads/videos/', '')}${token ? `?token=${token}` : ''}`}
                                     className="w-full h-full max-h-full object-contain"
                                     onTimeUpdate={handleTimeUpdate}
                                     onPlay={() => setIsPlaying(true)}
