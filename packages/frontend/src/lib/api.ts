@@ -792,6 +792,11 @@ class ApiClient {
     return res.data;
   }
 
+  async getCardHistory(flashcardId: string, cardIndex: number) {
+    const res = await this.client.get(`/flashcard/${flashcardId}/card/${cardIndex}/history`);
+    return res.data;
+  }
+
   async getUserStudyStats() {
     const res = await this.client.get('/flashcard/user/study-stats');
     return res.data;

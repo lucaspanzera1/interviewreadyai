@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import PageTitle from './PageTitle';
-import { ArrowLeftIcon, ArrowRightIcon, ArrowPathIcon, CheckIcon, XMarkIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline';
+import CardHistoryModal from './CardHistoryModal';
+import { ArrowLeftIcon, ArrowRightIcon, ArrowPathIcon, CheckIcon, XMarkIcon, ExclamationTriangleIcon, ClockIcon, InformationCircleIcon } from '@heroicons/react/24/outline';
 import { apiClient } from '../lib/api';
 import { useToast } from '../contexts/ToastContext';
 
@@ -41,6 +42,8 @@ const FlashcardStudyPage: React.FC = () => {
     }>>([]);
     const [sessionStartTime] = useState<number>(Date.now());
     const [cardStartTime, setCardStartTime] = useState<number>(Date.now());
+    const [showHistoryModal, setShowHistoryModal] = useState(false);
+    const [showInfoModal, setShowInfoModal] = useState(false);
 
     useEffect(() => {
         if (id) {
@@ -53,8 +56,10 @@ const FlashcardStudyPage: React.FC = () => {
         
         try {
             setLoading(true);
-            const response = await apiClient.getFlashcardForStudy(id);
-            setFlashcard(response.flashcard);
+            const [flashcardResponse] = await Promise.all([
+                apiClient.getFlashcardForStudy(id)
+            ]);
+            setFlashcard(flashcardResponse.flashcard);
         } catch (error: any) {
             console.error('Error loading flashcard:', error);
             const message = error.response?.data?.message || 'Erro ao carregar flashcard.';
@@ -196,6 +201,13 @@ const FlashcardStudyPage: React.FC = () => {
                             {Math.round(((currentCardIndex) / flashcard.cards.length) * 100)}%
                         </div>
                     </div>
+                    <button
+                        onClick={() => setShowInfoModal(true)}
+                        className="p-2 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
+                        title="Sobre o sistema de repetição espaçada"
+                    >
+                        <InformationCircleIcon className="w-5 h-5" />
+                    </button>
                 </div>
                 
                 {/* Progress bar */}
@@ -259,8 +271,18 @@ const FlashcardStudyPage: React.FC = () => {
                             )}
                         </div>
 
-                        {/* Card flip indicator */}
-                        <div className="absolute top-4 right-4">
+                        {/* Card controls */}
+                        <div className="absolute top-4 right-4 flex gap-2">
+                            <button
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    setShowHistoryModal(true);
+                                }}
+                                className="p-2 bg-slate-100 dark:bg-slate-700 rounded-full hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors"
+                                title="Ver histórico do card"
+                            >
+                                <ClockIcon className="w-4 h-4 text-slate-600 dark:text-slate-400" />
+                            </button>
                             <div className="p-2 bg-slate-100 dark:bg-slate-700 rounded-full">
                                 <ArrowPathIcon className="w-4 h-4 text-slate-600 dark:text-slate-400" />
                             </div>
@@ -270,43 +292,46 @@ const FlashcardStudyPage: React.FC = () => {
                     {/* Difficulty Buttons - Only show when answer is revealed */}
                     {showAnswer && (
                         <div className="mt-8 space-y-4">
-                            <p className="text-center text-slate-600 dark:text-slate-400">
+                            <p className="text-center text-slate-600 dark:text-slate-400 font-medium">
                                 Como você avalia a dificuldade desta pergunta?
                             </p>
                             <div className="grid grid-cols-3 gap-4">
                                 <button
                                     onClick={(e) => {
                                         e.stopPropagation();
-                                        handleDifficultyChoice('EASY');
+                                        handleDifficultyChoice('HARD');
                                     }}
-                                    className="flex items-center justify-center gap-2 py-4 px-6 bg-green-500 hover:bg-green-600 text-white rounded-xl font-medium transition-colors"
+                                    className="flex flex-col items-center justify-center gap-2 py-4 px-6 bg-red-500 hover:bg-red-600 text-white rounded-xl font-medium transition-all hover:scale-105"
                                 >
-                                    <CheckIcon className="w-5 h-5" />
-                                    Fácil
+                                    <XMarkIcon className="w-6 h-6" />
+                                    <span>Difícil</span>
+                                    <span className="text-xs opacity-90">Revisar amanhã</span>
                                 </button>
                                 <button
                                     onClick={(e) => {
                                         e.stopPropagation();
                                         handleDifficultyChoice('NORMAL');
                                     }}
-                                    className="flex items-center justify-center gap-2 py-4 px-6 bg-yellow-500 hover:bg-yellow-600 text-white rounded-xl font-medium transition-colors"
+                                    className="flex flex-col items-center justify-center gap-2 py-4 px-6 bg-yellow-500 hover:bg-yellow-600 text-white rounded-xl font-medium transition-all hover:scale-105"
                                 >
-                                    <ArrowPathIcon className="w-5 h-5" />
-                                    Normal
+                                    <ArrowPathIcon className="w-6 h-6" />
+                                    <span>Normal</span>
+                                    <span className="text-xs opacity-90">Intervalo padrão</span>
                                 </button>
                                 <button
                                     onClick={(e) => {
                                         e.stopPropagation();
-                                        handleDifficultyChoice('HARD');
+                                        handleDifficultyChoice('EASY');
                                     }}
-                                    className="flex items-center justify-center gap-2 py-4 px-6 bg-red-500 hover:bg-red-600 text-white rounded-xl font-medium transition-colors"
+                                    className="flex flex-col items-center justify-center gap-2 py-4 px-6 bg-green-500 hover:bg-green-600 text-white rounded-xl font-medium transition-all hover:scale-105"
                                 >
-                                    <XMarkIcon className="w-5 h-5" />
-                                    Difícil
+                                    <CheckIcon className="w-6 h-6" />
+                                    <span>Fácil</span>
+                                    <span className="text-xs opacity-90">Revisar mais tarde</span>
                                 </button>
                             </div>
                             <p className="text-sm text-center text-slate-500 dark:text-slate-400">
-                                Esta escolha determina quando este card aparecerá novamente para revisão
+                                O sistema de repetição espaçada ajustará automaticamente quando este card aparecerá novamente
                             </p>
                         </div>
                     )}
@@ -333,6 +358,69 @@ const FlashcardStudyPage: React.FC = () => {
                     </div>
                 </div>
             </main>
+
+            {/* Info Modal */}
+            {showInfoModal && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
+                    <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl max-w-md w-full">
+                        <div className="flex items-center justify-between p-6 border-b border-slate-200 dark:border-slate-700">
+                            <h2 className="text-xl font-bold text-slate-900 dark:text-white">
+                                Sistema de Repetição Espaçada
+                            </h2>
+                            <button
+                                onClick={() => setShowInfoModal(false)}
+                                className="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
+                            >
+                                <XMarkIcon className="w-5 h-5 text-slate-500 dark:text-slate-400" />
+                            </button>
+                        </div>
+                        <div className="p-6 space-y-4">
+                            <div className="space-y-3 text-sm text-slate-600 dark:text-slate-400">
+                                <p>
+                                    <strong>Como funciona:</strong> O sistema usa o algoritmo SM-2 (similar ao Anki) para otimizar seu aprendizado.
+                                </p>
+                                <div className="space-y-2">
+                                    <div className="flex items-center gap-2">
+                                        <div className="w-3 h-3 bg-red-500 rounded-full"></div>
+                                        <span><strong>Difícil:</strong> Reinicia o ciclo, revisar em 1 dia</span>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
+                                        <span><strong>Normal:</strong> Mantém o ritmo padrão</span>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                                        <span><strong>Fácil:</strong> Aumenta o intervalo significativamente</span>
+                                    </div>
+                                </div>
+                                <p>
+                                    <strong>Fator de Facilidade:</strong> Ajusta automaticamente baseado no seu desempenho (mínimo 1.3).
+                                </p>
+                                <p>
+                                    <strong>Histórico:</strong> Clique no ícone de relógio para ver o progresso detalhado de cada card.
+                                </p>
+                            </div>
+                            <button
+                                onClick={() => setShowInfoModal(false)}
+                                className="w-full py-2 px-4 bg-primary-600 hover:bg-primary-700 text-white rounded-lg font-medium transition-colors"
+                            >
+                                Entendi
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* History Modal */}
+            {flashcard && (
+                <CardHistoryModal
+                    isOpen={showHistoryModal}
+                    onClose={() => setShowHistoryModal(false)}
+                    flashcardId={flashcard._id}
+                    cardIndex={currentCardIndex}
+                    question={currentCard.question}
+                />
+            )}
         </div>
     );
 };

@@ -16,7 +16,8 @@ import {
   FlashcardStudy, 
   FlashcardStudyDocument,
   FlashcardLevel,
-  FlashcardItem 
+  FlashcardItem,
+  ReviewHistory
 } from './schemas';
 import { UserService } from '../user/user.service';
 import { CardDifficulty, CardProgress } from './schemas/flashcard-study.schema';
@@ -852,7 +853,10 @@ IMPORTANTE:
         cardIndex: index,
         difficulty: CardDifficulty.NORMAL,
         timesStudied: 0,
-        interval: 1
+        interval: 1,
+        easeFactor: 2.5,
+        repetitions: 0,
+        history: []
       }));
 
       studyProgress = await this.flashcardStudyModel.create({
@@ -913,16 +917,36 @@ IMPORTANTE:
         cardProgress.timesStudied += 1;
         cardProgress.lastStudiedAt = now;
 
-        // Calcular próximo intervalo de revisão (sistema simplificado)
-        cardProgress.interval = this.calculateNextInterval(
-          cardProgress.interval, 
+        // Garantir que os campos novos existam (para compatibilidade com dados antigos)
+        if (cardProgress.easeFactor === undefined) cardProgress.easeFactor = 2.5;
+        if (cardProgress.repetitions === undefined) cardProgress.repetitions = 0;
+        if (!cardProgress.history) cardProgress.history = [];
+
+        // Calcular próximo intervalo de revisão usando SM-2
+        const { newInterval, newEaseFactor, newRepetitions } = this.calculateSM2(
+          cardProgress.interval,
+          cardProgress.easeFactor,
+          cardProgress.repetitions,
           cardStudy.difficulty
         );
+
+        cardProgress.interval = newInterval;
+        cardProgress.easeFactor = newEaseFactor;
+        cardProgress.repetitions = newRepetitions;
         
         // Definir próxima data de revisão
         cardProgress.nextReviewAt = new Date(
           now.getTime() + cardProgress.interval * 24 * 60 * 60 * 1000
         );
+
+        // Adicionar ao histórico
+        cardProgress.history.push({
+          reviewedAt: now,
+          difficulty: cardStudy.difficulty,
+          intervalBefore: cardProgress.interval,
+          intervalAfter: newInterval,
+          easeFactor: newEaseFactor
+        });
       }
     }
 
@@ -942,19 +966,58 @@ IMPORTANTE:
   }
 
   /**
-   * Calcula o próximo intervalo de revisão
+   * Calcula o próximo intervalo usando algoritmo SM-2 (similar ao Anki)
    */
-  private calculateNextInterval(currentInterval: number, difficulty: CardDifficulty): number {
+  private calculateSM2(
+    currentInterval: number,
+    currentEaseFactor: number,
+    currentRepetitions: number,
+    difficulty: CardDifficulty
+  ): { newInterval: number; newEaseFactor: number; newRepetitions: number } {
+    // Mapear dificuldade para qualidade (1-4)
+    let quality: number;
     switch (difficulty) {
-      case CardDifficulty.EASY:
-        return Math.min(currentInterval * 2.5, 30); // Aumenta, máximo 30 dias
-      case CardDifficulty.NORMAL:
-        return Math.min(currentInterval * 1.5, 14); // Aumenta moderadamente, máximo 14 dias
       case CardDifficulty.HARD:
-        return Math.max(1, Math.floor(currentInterval * 0.8)); // Diminui, mínimo 1 dia
+        quality = 1; // Again
+        break;
+      case CardDifficulty.NORMAL:
+        quality = 3; // Good
+        break;
+      case CardDifficulty.EASY:
+        quality = 4; // Easy
+        break;
       default:
-        return currentInterval;
+        quality = 3;
     }
+
+    let newEaseFactor = currentEaseFactor;
+    let newRepetitions = currentRepetitions;
+    let newInterval = currentInterval;
+
+    if (quality >= 3) {
+      // Resposta correta
+      if (currentRepetitions === 0) {
+        newInterval = 1;
+      } else if (currentRepetitions === 1) {
+        newInterval = 6;
+      } else {
+        newInterval = Math.round(currentInterval * currentEaseFactor);
+      }
+      newRepetitions = currentRepetitions + 1;
+    } else {
+      // Resposta incorreta
+      newRepetitions = 0;
+      newInterval = 1;
+    }
+
+    // Atualizar ease factor
+    newEaseFactor = currentEaseFactor + (0.1 - (5 - quality) * (0.08 + (5 - quality) * 0.02));
+    newEaseFactor = Math.max(1.3, newEaseFactor); // Mínimo 1.3
+
+    // Limitar intervalo máximo (ex: 1 ano)
+    newInterval = Math.min(newInterval, 365);
+
+    return { newInterval, newEaseFactor, newRepetitions };
   }
 
   /**
@@ -1313,6 +1376,37 @@ IMPORTANTE:
         totalCards: flashcard.cards?.length || 0,
       },
       studyStats,
+    };
+  }
+
+  /**
+   * Obtém o histórico de revisões de um card específico
+   */
+  async getCardHistory(flashcardId: string, userId: string, cardIndex: number) {
+    const studyProgress = await this.flashcardStudyModel.findOne({
+      flashcardId: flashcardId,
+      userId: userId
+    });
+
+    if (!studyProgress) {
+      throw new NotFoundException('Study progress not found');
+    }
+
+    const cardProgress = studyProgress.cardProgress.find(cp => cp.cardIndex === cardIndex);
+    if (!cardProgress) {
+      throw new NotFoundException('Card progress not found');
+    }
+
+    return {
+      cardIndex,
+      history: cardProgress.history || [],
+      currentStats: {
+        timesStudied: cardProgress.timesStudied,
+        interval: cardProgress.interval,
+        easeFactor: cardProgress.easeFactor,
+        repetitions: cardProgress.repetitions,
+        nextReviewAt: cardProgress.nextReviewAt
+      }
     };
   }
 }

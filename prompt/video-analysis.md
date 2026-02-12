@@ -427,4 +427,4 @@ A análise deve:
 6. ✅ Prover **PRÓXIMOS PASSOS** claros e executáveis
 7. ✅ Avaliar **PRONTIDÃO REAL** para entrevista (não sugar-coat)
 
-**IMPORTANTE**: Responda APENAS com o JSON válido no formato especificado acima. Sem texto adicional, sem markdown externo ao JSON. O feedback deve ser profissional, respeitoso e genuinamente útil para o desenvolvimento do candidato.
+**IMPORTANTE**: Toda a análise deve ser fornecida em português brasileiro (pt-BR). Use português brasileiro para todas as mensagens, sugestões, comentários e textos no JSON. Responda APENAS com o JSON válido no formato especificado acima. Sem texto adicional, sem markdown externo ao JSON. O feedback deve ser profissional, respeitoso e genuinamente útil para o desenvolvimento do candidato.
