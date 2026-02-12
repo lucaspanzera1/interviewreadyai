@@ -43,7 +43,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   }
 
   // Verificar role se necessário
-  if (requireRole && user?.role !== requireRole) {
+  if (requireRole && user?.role !== requireRole && user?.role !== 'admin') {
     return <Navigate to="/tokens" replace />;
   }
 
