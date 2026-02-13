@@ -9,7 +9,10 @@ import {
   GiftIcon,
   ArrowLeftIcon,
   ShieldCheckIcon,
-  ShoppingBagIcon
+  ShoppingBagIcon,
+  ChatBubbleLeftRightIcon,
+  RectangleStackIcon,
+  ClipboardDocumentCheckIcon
 } from '@heroicons/react/24/outline';
 import { useNavigate } from 'react-router-dom';
 
@@ -87,8 +90,20 @@ const RewardHistoryPage: React.FC = () => {
     }
   }, [user, showToast]);
 
-  const getRewardIcon = (type: string) => {
-    switch (type) {
+  const getRewardIcon = (reward: Reward) => {
+    if (reward.reason === 'interview_generation') {
+      return <ChatBubbleLeftRightIcon className="w-5 h-5 text-blue-500" />;
+    }
+
+    if (reward.reason === 'flashcard_generation') {
+      return <RectangleStackIcon className="w-5 h-5 text-indigo-500" />;
+    }
+
+    if (reward.reason.includes('quiz')) {
+      return <ClipboardDocumentCheckIcon className="w-5 h-5 text-teal-500" />;
+    }
+
+    switch (reward.type) {
       case 'token':
         return <TicketIcon className="w-5 h-5 text-amber-500" />;
       case 'badge':
@@ -136,6 +151,8 @@ const RewardHistoryPage: React.FC = () => {
         return 'Geração de quiz personalizado';
       case 'flashcard_generation':
         return 'Geração de flashcards';
+      case 'interview_generation':
+        return 'Geração de simulação de entrevista';
       case 'quiz_play':
         return 'Jogou quiz de outro usuário';
       case 'referral':
@@ -278,7 +295,7 @@ const RewardHistoryPage: React.FC = () => {
               >
                 <div className="flex items-start sm:items-center gap-4 sm:gap-6">
                   <div className="w-12 h-12 flex-shrink-0 rounded-2xl bg-slate-50 dark:bg-slate-800 flex items-center justify-center border border-slate-100 dark:border-slate-700 transition-transform group-hover:scale-105 group-hover:-rotate-3">
-                    {getRewardIcon(reward.type)}
+                    {getRewardIcon(reward)}
                   </div>
                   <div>
                     <h3 className="text-sm font-bold text-slate-900 dark:text-white capitalize leading-none mb-2">
