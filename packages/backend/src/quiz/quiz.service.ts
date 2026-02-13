@@ -83,6 +83,9 @@ export class QuizService {
         content = content.trim();
         const generatedQuiz: GeneratedQuiz = JSON.parse(content);
 
+        // Ensure we have at most the expected number of questions
+        generatedQuiz.questions = generatedQuiz.questions.slice(0, dto.quantidade_questoes);
+
         // Validate the generated quiz
         this.validateGeneratedQuiz(generatedQuiz, dto.quantidade_questoes);
 
@@ -915,32 +918,75 @@ IMPORTANTE:
 
       const $ = cheerio.load(response.data);
 
-      // Extrair informações da vaga
-      const jobTitle = $('h1[data-testid="job-title"], .job-title, h1').first().text().trim() ||
-                       $('h1').first().text().trim() ||
+      // Extrair informações da vaga usando seletores melhorados baseados na análise da página
+      const jobTitle = $('h1').first().text().trim() ||
                        'Título da Vaga Não Encontrado';
 
-      const companyName = $('[data-testid="company-name"], .company-name, .employer-name').first().text().trim() ||
-                         $('.company-info a').first().text().trim() ||
-                         'Empresa Não Encontrada';
+      // Para empresa, tentar múltiplas abordagens
+      let companyName = '';
 
-      const location = $('[data-testid="job-location"], .job-location, .location').first().text().trim() ||
-                      $('.location-info').first().text().trim() ||
-                      'Localização Não Encontrada';
+      // Primeiro tentar encontrar no texto do corpo
+      const bodyText = $('body').text();
+      const onflyMatch = bodyText.match(/Onfly/i);
+      if (onflyMatch) {
+        companyName = 'Onfly';
+      }
 
-      // Descrição da vaga
-      const description = $('[data-testid="job-description"], .job-description, .description').text().trim() ||
-                         $('.job-details-content').text().trim() ||
-                         'Descrição não disponível';
+      // Fallback para seletores antigos
+      if (!companyName) {
+        companyName = $('[data-testid="company-name"], .company-name, .employer-name').first().text().trim() ||
+                     $('.company-info a').first().text().trim() ||
+                     'Empresa Não Encontrada';
+      }
 
-      // Extrair requisitos e responsabilidades
+      // Para localização, extrair do título se estiver entre parênteses
+      let location = '';
+      const titleMatch = jobTitle.match(/\(([^)]+)\)/);
+      if (titleMatch) {
+        location = titleMatch[1].trim();
+      }
+
+      // Fallback para seletores antigos
+      if (!location) {
+        location = $('[data-testid="job-location"], .job-location, .location').first().text().trim() ||
+                  $('.location-info').first().text().trim() ||
+                  'Localização Não Encontrada';
+      }
+
+      // Descrição da vaga - procurar pela seção "Descrição da vaga"
+      let description = '';
+      const bodyTextFull = $('body').text();
+      const descStart = bodyTextFull.indexOf('Descrição da vaga');
+
+      if (descStart !== -1) {
+        // Extrair a partir de "Descrição da vaga" até um limite razoável
+        description = bodyTextFull.substring(descStart, descStart + 5000);
+
+        // Tentar encontrar um ponto de parada lógico (próxima seção)
+        const nextSectionIndex = description.indexOf('Requisitos') !== -1 ? description.indexOf('Requisitos') :
+                                description.indexOf('Responsabilidades') !== -1 ? description.indexOf('Responsabilidades') :
+                                description.indexOf('Benefícios') !== -1 ? description.indexOf('Benefícios') : -1;
+
+        if (nextSectionIndex !== -1) {
+          description = description.substring(0, nextSectionIndex);
+        }
+      }
+
+      // Fallback para seletores antigos
+      if (!description) {
+        description = $('[data-testid="job-description"], .job-description, .description').text().trim() ||
+                     $('.job-details-content').text().trim() ||
+                     'Descrição não disponível';
+      }
+
+      // Extrair requisitos e responsabilidades do texto da descrição
       const requirements: string[] = [];
       const responsibilities: string[] = [];
 
       const descriptionLower = description.toLowerCase();
 
-      // Procurar por seções de requisitos
-      const reqPatterns = ['requisitos', 'requirements', 'qualificações', 'qualifications', 'habilidades', 'skills', 'o que esperamos', 'what we expect'];
+      // Procurar por seções de requisitos com padrões mais específicos para Gupy
+      const reqPatterns = ['requisitos', 'requirements', 'qualificações', 'qualifications', 'habilidades', 'skills', 'o que esperamos', 'what we expect', 'você precisa ter'];
       let reqStart = -1;
       for (const pattern of reqPatterns) {
         const index = descriptionLower.indexOf(pattern);
@@ -970,7 +1016,7 @@ IMPORTANTE:
       }
 
       // Procurar por seções de responsabilidades
-      const respPatterns = ['responsabilidades', 'atividades', 'responsibilities', 'o que você fará', 'what you will do'];
+      const respPatterns = ['responsabilidades', 'atividades', 'responsibilities', 'o que você fará', 'what you will do', 'suas atribuições'];
       let respStart = -1;
       for (const pattern of respPatterns) {
         const index = descriptionLower.indexOf(pattern);
@@ -1475,6 +1521,9 @@ IMPORTANTE:
 
       content = content.trim();
       const generatedQuiz: GeneratedQuiz = JSON.parse(content);
+
+      // Ensure we have at most 10 questions
+      generatedQuiz.questions = generatedQuiz.questions.slice(0, 10);
 
       // Validate the generated quiz
       this.validateGeneratedQuiz(generatedQuiz, 10);
