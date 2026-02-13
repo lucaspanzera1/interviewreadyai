@@ -18,7 +18,7 @@ import { QuizModule } from '../quiz/quiz.module';
     ]),
     HttpModule,
     ConfigModule,
-    UserModule,
+    forwardRef(() => UserModule),
     forwardRef(() => QuizModule),
   ],
   controllers: [FlashcardController],

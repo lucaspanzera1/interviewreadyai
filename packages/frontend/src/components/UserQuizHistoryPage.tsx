@@ -2,14 +2,15 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import PageTitle from './PageTitle';
 import { apiClient } from '../lib/api';
-import { toast } from 'react-toastify';
+import Loading from './Loading';
 import {
     ArrowLeftIcon,
     ClockIcon,
     AcademicCapIcon,
     ChartBarIcon,
     TrophyIcon,
-    CalendarIcon
+    CalendarIcon,
+    ChevronRightIcon
 } from '@heroicons/react/24/outline';
 import { StarIcon as StarIconSolid } from '@heroicons/react/24/solid';
 
@@ -63,25 +64,25 @@ const UserQuizHistoryPage: React.FC = () => {
             setAttempts(response.attempts);
             setTotalPages(response.totalPages);
 
-            // Calculate stats
             const allAttempts = response.attempts;
-            const totalAttempts = allAttempts.length;
-            const averageScore = totalAttempts > 0
-                ? allAttempts.reduce((sum, attempt) => sum + attempt.percentage, 0) / totalAttempts
+            // Note: Stats here are calculated based on the fetched page. 
+            // Ideally backend should provide global stats.
+
+            const averageScore = allAttempts.length > 0
+                ? allAttempts.reduce((sum, attempt) => sum + attempt.percentage, 0) / allAttempts.length
                 : 0;
-            const bestScore = totalAttempts > 0
+            const bestScore = allAttempts.length > 0
                 ? Math.max(...allAttempts.map(attempt => attempt.percentage))
                 : 0;
             const totalTime = allAttempts.reduce((sum, attempt) => sum + attempt.timeSpent, 0);
 
             setStats({
-                totalAttempts,
+                totalAttempts: response.total,
                 averageScore,
                 bestScore,
                 totalTime,
             });
         } catch (error) {
-            toast.error('Erro ao carregar histórico de quizzes');
             console.error(error);
         } finally {
             setLoading(false);
@@ -98,239 +99,238 @@ const UserQuizHistoryPage: React.FC = () => {
         return new Date(dateString).toLocaleDateString('pt-BR', {
             day: '2-digit',
             month: 'short',
-            year: 'numeric',
             hour: '2-digit',
             minute: '2-digit',
         });
     };
 
-
-
     const getDifficultyColor = (nivel: string) => {
         switch (nivel) {
-            case 'INICIANTE': return 'bg-green-100/50 text-green-700 dark:text-green-300 border-green-200 dark:border-green-800';
-            case 'MEDIO': return 'bg-amber-100/50 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-800';
-            case 'DIFÍCIL': return 'bg-orange-100/50 text-orange-700 dark:text-orange-300 border-orange-200 dark:border-orange-800';
-            case 'EXPERT': return 'bg-red-100/50 text-red-700 dark:text-red-300 border-red-200 dark:border-red-800';
-            default: return 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700';
+            case 'INICIANTE': return 'text-green-600 bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800';
+            case 'MEDIO': return 'text-amber-600 bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800';
+            case 'DIFÍCIL': return 'text-orange-600 bg-orange-50 dark:bg-orange-900/20 border-orange-200 dark:border-orange-800';
+            case 'EXPERT': return 'text-red-600 bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800';
+            default: return 'text-slate-600 bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700';
         }
     };
 
-    const StatCard = ({ icon: Icon, label, value, colorClass }: any) => (
-        <div className={`relative overflow-hidden bg-white dark:bg-slate-800 rounded-2xl p-4 sm:p-6 shadow-soft hover:shadow-lifted transition-all duration-300 border border-slate-100 dark:border-slate-700 group hover:-translate-y-1`}>
-            {/* Background decoration */}
-            <div className={`absolute top-0 right-0 p-4 -mr-4 -mt-4 opacity-5 group-hover:opacity-10 transition-opacity`}>
-                <Icon className="w-24 h-24 sm:w-32 sm:h-32 transform rotate-12" />
-            </div>
-
-            <div className="relative z-10 flex items-center gap-3 sm:gap-4">
-                <div className={`p-3 sm:p-4 rounded-xl ${colorClass} bg-opacity-10 backdrop-blur-sm ring-1 ring-inset ring-black/5 dark:ring-white/5`}>
-                    <Icon className="h-5 w-5 sm:h-6 sm:w-6" />
-                </div>
-                <div>
-                    <p className="text-xs sm:text-sm font-medium text-slate-500 dark:text-slate-400">{label}</p>
-                    <p className="text-xl sm:text-3xl font-bold text-slate-900 dark:text-white font-sans tracking-tight mt-0.5">{value}</p>
-                </div>
-            </div>
-        </div>
-    );
-
-    if (loading) {
-        return (
-            <div className="flex items-center justify-center min-h-[60vh]">
-                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary-600"></div>
-            </div>
-        );
+    if (loading && attempts.length === 0) {
+        return <Loading />;
     }
 
     return (
-        <div className="min-h-screen bg-slate-50 dark:bg-slate-900 pb-20">
-            <PageTitle title="Meu Histórico - TreinaVagaAI" />
+        <div className="max-w-4xl mx-auto space-y-8 sm:space-y-12 py-6 sm:py-8 pb-32 sm:pb-8">
+            <PageTitle title="Evolução - TreinaVagaAI" />
 
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
-                {/* Header */}
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                    <div className="flex items-center gap-4">
+            {/* Sticky Header */}
+            <header className="sticky top-0 z-20 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 -mx-4 -mt-4 lg:-mx-8 lg:-mt-8 px-4 lg:px-8 py-4 mb-8 transition-all duration-300">
+                <div className="max-w-4xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+                    <div className="flex items-center gap-4 w-full md:w-auto">
                         <button
                             onClick={() => navigate(-1)}
-                            className="group p-3 rounded-xl bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-slate-50 dark:hover:bg-slate-700 transition-all shadow-sm border border-slate-200 dark:border-slate-700"
+                            className="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors"
                         >
-                            <ArrowLeftIcon className="h-5 w-5 group-hover:-translate-x-1 transition-transform" />
+                            <ArrowLeftIcon className="w-5 h-5" />
                         </button>
                         <div>
-                            <h1 className="text-3xl font-bold text-slate-900 dark:text-white font-sans tracking-tight">
-                                Meu Histórico
-                            </h1>
-                            <p className="text-slate-500 dark:text-slate-400 mt-1">
-                                Acompanhe sua evolução e conquistas
-                            </p>
+                            <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white tracking-tight">Evolução</h1>
+                            <p className="text-slate-500 dark:text-slate-400 font-medium text-sm">Seu histórico de aprendizado e performance.</p>
+                        </div>
+                    </div>
+
+                    <div className="flex items-center gap-3 bg-primary-50 dark:bg-primary-900/10 px-4 py-2 rounded-xl border border-primary-100 dark:border-primary-800/30 w-full md:w-auto justify-between md:justify-start">
+                        <span className="text-xs font-bold text-primary-600 dark:text-primary-400 uppercase tracking-wider">Média Geral</span>
+                        <div className="flex items-center gap-2">
+                            <ChartBarIcon className="w-5 h-5 text-primary-500" />
+                            <span className="text-2xl font-black text-slate-900 dark:text-white leading-none">
+                                {stats.averageScore.toFixed(0)}%
+                            </span>
                         </div>
                     </div>
                 </div>
+            </header>
 
-                {/* Stats Grid */}
-                <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
-                    <StatCard
-                        icon={AcademicCapIcon}
-                        label="Total de Quizzes"
-                        value={stats.totalAttempts}
-                        colorClass="text-blue-600 bg-blue-100 dark:text-blue-300 dark:bg-blue-900"
-                    />
-                    <StatCard
-                        icon={TrophyIcon}
-                        label="Melhor Pontuação"
-                        value={`${stats.bestScore.toFixed(0)}%`}
-                        colorClass="text-green-600 bg-green-100 dark:text-green-300 dark:bg-green-900"
-                    />
-                    <StatCard
-                        icon={ChartBarIcon}
-                        label="Média Geral"
-                        value={`${stats.averageScore.toFixed(0)}%`}
-                        colorClass="text-primary-600 bg-primary-100 dark:text-primary-300 dark:bg-primary-900"
-                    />
-                    <StatCard
-                        icon={ClockIcon}
-                        label="Tempo Total"
-                        value={formatTime(stats.totalTime)}
-                        colorClass="text-amber-600 bg-amber-100 dark:text-amber-300 dark:bg-amber-900"
-                    />
+            {/* Stats Highlight Grid */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 px-4">
+                {[
+                    {
+                        title: "Quizzes",
+                        value: stats.totalAttempts,
+                        icon: AcademicCapIcon,
+                        color: "text-blue-500",
+                        bg: "bg-blue-50 dark:bg-blue-900/20"
+                    },
+                    {
+                        title: "Melhor Score",
+                        value: `${stats.bestScore.toFixed(0)}%`,
+                        icon: TrophyIcon,
+                        color: "text-amber-500",
+                        bg: "bg-amber-50 dark:bg-amber-900/20"
+                    },
+                    {
+                        title: "Tempo Total",
+                        value: formatTime(stats.totalTime),
+                        icon: ClockIcon,
+                        color: "text-purple-500",
+                        bg: "bg-purple-50 dark:bg-purple-900/20"
+                    },
+                    {
+                        title: "Sequência",
+                        value: "N/A",
+                        icon: CalendarIcon,
+                        color: "text-green-500",
+                        bg: "bg-green-50 dark:bg-green-900/20"
+                    }
+                ].map((item, i) => (
+                    <div key={i} className="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-100 dark:border-slate-800 flex flex-col items-center text-center sm:items-start sm:text-left gap-2 shadow-sm">
+                        <div className={`p-2 rounded-lg ${item.bg} ${item.color} w-fit`}>
+                            <item.icon className="w-5 h-5" />
+                        </div>
+                        <div>
+                            <p className="text-xs text-slate-500 font-medium uppercase tracking-wide">{item.title}</p>
+                            <p className="text-xl font-bold text-slate-900 dark:text-white mt-0.5">{item.value}</p>
+                        </div>
+                    </div>
+                ))}
+            </div>
+
+
+            {/* Content Section */}
+            <div className="space-y-6 px-4">
+                <div className="flex items-center justify-between">
+                    <h2 className="text-xl font-bold text-slate-900 dark:text-white">Histórico Recente</h2>
+                    <span className="text-xs font-medium text-slate-400 bg-slate-100 dark:bg-slate-800 px-3 py-1 rounded-full">
+                        {stats.totalAttempts} atividades
+                    </span>
                 </div>
 
-                {/* Attempts List */}
-                <div className="space-y-6">
-                    <div className="flex items-center justify-between px-2">
-                        <h2 className="text-xl font-bold text-slate-900 dark:text-white font-sans">
-                            Atividades Recentes
-                        </h2>
+                {attempts.length === 0 ? (
+                    <div className="text-center py-20 bg-white dark:bg-slate-900 rounded-[2rem] border-2 border-dashed border-slate-200 dark:border-slate-800">
+                        <div className="bg-slate-50 dark:bg-slate-800 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6">
+                            <AcademicCapIcon className="h-10 w-10 text-slate-400" />
+                        </div>
+                        <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2">
+                            Nenhuma atividade encontrada
+                        </h3>
+                        <p className="text-slate-500 dark:text-slate-400 mb-8 max-w-sm mx-auto text-sm">
+                            Você ainda não realizou nenhum quiz. Comece agora para ver sua evolução!
+                        </p>
+                        <button
+                            onClick={() => navigate('/free-quizzes')}
+                            className="px-6 py-3 bg-primary-600 text-white rounded-xl hover:bg-primary-700 transition-all font-bold text-sm shadow-lg shadow-primary-600/20"
+                        >
+                            Explorar Quizzes
+                        </button>
                     </div>
+                ) : (
+                    <div className="grid grid-cols-1 gap-4">
+                        {attempts.map((attempt) => (
+                            <div
+                                key={attempt._id}
+                                onClick={() => navigate(`/profile/quiz-history/${attempt._id}`)}
+                                className="group bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-100 dark:border-slate-800 hover:border-primary-500/30 hover:shadow-lg hover:shadow-primary-500/5 transition-all duration-300 cursor-pointer relative overflow-hidden"
+                            >
+                                {/* Hover Effect */}
+                                <div className="absolute inset-0 bg-primary-50/0 group-hover:bg-primary-50/30 dark:group-hover:bg-primary-900/10 transition-colors duration-300 pointer-events-none" />
 
-                    <div className="space-y-4">
-                        {attempts.length > 0 ? (
-                            attempts.map((attempt) => (
-                                <div
-                                    key={attempt._id}
-                                    className="group relative bg-white dark:bg-slate-800 rounded-2xl p-4 sm:p-6 shadow-soft hover:shadow-lifted border border-slate-100 dark:border-slate-700 transition-all duration-300 overflow-hidden hover:border-primary-100 dark:hover:border-primary-900/50"
-                                >
-                                    <div className="absolute top-0 right-0 p-6 opacity-0 group-hover:opacity-5 transition-opacity duration-500">
-                                        <AcademicCapIcon className="h-32 w-32 text-primary-600 transform rotate-12" />
+                                <div className="flex flex-col sm:flex-row gap-5 relative z-10">
+                                    {/* Score Indicator */}
+                                    <div className="flex-shrink-0 flex items-start">
+                                        <div className={`
+                                            flex flex-col items-center justify-center w-16 h-16 rounded-xl border-2
+                                            ${attempt.percentage >= 80
+                                                ? 'bg-green-50 dark:bg-green-900/10 border-green-100 dark:border-green-800/50 text-green-600'
+                                                : attempt.percentage >= 60
+                                                    ? 'bg-amber-50 dark:bg-amber-900/10 border-amber-100 dark:border-amber-800/50 text-amber-600'
+                                                    : 'bg-red-50 dark:bg-red-900/10 border-red-100 dark:border-red-800/50 text-red-600'
+                                            }
+                                        `}>
+                                            <span className="text-base font-black">{attempt.percentage.toFixed(0)}%</span>
+                                            <div className="flex gap-0.5 mt-0.5">
+                                                {Array.from({ length: 3 }, (_, i) => (
+                                                    <StarIconSolid
+                                                        key={i}
+                                                        className={`h-2.5 w-2.5 ${i < Math.round(attempt.percentage / 33)
+                                                            ? 'opacity-100'
+                                                            : 'opacity-20'
+                                                            }`}
+                                                    />
+                                                ))}
+                                            </div>
+                                        </div>
                                     </div>
 
-                                    <div className="relative z-10 flex flex-col sm:flex-row gap-4 sm:gap-6">
-                                        {/* Score Badge */}
-                                        <div className="flex-shrink-0 flex items-center justify-center sm:block">
-                                            <div className={`
-                                                relative w-24 h-24 rounded-2xl flex flex-col items-center justify-center border-4 transition-transform group-hover:scale-105
-                                                ${attempt.percentage >= 80
-                                                    ? 'bg-green-50 dark:bg-green-900/20 border-green-100 dark:border-green-800 text-green-700 dark:text-green-400'
-                                                    : attempt.percentage >= 60
-                                                        ? 'bg-amber-50 dark:bg-amber-900/20 border-amber-100 dark:border-amber-800 text-amber-700 dark:text-amber-400'
-                                                        : 'bg-red-50 dark:bg-red-900/20 border-red-100 dark:border-red-800 text-red-700 dark:text-red-400'
-                                                }
-                                            `}>
-                                                <span className="text-2xl font-bold tracking-tight">{attempt.percentage.toFixed(0)}%</span>
-                                                <div className="flex gap-0.5 mt-1">
-                                                    {Array.from({ length: 3 }, (_, i) => (
-                                                        <StarIconSolid
-                                                            key={i}
-                                                            className={`h-3 w-3 ${i < Math.round(attempt.percentage / 33)
-                                                                ? 'opacity-100'
-                                                                : 'opacity-20'
-                                                                }`}
-                                                        />
-                                                    ))}
-                                                </div>
-                                            </div>
+                                    {/* Content */}
+                                    <div className="flex-1 min-w-0">
+                                        <div className="flex flex-wrap items-center gap-2 mb-2">
+                                            <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${getDifficultyColor(attempt.quizId.nivel)}`}>
+                                                {attempt.quizId.nivel}
+                                            </span>
+                                            <span className="text-xs text-slate-400 font-medium mx-1">•</span>
+                                            <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide">
+                                                {attempt.quizId.categoria}
+                                            </span>
                                         </div>
 
-                                        {/* Content */}
-                                        <div className="flex-1 min-w-0 py-1">
-                                            <div className="flex flex-wrap items-center gap-3 mb-3">
-                                                <span className={`px-3 py-1 rounded-full text-xs font-bold tracking-wide border ${getDifficultyColor(attempt.quizId.nivel)}`}>
-                                                    {attempt.quizId.nivel === 'INICIANTE' ? 'INICIANTE' :
-                                                        attempt.quizId.nivel === 'MEDIO' ? 'MÉDIO' :
-                                                            attempt.quizId.nivel === 'DIFÍCIL' ? 'DIFÍCIL' : 'EXPERT'}
-                                                </span>
-                                                <span className="text-sm text-slate-500 dark:text-slate-400 font-medium flex items-center gap-2">
-                                                    <span className="w-1.5 h-1.5 rounded-full bg-slate-300 dark:bg-slate-600"></span>
-                                                    {attempt.quizId.categoria}
-                                                </span>
+                                        <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-3 pr-8 group-hover:text-primary-600 transition-colors">
+                                            {attempt.quizId.titulo}
+                                        </h3>
+
+                                        <div className="flex flex-wrap gap-4 text-xs text-slate-500 dark:text-slate-400 font-medium">
+                                            <div className="flex items-center gap-1.5">
+                                                <CalendarIcon className="h-4 w-4 text-slate-400" />
+                                                {formatDate(attempt.createdAt)}
                                             </div>
-
-                                            <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-4 line-clamp-1 group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">
-                                                {attempt.quizId.titulo}
-                                            </h3>
-
-                                            <div className="flex flex-wrap gap-4 text-sm text-slate-500 dark:text-slate-400">
-                                                <div className="flex items-center gap-2 bg-slate-50 dark:bg-slate-800/50 px-3 py-1.5 rounded-lg border border-slate-100 dark:border-slate-700">
-                                                    <CalendarIcon className="h-4 w-4 text-slate-400" />
-                                                    {formatDate(attempt.createdAt)}
-                                                </div>
-                                                <div className="flex items-center gap-2 bg-slate-50 dark:bg-slate-800/50 px-3 py-1.5 rounded-lg border border-slate-100 dark:border-slate-700">
-                                                    <ClockIcon className="h-4 w-4 text-slate-400" />
-                                                    {formatTime(attempt.timeSpent)}
-                                                </div>
-                                                <div className="flex items-center gap-2 bg-slate-50 dark:bg-slate-800/50 px-3 py-1.5 rounded-lg border border-slate-100 dark:border-slate-700">
-                                                    <AcademicCapIcon className="h-4 w-4 text-slate-400" />
-                                                    {attempt.score}/{attempt.totalQuestions} acertos
-                                                </div>
+                                            <div className="flex items-center gap-1.5">
+                                                <ClockIcon className="h-4 w-4 text-slate-400" />
+                                                {formatTime(attempt.timeSpent)}
                                             </div>
-                                        </div>
-
-                                        {/* Action */}
-                                        <div className="flex items-center justify-end sm:justify-center pl-4 border-l border-slate-100 dark:border-slate-700 sm:w-48">
-                                            <button
-                                                onClick={() => navigate(`/profile/quiz-history/${attempt._id}`)}
-                                                className="w-full px-6 py-3 text-sm font-semibold text-white bg-slate-900 dark:bg-slate-700 rounded-xl hover:bg-primary-600 dark:hover:bg-primary-600 transition-all shadow-sm hover:shadow-md transform hover:-translate-y-0.5"
-                                            >
-                                                Ver Detalhes
-                                            </button>
+                                            <div className="flex items-center gap-1.5">
+                                                <AcademicCapIcon className="h-4 w-4 text-slate-400" />
+                                                {attempt.score}/{attempt.totalQuestions} acertos
+                                            </div>
                                         </div>
                                     </div>
+
+                                    {/* Chevron */}
+                                    <div className="hidden sm:flex items-center text-slate-300 group-hover:text-primary-500 transition-colors">
+                                        <ChevronRightIcon className="w-6 h-6" />
+                                    </div>
                                 </div>
-                            ))
-                        ) : (
-                            <div className="text-center py-20 bg-white dark:bg-slate-800 rounded-3xl border border-dashed border-slate-300 dark:border-slate-700">
-                                <div className="bg-slate-50 dark:bg-slate-900/50 w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-6">
-                                    <AcademicCapIcon className="h-12 w-12 text-slate-400" />
-                                </div>
-                                <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-3">
-                                    Nenhuma atividade encontrada
-                                </h3>
-                                <p className="text-slate-500 dark:text-slate-400 mb-8 max-w-sm mx-auto text-lg">
-                                    Você ainda não realizou nenhum quiz. Que tal testar seus conhecimentos agora?
-                                </p>
-                                <button
-                                    onClick={() => navigate('/free-quizzes')}
-                                    className="px-8 py-4 bg-gradient-to-r from-primary-600 to-primary-700 text-white rounded-xl hover:shadow-lg hover:scale-105 transition-all font-bold text-lg shadow-primary-600/20"
-                                >
-                                    Explorar Quizzes
-                                </button>
                             </div>
-                        )}
+                        ))}
                     </div>
-                </div>
+                )}
 
-                {/* Pagination */}
+                {/* Simplified Pagination */}
                 {totalPages > 1 && (
-                    <div className="flex justify-center items-center gap-4 py-8">
+                    <div className="flex justify-center items-center gap-2 py-8">
                         <button
                             onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
                             disabled={currentPage === 1}
-                            className="px-6 py-2.5 text-sm font-medium text-slate-600 dark:text-slate-300 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all hover:scale-105 shadow-sm"
+                            className="p-2 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-500 disabled:opacity-30 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
                         >
-                            Anterior
+                            <span className="sr-only">Anterior</span>
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5">
+                                <path fillRule="evenodd" d="M12.79 5.23a.75.75 0 01-.02 1.06L8.832 10l3.938 3.71a.75.75 0 11-1.04 1.08l-4.5-4.25a.75.75 0 010-1.08l4.5-4.25a.75.75 0 011.06.02z" clipRule="evenodd" />
+                            </svg>
                         </button>
 
-                        <span className="text-sm font-bold text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-800 px-6 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
-                            {currentPage} / {totalPages}
-                        </span>
+                        <div className="flex items-center gap-1">
+                            <span className="text-sm font-bold text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-800 px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-700">
+                                Página {currentPage} de {totalPages}
+                            </span>
+                        </div>
 
                         <button
                             onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
                             disabled={currentPage === totalPages}
-                            className="px-6 py-2.5 text-sm font-medium text-slate-600 dark:text-slate-300 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all hover:scale-105 shadow-sm"
+                            className="p-2 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-500 disabled:opacity-30 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
                         >
-                            Próxima
+                            <span className="sr-only">Próxima</span>
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5">
+                                <path fillRule="evenodd" d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z" clipRule="evenodd" />
+                            </svg>
                         </button>
                     </div>
                 )}

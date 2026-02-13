@@ -196,7 +196,7 @@ const FlashcardStudyPage: React.FC = () => {
 
     if (loading) {
         return (
-            <div className="flex justify-center items-center min-h-screen bg-slate-50 dark:bg-slate-900">
+            <div className="flex justify-center items-center h-[100dvh] bg-slate-50 dark:bg-slate-900">
                 <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
             </div>
         );
@@ -204,7 +204,7 @@ const FlashcardStudyPage: React.FC = () => {
 
     if (!flashcard) {
         return (
-            <div className="flex flex-col items-center justify-center min-h-screen bg-slate-50 dark:bg-slate-900 p-4">
+            <div className="flex flex-col items-center justify-center h-[100dvh] bg-slate-50 dark:bg-slate-900 p-4">
                 <ExclamationTriangleIcon className="w-24 h-24 text-slate-400 mb-4" />
                 <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">
                     Flashcard não encontrado
@@ -223,7 +223,7 @@ const FlashcardStudyPage: React.FC = () => {
     const progress = Math.round(((currentCardIndex) / flashcard.cards.length) * 100);
 
     return (
-        <div className="flex flex-col min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-slate-900 dark:to-slate-950 transition-colors duration-300">
+        <div className="flex flex-col h-[100dvh] bg-slate-50 dark:bg-slate-950 transition-colors duration-300 overflow-hidden relative">
             <style>{`
                 .perspective-1000 {
                     perspective: 1000px;
@@ -237,101 +237,110 @@ const FlashcardStudyPage: React.FC = () => {
                 .rotate-y-180 {
                     transform: rotateY(180deg);
                 }
-                .grid-stack {
-                    display: grid;
-                    grid-template-areas: "stack";
+                .rotate-y-0 {
+                    transform: rotateY(0deg);
                 }
-                .grid-stack > * {
-                    grid-area: stack;
+                /* Custom Scrollbar for Card Content */
+                .custom-scrollbar::-webkit-scrollbar {
+                    width: 4px;
+                }
+                .custom-scrollbar::-webkit-scrollbar-track {
+                    background: transparent;
+                }
+                .custom-scrollbar::-webkit-scrollbar-thumb {
+                    background-color: rgba(156, 163, 175, 0.5);
+                    border-radius: 20px;
                 }
             `}</style>
 
             <PageTitle title={`Estudando: ${flashcard.titulo} - TreinaVagaAI`} />
 
-            {/* Header */}
-            <header className="sticky top-0 z-10 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 p-4 transition-colors">
-                <div className="max-w-5xl mx-auto">
-                    <div className="flex items-center justify-between mb-4">
-                        <button
-                            onClick={() => navigate('/my-flashcards')}
-                            className="flex items-center gap-2 px-3 py-1.5 rounded-full text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-                        >
-                            <ArrowLeftIcon className="w-4 h-4" />
-                            <span className="text-sm font-medium">Voltar</span>
-                        </button>
+            {/* Header Compacto */}
+            <header className="shrink-0 z-20 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 px-4 py-3 safe-top">
+                <div className="max-w-3xl mx-auto w-full flex items-center justify-between gap-4">
+                    <button
+                        onClick={() => navigate('/my-flashcards')}
+                        className="p-2 -ml-2 rounded-full text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                        aria-label="Voltar"
+                    >
+                        <ArrowLeftIcon className="w-5 h-5" />
+                    </button>
 
-                        <div className="flex items-center gap-2">
-                            <span className="text-sm font-medium text-slate-500 dark:text-slate-400">
-                                {currentCardIndex + 1} / {flashcard.cards.length}
-                            </span>
-                            <button
-                                onClick={() => setShowInfoModal(true)}
-                                className="p-1.5 text-slate-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
-                                title="Ajuda sobre o sistema"
-                            >
-                                <InformationCircleIcon className="w-5 h-5" />
-                            </button>
+                    <div className="flex-1 max-w-xs mx-auto">
+                        <div className="flex justify-between text-xs font-medium text-slate-500 dark:text-slate-400 mb-1.5 px-1">
+                            <span>Progresso</span>
+                            <span>{currentCardIndex + 1} / {flashcard.cards.length}</span>
+                        </div>
+                        <div className="h-2 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                            <div
+                                className="h-full bg-primary-600 transition-all duration-300 ease-out rounded-full"
+                                style={{ width: `${progress}%` }}
+                            />
                         </div>
                     </div>
 
-                    {/* Progress Bar */}
-                    <div className="h-1.5 w-full bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden">
-                        <div
-                            className="h-full bg-primary-600 transition-all duration-300 ease-out"
-                            style={{ width: `${progress}%` }}
-                        />
+                    <div className="flex gap-1 -mr-2">
+                        <button
+                            onClick={() => setShowHistoryModal(true)}
+                            className="p-2 rounded-full text-slate-400 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                        >
+                            <ClockIcon className="w-5 h-5" />
+                        </button>
+                        <button
+                            onClick={() => setShowInfoModal(true)}
+                            className="p-2 rounded-full text-slate-400 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                        >
+                            <InformationCircleIcon className="w-5 h-5" />
+                        </button>
                     </div>
                 </div>
             </header>
 
-            {/* Main Area */}
-            <main className="flex-1 flex flex-col items-center justify-center p-4 md:p-8 w-full max-w-5xl mx-auto" ref={containerRef}>
-
-                {/* 3D Card Container */}
-                <div className="w-full max-w-3xl perspective-1000 my-8">
+            {/* Main Area - Card */}
+            <main className="flex-1 flex flex-col items-center justify-center p-4 w-full max-w-3xl mx-auto relative overflow-hidden" ref={containerRef}>
+                <div className="w-full h-full flex flex-col justify-center perspective-1000 max-h-[75vh]">
                     <div
-                        className={`relative w-full transition-transform duration-500 transform-style-3d cursor-pointer grid-stack ${showAnswer ? 'rotate-y-180' : ''
-                            }`}
+                        className={`relative w-full h-full transition-transform duration-500 transform-style-3d cursor-pointer ${showAnswer ? 'rotate-y-180' : 'rotate-y-0'}`}
                         onClick={handleFlipCard}
                     >
                         {/* FRONT FACE (Question) */}
-                        <div className="backface-hidden w-full h-full bg-white dark:bg-slate-800 rounded-3xl shadow-xl border border-slate-100 dark:border-slate-700 p-8 md:p-12 flex flex-col items-center justify-center min-h-[400px]">
-                            <div className="w-full max-w-2xl text-center space-y-8">
-                                <span className="inline-block px-4 py-1.5 rounded-full bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 text-xs font-bold tracking-wider uppercase">
+                        <div className="absolute inset-0 backface-hidden w-full h-full bg-white dark:bg-slate-800 rounded-3xl shadow-xl border border-slate-200 dark:border-slate-700 flex flex-col overflow-hidden">
+                            <div className="flex-1 p-6 sm:p-10 flex flex-col items-center justify-center text-center overflow-y-auto custom-scrollbar">
+                                <span className="inline-block px-3 py-1 mb-6 rounded-full bg-primary-50 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400 text-xs font-bold tracking-wider uppercase shrink-0">
                                     Pergunta
                                 </span>
-                                <h3 className="text-2xl md:text-3xl font-medium text-slate-800 dark:text-slate-100 leading-relaxed">
+                                <h3 className="text-xl sm:text-2xl md:text-3xl font-medium text-slate-800 dark:text-slate-100 leading-relaxed max-w-2xl">
                                     {currentCard.question}
                                 </h3>
-                                <div className="pt-8 text-slate-400 dark:text-slate-500 flex items-center justify-center gap-2 text-sm animate-pulse">
-                                    <ArrowPathIcon className="w-4 h-4" />
-                                    <span>Toque ou Pressione Espaço para virar</span>
-                                </div>
+                            </div>
+                            <div className="p-4 bg-slate-50 dark:bg-slate-800/50 border-t border-slate-100 dark:border-slate-700/50 text-center shrink-0">
+                                <span className="text-xs font-medium text-slate-400 animate-pulse flex items-center justify-center gap-2">
+                                    <ArrowPathIcon className="w-3.5 h-3.5" />
+                                    Toque para virar
+                                </span>
                             </div>
                         </div>
 
                         {/* BACK FACE (Answer) */}
-                        <div className="backface-hidden w-full h-full bg-slate-50 dark:bg-slate-800 rounded-3xl shadow-xl border border-slate-200 dark:border-slate-700 p-8 md:p-12 rotate-y-180 flex flex-col min-h-[400px]">
-                            <div className="w-full max-w-2xl mx-auto space-y-6">
-                                <div className="flex items-center justify-center mb-4">
-                                    <span className="inline-block px-4 py-1.5 rounded-full bg-green-50 dark:bg-green-900/30 text-green-600 dark:text-green-400 text-xs font-bold tracking-wider uppercase">
+                        <div className="absolute inset-0 backface-hidden w-full h-full bg-white dark:bg-slate-800 rounded-3xl shadow-xl border border-slate-200 dark:border-slate-700 rotate-y-180 flex flex-col overflow-hidden">
+                            <div className="flex-1 p-6 sm:p-10 flex flex-col text-center overflow-y-auto custom-scrollbar">
+                                <div className="flex items-center justify-center mb-6 shrink-0">
+                                    <span className="inline-block px-3 py-1 rounded-full bg-green-50 dark:bg-green-900/30 text-green-600 dark:text-green-400 text-xs font-bold tracking-wider uppercase">
                                         Resposta
                                     </span>
                                 </div>
 
-                                <div className="text-lg md:text-xl text-slate-700 dark:text-slate-200 leading-relaxed text-center">
+                                <div className="text-lg sm:text-xl text-slate-700 dark:text-slate-200 leading-relaxed mb-6">
                                     {currentCard.answer}
                                 </div>
 
                                 {currentCard.explanation && (
-                                    <div className="mt-8 p-6 bg-yellow-50 dark:bg-yellow-900/10 rounded-2xl border border-yellow-100 dark:border-yellow-900/30">
-                                        <div className="flex items-start gap-3">
-                                            <LightBulbIcon className="w-6 h-6 text-yellow-600 dark:text-yellow-500 flex-shrink-0 mt-0.5" />
+                                    <div className="mt-auto mx-auto w-full max-w-lg p-4 bg-amber-50 dark:bg-amber-900/10 rounded-xl border border-amber-100 dark:border-amber-900/30 text-left shrink-0">
+                                        <div className="flex gap-3">
+                                            <LightBulbIcon className="w-5 h-5 text-amber-500 shrink-0 mt-0.5" />
                                             <div>
-                                                <h4 className="text-sm font-bold text-yellow-800 dark:text-yellow-500 mb-2 uppercase">
-                                                    Explicação
-                                                </h4>
-                                                <p className="text-slate-700 dark:text-slate-300 text-base">
+                                                <p className="text-xs font-bold text-amber-700 dark:text-amber-500 uppercase mb-1">Explicação</p>
+                                                <p className="text-sm text-slate-700 dark:text-slate-300 leading-relaxed">
                                                     {currentCard.explanation}
                                                 </p>
                                             </div>
@@ -342,110 +351,100 @@ const FlashcardStudyPage: React.FC = () => {
                         </div>
                     </div>
                 </div>
-
-                {/* Controls Area (Bottom) - Only Show when Answer is Revealed */}
-                <div className={`w-full max-w-xl transition-all duration-500 transform ${showAnswer ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0 pointer-events-none'
-                    }`}>
-                    {showAnswer && (
-                        <div className="bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm p-2 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-lg">
-                            <div className="grid grid-cols-3 gap-2">
-                                <button
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        handleDifficultyChoice('HARD');
-                                    }}
-                                    className="group relative flex flex-col items-center justify-center p-4 rounded-xl hover:bg-red-50 dark:hover:bg-red-900/20 transition-all border border-transparent hover:border-red-200 dark:hover:border-red-800/50"
-                                >
-                                    <div className="w-10 h-10 mb-2 rounded-full bg-red-100 dark:bg-red-900/50 flex items-center justify-center text-red-600 dark:text-red-400 group-hover:scale-110 transition-transform">
-                                        <HandThumbDownIcon className="w-5 h-5" />
-                                    </div>
-                                    <span className="font-bold text-slate-700 dark:text-slate-200 group-hover:text-red-600 dark:group-hover:text-red-400">Difícil</span>
-                                    <span className="text-xs text-slate-500 dark:text-slate-400 mt-1">Tecla 1</span>
-                                </button>
-
-                                <button
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        handleDifficultyChoice('NORMAL');
-                                    }}
-                                    className="group relative flex flex-col items-center justify-center p-4 rounded-xl hover:bg-yellow-50 dark:hover:bg-yellow-900/20 transition-all border border-transparent hover:border-yellow-200 dark:hover:border-yellow-800/50"
-                                >
-                                    <div className="w-10 h-10 mb-2 rounded-full bg-yellow-100 dark:bg-yellow-900/50 flex items-center justify-center text-yellow-600 dark:text-yellow-400 group-hover:scale-110 transition-transform">
-                                        <ArrowPathIcon className="w-5 h-5" />
-                                    </div>
-                                    <span className="font-bold text-slate-700 dark:text-slate-200 group-hover:text-yellow-600 dark:group-hover:text-yellow-400">Normal</span>
-                                    <span className="text-xs text-slate-500 dark:text-slate-400 mt-1">Tecla 2</span>
-                                </button>
-
-                                <button
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        handleDifficultyChoice('EASY');
-                                    }}
-                                    className="group relative flex flex-col items-center justify-center p-4 rounded-xl hover:bg-green-50 dark:hover:bg-green-900/20 transition-all border border-transparent hover:border-green-200 dark:hover:border-green-800/50"
-                                >
-                                    <div className="w-10 h-10 mb-2 rounded-full bg-green-100 dark:bg-green-900/50 flex items-center justify-center text-green-600 dark:text-green-400 group-hover:scale-110 transition-transform">
-                                        <HandThumbUpIcon className="w-5 h-5" />
-                                    </div>
-                                    <span className="font-bold text-slate-700 dark:text-slate-200 group-hover:text-green-600 dark:group-hover:text-green-400">Fácil</span>
-                                    <span className="text-xs text-slate-500 dark:text-slate-400 mt-1">Tecla 3</span>
-                                </button>
-                            </div>
-                        </div>
-                    )}
-                </div>
-
-                {/* Additional Actions */}
-                <div className="absolute top-24 right-4 md:right-8 flex flex-col gap-2">
-                    <button
-                        onClick={() => setShowHistoryModal(true)}
-                        className="p-3 bg-white dark:bg-slate-800 rounded-full shadow-lg text-slate-500 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
-                        title="Ver histórico deste card"
-                    >
-                        <ClockIcon className="w-6 h-6" />
-                    </button>
-                    {/* Add more tools here if needed */}
-                </div>
             </main>
+
+            {/* Bottom Controls - Fixed/Safe Area */}
+            {showAnswer && (
+                <div className="shrink-0 p-4 pb-8 sm:pb-4 bg-white dark:bg-slate-900 border-t border-slate-100 dark:border-slate-800 transition-all duration-300 z-30 animate-slide-up shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)]">
+                    <div className="max-w-xl mx-auto grid grid-cols-3 gap-3">
+                        <button
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                handleDifficultyChoice('HARD');
+                            }}
+                            className="group flex flex-col items-center justify-center p-3 rounded-2xl bg-red-50 dark:bg-red-900/10 active:scale-95 transition-all border border-transparent active:border-red-200 dark:active:border-red-800 hover:bg-red-100 dark:hover:bg-red-900/20"
+                        >
+                            <div className="mb-1 text-red-500 dark:text-red-400">
+                                <HandThumbDownIcon className="w-6 h-6" />
+                            </div>
+                            <span className="text-sm font-bold text-red-700 dark:text-red-400">Difícil</span>
+                        </button>
+
+                        <button
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                handleDifficultyChoice('NORMAL');
+                            }}
+                            className="group flex flex-col items-center justify-center p-3 rounded-2xl bg-amber-50 dark:bg-amber-900/10 active:scale-95 transition-all border border-transparent active:border-amber-200 dark:active:border-amber-800 hover:bg-amber-100 dark:hover:bg-amber-900/20"
+                        >
+                            <div className="mb-1 text-amber-500 dark:text-amber-400">
+                                <ClockIcon className="w-6 h-6" />
+                            </div>
+                            <span className="text-sm font-bold text-amber-700 dark:text-amber-400">Normal</span>
+                        </button>
+
+                        <button
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                handleDifficultyChoice('EASY');
+                            }}
+                            className="group flex flex-col items-center justify-center p-3 rounded-2xl bg-green-50 dark:bg-green-900/10 active:scale-95 transition-all border border-transparent active:border-green-200 dark:active:border-green-800 hover:bg-green-100 dark:hover:bg-green-900/20"
+                        >
+                            <div className="mb-1 text-green-500 dark:text-green-400">
+                                <HandThumbUpIcon className="w-6 h-6" />
+                            </div>
+                            <span className="text-sm font-bold text-green-700 dark:text-green-400">Fácil</span>
+                        </button>
+                    </div>
+                </div>
+            )}
 
             {/* Info Modal */}
             {showInfoModal && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-                    <div className="bg-white dark:bg-slate-800 rounded-3xl shadow-2xl max-w-md w-full overflow-hidden">
-                        <div className="p-6 border-b border-slate-100 dark:border-slate-700">
-                            <h2 className="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                                <InformationCircleIcon className="w-6 h-6 text-primary-600" />
-                                Como Funciona
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
+                    <div className="bg-white dark:bg-slate-800 rounded-3xl shadow-2xl max-w-sm w-full overflow-hidden animate-scale-up">
+                        <div className="p-5 border-b border-slate-100 dark:border-slate-700">
+                            <h2 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                                <InformationCircleIcon className="w-5 h-5 text-primary-600" />
+                                Sistema SRS
                             </h2>
                         </div>
-                        <div className="p-6 space-y-4 text-slate-600 dark:text-slate-300">
-                            <p>
-                                Este sistema utiliza <strong>Repetição Espaçada</strong> para otimizar sua memória.
-                            </p>
-                            <ul className="space-y-3">
-                                <li className="flex items-start gap-3">
-                                    <span className="w-2 h-2 mt-2 bg-red-500 rounded-full flex-shrink-0" />
-                                    <span><strong>Difícil (1):</strong> Você errou ou demorou muito. O card voltará em breve.</span>
-                                </li>
-                                <li className="flex items-start gap-3">
-                                    <span className="w-2 h-2 mt-2 bg-yellow-500 rounded-full flex-shrink-0" />
-                                    <span><strong>Normal (2):</strong> Você lembrou, mas com algum esforço. Intervalo padrão.</span>
-                                </li>
-                                <li className="flex items-start gap-3">
-                                    <span className="w-2 h-2 mt-2 bg-green-500 rounded-full flex-shrink-0" />
-                                    <span><strong>Fácil (3):</strong> Você lembrou instantaneamente. O intervalo aumentará.</span>
-                                </li>
-                            </ul>
-                            <div className="bg-slate-100 dark:bg-slate-700/50 p-4 rounded-xl text-sm">
-                                <p className="font-semibold mb-1">Dica de Atalhos:</p>
-                                <p>Espaço: Virar card</p>
-                                <p>1, 2, 3: Avaliar dificuldade</p>
+                        <div className="p-5 space-y-4 text-sm text-slate-600 dark:text-slate-300">
+                            <p>O <strong>Sistema de Repetição Espaçada</strong> agenda revisões baseadas no seu desempenho:</p>
+                            <div className="space-y-3 bg-slate-50 dark:bg-slate-900/50 p-4 rounded-xl">
+                                <div className="flex items-center gap-3">
+                                    <div className="w-8 h-8 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center text-red-600 shrink-0">
+                                        <HandThumbDownIcon className="w-4 h-4" />
+                                    </div>
+                                    <div>
+                                        <div className="font-bold text-slate-900 dark:text-white">Difícil</div>
+                                        <div className="text-xs">Repetir em breve {`(< 1min)`}</div>
+                                    </div>
+                                </div>
+                                <div className="flex items-center gap-3">
+                                    <div className="w-8 h-8 rounded-full bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center text-amber-600 shrink-0">
+                                        <ClockIcon className="w-4 h-4" />
+                                    </div>
+                                    <div>
+                                        <div className="font-bold text-slate-900 dark:text-white">Normal</div>
+                                        <div className="text-xs">Repetir amanhã</div>
+                                    </div>
+                                </div>
+                                <div className="flex items-center gap-3">
+                                    <div className="w-8 h-8 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center text-green-600 shrink-0">
+                                        <HandThumbUpIcon className="w-4 h-4" />
+                                    </div>
+                                    <div>
+                                        <div className="font-bold text-slate-900 dark:text-white">Fácil</div>
+                                        <div className="text-xs">Repetir em 3+ dias</div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
-                        <div className="p-4 bg-slate-50 dark:bg-slate-800/50 border-t border-slate-100 dark:border-slate-700">
+                        <div className="p-4 border-t border-slate-100 dark:border-slate-700">
                             <button
                                 onClick={() => setShowInfoModal(false)}
-                                className="w-full py-3 px-4 bg-primary-600 hover:bg-primary-700 text-white rounded-xl font-bold transition-all transform active:scale-95"
+                                className="w-full py-3 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-xl font-bold text-sm"
                             >
                                 Entendi
                             </button>

@@ -78,7 +78,7 @@ const HomePage: React.FC = () => {
 
   const loadUserStats = async () => {
     try {
-      const stats = await apiClient.getUserStats();
+      const stats = await apiClient.getGeneralStats();
       setUserStats(stats);
     } catch (error) {
       console.error('Erro ao carregar estatísticas:', error);
@@ -142,16 +142,16 @@ const HomePage: React.FC = () => {
     { label: 'Nível', value: 'Sênior', icon: TrophyIcon, color: 'primary', blur: true },
   ] : userStats ? [
     // Real User Stats
-    { label: 'Simulados', value: (userStats.totalAttempts ?? 0).toString(), icon: DocumentTextIcon, color: 'indigo', blur: false },
+    { label: 'Atividades', value: (userStats.totalAttempts ?? 0).toString(), icon: DocumentTextIcon, color: 'indigo', blur: false },
     { label: 'Taxa de Acerto', value: `${((userStats.averageScore ?? 0) * 10).toFixed(0)}%`, icon: CheckCircleIcon, color: 'green', blur: false },
-    { label: 'Tempo Médio', value: `${Math.floor((userStats.averageTime ?? 0) / 60)}min`, icon: ClockIcon, color: 'amber', blur: false },
-    { label: 'Evolução', value: `${(userStats.evolution ?? 0) >= 0 ? '+' : ''}${(userStats.evolution ?? 0).toFixed(0)}%`, icon: ArrowTrendingUpIcon, color: 'primary', blur: false },
+    { label: 'Quizzes Gratuitos', value: (userStats.totalFreeQuizzesCompleted ?? 0).toString(), icon: SparklesIcon, color: 'amber', blur: false },
+    { label: 'Sessões Flashcard', value: (userStats.flashcardSessions ?? 0).toString(), icon: DocumentTextIcon, color: 'primary', blur: false },
   ] : [
     // Empty User Stats
-    { label: 'Simulados', value: '0', icon: DocumentTextIcon, color: 'indigo', blur: false },
+    { label: 'Atividades', value: '0', icon: DocumentTextIcon, color: 'indigo', blur: false },
     { label: 'Taxa de Acerto', value: '0%', icon: CheckCircleIcon, color: 'green', blur: false },
-    { label: 'Tempo Médio', value: '0min', icon: ClockIcon, color: 'amber', blur: false },
-    { label: 'Evolução', value: '0%', icon: ArrowTrendingUpIcon, color: 'primary', blur: false },
+    { label: 'Quizzes Gratuitos', value: '0', icon: SparklesIcon, color: 'amber', blur: false },
+    { label: 'Sessões Flashcard', value: '0', icon: DocumentTextIcon, color: 'primary', blur: false },
   ];
 
   const quickActions = isGuest ? [
@@ -299,7 +299,7 @@ const HomePage: React.FC = () => {
                   </div>
 
                   <h1 className="text-4xl lg:text-5xl font-black text-white mb-6 leading-tight">
-                    <span className="text-slate-900 dark:text-white">Conquiste sua vaga em </span>
+                    <span className="text-white">Conquiste sua vaga em </span>
                     <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary-400 to-blue-400">
                       qualquer área
                     </span>

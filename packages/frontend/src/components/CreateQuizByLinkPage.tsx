@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import PageTitle from './PageTitle';
 import { SparklesIcon, LinkIcon, AcademicCapIcon, PlusIcon, XMarkIcon, ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/outline';
@@ -41,6 +41,25 @@ const CreateQuizByLinkPage: React.FC = () => {
         { id: 'glassdoor', name: 'Glassdoor', logo: 'https://cdn.worldvectorlogo.com/logos/glassdoor.svg' },
         { id: 'indeed', name: 'Indeed', logo: 'https://cdn.worldvectorlogo.com/logos/indeed-1.svg' },
     ];
+
+    // Auto-detect platform from job link
+    useEffect(() => {
+        if (!jobLink) return;
+
+        const url = jobLink.toLowerCase();
+
+        if (url.includes('linkedin.com')) {
+            setSelectedPlatform('linkedin');
+        } else if (url.includes('gupy.io') || url.includes('gupy.com.br')) {
+            setSelectedPlatform('gupy');
+        } else if (url.includes('infojobs.com') || url.includes('infojobs.net')) {
+            setSelectedPlatform('infojobs');
+        } else if (url.includes('glassdoor.com') || url.includes('glassdoor.com.br')) {
+            setSelectedPlatform('glassdoor');
+        } else if (url.includes('indeed.com') || url.includes('indeed.com.br')) {
+            setSelectedPlatform('indeed');
+        }
+    }, [jobLink]);
 
     const handleJobSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -293,9 +312,19 @@ const CreateQuizByLinkPage: React.FC = () => {
 
                                         {/* Platform Selector */}
                                         <div className="space-y-4 mb-8">
-                                            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">
-                                                Selecione a Plataforma
-                                            </label>
+                                            <div className="flex items-center justify-between">
+                                                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">
+                                                    Plataforma Detectada
+                                                </label>
+                                                {jobLink && (
+                                                    <span className="text-xs bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 px-2 py-1 rounded-full font-medium flex items-center gap-1">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" className="w-3 h-3">
+                                                            <path fillRule="evenodd" d="M12.416 3.376a.75.75 0 0 1 .208 1.04l-5 7.5a.75.75 0 0 1-1.154.114l-3-3a.75.75 0 0 1 1.06-1.06l2.353 2.353 4.493-6.74a.75.75 0 0 1 1.04-.207Z" clipRule="evenodd" />
+                                                        </svg>
+                                                        Auto-detectado
+                                                    </span>
+                                                )}
+                                            </div>
                                             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
                                                 {platforms.map((platform) => (
                                                     <div
@@ -349,8 +378,11 @@ const CreateQuizByLinkPage: React.FC = () => {
                                                     required
                                                 />
                                             </div>
-                                            <p className="text-xs text-slate-500 dark:text-slate-400 mt-2">
-                                                Cole aqui o link completo de uma vaga do {platforms.find(p => p.id === selectedPlatform)?.name}
+                                            <p className="text-xs text-slate-500 dark:text-slate-400 mt-2 flex items-start gap-1.5">
+                                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" className="w-4 h-4 mt-0.5 shrink-0">
+                                                    <path fillRule="evenodd" d="M15 8A7 7 0 1 1 1 8a7 7 0 0 1 14 0ZM9 5a1 1 0 1 1-2 0 1 1 0 0 1 2 0ZM6.75 8a.75.75 0 0 0 0 1.5h.75v1.75a.75.75 0 0 0 1.5 0v-2.5A.75.75 0 0 0 8.25 8h-1.5Z" clipRule="evenodd" />
+                                                </svg>
+                                                <span>Cole o link da vaga e a plataforma será detectada automaticamente</span>
                                             </p>
                                         </div>
 

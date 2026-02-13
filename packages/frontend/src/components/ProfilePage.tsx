@@ -18,14 +18,14 @@ import {
   BriefcaseIcon,
   MapPinIcon,
   DocumentTextIcon,
-  AcademicCapIcon,
   ChartBarIcon,
   Cog6ToothIcon,
   GiftIcon,
   TrophyIcon,
   ShoppingBagIcon,
   ClockIcon,
-  ChevronUpDownIcon
+  ChevronUpDownIcon,
+  SparklesIcon
 } from '@heroicons/react/24/outline';
 import { getNicheIcon } from '../utils/nicheIcons';
 import ActivityHeatmap from './ActivityHeatmap';
@@ -124,7 +124,10 @@ const ProfilePage: React.FC = () => {
   const [stats, setStats] = useState({
     totalAttempts: 0,
     averageScore: 0,
-    totalFreeQuizzesCompleted: 0
+    totalFreeQuizzesCompleted: 0,
+    quizAttempts: 0,
+    flashcardSessions: 0,
+    interviewAttempts: 0
   });
 
   const [activityData, setActivityData] = useState<{ date: string; count: number }[]>([]);
@@ -139,7 +142,10 @@ const ProfilePage: React.FC = () => {
           setStats({
             totalAttempts: data.totalAttempts || 0,
             averageScore: data.averageScore || 0,
-            totalFreeQuizzesCompleted: data.totalFreeQuizzesCompleted || 0
+            totalFreeQuizzesCompleted: data.totalFreeQuizzesCompleted || 0,
+            quizAttempts: data.quizAttempts || 0,
+            flashcardSessions: data.flashcardSessions || 0,
+            interviewAttempts: data.interviewAttempts || 0
           });
         }
       } catch (error) {
@@ -1115,14 +1121,24 @@ const ProfilePage: React.FC = () => {
 
                 <div className="grid grid-cols-2 gap-4 pt-2">
                   <div className="text-center p-3 bg-slate-50 dark:bg-slate-800/50 rounded-lg border border-slate-100 dark:border-slate-700">
-                    <AcademicCapIcon className="h-6 w-6 text-primary-500 mx-auto mb-2" />
-                    <p className="text-xs text-slate-500 dark:text-slate-400">Quizzes Feitos</p>
+                    <DocumentTextIcon className="h-6 w-6 text-indigo-500 mx-auto mb-2" />
+                    <p className="text-xs text-slate-500 dark:text-slate-400">Atividades</p>
                     <p className="text-lg font-bold text-slate-900 dark:text-white">{stats.totalAttempts}</p>
                   </div>
                   <div className="text-center p-3 bg-slate-50 dark:bg-slate-800/50 rounded-lg border border-slate-100 dark:border-slate-700">
                     <ShieldCheckIcon className="h-6 w-6 text-green-500 mx-auto mb-2" />
                     <p className="text-xs text-slate-500 dark:text-slate-400">Média Geral</p>
                     <p className="text-lg font-bold text-slate-900 dark:text-white">{(stats.averageScore * 10).toFixed(0)}%</p>
+                  </div>
+                  <div className="text-center p-3 bg-slate-50 dark:bg-slate-800/50 rounded-lg border border-slate-100 dark:border-slate-700">
+                    <SparklesIcon className="h-6 w-6 text-amber-500 mx-auto mb-2" />
+                    <p className="text-xs text-slate-500 dark:text-slate-400">Quizzes Gratuitos</p>
+                    <p className="text-lg font-bold text-slate-900 dark:text-white">{stats.totalFreeQuizzesCompleted}</p>
+                  </div>
+                  <div className="text-center p-3 bg-slate-50 dark:bg-slate-800/50 rounded-lg border border-slate-100 dark:border-slate-700">
+                    <DocumentTextIcon className="h-6 w-6 text-primary-500 mx-auto mb-2" />
+                    <p className="text-xs text-slate-500 dark:text-slate-400">Sessões Flashcard</p>
+                    <p className="text-lg font-bold text-slate-900 dark:text-white">{stats.flashcardSessions}</p>
                   </div>
                 </div>
 

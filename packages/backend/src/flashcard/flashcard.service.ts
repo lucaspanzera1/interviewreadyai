@@ -19,8 +19,10 @@ import {
   FlashcardItem,
   ReviewHistory
 } from './schemas';
-import { UserService } from '../user/user.service';
 import { CardDifficulty, CardProgress } from './schemas/flashcard-study.schema';
+import { ModuleRef } from '@nestjs/core';
+import { forwardRef, Inject } from '@nestjs/common';
+import { UserService } from '../user/user.service';
 
 @Injectable()
 export class FlashcardService {
@@ -29,8 +31,14 @@ export class FlashcardService {
     private readonly configService: ConfigService,
     @InjectModel(Flashcard.name) private flashcardModel: Model<FlashcardDocument>,
     @InjectModel(FlashcardStudy.name) private flashcardStudyModel: Model<FlashcardStudyDocument>,
+    private readonly moduleRef: ModuleRef,
+    @Inject(forwardRef(() => UserService))
     private readonly userService: UserService,
   ) {}
+
+  private async getUserService(): Promise<any> {
+    return this.userService;
+  }
 
   /**
    * Gera flashcards personalizados baseado em vaga do LinkedIn
@@ -38,7 +46,8 @@ export class FlashcardService {
    */
   async generateJobFlashcard(dto: GenerateJobFlashcardDto, userId: string): Promise<GeneratedFlashcard> {
     // Validar que o usuário existe e tem tokens suficientes
-    const user = await this.userService.findById(userId);
+    const userService = await this.getUserService();
+    const user = await userService.findById(userId);
     if (!user) {
       throw new HttpException('User not found', HttpStatus.NOT_FOUND);
     }
@@ -57,7 +66,7 @@ export class FlashcardService {
       const flashcards = await this.generateFlashcardsFromJobData(jobData, dto, userId);
 
       // Deduzir 2 tokens do usuário após sucesso
-      await this.userService.removeTokensFromUser(userId, 2, 'flashcard_generation');
+      await userService.removeTokensFromUser(userId, 2, 'flashcard_generation');
 
       console.log('Flashcards generated successfully');
       return flashcards;
@@ -427,7 +436,8 @@ export class FlashcardService {
       console.log(`Saving flashcard for user: ${userId} (ObjectId: ${userObjectId})`);
       
       // Verificar se usuário é admin para definir como público
-      const user = await this.userService.findById(userId);
+      const userService = await this.getUserService();
+      const user = await userService.findById(userId);
       const isAdmin = user && user.role === 'admin';
       
       const flashcardData = {
@@ -483,7 +493,8 @@ export class FlashcardService {
           const { Types } = require('mongoose');
           const userObjectId = new Types.ObjectId(userId);
           
-          const user = await this.userService.findById(userId);
+          const userService = await this.getUserService();
+          const user = await userService.findById(userId);
           const isAdmin = user && user.role === 'admin';
           
           const savedFlashcard = await this.flashcardModel.create({
@@ -827,9 +838,11 @@ IMPORTANTE:
     // Verificar se o usuário é o criador do flashcard
     const isCreator = flashcard.createdBy.toString() === userId.toString();
 
+    const userService = await this.getUserService();
+
     if (!flashcard.isFree && !isCreator) {
       // Se não é gratuito E não é o criador, verificar se o usuário tem tokens suficientes
-      const userTokens = await this.userService.getUserTokens(userId);
+      const userTokens = await userService.getUserTokens(userId);
       if (userTokens < 1) {
         throw new HttpException(
           'Você não tem tokens suficientes para estudar este flashcard. Compre tokens para continuar.',
@@ -838,7 +851,7 @@ IMPORTANTE:
       }
 
       // Debitar 1 token (custo para estudar flashcards de outros usuários)
-      await this.userService.removeTokensFromUser(userId, 1, 'flashcard_study');
+      await userService.removeTokensFromUser(userId, 1, 'flashcard_study');
     }
 
     // Buscar ou criar progresso do usuário

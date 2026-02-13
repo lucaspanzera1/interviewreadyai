@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { HttpModule } from '@nestjs/axios';
 import { UserController } from './user.controller';
@@ -10,6 +10,9 @@ import { User, UserSchema } from './schemas/user.schema';
 import { UserFollow, UserFollowSchema } from './schemas/user-follow.schema';
 import { QuizAttempt, QuizAttemptSchema } from '../quiz/schemas/quiz-attempt.schema';
 import { EmailModule } from '../common/email.module';
+import { FlashcardModule } from '../flashcard/flashcard.module';
+import { QuizModule } from '../quiz/quiz.module';
+import { InterviewModule } from '../interview/interview.module';
 
 /**
  * Módulo de usuários
@@ -24,6 +27,9 @@ import { EmailModule } from '../common/email.module';
     ]),
     EmailModule,
     HttpModule,
+    forwardRef(() => FlashcardModule),
+    forwardRef(() => QuizModule),
+    forwardRef(() => InterviewModule),
   ],
   controllers: [UserController],
   providers: [UserService, UserSocialService, UserExpirationService, MigrationService],
