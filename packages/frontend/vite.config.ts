@@ -7,6 +7,9 @@ export default defineConfig({
   server: {
     port: 8080,
     host: '0.0.0.0',
+    headers: {
+      'X-Content-Type-Options': 'nosniff',
+    },
     proxy: {
       '/api': {
         target: 'http://localhost:8081',
@@ -27,6 +30,9 @@ export default defineConfig({
       '.treinavaga.tech',
       'localhost'
     ],
+    headers: {
+      'X-Content-Type-Options': 'nosniff',
+    },
   },
   build: {
     rollupOptions: {
