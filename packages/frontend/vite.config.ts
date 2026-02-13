@@ -7,6 +7,10 @@ export default defineConfig({
   server: {
     port: 8080,
     host: '0.0.0.0',
+    headers: {
+      'X-Content-Type-Options': 'nosniff',
+      'Content-Security-Policy': "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: https:; connect-src 'self' https://api.treinavaga.tech http://localhost:8081 https://accounts.google.com https://github.com; frame-src https://www.youtube.com; frame-ancestors 'none';",
+    },
     proxy: {
       '/api': {
         target: 'http://localhost:8081',
@@ -27,6 +31,10 @@ export default defineConfig({
       '.treinavaga.tech',
       'localhost'
     ],
+    headers: {
+      'X-Content-Type-Options': 'nosniff',
+      'Content-Security-Policy': "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: https:; connect-src 'self' https://api.treinavaga.tech https://accounts.google.com https://github.com; frame-src https://www.youtube.com; frame-ancestors 'none';",
+    },
   },
   build: {
     rollupOptions: {
