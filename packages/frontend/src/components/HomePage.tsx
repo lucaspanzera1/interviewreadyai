@@ -639,7 +639,7 @@ const HomePage: React.FC = () => {
                         endDate={new Date(2027, 1, 1)}
                       />
                     </div>
-                    {recentSimulados.length > 0 ? (
+                    {recentSimulados.length > 0 && (
                       <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden">
                         {recentSimulados.slice(0, 3).map((simulado: any, i: number) => (
                           <div
@@ -661,11 +661,6 @@ const HomePage: React.FC = () => {
                             <ArrowRightOnRectangleIcon className="w-4 h-4 text-slate-300 -rotate-45 shrink-0" />
                           </div>
                         ))}
-                      </div>
-                    ) : (
-                      <div className="text-center py-10 bg-slate-50 dark:bg-slate-900 rounded-xl border border-dashed border-slate-200 dark:border-slate-800">
-                        <p className="text-sm text-slate-500">Nenhuma atividade recente.</p>
-                        <button onClick={() => navigate('/simulados/novo')} className="text-xs text-primary-600 font-semibold mt-1">Começar agora</button>
                       </div>
                     )}
                   </>
