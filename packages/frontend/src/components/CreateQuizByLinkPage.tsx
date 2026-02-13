@@ -15,11 +15,11 @@ const CreateQuizByLinkPage: React.FC = () => {
     const navigate = useNavigate();
     const { user, refreshUser } = useAuth();
     const { showToast } = useToast();
-    
+
     // Job quiz states
     const [jobLink, setJobLink] = useState('');
     const [selectedPlatform, setSelectedPlatform] = useState('linkedin');
-    
+
     // Theme quiz states
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [currentStep, setCurrentStep] = useState(1);
@@ -36,8 +36,8 @@ const CreateQuizByLinkPage: React.FC = () => {
 
     const platforms = [
         { id: 'linkedin', name: 'LinkedIn', logo: 'https://upload.wikimedia.org/wikipedia/commons/c/ca/LinkedIn_logo_initials.png' },
-        { id: 'gupy', name: 'Gupy', logo: 'https://cdn.worldvectorlogo.com/logos/gupy-1.svg' },
-        { id: 'infojobs', name: 'InfoJobs', logo: 'https://cdn.worldvectorlogo.com/logos/infojobs.svg' },
+        { id: 'gupy', name: 'Gupy', logo: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADgAAAA4CAMAAACfWMssAAAAflBMVEUAPP3///8AOf0ANf0AK/31+P+2wv4AMf0ALf0AJv0AL/0AIf0AM/0AN/3Dzf4pU/3a4P+aqf7s8P/L0/4gTP1AYf10iP6Nm/57jf5Jaf0MQf09Xv1ogP00WP2lsv5HZf2Rof7R2f9Zc/2Clf6uvP7k6f+qt/67x/4AAP1Sbv3hNUABAAABeElEQVRIie2V3XKDIBCFccEAIomJNkatqflr2vd/wcaFTNWZCNzlwnMlzn6zx+WAhCxa9CbSKeephkAqlfCxL8tDVUsegHG5P0VWWcmFJwbyEEdDbRPq5bLOool2jUdT3sRT7qFP5uJoO2i0G5Cp4/vos9/xSygl287CmcOsXJu6K2e6X+tEdv36JOY3lJ4Nd1D/dayKopw5gqDMQC9y+DI539U8RrSZTD6po87NEEcEC+0qnEqi01y6Kycye3EJiTUKCnRa2WRqOtKMf9gg2JoSto6Hiq6vRzQB83FcV6/jCjVWnGkoSERsjl8wKLH2poJBXhqveISg6EWvPiBocw4TjDQAaLXy6kjYahRWULmf1WcEohLDA3x4+8yCROCx/ca06vRmkOPdDZLe3Bad0treGtuftQdIRNZhv7Swt89FMi8QEtz/pLGf9rgY/UDb99dylSAhYLo3WNz24zUZuvuA0GxQBPMORf9ceP3xwGi08uEWLXo//QHGZBFDIk9DpwAAAABJRU5ErkJggg==' },
+        { id: 'infojobs', name: 'InfoJobs', logo: 'https://i0.wp.com/blog.infojobs.com.br/wp-content/uploads/2023/07/Versao-Duotone-Indigo%402x-2-1.png?fit=2420%2C1014&ssl=1' },
         { id: 'glassdoor', name: 'Glassdoor', logo: 'https://cdn.worldvectorlogo.com/logos/glassdoor.svg' },
         { id: 'indeed', name: 'Indeed', logo: 'https://cdn.worldvectorlogo.com/logos/indeed-1.svg' },
     ];
@@ -101,10 +101,10 @@ const CreateQuizByLinkPage: React.FC = () => {
 
             // Mostrar mensagem de sucesso
             showToast('Quiz criado com sucesso! 1 token foi deduzido.', 'success');
-            
+
             // Fechar modal
             setIsModalOpen(false);
-            
+
             // Reset form
             setFormData({
                 categoria: '',
@@ -201,42 +201,40 @@ const CreateQuizByLinkPage: React.FC = () => {
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 {/* Job Quiz Option */}
                                 <div
-                                    className={`relative flex flex-col items-center p-6 rounded-xl border-2 cursor-pointer transition-all ${
-                                        quizType === 'job'
-                                            ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20 shadow-md transform scale-[1.02]'
-                                            : 'border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600'
-                                    }`}
+                                    className={`relative flex flex-col items-center p-6 rounded-xl border-2 cursor-pointer transition-all duration-300 ${quizType === 'job'
+                                        ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20 shadow-xl shadow-primary-500/10 transform scale-[1.02] ring-1 ring-primary-500/50'
+                                        : 'border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-800'
+                                        }`}
                                     onClick={() => setQuizType('job')}
                                 >
-                                    <LinkIcon className="h-12 w-12 text-primary-600 dark:text-primary-400 mb-4" />
+                                    <LinkIcon className={`h-12 w-12 mb-4 transition-colors ${quizType === 'job' ? 'text-primary-600 dark:text-primary-400' : 'text-slate-400'}`} />
                                     <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-2">Por Vaga de Emprego</h3>
-                                    <p className="text-sm text-slate-600 dark:text-slate-400 text-center">
+                                    <p className="text-sm text-slate-600 dark:text-slate-400 text-center leading-relaxed">
                                         Cole o link de uma vaga e receba um quiz personalizado baseado nos requisitos.
                                     </p>
                                     {quizType === 'job' && (
-                                        <div className="absolute top-3 right-3 text-primary-600">
-                                            <div className="w-3 h-3 rounded-full bg-primary-600"></div>
+                                        <div className="absolute top-3 right-3 text-primary-600 animate-in zoom-in duration-300">
+                                            <div className="w-3 h-3 rounded-full bg-primary-600 ring-4 ring-primary-100 dark:ring-primary-900/50"></div>
                                         </div>
                                     )}
                                 </div>
 
                                 {/* Theme Quiz Option */}
                                 <div
-                                    className={`relative flex flex-col items-center p-6 rounded-xl border-2 cursor-pointer transition-all ${
-                                        quizType === 'theme'
-                                            ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20 shadow-md transform scale-[1.02]'
-                                            : 'border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600'
-                                    }`}
+                                    className={`relative flex flex-col items-center p-6 rounded-xl border-2 cursor-pointer transition-all duration-300 ${quizType === 'theme'
+                                        ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20 shadow-xl shadow-primary-500/10 transform scale-[1.02] ring-1 ring-primary-500/50'
+                                        : 'border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-800'
+                                        }`}
                                     onClick={() => setQuizType('theme')}
                                 >
-                                    <AcademicCapIcon className="h-12 w-12 text-primary-600 dark:text-primary-400 mb-4" />
+                                    <AcademicCapIcon className={`h-12 w-12 mb-4 transition-colors ${quizType === 'theme' ? 'text-primary-600 dark:text-primary-400' : 'text-slate-400'}`} />
                                     <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-2">Por Tema Personalizado</h3>
-                                    <p className="text-sm text-slate-600 dark:text-slate-400 text-center">
+                                    <p className="text-sm text-slate-600 dark:text-slate-400 text-center leading-relaxed">
                                         Defina o tema, nível de dificuldade e quantidade de questões do seu quiz.
                                     </p>
                                     {quizType === 'theme' && (
-                                        <div className="absolute top-3 right-3 text-primary-600">
-                                            <div className="w-3 h-3 rounded-full bg-primary-600"></div>
+                                        <div className="absolute top-3 right-3 text-primary-600 animate-in zoom-in duration-300">
+                                            <div className="w-3 h-3 rounded-full bg-primary-600 ring-4 ring-primary-100 dark:ring-primary-900/50"></div>
                                         </div>
                                     )}
                                 </div>
@@ -257,18 +255,19 @@ const CreateQuizByLinkPage: React.FC = () => {
                                 <div className="relative z-10">
                                     <form onSubmit={handleJobSubmit} className="space-y-6">
                                         {/* Token Info Card */}
-                                        <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700/50 rounded-xl p-4 mb-6 flex items-start gap-4">
-                                            <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg text-blue-600 dark:text-blue-400 shrink-0">
+                                        {/* Token Info Card */}
+                                        <div className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border border-blue-100 dark:border-blue-700/50 rounded-xl p-5 mb-6 flex items-start gap-4 shadow-sm">
+                                            <div className="p-2.5 bg-white dark:bg-blue-900/40 rounded-lg text-blue-600 dark:text-blue-400 shrink-0 shadow-sm">
                                                 <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                                 </svg>
                                             </div>
                                             <div className="flex-1">
-                                                <h3 className="text-lg font-bold text-blue-800 dark:text-blue-200">
+                                                <h3 className="text-lg font-bold text-blue-900 dark:text-blue-100">
                                                     Custa 1 Token
                                                 </h3>
-                                                <p className="text-blue-700 dark:text-blue-300 mt-1">
-                                                    Você tem <span className="font-bold">{user?.tokens || 0} tokens</span> disponíveis. Cada quiz personalizado custa 1 token.
+                                                <p className="text-blue-700 dark:text-blue-300 mt-1 leading-relaxed">
+                                                    Você tem <span className="font-bold bg-blue-100 dark:bg-blue-800 px-1.5 py-0.5 rounded text-blue-800 dark:text-blue-200">{user?.tokens || 0} tokens</span> disponíveis.
                                                 </p>
                                             </div>
                                         </div>
@@ -301,11 +300,10 @@ const CreateQuizByLinkPage: React.FC = () => {
                                                 {platforms.map((platform) => (
                                                     <div
                                                         key={platform.id}
-                                                        className={`relative flex items-center justify-center p-4 rounded-xl border-2 cursor-pointer transition-all ${
-                                                            selectedPlatform === platform.id
-                                                                ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20 shadow-md transform scale-[1.02]'
-                                                                : 'border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600'
-                                                        }`}
+                                                        className={`relative flex items-center justify-center p-4 rounded-xl border-2 cursor-pointer transition-all ${selectedPlatform === platform.id
+                                                            ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20 shadow-md transform scale-[1.02]'
+                                                            : 'border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600'
+                                                            }`}
                                                         onClick={() => setSelectedPlatform(platform.id)}
                                                     >
                                                         <div className="flex flex-col items-center gap-3">
@@ -359,11 +357,10 @@ const CreateQuizByLinkPage: React.FC = () => {
                                         <button
                                             type="submit"
                                             disabled={isLoading || !isValidJobUrl || !user?.tokens || user.tokens < 1}
-                                            className={`w-full flex items-center justify-center gap-3 px-8 py-4 border border-transparent text-lg font-bold rounded-xl text-white transition-all duration-300 ${
-                                                isLoading || !isValidJobUrl || !user?.tokens || user.tokens < 1
-                                                    ? 'bg-slate-400 dark:bg-slate-600 cursor-not-allowed'
-                                                    : 'bg-gradient-to-r from-primary-600 to-indigo-600 hover:from-primary-700 hover:to-indigo-700 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5'
-                                            }`}
+                                            className={`w-full flex items-center justify-center gap-3 px-8 py-4 border border-transparent text-lg font-bold rounded-xl text-white transition-all duration-300 ${isLoading || !isValidJobUrl || !user?.tokens || user.tokens < 1
+                                                ? 'bg-slate-400 dark:bg-slate-600 cursor-not-allowed'
+                                                : 'bg-gradient-to-r from-primary-600 to-indigo-600 hover:from-primary-700 hover:to-indigo-700 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5'
+                                                }`}
                                         >
                                             {isLoading ? (
                                                 <>
@@ -389,25 +386,25 @@ const CreateQuizByLinkPage: React.FC = () => {
                         <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl border border-slate-200 dark:border-slate-700 p-8 relative overflow-hidden group">
                             <div className="absolute top-0 right-0 -mt-20 -mr-20 w-64 h-64 bg-primary-500/10 rounded-full blur-3xl group-hover:bg-primary-500/20 transition-all duration-500"></div>
                             <div className="absolute bottom-0 left-0 -mb-20 -ml-20 w-64 h-64 bg-indigo-500/10 rounded-full blur-3xl group-hover:bg-indigo-500/20 transition-all duration-500"></div>
-                            
+
                             <div className="relative z-10 text-center">
                                 {/* Token Info Card */}
-                                <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700/50 rounded-xl p-4 mb-6 flex items-start gap-4">
-                                    <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg text-blue-600 dark:text-blue-400 shrink-0">
+                                <div className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border border-blue-100 dark:border-blue-700/50 rounded-xl p-5 mb-6 flex items-start gap-4 shadow-sm text-left">
+                                    <div className="p-2.5 bg-white dark:bg-blue-900/40 rounded-lg text-blue-600 dark:text-blue-400 shrink-0 shadow-sm">
                                         <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                         </svg>
                                     </div>
                                     <div className="flex-1">
-                                        <h3 className="text-lg font-bold text-blue-800 dark:text-blue-200">
+                                        <h3 className="text-lg font-bold text-blue-900 dark:text-blue-100">
                                             Custa 1 Token
                                         </h3>
-                                        <p className="text-blue-700 dark:text-blue-300 mt-1">
-                                            Você tem <span className="font-bold">{user?.tokens || 0} tokens</span> disponíveis. Cada quiz personalizado custa 1 token.
+                                        <p className="text-blue-700 dark:text-blue-300 mt-1 leading-relaxed">
+                                            Você tem <span className="font-bold bg-blue-100 dark:bg-blue-800 px-1.5 py-0.5 rounded text-blue-800 dark:text-blue-200">{user?.tokens || 0} tokens</span> disponíveis.
                                         </p>
                                     </div>
                                 </div>
-                                
+
                                 {/* Error Message */}
                                 {error && (
                                     <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700/50 rounded-xl p-4 flex items-start gap-4 mb-6">
@@ -426,22 +423,21 @@ const CreateQuizByLinkPage: React.FC = () => {
                                         </div>
                                     </div>
                                 )}
-                                
+
                                 <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-4">
                                     Crie Seu Quiz Personalizado
                                 </h2>
                                 <p className="text-slate-600 dark:text-slate-400 mb-8">
                                     Defina o tema, nível de dificuldade e contexto do seu quiz personalizado.
                                 </p>
-                                
+
                                 <button
                                     onClick={() => setIsModalOpen(true)}
                                     disabled={!user?.tokens || user.tokens < 1}
-                                    className={`inline-flex items-center gap-3 px-8 py-4 border border-transparent text-lg font-bold rounded-xl text-white transition-all duration-300 ${
-                                        !user?.tokens || user.tokens < 1
-                                            ? 'bg-slate-400 dark:bg-slate-600 cursor-not-allowed'
-                                            : 'bg-gradient-to-r from-primary-600 to-indigo-600 hover:from-primary-700 hover:to-indigo-700 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5'
-                                    }`}
+                                    className={`inline-flex items-center gap-3 px-8 py-4 border border-transparent text-lg font-bold rounded-xl text-white transition-all duration-300 ${!user?.tokens || user.tokens < 1
+                                        ? 'bg-slate-400 dark:bg-slate-600 cursor-not-allowed'
+                                        : 'bg-gradient-to-r from-primary-600 to-indigo-600 hover:from-primary-700 hover:to-indigo-700 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5'
+                                        }`}
                                 >
                                     <SparklesIcon className="h-6 w-6" />
                                     Criar Quiz Personalizado
@@ -452,34 +448,34 @@ const CreateQuizByLinkPage: React.FC = () => {
 
                     {/* Features / Info Section */}
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        <div className="p-6 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 hover:shadow-md transition-shadow">
-                            <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center mb-4 text-blue-600 dark:text-blue-400">
+                        <div className="p-6 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
+                            <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-xl flex items-center justify-center mb-4 text-blue-600 dark:text-blue-400 shadow-sm">
                                 <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                                 </svg>
                             </div>
-                            <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-2">Instantâneo</h3>
-                            <p className="text-slate-600 dark:text-slate-400">Cole o link e receba um quiz personalizado em segundos, focado nas habilidades exigidas.</p>
+                            <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-2">Instantâneo</h3>
+                            <p className="text-slate-600 dark:text-slate-400 leading-relaxed">Cole o link e receba um quiz personalizado em segundos, focado nas habilidades exigidas.</p>
                         </div>
 
-                        <div className="p-6 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 hover:shadow-md transition-shadow">
-                            <div className="w-10 h-10 bg-purple-100 dark:bg-purple-900/30 rounded-lg flex items-center justify-center mb-4 text-purple-600 dark:text-purple-400">
+                        <div className="p-6 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
+                            <div className="w-12 h-12 bg-purple-100 dark:bg-purple-900/30 rounded-xl flex items-center justify-center mb-4 text-purple-600 dark:text-purple-400 shadow-sm">
                                 <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                                 </svg>
                             </div>
-                            <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-2">Relevante</h3>
-                            <p className="text-slate-600 dark:text-slate-400">Perguntas geradas baseadas exatamente no que a vaga pede, aumentando suas chances.</p>
+                            <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-2">Relevante</h3>
+                            <p className="text-slate-600 dark:text-slate-400 leading-relaxed">Perguntas geradas baseadas exatamente no que a vaga pede, aumentando suas chances.</p>
                         </div>
 
-                        <div className="p-6 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 hover:shadow-md transition-shadow">
-                            <div className="w-10 h-10 bg-green-100 dark:bg-green-900/30 rounded-lg flex items-center justify-center mb-4 text-green-600 dark:text-green-400">
+                        <div className="p-6 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
+                            <div className="w-12 h-12 bg-green-100 dark:bg-green-900/30 rounded-xl flex items-center justify-center mb-4 text-green-600 dark:text-green-400 shadow-sm">
                                 <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
                                 </svg>
                             </div>
-                            <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-2">Evolução</h3>
-                            <p className="text-slate-600 dark:text-slate-400">Acompanhe seu desempenho e identifique pontos de melhoria antes da entrevista real.</p>
+                            <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-2">Evolução</h3>
+                            <p className="text-slate-600 dark:text-slate-400 leading-relaxed">Acompanhe seu desempenho e identifique pontos de melhoria antes da entrevista real.</p>
                         </div>
                     </div>
                 </div>
@@ -492,12 +488,12 @@ const CreateQuizByLinkPage: React.FC = () => {
                             href="https://wa.me/5531997313160"
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 font-medium hover:underline inline-flex items-center gap-1"
+                            className="bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 hover:bg-green-200 dark:hover:bg-green-900/50 px-3 py-1 rounded-full text-sm font-semibold transition-colors inline-flex items-center gap-1.5"
                         >
-                            Entre em contato com o suporte via WhatsApp
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4">
                                 <path fillRule="evenodd" d="M1.5 4.5a3 3 0 013-3h1.372c.86 0 1.61.586 1.819 1.42l1.105 4.423a1.875 1.875 0 01-.694 1.955l-1.293.97c-.135.101-.164.249-.126.352a11.285 11.285 0 006.697 6.697c.103.038.25.009.352-.126l.97-1.293a1.875 1.875 0 011.955-.694l4.423 1.105c.834.209 1.42.959 1.42 1.82V19.5a3 3 0 01-3 3h-2.25C8.552 22.5 1.5 15.448 1.5 5.25V4.5z" clipRule="evenodd" />
                             </svg>
+                            Fale conosco no WhatsApp
                         </a>
                     </p>
                 </div>
@@ -505,8 +501,8 @@ const CreateQuizByLinkPage: React.FC = () => {
 
             {/* Theme Quiz Modal */}
             {isModalOpen && (
-                <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
-                    <div className="bg-white dark:bg-slate-900 rounded-2xl w-full max-w-2xl shadow-2xl flex flex-col max-h-[90vh]">
+                <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in zoom-in-95 duration-200">
+                    <div className="bg-white dark:bg-slate-900 rounded-2xl w-full max-w-2xl shadow-2xl flex flex-col max-h-[90vh] ring-1 ring-slate-900/5 dark:ring-white/10">
                         {/* Header */}
                         <div className="flex items-center justify-between p-6 border-b border-slate-200 dark:border-slate-800">
                             <div>
@@ -527,11 +523,11 @@ const CreateQuizByLinkPage: React.FC = () => {
                         </div>
 
                         {/* Stepper */}
-                        <div className="px-8 py-4 bg-slate-50 dark:bg-slate-900/50 border-b border-slate-200 dark:border-slate-800">
+                        <div className="px-8 py-6 bg-slate-50 dark:bg-slate-900/50 border-b border-slate-200 dark:border-slate-800">
                             <div className="flex items-center justify-between relative">
                                 <div className="absolute left-0 top-1/2 -translate-y-1/2 w-full h-1 bg-slate-200 dark:bg-slate-700 rounded-full -z-10" />
                                 <div
-                                    className="absolute left-0 top-1/2 -translate-y-1/2 h-1 bg-primary-600 rounded-full -z-10 transition-all duration-300 ease-in-out"
+                                    className="absolute left-0 top-1/2 -translate-y-1/2 h-1 bg-gradient-to-r from-primary-500 to-indigo-600 rounded-full -z-10 transition-all duration-500 ease-out"
                                     style={{ width: `${((currentStep - 1) / (steps.length - 1)) * 100}%` }}
                                 />
 
@@ -541,19 +537,17 @@ const CreateQuizByLinkPage: React.FC = () => {
                                     const isCurrent = currentStep === step.id;
 
                                     return (
-                                        <div key={step.id} className="flex flex-col items-center gap-2 bg-slate-50 dark:bg-slate-900 px-2">
+                                        <div key={step.id} className="flex flex-col items-center gap-2 bg-transparent px-2">
                                             <div
-                                                className={`w-10 h-10 rounded-full flex items-center justify-center border-2 transition-all duration-300 ${
-                                                    isActive
-                                                        ? 'bg-primary-600 border-primary-600 text-white shadow-lg shadow-primary-500/30 scale-110'
-                                                        : 'bg-white dark:bg-slate-800 border-slate-300 dark:border-slate-600 text-slate-400'
-                                                }`}
+                                                className={`w-10 h-10 rounded-full flex items-center justify-center border-2 transition-all duration-300 ${isActive
+                                                    ? 'bg-primary-600 border-primary-600 text-white shadow-lg shadow-primary-500/30 scale-110'
+                                                    : 'bg-white dark:bg-slate-800 border-slate-300 dark:border-slate-600 text-slate-400'
+                                                    }`}
                                             >
                                                 <Icon className="w-5 h-5" />
                                             </div>
-                                            <span className={`text-xs font-medium transition-colors duration-300 ${
-                                                isCurrent ? 'text-primary-600 dark:text-primary-400' : 'text-slate-500'
-                                            }`}>
+                                            <span className={`text-xs font-medium transition-colors duration-300 ${isCurrent ? 'text-primary-600 dark:text-primary-400 font-bold' : isActive ? 'text-slate-700 dark:text-slate-300' : 'text-slate-400'
+                                                }`}>
                                                 {step.name}
                                             </span>
                                         </div>
@@ -566,7 +560,7 @@ const CreateQuizByLinkPage: React.FC = () => {
                         <div className="p-8 overflow-y-auto flex-1 custom-scrollbar">
                             <div className="space-y-6">
                                 {currentStep === 1 && (
-                                    <div className="space-y-6 animate-in slide-in-from-right-4 duration-300">
+                                    <div className="space-y-6 animate-in slide-in-from-right-8 duration-300 fade-in">
                                         <div>
                                             <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                                                 Título do Quiz <span className="text-red-500">*</span>
@@ -575,8 +569,8 @@ const CreateQuizByLinkPage: React.FC = () => {
                                                 type="text"
                                                 value={formData.titulo}
                                                 onChange={(e) => setFormData(prev => ({ ...prev, titulo: e.target.value }))}
-                                                className="w-full px-4 py-3 border border-slate-300 dark:border-slate-600 rounded-xl bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-primary-500/50 focus:border-primary-500 transition-all placeholder:text-slate-400"
-                                                placeholder="Ex: Fundamentos do React 2024"
+                                                className="w-full px-4 py-3.5 border border-slate-300 dark:border-slate-600 rounded-xl bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all placeholder:text-slate-400"
+                                                placeholder="Ex: Marketing Digital, Anatomia Humana, História da Arte..."
                                                 autoFocus
                                             />
                                         </div>
@@ -589,8 +583,8 @@ const CreateQuizByLinkPage: React.FC = () => {
                                                 type="text"
                                                 value={formData.categoria}
                                                 onChange={(e) => setFormData(prev => ({ ...prev, categoria: e.target.value }))}
-                                                className="w-full px-4 py-3 border border-slate-300 dark:border-slate-600 rounded-xl bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-primary-500/50 focus:border-primary-500 transition-all placeholder:text-slate-400"
-                                                placeholder="Ex: Frontend, Backend, DevOps"
+                                                className="w-full px-4 py-3.5 border border-slate-300 dark:border-slate-600 rounded-xl bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all placeholder:text-slate-400"
+                                                placeholder="Ex: Negócios, Saúde, Artes, Tecnologia..."
                                             />
                                         </div>
 
@@ -601,16 +595,16 @@ const CreateQuizByLinkPage: React.FC = () => {
                                             <textarea
                                                 value={formData.descricao}
                                                 onChange={(e) => setFormData(prev => ({ ...prev, descricao: e.target.value }))}
-                                                className="w-full px-4 py-3 border border-slate-300 dark:border-slate-600 rounded-xl bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-primary-500/50 focus:border-primary-500 transition-all placeholder:text-slate-400"
+                                                className="w-full px-4 py-3.5 border border-slate-300 dark:border-slate-600 rounded-xl bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all placeholder:text-slate-400"
                                                 rows={4}
-                                                placeholder="Descreva o objetivo e o conteúdo deste quiz..."
+                                                placeholder="Descreva o objetivo e os principais tópicos que serão abordados neste quiz..."
                                             />
                                         </div>
                                     </div>
                                 )}
 
                                 {currentStep === 2 && (
-                                    <div className="space-y-8 animate-in slide-in-from-right-4 duration-300">
+                                    <div className="space-y-8 animate-in slide-in-from-right-8 duration-300 fade-in">
                                         <div className="space-y-4">
                                             <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">
                                                 Nível de Dificuldade
@@ -621,11 +615,10 @@ const CreateQuizByLinkPage: React.FC = () => {
                                                         key={level}
                                                         type="button"
                                                         onClick={() => setFormData(prev => ({ ...prev, nivel: level }))}
-                                                        className={`p-3 rounded-lg border-2 text-sm font-medium transition-all ${
-                                                            formData.nivel === level
-                                                                ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-300'
-                                                                : 'border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:border-slate-300 dark:hover:border-slate-600'
-                                                        }`}
+                                                        className={`p-3 rounded-lg border-2 text-sm font-medium transition-all ${formData.nivel === level
+                                                            ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-300 ring-1 ring-primary-500 ring-offset-1 dark:ring-offset-slate-900'
+                                                            : 'border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:border-slate-300 dark:hover:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-800'
+                                                            }`}
                                                     >
                                                         {level}
                                                     </button>
@@ -638,46 +631,49 @@ const CreateQuizByLinkPage: React.FC = () => {
                                                 <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">
                                                     Quantidade de Questões
                                                 </label>
-                                                <span className="text-lg font-bold text-primary-600 dark:text-primary-400">
+                                                <span className="text-lg font-bold text-primary-600 dark:text-primary-400 bg-primary-50 dark:bg-primary-900/30 px-3 py-1 rounded-lg">
                                                     {formData.quantidade_questoes}
                                                 </span>
                                             </div>
-                                            <input
-                                                type="range"
-                                                min="1"
-                                                max="20"
-                                                step="1"
-                                                value={formData.quantidade_questoes}
-                                                onChange={(e) => setFormData(prev => ({ ...prev, quantidade_questoes: parseInt(e.target.value) }))}
-                                                className="w-full h-2 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-primary-600"
-                                            />
-                                            <div className="flex justify-between text-xs text-slate-400 mt-1">
-                                                <span>1</span>
-                                                <span>20</span>
+                                            <div className="relative pt-1">
+                                                <input
+                                                    type="range"
+                                                    min="1"
+                                                    max="20"
+                                                    step="1"
+                                                    value={formData.quantidade_questoes}
+                                                    onChange={(e) => setFormData(prev => ({ ...prev, quantidade_questoes: parseInt(e.target.value) }))}
+                                                    className="w-full h-2 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-primary-600"
+                                                />
+                                            </div>
+                                            <div className="flex justify-between text-xs text-slate-400 mt-2 font-medium">
+                                                <span>1 questão</span>
+                                                <span>20 questões</span>
                                             </div>
                                         </div>
 
                                         <div>
                                             <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                                                 Contexto Adicional (IA)
-                                                <span className="text-xs text-slate-500 dark:text-slate-400 font-normal"> - Opcional</span>
+                                                <span className="text-xs text-slate-500 dark:text-slate-400 font-normal ml-2 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-full">Opcional</span>
                                             </label>
-                                            <div className="relative">
+                                            <div className="relative group">
+                                                <div className="absolute -inset-0.5 bg-gradient-to-r from-primary-500 to-indigo-500 rounded-xl opacity-0 group-focus-within:opacity-20 transition duration-300 pointer-events-none"></div>
                                                 <textarea
                                                     value={formData.contexto}
                                                     onChange={(e) => setFormData(prev => ({ ...prev, contexto: e.target.value }))}
-                                                    className="w-full px-4 py-3 border border-slate-300 dark:border-slate-600 rounded-xl bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-primary-500/50 focus:border-primary-500 transition-all placeholder:text-slate-400"
+                                                    className="relative w-full px-4 py-3.5 border border-slate-300 dark:border-slate-600 rounded-xl bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all placeholder:text-slate-400"
                                                     rows={4}
                                                     placeholder="Cole aqui um texto, artigo ou documentação para a IA usar como base..."
                                                 />
-                                                <SparklesIcon className="absolute right-3 top-3 w-5 h-5 text-primary-400 animate-pulse" />
+                                                <SparklesIcon className="absolute right-3 top-3 w-5 h-5 text-primary-400 animate-pulse pointer-events-none" />
                                             </div>
                                         </div>
                                     </div>
                                 )}
 
                                 {currentStep === 3 && (
-                                    <div className="space-y-6 animate-in slide-in-from-right-4 duration-300">
+                                    <div className="space-y-6 animate-in slide-in-from-right-8 duration-300 fade-in">
                                         <div>
                                             <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                                                 Tags Relacionadas
@@ -688,56 +684,60 @@ const CreateQuizByLinkPage: React.FC = () => {
                                                     value={tagInput}
                                                     onChange={(e) => setTagInput(e.target.value)}
                                                     onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addTag())}
-                                                    className="flex-1 px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-primary-500/50 focus:border-primary-500 transition-all text-sm placeholder:text-slate-400"
+                                                    className="flex-1 px-4 py-3 border border-slate-300 dark:border-slate-600 rounded-xl bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all text-sm placeholder:text-slate-400"
                                                     placeholder="Digite uma tag e pressione Enter"
                                                 />
                                                 <button
                                                     type="button"
                                                     onClick={addTag}
-                                                    className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors flex items-center gap-1 text-sm font-medium"
+                                                    className="px-6 py-3 bg-primary-600 text-white rounded-xl hover:bg-primary-700 transition-colors flex items-center gap-2 text-sm font-bold shadow-lg shadow-primary-600/20"
                                                 >
-                                                    <PlusIcon className="w-4 h-4" />
+                                                    <PlusIcon className="w-5 h-5" />
                                                     Adicionar
                                                 </button>
                                             </div>
 
-                                            <div className="min-h-[100px] p-4 bg-slate-50 dark:bg-slate-900/50 rounded-xl border border-slate-200 dark:border-slate-700">
+                                            <div className="min-h-[120px] p-5 bg-slate-50 dark:bg-slate-900/50 rounded-xl border border-slate-200 dark:border-slate-700 transition-all hover:border-slate-300 dark:hover:border-slate-600">
                                                 {formData.tags.length > 0 ? (
                                                     <div className="flex flex-wrap gap-2">
                                                         {formData.tags.map((tag) => (
                                                             <span
                                                                 key={tag}
-                                                                className="inline-flex items-center gap-1 px-3 py-1 bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 rounded-full text-sm font-medium border border-primary-200 dark:border-primary-700"
+                                                                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white dark:bg-slate-800 text-primary-700 dark:text-primary-300 rounded-full text-sm font-medium border border-primary-100 dark:border-primary-900/50 shadow-sm"
                                                             >
                                                                 {tag}
                                                                 <button
                                                                     type="button"
                                                                     onClick={() => removeTag(tag)}
-                                                                    className="ml-1 text-primary-600 dark:text-primary-400 hover:text-primary-800 dark:hover:text-primary-200"
+                                                                    className="ml-1 text-slate-400 hover:text-red-500 transition-colors p-0.5 rounded-full hover:bg-slate-100 dark:hover:bg-slate-700"
                                                                 >
-                                                                    <XMarkIcon className="w-3 h-3" />
+                                                                    <XMarkIcon className="w-3.5 h-3.5" />
                                                                 </button>
                                                             </span>
                                                         ))}
                                                     </div>
                                                 ) : (
-                                                    <p className="text-slate-500 dark:text-slate-400 text-sm italic">
-                                                        Nenhuma tag adicionada ainda. Tags ajudam a categorizar e encontrar seu quiz.
-                                                    </p>
+                                                    <div className="h-full flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 text-center">
+                                                        <span className="bg-slate-100 dark:bg-slate-800 p-3 rounded-full mb-2">
+                                                            <SparklesIcon className="w-6 h-6" />
+                                                        </span>
+                                                        <p className="text-sm font-medium">Nenhuma tag adicionada</p>
+                                                        <p className="text-xs mt-1">Tags ajudam a categorizar seu quiz</p>
+                                                    </div>
                                                 )}
                                             </div>
                                         </div>
 
-                                        <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-xl border border-blue-100 dark:border-blue-900/50 flex gap-4">
-                                            <div className="p-2 bg-blue-100 dark:bg-blue-900/50 rounded-lg h-fit">
+                                        <div className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 p-5 rounded-2xl border border-blue-100 dark:border-blue-900/50 flex gap-4">
+                                            <div className="p-3 bg-white dark:bg-blue-900/50 rounded-xl h-fit shadow-sm">
                                                 <SparklesIcon className="w-6 h-6 text-blue-600 dark:text-blue-400" />
                                             </div>
                                             <div>
-                                                <h3 className="font-semibold text-blue-900 dark:text-blue-100 mb-1">
+                                                <h3 className="font-bold text-blue-900 dark:text-blue-100 mb-1">
                                                     Pronto para gerar!
                                                 </h3>
-                                                <p className="text-sm text-blue-700 dark:text-blue-300">
-                                                    Sua configuração está completa. Clique em "Gerar Quiz" para criar um quiz personalizado com IA.
+                                                <p className="text-sm text-blue-700 dark:text-blue-300 leading-relaxed">
+                                                    Sua configuração está completa. A IA irá analisar suas preferências e criar um desafio único para você.
                                                 </p>
                                             </div>
                                         </div>
@@ -751,9 +751,8 @@ const CreateQuizByLinkPage: React.FC = () => {
                             <button
                                 onClick={prevStep}
                                 disabled={isLoading}
-                                className={`px-6 py-2.5 rounded-xl border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 font-medium hover:bg-white dark:hover:bg-slate-800 transition-all flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed ${
-                                    currentStep === 1 ? 'invisible' : 'visible'
-                                }`}
+                                className={`px-6 py-3 rounded-xl border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 font-medium hover:bg-white dark:hover:bg-slate-800 hover:shadow-sm transition-all flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed ${currentStep === 1 ? 'invisible' : 'visible'
+                                    }`}
                             >
                                 <ChevronLeftIcon className="w-4 h-4" />
                                 Voltar
@@ -763,7 +762,7 @@ const CreateQuizByLinkPage: React.FC = () => {
                                 <button
                                     onClick={nextStep}
                                     disabled={!canProceed() || isLoading}
-                                    className="px-6 py-2.5 bg-primary-600 text-white rounded-xl hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center gap-2 shadow-lg shadow-primary-600/20 font-medium"
+                                    className="px-8 py-3 bg-primary-600 text-white rounded-xl hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center gap-2 shadow-lg shadow-primary-600/20 font-bold hover:translate-x-1"
                                 >
                                     Próximo
                                     <ChevronRightIcon className="w-4 h-4" />
@@ -772,17 +771,17 @@ const CreateQuizByLinkPage: React.FC = () => {
                                 <button
                                     onClick={handleThemeQuizSubmit}
                                     disabled={isLoading || !user?.tokens || user.tokens < 1}
-                                    className="px-8 py-2.5 bg-gradient-to-r from-primary-600 to-indigo-600 hover:from-primary-700 hover:to-indigo-700 text-white rounded-xl disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center gap-2 shadow-lg shadow-primary-600/20 font-medium transform active:scale-95"
+                                    className="px-8 py-3 bg-gradient-to-r from-primary-600 to-indigo-600 hover:from-primary-700 hover:to-indigo-700 text-white rounded-xl disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center gap-2 shadow-lg shadow-primary-600/20 font-bold transform active:scale-95 hover:shadow-xl"
                                 >
                                     {isLoading ? (
                                         <>
-                                            <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent" />
-                                            Gerando Quiz...
+                                            <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent" />
+                                            Gerando...
                                         </>
                                     ) : (
                                         <>
                                             <SparklesIcon className="w-5 h-5" />
-                                            Gerar Quiz com IA
+                                            Gerar Quiz
                                         </>
                                     )}
                                 </button>

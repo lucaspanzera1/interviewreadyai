@@ -34,6 +34,7 @@ import {
     ClockIcon as ClockIconSolid,
     RectangleStackIcon as RectangleStackIconSolid,
     ChatBubbleLeftRightIcon as ChatBubbleLeftRightIconSolid,
+    PlusCircleIcon as PlusCircleIconSolid,
 } from '@heroicons/react/24/solid';
 import { Users as UsersIconLucide, FileQuestion, Gift } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
@@ -582,7 +583,7 @@ const Sidebar: React.FC = () => {
     const bottomNavItems = [
         { name: 'Início', path: '/', icon: HomeIcon, activeIcon: HomeIconSolid },
         { name: 'Quizzes', path: '/my-quizzes', icon: DocumentTextIcon, activeIcon: DocumentTextIconSolid },
-        { name: 'Entrevista', path: '/create-interview', icon: ChatBubbleLeftRightIcon, activeIcon: ChatBubbleLeftRightIconSolid, badge: 'NOVO', locked: !isPro && user?.role !== 'admin' },
+        { name: 'Novo Quiz', path: '/create-quiz', icon: PlusCircleIcon, activeIcon: PlusCircleIconSolid, badge: null, locked: false },
         { name: 'Menu', path: '#menu', icon: Bars3Icon, activeIcon: Bars3Icon, action: () => setIsMobileOpen(true) },
     ];
 
