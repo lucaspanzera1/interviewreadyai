@@ -9,7 +9,6 @@ import { apiClient } from '../lib/api';
 import {
   SparklesIcon,
   DocumentTextIcon,
-  ChartBarIcon,
   ClockIcon,
   CheckCircleIcon,
   ArrowTrendingUpIcon,
@@ -20,10 +19,13 @@ import {
   LockClosedIcon,
   TrophyIcon,
   QuestionMarkCircleIcon,
-  ChatBubbleLeftRightIcon
+  ChatBubbleLeftRightIcon,
+  FireIcon,
+  XMarkIcon
 } from '@heroicons/react/24/outline';
 import OnboardingGuide from './OnboardingGuide';
 import ActivityHeatmap from './ActivityHeatmap';
+import { getNicheIcon } from '../utils/nicheIcons';
 
 const HomePage: React.FC = () => {
   const { user, isLoading } = useAuth();
@@ -33,6 +35,7 @@ const HomePage: React.FC = () => {
   const [suggestedQuizzes, setSuggestedQuizzes] = useState<any[]>([]);
   const [startingQuizId, setStartingQuizId] = useState<string | null>(null);
   const [isOnboardingOpen, setIsOnboardingOpen] = useState(false);
+  const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
 
   // Initial Loading State
   if (isLoading) {
@@ -132,11 +135,11 @@ const HomePage: React.FC = () => {
   const isGuest = !user;
 
   const statsConfig = isGuest ? [
-    // Demo/Preview Stats for Guests
-    { label: 'Estatísticas', value: 'Preview', icon: DocumentTextIcon, color: 'indigo', blur: true },
-    { label: 'Taxa de Acerto', value: '85%', icon: CheckCircleIcon, color: 'green', blur: true },
-    { label: 'Tempo Médio', value: '12min', icon: ClockIcon, color: 'amber', blur: true },
-    { label: 'Evolução', value: '+15%', icon: ArrowTrendingUpIcon, color: 'primary', blur: true },
+    // Demo/Preview Stats for Guests (Locked State)
+    { label: 'Questões Feitas', value: '428', icon: DocumentTextIcon, color: 'indigo', blur: true },
+    { label: 'Taxa de Acerto', value: '76%', icon: CheckCircleIcon, color: 'green', blur: true },
+    { label: 'Sequência', value: '12 dias', icon: FireIcon, color: 'amber', blur: true },
+    { label: 'Nível', value: 'Sênior', icon: TrophyIcon, color: 'primary', blur: true },
   ] : userStats ? [
     // Real User Stats
     { label: 'Simulados', value: (userStats.totalAttempts ?? 0).toString(), icon: DocumentTextIcon, color: 'indigo', blur: false },
@@ -159,16 +162,17 @@ const HomePage: React.FC = () => {
       action: () => navigate('/login'),
       primary: true,
       bg: 'bg-primary-600',
-      text: 'text-white'
+      text: 'text-white',
+      animate: true
     },
     {
-      label: 'Testar Gratuitamente',
-      desc: 'Experimente um quiz agora',
+      label: 'Quiz Gratuito',
+      desc: 'Teste seus conhecimentos',
       icon: PlayIcon,
       action: () => navigate('/free-quizzes'),
       primary: false,
-      bg: 'bg-primary-50 dark:bg-primary-900/20',
-      text: 'text-primary-600 dark:text-primary-400'
+      bg: 'bg-indigo-50 dark:bg-indigo-900/20',
+      text: 'text-indigo-600 dark:text-indigo-400'
     },
     {
       label: 'Ver Planos Premium',
@@ -278,76 +282,98 @@ const HomePage: React.FC = () => {
 
           {/* Guest Hero Section */}
           {isGuest && (
-            <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-primary-50 via-blue-50 to-slate-50 dark:from-primary-950/30 dark:via-blue-950/20 dark:to-slate-900 border border-primary-100 dark:border-primary-900/30 p-8 lg:p-12 mb-8">
-              {/* Decorative Network Background */}
-              <div className="absolute inset-0 opacity-30 dark:opacity-20">
-                <div className="absolute top-10 left-10 w-3 h-3 bg-primary-500 rounded-full animate-pulse"></div>
-                <div className="absolute top-20 right-20 w-2 h-2 bg-primary-400 rounded-full animate-pulse delay-100"></div>
-                <div className="absolute bottom-20 left-1/4 w-2.5 h-2.5 bg-primary-600 rounded-full animate-pulse delay-200"></div>
-                <div className="absolute bottom-10 right-1/3 w-2 h-2 bg-primary-500 rounded-full animate-pulse delay-300"></div>
-                <svg className="absolute inset-0 w-full h-full" xmlns="http://www.w3.org/2000/svg">
-                  <line x1="10%" y1="20%" x2="80%" y2="30%" stroke="var(--color-primary-500)" strokeWidth="1" opacity="0.2" strokeDasharray="4,4" />
-                  <line x1="25%" y1="80%" x2="70%" y2="40%" stroke="var(--color-primary-500)" strokeWidth="1" opacity="0.2" strokeDasharray="4,4" />
-                </svg>
+            <div className="relative overflow-hidden rounded-3xl bg-slate-900 dark:bg-slate-950 border border-slate-800 p-8 lg:p-12 mb-10 shadow-2xl">
+              {/* Abstract Background */}
+              <div className="absolute inset-0 overflow-hidden">
+                <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-primary-600/20 rounded-full blur-[100px] -translate-y-1/2 translate-x-1/4 animate-pulse"></div>
+                <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-blue-600/20 rounded-full blur-[100px] translate-y-1/3 -translate-x-1/4"></div>
+                <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20"></div>
               </div>
 
               {/* Content */}
-              <div className="relative z-10">
-                <div className="max-w-3xl">
-                  <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 rounded-full text-sm font-semibold mb-6 border border-primary-200 dark:border-primary-800">
-                    <SparklesIcon className="w-4 h-4" />
-                    <span>Bem-vindo ao TreinaVagaAI</span>
+              <div className="relative z-10 flex flex-col md:flex-row items-center gap-12">
+                <div className="flex-1 text-center md:text-left">
+                  <div className="inline-flex items-center gap-2 px-3 py-1 bg-primary-500/10 text-primary-400 rounded-full text-xs font-bold uppercase tracking-wider mb-6 border border-primary-500/20">
+                    <SparklesIcon className="w-3 h-3" />
+                    <span>Para todas as carreiras</span>
                   </div>
 
-                  <h1 className="text-4xl lg:text-5xl font-black mb-4 leading-tight">
-                    <span className="text-slate-900 dark:text-white">Pronto para dominar sua </span>
-                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary-600 to-primary-800 dark:from-primary-400 dark:to-primary-600">
-                      vaga tech?
+                  <h1 className="text-4xl lg:text-5xl font-black text-white mb-6 leading-tight">
+                    <span className="text-slate-900 dark:text-white">Conquiste sua vaga em </span>
+                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary-400 to-blue-400">
+                      qualquer área
                     </span>
                   </h1>
 
-                  <p className="text-lg text-slate-600 dark:text-slate-300 mb-8 max-w-2xl leading-relaxed">
-                    Simulados personalizados com IA, roadmaps focados e flashcards inteligentes.
-                    Tudo que você precisa para se preparar e conquistar sua aprovação.
+                  <p className="text-lg text-slate-400 mb-8 leading-relaxed max-w-xl mx-auto md:mx-0">
+                    Tech, Saúde, Vendas, Direito, Engenharia... O TreinaVaga usa IA para criar simulados personalizados para <b>sua</b> realidade, qualquer que seja ela.
                   </p>
 
-                  {/* CTAs */}
-                  <div className="flex flex-col sm:flex-row gap-4 mb-8">
+                  <div className="flex flex-col sm:flex-row gap-4 justify-center md:justify-start">
                     <button
                       onClick={() => navigate('/login')}
-                      className="group px-8 py-4 bg-primary-600 hover:bg-primary-700 text-white rounded-full font-bold text-lg shadow-lg shadow-primary-500/30 hover:shadow-xl hover:shadow-primary-500/40 transition-all duration-300 hover:scale-105 active:scale-95 flex items-center justify-center gap-2"
+                      className="group relative px-8 py-4 bg-primary-600 hover:bg-primary-500 text-white rounded-xl font-bold text-lg shadow-lg shadow-primary-900/50 hover:shadow-primary-600/50 transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]"
                     >
-                      <span>Treinar Agora</span>
-                      <ArrowRightOnRectangleIcon className="w-5 h-5 -rotate-45 group-hover:translate-x-1 transition-transform" />
+                      <span className="relative z-10 flex items-center justify-center gap-2">
+                        Começar Agora
+                        <ArrowRightOnRectangleIcon className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                      </span>
                     </button>
                     <button
-                      onClick={() => navigate('/free-quizzes')}
-                      className="px-8 py-4 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-900 dark:text-white rounded-full font-bold text-lg border-2 border-slate-200 dark:border-slate-700 hover:border-primary-300 dark:hover:border-primary-600 transition-all duration-300 hover:scale-105 active:scale-95 flex items-center justify-center gap-2"
+                      onClick={() => setIsVideoModalOpen(true)}
+                      className="px-8 py-4 bg-white/5 hover:bg-white/10 text-white rounded-xl font-bold text-lg backdrop-blur-sm border border-white/10 hover:border-white/20 transition-all duration-300 flex items-center justify-center gap-2"
                     >
-                      <PlayIcon className="w-5 h-5" />
-                      <span>Quiz Gratuito</span>
+                      <PlayIcon className="w-5 h-5 text-primary-400" />
+                      <span>Ver Demonstração</span>
                     </button>
                   </div>
 
-                  {/* Social Proof Stats */}
-                  <div className="flex flex-wrap gap-6 lg:gap-8">
-                    <div className="flex items-center gap-2">
-                      <div className="text-3xl font-black text-primary-600 dark:text-primary-400">+150</div>
-                      <div className="text-sm text-slate-600 dark:text-slate-400 font-medium">
-                        Stacks<br />Disponíveis
-                      </div>
+                  <div className="mt-8 flex items-center justify-center md:justify-start gap-4 text-sm text-slate-500">
+                    <div className="flex -space-x-2">
+                      {[
+                        { niche: 'juridico', title: 'Direito' },
+                        { niche: 'saude', title: 'Saúde' },
+                        { niche: 'tecnologia', title: 'Tech' },
+                        { niche: 'vendas', title: 'Vendas' },
+                        { niche: 'engenharia', title: 'Engenharia' },
+                      ].map((item, i) => (
+                        <div key={i} title={item.title} className={`w-10 h-10 rounded-full border-2 border-slate-900 bg-slate-800 flex items-center justify-center text-slate-300 shadow-sm relative z-[${10 - i}] hover:z-20 hover:scale-110 transition-all`}>
+                          {getNicheIcon(item.niche, "w-5 h-5")}
+                        </div>
+                      ))}
                     </div>
-                    <div className="flex items-center gap-2">
-                      <div className="text-3xl font-black text-primary-600 dark:text-primary-400">30s</div>
-                      <div className="text-sm text-slate-600 dark:text-slate-400 font-medium">
-                        Geração<br />Instantânea
+                    <p>Junte-se a profissionais de todas as áreas</p>
+                  </div>
+                </div>
+
+                {/* Visual / Card Prevention */}
+                <div className="w-full md:w-5/12 hidden md:block relative">
+                  <div className="relative bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-2xl rotate-3 hover:rotate-0 transition-all duration-500">
+                    <div className="flex items-center justify-between mb-4 border-b border-slate-800 pb-4">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-full bg-primary-600/20 text-primary-400 flex items-center justify-center">
+                          <TrophyIcon className="w-6 h-6" />
+                        </div>
+                        <div>
+                          <div className="text-white font-bold">Candidato Preparado</div>
+                          <div className="text-xs text-slate-500">Pronto para o desafio</div>
+                        </div>
                       </div>
+                      <div className="px-2 py-1 bg-green-500/10 text-green-400 text-xs rounded font-bold">100% Pronto</div>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <div className="text-3xl font-black text-primary-600 dark:text-primary-400">IA</div>
-                      <div className="text-sm text-slate-600 dark:text-slate-400 font-medium">
-                        Feedback<br />Personalizado
-                      </div>
+                    <div className="space-y-3">
+                      <div className="h-2 bg-slate-800 rounded w-3/4"></div>
+                      <div className="h-2 bg-slate-800 rounded w-full"></div>
+                      <div className="h-2 bg-slate-800 rounded w-5/6"></div>
+                    </div>
+                    <div className="mt-6 flex gap-2">
+                      <div className="flex-1 h-10 bg-primary-600 rounded-lg flex items-center justify-center text-white font-bold text-sm">Iniciar Simulado</div>
+                    </div>
+
+                    {/* Floating Badge */}
+                    <div className="absolute -bottom-4 -right-4 bg-slate-800 border border-slate-700 p-3 rounded-xl shadow-xl flex items-center gap-3 animate-bounce delay-700">
+                      <CheckCircleIcon className="w-5 h-5 text-green-400" />
+                      <span className="text-white font-bold text-sm">Aprovado!</span>
                     </div>
                   </div>
                 </div>
@@ -375,23 +401,23 @@ const HomePage: React.FC = () => {
                   </p>
                 </div>
 
-                {/* Feature 2: Roadmaps */}
+                {/* Feature 2: Interview Simulator */}
                 <div className="group bg-white dark:bg-slate-900 border-2 border-dashed border-slate-200 dark:border-slate-800 hover:border-primary-300 dark:hover:border-primary-600 rounded-2xl p-6 transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
-                  <div className="w-14 h-14 bg-primary-100 dark:bg-primary-900/30 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                    <ArrowTrendingUpIcon className="w-7 h-7 text-primary-600 dark:text-primary-400" />
+                  <div className="w-14 h-14 bg-green-50 dark:bg-green-900/20 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                    <ChatBubbleLeftRightIcon className="w-7 h-7 text-green-600 dark:text-green-400" />
                   </div>
                   <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-2">
-                    Roadmaps Focados
+                    Simulação de Entrevista
                   </h3>
                   <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
-                    Planos de estudo personalizados para sua stack. Saiba exatamente o que estudar e quando.
+                    Pratique com uma IA que simula recrutadores reais. Receba feedback instantâneo sobre suas respostas.
                   </p>
                 </div>
 
                 {/* Feature 3: Flashcards */}
                 <div className="group bg-white dark:bg-slate-900 border-2 border-dashed border-slate-200 dark:border-slate-800 hover:border-primary-300 dark:hover:border-primary-600 rounded-2xl p-6 transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
-                  <div className="w-14 h-14 bg-primary-100 dark:bg-primary-900/30 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                    <DocumentTextIcon className="w-7 h-7 text-primary-600 dark:text-primary-400" />
+                  <div className="w-14 h-14 bg-amber-50 dark:bg-amber-900/20 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                    <DocumentTextIcon className="w-7 h-7 text-amber-600 dark:text-amber-400" />
                   </div>
                   <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-2">
                     Flashcards SRS
@@ -449,7 +475,7 @@ const HomePage: React.FC = () => {
                           : action.primary
                             ? 'bg-primary-600 border-primary-500 text-white shadow-lg shadow-primary-500/20 hover:bg-primary-700 hover:shadow-xl hover:shadow-primary-500/30'
                             : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:border-primary-400 dark:hover:border-primary-500'
-                          }`}
+                          } ${(action as any).animate ? 'animate-pulse' : ''}`}
                       >
                         <div className="relative z-10 flex items-center justify-between">
                           <div className="flex items-center gap-4 min-w-0">
@@ -471,15 +497,19 @@ const HomePage: React.FC = () => {
                 </div>
               </section>
 
-              {/* Tip Card */}
-              <div className="p-5 bg-gradient-to-br from-primary-50 to-white dark:from-primary-950/30 dark:to-slate-900 border border-primary-100 dark:border-slate-800 rounded-2xl">
-                <div className="flex items-start gap-3">
-                  <SparklesIcon className="w-5 h-5 text-primary-500 dark:text-primary-400 mt-0.5 shrink-0" />
+              <div className="p-5 bg-gradient-to-br from-amber-50 to-white dark:from-amber-900/20 dark:to-slate-900 border border-amber-200 dark:border-amber-800 rounded-2xl relative overflow-hidden">
+                <div className="absolute -top-6 -right-6 w-16 h-16 bg-amber-400/20 rounded-full blur-xl"></div>
+                <div className="flex items-start gap-4 relative z-10">
+                  <div className="p-2 bg-amber-100 dark:bg-amber-900/30 rounded-lg text-amber-600 dark:text-amber-400 shrink-0">
+                    <SparklesIcon className="w-5 h-5" />
+                  </div>
                   <div>
-                    <p className="text-xs font-bold text-primary-900 dark:text-primary-300 uppercase tracking-wide mb-1">{isGuest ? '💡 Por que criar conta?' : 'Dica Pro'}</p>
-                    <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+                    <p className="text-xs font-bold text-amber-900 dark:text-amber-400 uppercase tracking-widest mb-2">
+                      {isGuest ? 'Dica de Carreira' : 'Dica Pro'}
+                    </p>
+                    <p className="text-sm text-slate-700 dark:text-slate-300 leading-relaxed font-medium">
                       {isGuest
-                        ? 'Acompanhe sua evolução, receba feedback personalizado de IA e tenha acesso a roadmaps completos. Tudo 100% grátis para começar!'
+                        ? 'Recrutadores gastam em média 6 segundos por currículo. Seus resultados nos simulados geram um portfólio verificável que chama a atenção.'
                         : 'Revise seus erros nos simulados anteriores. Usuários que revisam erros têm 40% mais chances de aprovação.'}
                     </p>
                   </div>
@@ -543,28 +573,60 @@ const HomePage: React.FC = () => {
                 </div>
 
                 {isGuest ? (
-                  <div className="bg-gradient-to-br from-primary-50 via-white to-slate-50 dark:from-primary-950/20 dark:via-slate-900 dark:to-slate-900 border-2 border-dashed border-primary-200 dark:border-primary-900/30 rounded-2xl p-10 text-center relative overflow-hidden">
-                    {/* Decorative elements */}
-                    <div className="absolute top-0 right-0 w-32 h-32 bg-primary-200/30 dark:bg-primary-800/10 rounded-full blur-3xl"></div>
-                    <div className="absolute bottom-0 left-0 w-32 h-32 bg-blue-200/30 dark:bg-blue-800/10 rounded-full blur-3xl"></div>
+                  <div className="relative overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 group">
 
-                    <div className="relative z-10">
-                      <div className="w-16 h-16 bg-primary-100 dark:bg-primary-900/30 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                        <ChartBarIcon className="w-8 h-8 text-primary-600 dark:text-primary-400" />
+                    {/* Fake Background Content (Blurred) */}
+                    <div className="p-6 opacity-30 blur-[2px] filter grayscale-[30%] select-none pointer-events-none transition-all duration-500 group-hover:blur-[3px] group-hover:scale-[1.02]">
+                      {/* Mock Header */}
+                      <div className="flex items-center justify-between mb-6">
+                        <div className="space-y-2">
+                          <div className="h-5 w-32 bg-slate-300 dark:bg-slate-700 rounded-md"></div>
+                          <div className="h-3 w-20 bg-slate-200 dark:bg-slate-800 rounded-md"></div>
+                        </div>
+                        <div className="h-8 w-24 bg-primary-100 dark:bg-primary-900/30 rounded-full"></div>
                       </div>
-                      <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2">
-                        Acompanhe Sua Evolução
-                      </h3>
-                      <p className="text-sm text-slate-600 dark:text-slate-400 max-w-md mx-auto mb-6 leading-relaxed">
-                        Veja seu progresso em tempo real, identifique pontos fracos e receba insights personalizados sobre seu desempenho.
-                      </p>
-                      <button
-                        onClick={() => navigate('/login')}
-                        className="inline-flex items-center gap-2 px-6 py-3 bg-primary-600 hover:bg-primary-700 text-white font-bold rounded-full transition-all duration-300 hover:scale-105 active:scale-95 shadow-lg shadow-primary-500/30"
-                      >
-                        <SparklesIcon className="w-5 h-5" />
-                        <span>Criar Conta Grátis</span>
-                      </button>
+
+                      {/* Mock Stats Row */}
+                      <div className="grid grid-cols-2 gap-4 mb-6">
+                        <div className="p-4 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800">
+                          <div className="h-8 w-8 bg-green-100 dark:bg-green-900/30 rounded-full mb-2"></div>
+                          <div className="h-5 w-16 bg-slate-200 dark:bg-slate-700 rounded mb-1"></div>
+                          <div className="h-3 w-full bg-slate-100 dark:bg-slate-800 rounded"></div>
+                        </div>
+                        <div className="p-4 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800">
+                          <div className="h-8 w-8 bg-blue-100 dark:bg-blue-900/30 rounded-full mb-2"></div>
+                          <div className="h-5 w-16 bg-slate-200 dark:bg-slate-700 rounded mb-1"></div>
+                          <div className="h-3 w-full bg-slate-100 dark:bg-slate-800 rounded"></div>
+                        </div>
+                      </div>
+
+                      {/* Mock Chart Area */}
+                      <div className="h-32 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-4 flex items-end justify-between gap-2">
+                        {[40, 70, 45, 90, 60, 80, 50].map(h => (
+                          <div key={h} className="w-full bg-slate-200 dark:bg-slate-800 rounded-t-sm" style={{ height: `${h}%` }}></div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Lock Overlay */}
+                    <div className="absolute inset-0 z-10 flex flex-col items-center justify-center p-6 bg-white/40 dark:bg-slate-950/50 backdrop-blur-[1px]">
+                      <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 text-center max-w-sm w-full transform transition-all duration-300 hover:scale-105">
+                        <div className="w-12 h-12 bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400 rounded-full flex items-center justify-center mx-auto mb-3">
+                          <LockClosedIcon className="w-6 h-6" />
+                        </div>
+                        <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-2">
+                          Painel de Evolução
+                        </h3>
+                        <p className="text-sm text-slate-500 dark:text-slate-400 mb-5 leading-relaxed">
+                          Acesse gráficos detalhados, histórico de erros e receba insights para acelerar sua aprovação.
+                        </p>
+                        <button
+                          onClick={() => navigate('/login')}
+                          className="w-full py-3 bg-slate-900 dark:bg-white hover:bg-slate-800 dark:hover:bg-slate-200 text-white dark:text-slate-900 font-bold rounded-xl transition-all shadow-lg text-sm"
+                        >
+                          Criar Conta Grátis
+                        </button>
+                      </div>
                     </div>
                   </div>
                 ) : (
@@ -633,8 +695,37 @@ const HomePage: React.FC = () => {
           Ajuda
         </span>
       </button>
+
+      {/* Video Modal */}
+      {isVideoModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/90 backdrop-blur-sm animate-in fade-in duration-200">
+          <div
+            className="relative w-full max-w-4xl bg-black rounded-2xl overflow-hidden shadow-2xl border border-slate-800"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              onClick={() => setIsVideoModalOpen(false)}
+              className="absolute top-4 right-4 z-10 p-2 bg-black/50 text-white rounded-full hover:bg-black/70 transition-colors"
+            >
+              <XMarkIcon className="w-6 h-6" />
+            </button>
+            <div className="aspect-video w-full">
+              <iframe
+                width="100%"
+                height="100%"
+                src="https://www.youtube.com/embed/dQw4w9WgXcQ?autoplay=1"
+                title="TreinaVaga Demo"
+                frameBorder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+              ></iframe>
+            </div>
+          </div>
+          <div className="absolute inset-0 -z-10" onClick={() => setIsVideoModalOpen(false)}></div>
+        </div>
+      )}
     </div>
   );
-};
+}; // End of HomePage Component
 
 export default HomePage;
