@@ -27,21 +27,23 @@ async function bootstrap() {
         frameAncestors: ["'none'"], // Prevent clickjacking
       },
     },
-    hsts: {
+    hsts: process.env.NODE_ENV === 'production' ? {
       maxAge: 86400, // Start with 1 day, can increase later
       includeSubDomains: true,
       preload: false, // Set to true after testing
-    },
+    } : false,
   }));
 
-  // Redirect HTTP to HTTPS
-  app.use((req, res, next) => {
-    if (req.header('x-forwarded-proto') !== 'https') {
-      res.redirect(`https://${req.header('host')}${req.url}`);
-    } else {
-      next();
-    }
-  });
+  // Redirect HTTP to HTTPS only in production
+  if (process.env.NODE_ENV === 'production') {
+    app.use((req, res, next) => {
+      if (req.header('x-forwarded-proto') !== 'https') {
+        res.redirect(`https://${req.header('host')}${req.url}`);
+      } else {
+        next();
+      }
+    });
+  }
 
   // Prefixo global para todas as rotas
   app.setGlobalPrefix('api');
@@ -64,7 +66,7 @@ async function bootstrap() {
 
   // Configuração de CORS
   app.enableCors({
-    origin: process.env.CORS_ORIGIN ? process.env.CORS_ORIGIN.split(',') : 'http://localhost:8080',
+    origin: process.env.CORS_ORIGIN ? process.env.CORS_ORIGIN.split(',') : ['http://localhost:8080', 'http://localhost:8082'],
     credentials: true,
   });
 
