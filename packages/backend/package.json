@@ -39,7 +39,7 @@
     "@nestjs/swagger": "^7.1.17",
     "@nestjs/websockets": "^10.0.0",
     "@types/multer": "^2.0.0",
-    "axios": "^1.13.4",
+    "axios": "^1.13.5",
     "bcrypt": "^5.1.1",
     "cheerio": "^1.2.0",
     "class-transformer": "^0.5.1",
