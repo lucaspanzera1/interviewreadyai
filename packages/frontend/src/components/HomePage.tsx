@@ -299,7 +299,7 @@ const HomePage: React.FC = () => {
                   </div>
 
                   <h1 className="text-4xl lg:text-5xl font-black text-white mb-6 leading-tight">
-                    <span className="text-slate-900 dark:text-white">Conquiste sua vaga em </span>
+                    <span className="text-white">Conquiste sua vaga em </span>
                     <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary-400 to-blue-400">
                       qualquer área
                     </span>

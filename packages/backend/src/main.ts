@@ -7,6 +7,7 @@ import { GlobalExceptionFilter } from './common/filters/global-exception.filter'
 import * as bodyParser from 'body-parser';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { join } from 'path';
+import helmet from 'helmet';
 
 /**
  * Bootstrap da aplicação NestJS
@@ -14,6 +15,33 @@ import { join } from 'path';
  */
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
+
+  // Security headers with Helmet
+  app.use(helmet({
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        styleSrc: ["'self'", "'unsafe-inline'"], // Allow inline styles for Swagger
+        scriptSrc: ["'self'"],
+        imgSrc: ["'self'", "data:", "https:"],
+        frameAncestors: ["'none'"], // Prevent clickjacking
+      },
+    },
+    hsts: {
+      maxAge: 86400, // Start with 1 day, can increase later
+      includeSubDomains: true,
+      preload: false, // Set to true after testing
+    },
+  }));
+
+  // Redirect HTTP to HTTPS
+  app.use((req, res, next) => {
+    if (req.header('x-forwarded-proto') !== 'https') {
+      res.redirect(`https://${req.header('host')}${req.url}`);
+    } else {
+      next();
+    }
+  });
 
   // Prefixo global para todas as rotas
   app.setGlobalPrefix('api');
