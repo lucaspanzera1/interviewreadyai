@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { HttpModule } from '@nestjs/axios';
 import { ConfigModule } from '@nestjs/config';
@@ -15,7 +15,7 @@ import { UserModule } from '../user/user.module';
       { name: InterviewAttempt.name, schema: InterviewAttemptSchema }, 
     ]),
     HttpModule,
-    UserModule,
+    forwardRef(() => UserModule),
     ConfigModule,
   ],
   controllers: [InterviewController],

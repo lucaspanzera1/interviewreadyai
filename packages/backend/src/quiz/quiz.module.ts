@@ -11,7 +11,7 @@ import { FlashcardModule } from '../flashcard/flashcard.module';
 @Module({
   imports: [
     HttpModule,
-    UserModule,
+    forwardRef(() => UserModule),
     forwardRef(() => FlashcardModule),
     MongooseModule.forFeature([
       { name: Quiz.name, schema: QuizSchema },

@@ -8,6 +8,8 @@ import axios from 'axios';
 import * as cheerio from 'cheerio';
 import { GenerateInterviewDto, GeneratedInterview, InterviewAttemptDto } from './dto';
 import { Interview, InterviewDocument, InterviewAttempt, InterviewAttemptDocument } from './schemas';
+import { ModuleRef } from '@nestjs/core';
+import { forwardRef, Inject } from '@nestjs/common';
 import { UserService } from '../user/user.service';
 
 @Injectable()
@@ -17,12 +19,19 @@ export class InterviewService {
     private readonly configService: ConfigService,
     @InjectModel(Interview.name) private interviewModel: Model<InterviewDocument>,
     @InjectModel(InterviewAttempt.name) private interviewAttemptModel: Model<InterviewAttemptDocument>,
+    private readonly moduleRef: ModuleRef,
+    @Inject(forwardRef(() => UserService))
     private readonly userService: UserService,
   ) {}
 
+  private async getUserService(): Promise<any> {
+    return this.userService;
+  }
+
   async generateInterview(dto: GenerateInterviewDto, userId: string): Promise<GeneratedInterview> {
     // Validar que o usuário existe e tem tokens suficientes (2 tokens)
-    const user = await this.userService.findById(userId);
+    const userService = await this.getUserService();
+    const user = await userService.findById(userId);
     if (!user) {
       throw new HttpException('User not found', HttpStatus.NOT_FOUND);
     }
@@ -42,7 +51,7 @@ export class InterviewService {
       const interview = await this.generateInterviewFromJobData(jobData, dto, userId);
 
       // Deduzir 2 tokens do usuário após sucesso
-      await this.userService.removeTokensFromUser(userId, 2, 'interview_generation');
+      await userService.removeTokensFromUser(userId, 2, 'interview_generation');
 
       return interview;
     } catch (error) {
@@ -1720,6 +1729,7 @@ Responda APENAS com JSON válido seguindo esta estrutura:
     const attempts = await this.interviewAttemptModel
       .find({
         userId: new Types.ObjectId(userId),
+        isCompleted: true,
         createdAt: { $gte: startDate }
       })
       .select('createdAt actualDuration difficultyRating')

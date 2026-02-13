@@ -11,6 +11,10 @@ import { User, UserDocument, UserRole } from './schemas/user.schema';
 import { UpdateUserDto, UserDto } from './dto';
 import { NotFoundException, DatabaseException } from '../common/exceptions';
 import { EmailService } from '../common/services/email.service';
+import { forwardRef, Inject } from '@nestjs/common';
+import { FlashcardService } from '../flashcard/flashcard.service';
+import { QuizService } from '../quiz/quiz.service';
+import { InterviewService } from '../interview/interview.service';
 
 /**
  * Service de usuários
@@ -25,6 +29,12 @@ export class UserService {
     private readonly emailService: EmailService,
     private readonly httpService: HttpService,
     private readonly moduleRef: ModuleRef,
+    @Inject(forwardRef(() => FlashcardService))
+    private readonly flashcardService: FlashcardService,
+    @Inject(forwardRef(() => QuizService))
+    private readonly quizService: QuizService,
+    @Inject(forwardRef(() => InterviewService))
+    private readonly interviewService: InterviewService,
   ) { }
 
   /**
@@ -287,10 +297,7 @@ export class UserService {
     // Buscar flashcard service se disponível
     let flashcardStats = null;
     try {
-      const flashcardService = this.moduleRef.get('FlashcardService', { strict: false });
-      if (flashcardService) {
-        flashcardStats = await flashcardService.getUserStats(userId);
-      }
+      flashcardStats = await this.flashcardService.getUserStats(userId);
     } catch (error) {
       console.log('FlashcardService não encontrado para estatísticas');
     }
@@ -646,12 +653,9 @@ export class UserService {
     // Buscar quiz service
     let quizStats = null;
     try {
-      const quizService = this.moduleRef.get('QuizService', { strict: false });
-      if (quizService) {
-        quizStats = await quizService.getUserStats(userId);
-      }
+      quizStats = await this.quizService.getUserStats(userId);
     } catch (error) {
-      console.log('QuizService não encontrado para estatísticas');
+      console.log('[API] QuizService não encontrado para estatísticas');
       quizStats = {
         totalAttempts: 0,
         averageScore: 0,
@@ -662,23 +666,17 @@ export class UserService {
     // Buscar flashcard service
     let flashcardStats = null;
     try {
-      const flashcardService = this.moduleRef.get('FlashcardService', { strict: false });
-      if (flashcardService) {
-        flashcardStats = await flashcardService.getUserStats(userId);
-      }
+      flashcardStats = await this.flashcardService.getUserStats(userId);
     } catch (error) {
-      console.log('FlashcardService não encontrado para estatísticas');
+      console.log('[API] FlashcardService não encontrado para estatísticas');
     }
 
     // Buscar interview service
     let interviewStats = null;
     try {
-      const interviewService = this.moduleRef.get('InterviewService', { strict: false });
-      if (interviewService) {
-        interviewStats = await interviewService.getUserStats(userId);
-      }
+      interviewStats = await this.interviewService.getUserStats(userId);
     } catch (error) {
-      console.log('InterviewService não encontrado para estatísticas');
+      console.log('[API] InterviewService não encontrado para estatísticas');
       interviewStats = {
         totalAttempts: 0,
         totalInterviewsGenerated: 0,
@@ -766,36 +764,25 @@ export class UserService {
     // Buscar atividade de flashcards
     let flashcardActivity = [];
     try {
-      const flashcardService = this.moduleRef.get('FlashcardService', { strict: false });
-      if (flashcardService) {
-        flashcardActivity = await flashcardService.getUserActivityStats(userId, days);
-      }
+      flashcardActivity = await this.flashcardService.getUserActivityStats(userId, days);
     } catch (error) {
-      console.log('FlashcardService não encontrado para atividade');
+      console.error('[API] FlashcardService não encontrado para atividade', error);
     }
 
     // Buscar atividade de quizzes
     let quizActivity = [];
     try {
-      const quizService = this.moduleRef.get('QuizService', { strict: false });
-      if (quizService) {
-        // Assumindo que há um método getUserActivityStats no QuizService
-        quizActivity = await quizService.getUserActivityStats(userId, days);
-      }
+      quizActivity = await this.quizService.getUserActivityStats(userId, days);
     } catch (error) {
-      console.log('QuizService não encontrado para atividade');
+      console.error('[API] QuizService não encontrado para atividade', error);
     }
 
     // Buscar atividade de interviews
     let interviewActivity = [];
     try {
-      const interviewService = this.moduleRef.get('InterviewService', { strict: false });
-      if (interviewService) {
-        // Assumindo que há um método getUserActivityStats no InterviewService
-        interviewActivity = await interviewService.getUserActivityStats(userId, days);
-      }
+      interviewActivity = await this.interviewService.getUserActivityStats(userId, days);
     } catch (error) {
-      console.log('InterviewService não encontrado para atividade');
+      console.error('[API] InterviewService não encontrado para atividade', error);
     }
 
     // Mapear todas as atividades para formato combinado

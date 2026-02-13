@@ -7,7 +7,9 @@ import { QuizAttempt, QuizAttemptDocument } from './schemas/quiz-attempt.schema'
 import { GenerateQuizDto } from './dto/generate-quiz.dto';
 import { GenerateJobQuizDto } from './dto/generate-job-quiz.dto';
 import { GeneratedQuiz } from './dto/quiz-response.dto';
+import { forwardRef, Inject } from '@nestjs/common';
 import { UserService } from '../user/user.service';
+import { FlashcardService } from '../flashcard/flashcard.service';
 import { ConfigService } from '@nestjs/config';
 import { HttpService } from '@nestjs/axios';
 import { firstValueFrom } from 'rxjs';
@@ -19,11 +21,18 @@ export class QuizService {
   constructor(
     @InjectModel(Quiz.name) private quizModel: Model<QuizDocument>,
     @InjectModel(QuizAttempt.name) private quizAttemptModel: Model<QuizAttemptDocument>,
-    private userService: UserService,
     private configService: ConfigService,
     private httpService: HttpService,
     private moduleRef: ModuleRef,
+    @Inject(forwardRef(() => UserService))
+    private readonly userService: UserService,
+    @Inject(forwardRef(() => FlashcardService))
+    private readonly flashcardService: FlashcardService,
   ) {}
+
+  private async getUserService(): Promise<any> {
+    return this.userService;
+  }
 
   /**
    * Gera um quiz baseado no DTO fornecido
@@ -31,7 +40,8 @@ export class QuizService {
    */
   async generateQuiz(dto: GenerateQuizDto, userId: string): Promise<GeneratedQuiz> {
     // Validar que o usuário existe e tem tokens suficientes
-    const user = await this.userService.findById(userId);
+    const userService = await this.getUserService();
+    const user = await userService.findById(userId);
     if (!user) {
       throw new HttpException('User not found', HttpStatus.NOT_FOUND);
     }
@@ -95,7 +105,8 @@ export class QuizService {
         });
 
         // Deduzir 1 token do usuário após sucesso
-        await this.userService.removeTokensFromUser(userId, 1, 'quiz_generation');
+        const userService = await this.getUserService();
+        await userService.removeTokensFromUser(userId, 1, 'quiz_generation');
 
         return {
           ...generatedQuiz,
@@ -438,14 +449,15 @@ IMPORTANTE:
     let tokenReward = false;
     if (quiz && quiz.isFree) {
       // Check limit before incrementing
-      const hasAccess = await this.userService.canDoFreeQuiz(userId);
+      const userService = await this.getUserService();
+      const hasAccess = await userService.canDoFreeQuiz(userId);
       if (!hasAccess) {
         throw new HttpException(
           'Você atingiu o limite diário de 3 quizzes gratuitos. Aguarde até amanhã ou compre tokens para continuar jogando.',
           HttpStatus.FORBIDDEN
         );
       }
-      const result = await this.userService.incrementFreeQuizCount(userId);
+      const result = await userService.incrementFreeQuizCount(userId);
       tokenReward = result.tokenReward;
     }
 
@@ -541,7 +553,8 @@ IMPORTANTE:
     }
 
     // Verificar se o usuário ainda tem acesso aos quizzes gratuitos
-    const hasAccess = await this.userService.canDoFreeQuiz(userId);
+    const userService = await this.getUserService();
+    const hasAccess = await userService.canDoFreeQuiz(userId);
     if (!hasAccess) {
       throw new HttpException(
         'Você atingiu o limite diário de 3 quizzes gratuitos. Aguarde até amanhã ou compre tokens para continuar jogando.',
@@ -571,9 +584,11 @@ IMPORTANTE:
     // Verificar se o usuário é o criador do quiz
     const isCreator = quiz.createdBy.toString() === userId.toString();
 
+    const userService = await this.getUserService();
+
     if (!quiz.isFree && !isCreator) {
       // Se não é gratuito E não é o criador, verificar se o usuário tem tokens suficientes
-      const userTokens = await this.userService.getUserTokens(userId);
+      const userTokens = await userService.getUserTokens(userId);
       if (userTokens < 1) {
         throw new HttpException(
           'Você não tem tokens suficientes para jogar este quiz. Compre tokens para continuar.',
@@ -582,10 +597,10 @@ IMPORTANTE:
       }
 
       // Debitar 1 token
-      await this.userService.removeTokensFromUser(userId, 1, 'quiz_play');
+      await userService.removeTokensFromUser(userId, 1, 'quiz_play');
     } else if (quiz.isFree) {
       // Se é gratuito, verificar limite diário
-      const hasAccess = await this.userService.canDoFreeQuiz(userId);
+      const hasAccess = await userService.canDoFreeQuiz(userId);
       if (!hasAccess) {
         throw new HttpException(
           'Você atingiu o limite diário de 3 quizzes gratuitos. Aguarde até amanhã ou compre tokens para continuar jogando.',
@@ -624,17 +639,15 @@ IMPORTANTE:
     // Buscar sessões de flashcard
     let flashcardSessions = 0;
     try {
-      const flashcardService = this.moduleRef.get('FlashcardService', { strict: false });
-      if (flashcardService) {
-        const flashcardStats = await flashcardService.getUserStats(userId);
-        flashcardSessions = flashcardStats.totalStudySessions || 0;
-      }
+      const flashcardStats = await this.flashcardService.getUserStats(userId);
+      flashcardSessions = flashcardStats.totalStudySessions || 0;
     } catch (error) {
-      console.log('FlashcardService não encontrado para estatísticas de quiz');
+      console.log('[API] FlashcardService não encontrado para estatísticas de quiz');
     }
 
     // Buscar totalFreeQuizzesCompleted do usuário
-    const user = await this.userService.findById(userId);
+    const userService = await this.getUserService();
+    const user = await userService.findById(userId);
     const totalFreeQuizzesCompleted = user.totalFreeQuizzesCompleted || 0;
 
     return {
@@ -680,7 +693,8 @@ IMPORTANTE:
    */
   async generateJobQuiz(dto: GenerateJobQuizDto, userId: string): Promise<GeneratedQuiz> {
     // Validar que o usuário existe e tem tokens suficientes
-    const user = await this.userService.findById(userId);
+    const userService = await this.getUserService();
+    const user = await userService.findById(userId);
     if (!user) {
       throw new HttpException('User not found', HttpStatus.NOT_FOUND);
     }
@@ -697,7 +711,7 @@ IMPORTANTE:
       const quiz = await this.generateJobQuizFromData(jobData, userId);
 
       // Deduzir 1 token do usuário após sucesso
-      await this.userService.removeTokensFromUser(userId, 1, 'quiz_generation');
+      await userService.removeTokensFromUser(userId, 1, 'quiz_generation');
 
       return quiz;
     } catch (error) {
