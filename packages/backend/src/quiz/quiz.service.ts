@@ -27,8 +27,19 @@ export class QuizService {
 
   /**
    * Gera um quiz baseado no DTO fornecido
+   * Deduz 1 token do usuário antes de gerar
    */
   async generateQuiz(dto: GenerateQuizDto, userId: string): Promise<GeneratedQuiz> {
+    // Validar que o usuário existe e tem tokens suficientes
+    const user = await this.userService.findById(userId);
+    if (!user) {
+      throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+    }
+
+    if (user.tokens < 1) {
+      throw new HttpException('Insufficient tokens. You need at least 1 token to generate a quiz.', HttpStatus.PAYMENT_REQUIRED);
+    }
+
     const apiKey = this.configService.get<string>('GROQ_API_KEY');
     if (!apiKey) {
       throw new HttpException('GROQ_API_KEY not configured', HttpStatus.INTERNAL_SERVER_ERROR);
@@ -82,6 +93,9 @@ export class QuizService {
           isFree: false,
           isPublic: false,
         });
+
+        // Deduzir 1 token do usuário após sucesso
+        await this.userService.removeTokensFromUser(userId, 1, 'quiz_generation');
 
         return {
           ...generatedQuiz,

@@ -6,7 +6,9 @@ import {
     PlayCircleIcon,
     BoltIcon,
     MagnifyingGlassIcon,
-    FunnelIcon
+    FunnelIcon,
+    QuestionMarkCircleIcon,
+    XMarkIcon
 } from '@heroicons/react/24/outline';
 import { StarIcon as StarIconSolid } from '@heroicons/react/24/solid';
 import { apiClient } from '../lib/api';
@@ -21,25 +23,25 @@ const DISPLAY_DIFFICULTY: Record<string, string> = {
 };
 
 const NICHOS = [
-  { value: 'tecnologia', label: 'Tecnologia' },
-  { value: 'educacao', label: 'Educação' },
-  { value: 'recursos_humanos', label: 'Recursos Humanos' },
-  { value: 'financeiro', label: 'Financeiro' },
-  { value: 'saude', label: 'Saúde' },
-  { value: 'vendas', label: 'Vendas' },
-  { value: 'marketing', label: 'Marketing' },
-  { value: 'juridico', label: 'Jurídico' },
-  { value: 'engenharia', label: 'Engenharia' },
-  { value: 'design', label: 'Design' },
-  { value: 'produto', label: 'Produto' },
-  { value: 'outro', label: 'Outro' },
+    { value: 'tecnologia', label: 'Tecnologia' },
+    { value: 'educacao', label: 'Educação' },
+    { value: 'recursos_humanos', label: 'Recursos Humanos' },
+    { value: 'financeiro', label: 'Financeiro' },
+    { value: 'saude', label: 'Saúde' },
+    { value: 'vendas', label: 'Vendas' },
+    { value: 'marketing', label: 'Marketing' },
+    { value: 'juridico', label: 'Jurídico' },
+    { value: 'engenharia', label: 'Engenharia' },
+    { value: 'design', label: 'Design' },
+    { value: 'produto', label: 'Produto' },
+    { value: 'outro', label: 'Outro' },
 ];
 
 const FreeQuizzesPage: React.FC = () => {
     const navigate = useNavigate();
     const { user, refreshUser } = useAuth();
     const { showToast } = useToast();
-    const [categories, setCategories] = useState<{value: string, label: string}[]>([]);
+    const [categories, setCategories] = useState<{ value: string, label: string }[]>([]);
     const [difficulties, setDifficulties] = useState<string[]>([]);
     const [selectedCategoryValue, setSelectedCategoryValue] = useState('Todas');
     const [selectedDifficulty, setSelectedDifficulty] = useState('Todas');
@@ -51,6 +53,7 @@ const FreeQuizzesPage: React.FC = () => {
     const [startingQuiz, setStartingQuiz] = useState<string | null>(null);
     const [highlightQuiz, setHighlightQuiz] = useState<any>(null);
     const [freeQuizLimit, setFreeQuizLimit] = useState<{ used: number; remaining: number; resetTime?: Date } | null>(null);
+    const [showHelp, setShowHelp] = useState(false);
 
     const formatResetTime = (resetTime: Date) => {
         const now = new Date();
@@ -111,12 +114,12 @@ const FreeQuizzesPage: React.FC = () => {
     const loadFilters = async () => {
         try {
             const { levels } = await apiClient.getPublicFilters();
-            setCategories([{value: 'Todas', label: 'Todas'}, ...NICHOS]);
+            setCategories([{ value: 'Todas', label: 'Todas' }, ...NICHOS]);
             setDifficulties(['Todas', ...levels]);
         } catch (error) {
             console.error('Erro ao carregar filtros:', error);
             // Fallbacks in case API fails
-            setCategories([{value: 'Todas', label: 'Todas'}, ...NICHOS]);
+            setCategories([{ value: 'Todas', label: 'Todas' }, ...NICHOS]);
             setDifficulties(['Todas', 'INICIANTE', 'MEDIO', 'DIFÍCIL', 'EXPERT']);
         }
     };
@@ -163,11 +166,11 @@ const FreeQuizzesPage: React.FC = () => {
                 selectedDifficulty,
                 debouncedSearch
             );
-            
+
             setPublicQuizzes(prev => {
                 if (currentPage === 1) return response.quizzes;
                 // Filter out duplicates just in case
-                const newQuizzes = response.quizzes.filter((newQ: any) => 
+                const newQuizzes = response.quizzes.filter((newQ: any) =>
                     !prev.some(existingQ => existingQ._id === newQ._id)
                 );
                 return [...prev, ...newQuizzes];
@@ -443,6 +446,52 @@ const FreeQuizzesPage: React.FC = () => {
                     </button>
                 </div>
             )}
+
+            {/* Help/Support Badge */}
+            <div className="mt-8 mb-8 flex justify-center">
+                {!showHelp ? (
+                    <button
+                        onClick={() => setShowHelp(true)}
+                        className="flex items-center gap-2 px-4 py-2 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 rounded-full text-sm font-medium hover:bg-blue-100 dark:hover:bg-blue-900/40 transition-colors shadow-sm"
+                    >
+                        <QuestionMarkCircleIcon className="w-5 h-5" />
+                        <span>Dúvidas sobre os Quizzes Gratuitos?</span>
+                    </button>
+                ) : (
+                    <div className="relative w-full p-4 sm:p-6 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-700 flex flex-col sm:flex-row gap-4 animate-fade-in-up">
+                        <button
+                            onClick={() => setShowHelp(false)}
+                            className="absolute top-2 right-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-2 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
+                        >
+                            <XMarkIcon className="w-5 h-5" />
+                        </button>
+                        <div className="p-3 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-lg shrink-0 w-fit h-fit">
+                            <QuestionMarkCircleIcon className="w-6 h-6" />
+                        </div>
+                        <div className="flex-1 pr-8">
+                            <h4 className="font-bold text-slate-900 dark:text-white mb-2">
+                                Quizzes Gratuitos vs. Personalizados
+                            </h4>
+                            <p className="text-sm text-slate-600 dark:text-slate-400 mb-4 leading-relaxed">
+                                Os quizzes desta página são gratuitos, criados pela comunidade e não consomem seus tokens!
+                                Eles são ótimos para aquecimento. Para treinar para uma vaga específica (ex: "Desenvolvedor React no Nubank"),
+                                use a ferramenta de <strong>Criar Quiz</strong> com a descrição da vaga.
+                            </p>
+                            <a
+                                href="https://wa.me/5531997313160"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 text-sm font-semibold hover:underline inline-flex items-center gap-2"
+                            >
+                                Sugestões ou problemas? Fale conosco
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-3 h-3">
+                                    <path fillRule="evenodd" d="M16.28 11.47a.75.75 0 010 1.06l-7.5 7.5a.75.75 0 01-1.06-1.06L14.69 12 7.72 5.03a.75.75 0 011.06-1.06l7.5 7.5z" clipRule="evenodd" />
+                                </svg>
+                            </a>
+                        </div>
+                    </div>
+                )}
+            </div>
         </div>
     );
 };

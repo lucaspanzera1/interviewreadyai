@@ -8,7 +8,8 @@ import {
     LightBulbIcon,
     Bars3CenterLeftIcon,
     ClockIcon,
-    XMarkIcon
+    XMarkIcon,
+    QuestionMarkCircleIcon
 } from '@heroicons/react/24/outline';
 import { apiClient, InterviewQuestion } from '../lib/api';
 import { useToast } from '../contexts/ToastContext';
@@ -55,6 +56,7 @@ const InterviewPlayPage: React.FC = () => {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [difficultyRating, setDifficultyRating] = useState<number>(0);
     const [feedback, setFeedback] = useState<string>('');
+    const [showHelp, setShowHelp] = useState(false);
 
     useEffect(() => {
         const storedInterview = localStorage.getItem('generatedInterview');
@@ -312,6 +314,42 @@ const InterviewPlayPage: React.FC = () => {
                                 className="w-full min-h-[300px] bg-transparent border-none text-lg leading-relaxed text-slate-800 dark:text-slate-200 placeholder-slate-300 dark:placeholder-slate-600 focus:ring-0 resize-none outline-none font-serif md:font-sans"
                             />
                         </div>
+
+                        {/* Help/Info Badge */}
+                        <div className="mt-12 flex justify-center">
+                            {!showHelp ? (
+                                <button
+                                    onClick={() => setShowHelp(true)}
+                                    className="flex items-center gap-2 px-4 py-2 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 rounded-full text-sm font-medium hover:bg-blue-100 dark:hover:bg-blue-900/40 transition-colors shadow-sm"
+                                >
+                                    <QuestionMarkCircleIcon className="w-5 h-5" />
+                                    <span>Como funciona a Simulação?</span>
+                                </button>
+                            ) : (
+                                <div className="relative w-full p-4 sm:p-6 bg-slate-50 dark:bg-slate-800/30 rounded-xl border border-slate-200 dark:border-slate-700 flex flex-col sm:flex-row gap-4 animate-fade-in-up">
+                                    <button
+                                        onClick={() => setShowHelp(false)}
+                                        className="absolute top-2 right-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-2 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
+                                    >
+                                        <XMarkIcon className="w-5 h-5" />
+                                    </button>
+                                    <div className="p-3 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-lg shrink-0 w-fit h-fit">
+                                        <QuestionMarkCircleIcon className="w-6 h-6" />
+                                    </div>
+                                    <div className="flex-1 pr-8">
+                                        <h4 className="font-bold text-slate-900 dark:text-white mb-2">
+                                            Sobre a Simulação
+                                        </h4>
+                                        <p className="text-sm text-slate-600 dark:text-slate-400 mb-2 leading-relaxed">
+                                            Esta é uma simulação segura para você praticar. Suas respostas serão analisadas pela IA, que fornecerá feedbacks construtivos sobre pontos fortes e áreas de melhoria.
+                                        </p>
+                                        <p className="text-sm text-slate-600 dark:text-slate-400 mb-2 leading-relaxed">
+                                            Se não souber responder, tente explicar seu raciocínio ou como buscaria a solução. Isso também é avaliado!
+                                        </p>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
                     </div>
                 </main>
 
@@ -370,8 +408,8 @@ const InterviewPlayPage: React.FC = () => {
                         <button
                             onClick={() => setShowTips(!showTips)}
                             className={`flex items-center gap-2 px-4 py-2 rounded-xl transition-all ${showTips
-                                    ? 'bg-amber-100 text-amber-900 dark:bg-amber-900/30 dark:text-amber-100'
-                                    : 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
+                                ? 'bg-amber-100 text-amber-900 dark:bg-amber-900/30 dark:text-amber-100'
+                                : 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
                                 }`}
                         >
                             <LightBulbIcon className="w-5 h-5" />

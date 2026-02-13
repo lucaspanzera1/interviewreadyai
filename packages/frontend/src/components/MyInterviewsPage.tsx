@@ -8,7 +8,9 @@ import {
     BuildingOfficeIcon,
     UserIcon,
     PlayIcon,
-    ChevronRightIcon
+    ChevronRightIcon,
+    QuestionMarkCircleIcon,
+    XMarkIcon
 } from '@heroicons/react/24/outline';
 import { useNavigate } from 'react-router-dom';
 import { apiClient, Interview } from '../lib/api';
@@ -22,6 +24,7 @@ const MyInterviewsPage: React.FC = () => {
     const [page, setPage] = useState(1);
     const [totalPages, setTotalPages] = useState(0);
     const [startingInterview, setStartingInterview] = useState<string | null>(null);
+    const [showHelp, setShowHelp] = useState(false);
 
     useEffect(() => {
         loadInterviews();
@@ -296,6 +299,50 @@ const MyInterviewsPage: React.FC = () => {
                         )}
                     </>
                 )}
+                {/* Help/Support Badge */}
+                <div className="mt-8 mb-8 flex justify-center">
+                    {!showHelp ? (
+                        <button
+                            onClick={() => setShowHelp(true)}
+                            className="flex items-center gap-2 px-4 py-2 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 rounded-full text-sm font-medium hover:bg-blue-100 dark:hover:bg-blue-900/40 transition-colors shadow-sm"
+                        >
+                            <QuestionMarkCircleIcon className="w-5 h-5" />
+                            <span>Dúvidas sobre Simulações?</span>
+                        </button>
+                    ) : (
+                        <div className="relative w-full p-4 sm:p-6 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-700 flex flex-col sm:flex-row gap-4 animate-fade-in-up">
+                            <button
+                                onClick={() => setShowHelp(false)}
+                                className="absolute top-2 right-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-2 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
+                            >
+                                <XMarkIcon className="w-5 h-5" />
+                            </button>
+                            <div className="p-3 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-lg shrink-0 w-fit h-fit">
+                                <QuestionMarkCircleIcon className="w-6 h-6" />
+                            </div>
+                            <div className="flex-1 pr-8">
+                                <h4 className="font-bold text-slate-900 dark:text-white mb-2">
+                                    Como funcionam as Simulações?
+                                </h4>
+                                <p className="text-sm text-slate-600 dark:text-slate-400 mb-4 leading-relaxed">
+                                    Aqui você treina para entrevistas reais! A IA atua como uma recrutadora, fazendo perguntas técnicas e comportamentais baseadas na vaga.
+                                    Ao final, você recebe um feedback detalhado sobre suas respostas.
+                                </p>
+                                <a
+                                    href="https://wa.me/5531997313160"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 text-sm font-semibold hover:underline inline-flex items-center gap-2"
+                                >
+                                    Precisa de ajuda? Fale com nosso suporte
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-3 h-3">
+                                        <path fillRule="evenodd" d="M16.28 11.47a.75.75 0 010 1.06l-7.5 7.5a.75.75 0 01-1.06-1.06L14.69 12 7.72 5.03a.75.75 0 011.06-1.06l7.5 7.5z" clipRule="evenodd" />
+                                    </svg>
+                                </a>
+                            </div>
+                        </div>
+                    )}
+                </div>
             </main>
 
             <style>{`
