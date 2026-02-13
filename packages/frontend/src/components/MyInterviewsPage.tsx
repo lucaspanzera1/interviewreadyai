@@ -325,7 +325,8 @@ const MyInterviewsPage: React.FC = () => {
                                     Como funcionam as Simulações?
                                 </h4>
                                 <p className="text-sm text-slate-600 dark:text-slate-400 mb-4 leading-relaxed">
-                                    Aqui você treina para entrevistas reais! A IA atua como uma recrutadora, fazendo perguntas técnicas e comportamentais baseadas na vaga.
+                                    Aqui você treina para entrevistas reais! A IA atua como uma recrutadora, criando perguntas técnicas e comportamentais baseadas na vaga.
+                                    Ela te da dicas de preparação, você grava um vídeo respondendo as perguntas.
                                     Ao final, você recebe um feedback detalhado sobre suas respostas.
                                 </p>
                                 <a
