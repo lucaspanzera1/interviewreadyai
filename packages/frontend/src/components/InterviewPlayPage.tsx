@@ -13,6 +13,7 @@ import {
 } from '@heroicons/react/24/outline';
 import { apiClient, InterviewQuestion } from '../lib/api';
 import { useToast } from '../contexts/ToastContext';
+import { useTranslation } from 'react-i18next';
 
 const InterviewTimer: React.FC<{ startTime: number }> = ({ startTime }) => {
     const [elapsed, setElapsed] = useState(0);
@@ -39,6 +40,7 @@ const InterviewTimer: React.FC<{ startTime: number }> = ({ startTime }) => {
 const InterviewPlayPage: React.FC = () => {
     const navigate = useNavigate();
     const { showToast } = useToast();
+    const { t } = useTranslation('interview');
     const [interview, setInterview] = useState<{
         questions: InterviewQuestion[];
         jobTitle?: string;
@@ -67,7 +69,7 @@ const InterviewPlayPage: React.FC = () => {
             setInterview(parsedData);
             setUserAnswers(new Array(parsedData.questions.length).fill(''));
         } else {
-            showToast('Nenhuma simulação encontrada. Redirecionando...', 'error');
+            showToast(t('play.noSimulationFound'), 'error');
             navigate('/my-interviews');
         }
 
@@ -117,7 +119,7 @@ const InterviewPlayPage: React.FC = () => {
             await apiClient.completeInterview(interviewId);
 
             // Celebration effect could go here
-            showToast('Simulação concluída com sucesso! 🎉', 'success');
+            showToast(t('play.simulationComplete'), 'success');
 
             // Limpar localStorage
             localStorage.removeItem('generatedInterview');
@@ -130,7 +132,7 @@ const InterviewPlayPage: React.FC = () => {
 
         } catch (error: any) {
             console.error('Erro ao submeter simulação:', error);
-            const message = error.response?.data?.message || 'Erro ao salvar resultados.';
+            const message = error.response?.data?.message || t('play.errorSaving');
             showToast(message, 'error');
         } finally {
             setIsSubmitting(false);
@@ -138,13 +140,13 @@ const InterviewPlayPage: React.FC = () => {
     };
 
     const getQuestionTypeLabel = (type: string) => {
-        const labels = {
-            'technical': 'Técnica',
-            'behavioral': 'Comportamental',
-            'situational': 'Situacional',
-            'company_specific': 'Empresa'
+        const labels: Record<string, string> = {
+            'technical': t('play.questionType.technical'),
+            'behavioral': t('play.questionType.behavioral'),
+            'situational': t('play.questionType.situational'),
+            'company_specific': t('play.questionType.company_specific')
         };
-        return labels[type as keyof typeof labels] || type;
+        return labels[type] || type;
     };
 
     if (!interview) {
@@ -161,7 +163,7 @@ const InterviewPlayPage: React.FC = () => {
     if (showResults) {
         return (
             <div className="min-h-screen bg-slate-50 dark:bg-slate-900 flex items-center justify-center p-4">
-                <PageTitle title="Resultados da Simulação - TreinaVagaAI" />
+                <PageTitle title={t('play.resultsPageTitle')} />
 
                 <div className="max-w-xl w-full bg-white dark:bg-slate-800 rounded-3xl shadow-2xl p-8 border border-slate-200 dark:border-slate-700 animate-fade-in-up">
                     <div className="text-center mb-8">
@@ -169,22 +171,22 @@ const InterviewPlayPage: React.FC = () => {
                             <CheckIcon className="w-10 h-10 text-green-600 dark:text-green-400" />
                         </div>
                         <h1 className="text-3xl font-bold text-slate-900 dark:text-white mb-2">
-                            Parabéns!
+                            {t('play.congratulations')}
                         </h1>
                         <p className="text-slate-600 dark:text-slate-400">
-                            Você completou a simulação para <span className="font-semibold text-primary-600 dark:text-primary-400">{interview.jobTitle}</span>.
+                            {t('play.completedSimulationFor')} <span className="font-semibold text-primary-600 dark:text-primary-400">{interview.jobTitle}</span>.
                         </p>
                     </div>
 
                     <div className="grid grid-cols-2 gap-4 mb-8">
                         <div className="bg-slate-50 dark:bg-slate-700/50 p-4 rounded-2xl text-center">
-                            <p className="text-sm text-slate-500 dark:text-slate-400 font-medium uppercase tracking-wider">Tempo</p>
+                            <p className="text-sm text-slate-500 dark:text-slate-400 font-medium uppercase tracking-wider">{t('play.time')}</p>
                             <p className="text-3xl font-bold text-slate-900 dark:text-white mt-1">
-                                {Math.floor((Date.now() - startTime) / 1000 / 60)}<span className="text-sm font-normal text-slate-500 ml-1">min</span>
+                                {Math.floor((Date.now() - startTime) / 1000 / 60)}<span className="text-sm font-normal text-slate-500 ml-1">{t('play.min')}</span>
                             </p>
                         </div>
                         <div className="bg-slate-50 dark:bg-slate-700/50 p-4 rounded-2xl text-center">
-                            <p className="text-sm text-slate-500 dark:text-slate-400 font-medium uppercase tracking-wider">Perguntas</p>
+                            <p className="text-sm text-slate-500 dark:text-slate-400 font-medium uppercase tracking-wider">{t('play.questions')}</p>
                             <p className="text-3xl font-bold text-slate-900 dark:text-white mt-1">
                                 {interview.questions.length}
                             </p>
@@ -193,7 +195,7 @@ const InterviewPlayPage: React.FC = () => {
 
                     <div className="mb-8">
                         <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-3 text-center">
-                            Como foi a dificuldade?
+                            {t('play.difficultyQuestion')}
                         </label>
                         <div className="flex justify-center gap-3">
                             {[1, 2, 3, 4, 5].map((rating) => (
@@ -210,8 +212,8 @@ const InterviewPlayPage: React.FC = () => {
                             ))}
                         </div>
                         <div className="flex justify-between text-xs text-slate-400 mt-2 px-8">
-                            <span>Muito Fácil</span>
-                            <span>Muito Difícil</span>
+                            <span>{t('play.veryEasy')}</span>
+                            <span>{t('play.veryHard')}</span>
                         </div>
                     </div>
 
@@ -219,7 +221,7 @@ const InterviewPlayPage: React.FC = () => {
                         <textarea
                             value={feedback}
                             onChange={(e) => setFeedback(e.target.value)}
-                            placeholder="Algum comentário sobre a simulação? (Opcional)"
+                            placeholder={t('play.feedbackPlaceholder')}
                             className="w-full bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-700 rounded-xl p-4 text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none resize-none h-24 text-sm"
                         />
                     </div>
@@ -230,13 +232,13 @@ const InterviewPlayPage: React.FC = () => {
                             disabled={isSubmitting}
                             className="w-full py-4 bg-primary-600 hover:bg-primary-700 disabled:bg-primary-400 text-white font-bold rounded-xl transition-all shadow-lg hover:shadow-primary-600/20 active:translate-y-0.5"
                         >
-                            {isSubmitting ? 'Salvando...' : 'Finalizar e Salvar'}
+                            {isSubmitting ? t('play.saving') : t('play.finishAndSave')}
                         </button>
                         <button
                             onClick={() => navigate('/my-interviews')}
                             className="w-full py-4 bg-transparent hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-400 font-semibold rounded-xl transition-colors"
                         >
-                            Sair sem salvar
+                            {t('play.exitWithoutSaving')}
                         </button>
                     </div>
                 </div>
@@ -246,7 +248,7 @@ const InterviewPlayPage: React.FC = () => {
 
     return (
         <div className="flex flex-col h-screen bg-white dark:bg-slate-900 overflow-hidden">
-            <PageTitle title={`Simulação - ${interview.jobTitle}`} />
+            <PageTitle title={t('play.simulationTitle', { jobTitle: interview.jobTitle })} />
 
             {/* Minimal Header */}
             <header className="flex-none bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 px-6 py-4 z-20">
@@ -266,7 +268,7 @@ const InterviewPlayPage: React.FC = () => {
                                 <span className="text-xs text-slate-500">{interview.companyName}</span>
                                 <span className="w-1 h-1 bg-slate-300 rounded-full"></span>
                                 <span className="text-xs text-primary-600 dark:text-primary-400 font-medium">
-                                    Pergunta {currentQuestion + 1} de {interview.questions.length}
+                                    {t('play.questionOf', { current: currentQuestion + 1, total: interview.questions.length })}
                                 </span>
                             </div>
                         </div>
@@ -310,7 +312,7 @@ const InterviewPlayPage: React.FC = () => {
                             <textarea
                                 value={userAnswers[currentQuestion] || ''}
                                 onChange={(e) => handleAnswerChange(e.target.value)}
-                                placeholder="Digite sua resposta aqui... Sinta-se à vontade para estruturar seus pensamentos."
+                                placeholder={t('play.answerPlaceholder')}
                                 className="w-full min-h-[300px] bg-transparent border-none text-lg leading-relaxed text-slate-800 dark:text-slate-200 placeholder-slate-300 dark:placeholder-slate-600 focus:ring-0 resize-none outline-none font-serif md:font-sans"
                             />
                         </div>
@@ -323,7 +325,7 @@ const InterviewPlayPage: React.FC = () => {
                                     className="flex items-center gap-2 px-4 py-2 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 rounded-full text-sm font-medium hover:bg-blue-100 dark:hover:bg-blue-900/40 transition-colors shadow-sm"
                                 >
                                     <QuestionMarkCircleIcon className="w-5 h-5" />
-                                    <span>Como funciona a Simulação?</span>
+                                    <span>{t('play.howSimulationWorks')}</span>
                                 </button>
                             ) : (
                                 <div className="relative w-full p-4 sm:p-6 bg-slate-50 dark:bg-slate-800/30 rounded-xl border border-slate-200 dark:border-slate-700 flex flex-col sm:flex-row gap-4 animate-fade-in-up">
@@ -338,13 +340,13 @@ const InterviewPlayPage: React.FC = () => {
                                     </div>
                                     <div className="flex-1 pr-8">
                                         <h4 className="font-bold text-slate-900 dark:text-white mb-2">
-                                            Sobre a Simulação
+                                            {t('play.aboutSimulation')}
                                         </h4>
                                         <p className="text-sm text-slate-600 dark:text-slate-400 mb-2 leading-relaxed">
-                                            Esta é uma simulação segura para você praticar. Suas respostas serão analisadas pela IA, que fornecerá feedbacks construtivos sobre pontos fortes e áreas de melhoria.
+                                            {t('play.aboutSimulationDesc1')}
                                         </p>
                                         <p className="text-sm text-slate-600 dark:text-slate-400 mb-2 leading-relaxed">
-                                            Se não souber responder, tente explicar seu raciocínio ou como buscaria a solução. Isso também é avaliado!
+                                            {t('play.aboutSimulationDesc2')}
                                         </p>
                                     </div>
                                 </div>
@@ -359,7 +361,7 @@ const InterviewPlayPage: React.FC = () => {
                         <div className="p-4 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center bg-slate-50 dark:bg-slate-900">
                             <h3 className="font-bold text-slate-900 dark:text-white flex items-center gap-2">
                                 <LightBulbIcon className="w-5 h-5 text-amber-500" />
-                                Dicas da IA
+                                {t('play.aiTips')}
                             </h3>
                             <button onClick={() => setShowTips(false)} className="p-1 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg">
                                 <XMarkIcon className="w-5 h-5" />
@@ -368,7 +370,7 @@ const InterviewPlayPage: React.FC = () => {
                         <div className="p-6 overflow-y-auto space-y-6">
                             {currentQ.tips && (
                                 <div>
-                                    <h4 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-2">Sugestão</h4>
+                                    <h4 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-2">{t('play.suggestion')}</h4>
                                     <p className="text-slate-700 dark:text-slate-300 text-sm leading-relaxed bg-amber-50 dark:bg-amber-900/10 p-4 rounded-xl border border-amber-100 dark:border-amber-800/30">
                                         {currentQ.tips}
                                     </p>
@@ -377,7 +379,7 @@ const InterviewPlayPage: React.FC = () => {
 
                             {currentQ.keywords && currentQ.keywords.length > 0 && (
                                 <div>
-                                    <h4 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-2">Palavras-chave</h4>
+                                    <h4 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-2">{t('play.keywords')}</h4>
                                     <div className="flex flex-wrap gap-2">
                                         {currentQ.keywords.map((kw, i) => (
                                             <span key={i} className="px-2 py-1 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 text-xs rounded-md">
@@ -401,7 +403,7 @@ const InterviewPlayPage: React.FC = () => {
                         className="flex items-center gap-2 px-4 py-2 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white disabled:opacity-30 transition-colors font-medium"
                     >
                         <ArrowLeftIcon className="w-4 h-4" />
-                        Anterior
+                        {t('play.previous')}
                     </button>
 
                     <div className="flex gap-4">
@@ -413,7 +415,7 @@ const InterviewPlayPage: React.FC = () => {
                                 }`}
                         >
                             <LightBulbIcon className="w-5 h-5" />
-                            <span className="hidden sm:inline">Dicas</span>
+                            <span className="hidden sm:inline">{t('play.tips')}</span>
                         </button>
 
                         {currentQuestion === interview.questions.length - 1 ? (
@@ -421,7 +423,7 @@ const InterviewPlayPage: React.FC = () => {
                                 onClick={finishInterview}
                                 className="flex items-center gap-2 px-6 py-2 bg-green-600 hover:bg-green-500 text-white rounded-xl font-bold transition-all shadow-lg shadow-green-600/20 active:translate-y-0.5"
                             >
-                                Finalizar
+                                {t('play.finish')}
                                 <CheckIcon className="w-5 h-5" />
                             </button>
                         ) : (
@@ -429,7 +431,7 @@ const InterviewPlayPage: React.FC = () => {
                                 onClick={nextQuestion}
                                 className="flex items-center gap-2 px-6 py-2 bg-primary-600 hover:bg-primary-500 text-white rounded-xl font-bold transition-all shadow-lg shadow-primary-600/20 active:translate-y-0.5"
                             >
-                                Próxima
+                                {t('play.next')}
                                 <ArrowRightIcon className="w-4 h-4" />
                             </button>
                         )}

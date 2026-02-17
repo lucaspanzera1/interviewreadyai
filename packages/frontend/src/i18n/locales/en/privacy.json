@@ -1,0 +1,49 @@
+{
+  "pageTitle": "Privacy Policy - TreinaVagaAI",
+  "title": "Privacy Policy",
+  "subtitle": "Transparency about how we handle your personal data.",
+  "updatedAt": "Updated on {{date}}",
+  "back": "Back",
+  "allRightsReserved": "© {{year}} TreinaVagaAI. All rights reserved.",
+  "sections": {
+    "introduction": {
+      "title": "1. Introduction",
+      "content": "Your privacy is extremely important to us. This Privacy Policy details transparently how TreinaVagaAI collects, stores, protects, and uses your personal information when using our platform."
+    },
+    "informationCollection": {
+      "title": "2. Information Collection",
+      "content": "To provide the best experience, we may collect the following types of information:",
+      "list": [
+        "Personal Information: Full name, email, and photo (via social login).",
+        "Usage Data: Quiz statistics, progress, and interactions.",
+        "Technical Data: IP address, device, and browser."
+      ]
+    },
+    "useOfInformation": {
+      "title": "3. Use of Information",
+      "content": "We use your data strictly to:",
+      "list": [
+        "Operate and maintain platform services.",
+        "Personalize study recommendations based on performance.",
+        "Statistical analysis to improve AI.",
+        "Send important communications and support."
+      ]
+    },
+    "sharing": {
+      "title": "4. Sharing",
+      "content": "We do not sell your personal information. Sharing occurs only with essential service providers (such as cloud infrastructure) who have contractual confidentiality obligations."
+    },
+    "dataSecurity": {
+      "title": "5. Data Security",
+      "content": "We adopt rigorous technical and administrative security measures, including encryption and access controls, to protect your data against unauthorized access, loss, or alteration."
+    },
+    "yourRights": {
+      "title": "6. Your Rights",
+      "content": "You have full control over your data. At any time, you can request access, correction, or deletion of your personal information through account settings or support."
+    },
+    "cookies": {
+      "title": "7. Cookies",
+      "content": "We use cookies to improve navigation, remember preferences, and analyze traffic. You can manage preferences directly in your browser."
+    }
+  }
+}

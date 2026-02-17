@@ -1,68 +1,39 @@
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { ArrowLeftIcon, ShieldExclamationIcon, CheckCircleIcon, DocumentTextIcon, UserIcon, NoSymbolIcon, ScaleIcon, ExclamationTriangleIcon, ChatBubbleLeftRightIcon } from '@heroicons/react/24/outline';
 import PageTitle from './PageTitle';
 
 const TermsOfUsePage: React.FC = () => {
     const navigate = useNavigate();
+    const { t } = useTranslation('terms');
 
     useEffect(() => {
         window.scrollTo(0, 0);
     }, []);
 
-    const sections = [
-        {
-            icon: CheckCircleIcon,
-            title: "1. Aceitação dos Termos",
-            content: "Ao acessar e usar a plataforma TreinaVagaAI, você concorda em cumprir e ficar vinculado a estes Termos de Uso. Se você não concordar com qualquer parte destes termos, você não deve usar nossos serviços. O uso contínuo da plataforma confirma sua aceitação destes termos e quaisquer alterações futuras."
-        },
-        {
-            icon: DocumentTextIcon,
-            title: "2. Descrição do Serviço",
-            content: "O TreinaVagaAI é uma plataforma avançada de educação e treinamento profissional que utiliza inteligência artificial para gerar quizzes, simulados e feedback personalizado, visando preparar usuários para processos seletivos e evolução de carreira.",
-        },
-        {
-            icon: UserIcon,
-            title: "3. Conta do Usuário",
-            content: "Para acessar recursos exclusivos, a criação de uma conta é obrigatória. Você é o único responsável pela segurança e confidencialidade de suas credenciais de acesso, bem como por todas as atividades que ocorrem sob sua conta. Notifique-nos imediatamente sobre qualquer uso não autorizado.",
-            fullWidth: true
-        },
-        {
-            icon: NoSymbolIcon,
-            title: "4. Uso Aceitável",
-            content: "Você se compromete a utilizar a plataforma de maneira ética e legal. É estritamente proibido:",
-            list: [
-                "Tentar violar ou contornar a segurança do sistema ou rede.",
-                "Utilizar bots, scrapers ou scripts automatizados para coletar dados.",
-                "Praticar qualquer ato de assédio, abuso ou discriminação.",
-                "Publicar conteúdo que viole direitos de propriedade intelectual."
-            ]
-        },
-        {
-            icon: ScaleIcon,
-            title: "5. Propriedade Intelectual",
-            content: "Todo o conteúdo, design, código, gráficos e funcionalidades da TreinaVagaAI são de propriedade exclusiva da plataforma e seus licenciadores, protegidos por leis de direitos autorais e propriedade intelectual. O uso não autorizado é proibido."
-        },
-        {
-            icon: ExclamationTriangleIcon,
-            title: "6. Isenção de Garantias",
-            content: "O serviço é fornecido 'no estado em que se encontra', sem garantias de qualquer tipo, expressas ou implícitas. Não garantimos que o serviço será ininterrupto, livre de erros ou totalmente seguro. O uso é de sua inteira responsabilidade."
-        },
-        {
-            icon: DocumentTextIcon,
-            title: "7. Alterações nos Termos",
-            content: "Reservamo-nos o direito de revisar e modificar estes termos a qualquer momento, sem aviso prévio. Recomendamos que você revise esta página periodicamente para estar ciente de quaisquer alterações."
-        },
-        {
-            icon: ChatBubbleLeftRightIcon,
-            title: "8. Contato",
-            content: "Em caso de dúvidas sobre estes Termos de Uso, entre em contato conosco através dos canais de suporte disponíveis na plataforma ou pelo nosso email de atendimento."
-        }
+    const sectionConfigs = [
+        { key: 'acceptance', icon: CheckCircleIcon },
+        { key: 'serviceDescription', icon: DocumentTextIcon },
+        { key: 'userAccount', icon: UserIcon, fullWidth: true },
+        { key: 'acceptableUse', icon: NoSymbolIcon, hasList: true },
+        { key: 'intellectualProperty', icon: ScaleIcon },
+        { key: 'disclaimer', icon: ExclamationTriangleIcon },
+        { key: 'changes', icon: DocumentTextIcon },
+        { key: 'contact', icon: ChatBubbleLeftRightIcon },
     ];
+
+    const sections = sectionConfigs.map(({ key, icon, fullWidth, hasList }) => ({
+        icon,
+        title: t(`sections.${key}.title`),
+        content: t(`sections.${key}.content`),
+        fullWidth,
+        ...(hasList ? { list: t(`sections.${key}.list`, { returnObjects: true }) as string[] } : {}),
+    }));
 
     return (
         <>
-            <PageTitle title="Termos de Uso - TreinaVagaAI" />
+            <PageTitle title={t('pageTitle')} />
             <div className="min-h-screen bg-slate-50 dark:bg-slate-900 relative overflow-hidden transition-colors duration-300">
                 {/* Background Gradients */}
                 <div className="absolute inset-0 z-0 pointer-events-none">
@@ -80,7 +51,7 @@ const TermsOfUsePage: React.FC = () => {
                             <div className="p-2 rounded-full bg-white/80 dark:bg-slate-900/80 shadow-sm ring-1 ring-slate-200 dark:ring-slate-800 group-hover:ring-primary-500/50 dark:group-hover:ring-primary-500/50 mr-3 transition-all duration-200 backdrop-blur-sm">
                                 <ArrowLeftIcon className="w-5 h-5 transform group-hover:-translate-x-0.5 transition-transform" />
                             </div>
-                            <span className="font-medium tracking-wide text-sm">Voltar</span>
+                            <span className="font-medium tracking-wide text-sm">{t('back')}</span>
                         </button>
 
                         <div className="flex flex-col md:flex-row md:items-end gap-6 justify-between border-b border-slate-200 dark:border-slate-800 pb-8">
@@ -89,16 +60,16 @@ const TermsOfUsePage: React.FC = () => {
                                     <ShieldExclamationIcon className="w-8 h-8 text-primary-600 dark:text-primary-400" />
                                 </div>
                                 <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight text-slate-900 dark:text-white mb-3">
-                                    Termos de Uso
+                                    {t('title')}
                                 </h1>
                                 <p className="text-lg text-slate-600 dark:text-slate-400 max-w-2xl leading-relaxed">
-                                    Regras e diretrizes para o uso da plataforma TreinaVagaAI.
+                                    {t('subtitle')}
                                 </p>
                             </div>
                             <div className="inline-flex items-center px-4 py-2 rounded-full bg-primary-50 dark:bg-primary-900/20 border border-primary-100 dark:border-primary-800/50">
                                 <span className="w-2 h-2 rounded-full bg-primary-500 mr-2 animate-pulse"></span>
                                 <span className="text-sm font-medium text-primary-700 dark:text-primary-300">
-                                    Atualizado em {new Date().toLocaleDateString('pt-BR')}
+                                    {t('updatedAt', { date: new Date().toLocaleDateString('pt-BR') })}
                                 </span>
                             </div>
                         </div>
@@ -142,7 +113,7 @@ const TermsOfUsePage: React.FC = () => {
                     {/* Footer Note */}
                     <div className="mt-12 text-center border-t border-slate-200 dark:border-slate-800 pt-8">
                         <p className="text-slate-500 dark:text-slate-500">
-                            © {new Date().getFullYear()} TreinaVagaAI. Todos os direitos reservados.
+                            {t('allRightsReserved', { year: new Date().getFullYear() })}
                         </p>
                     </div>
 

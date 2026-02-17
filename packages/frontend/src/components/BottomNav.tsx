@@ -42,6 +42,8 @@ import { useSidebar } from '../contexts/SidebarContext';
 import { useTheme } from '../contexts/ThemeContext';
 import SearchModal from './SearchModal';
 import { useSearchModal } from '../hooks/useSearchModal';
+import { useTranslation } from 'react-i18next';
+import LanguageSwitcher from './LanguageSwitcher';
 
 const Sidebar: React.FC = () => {
     const navigate = useNavigate();
@@ -51,6 +53,7 @@ const Sidebar: React.FC = () => {
     const { theme, resolvedTheme, toggleTheme, setTheme } = useTheme();
     const sidebarRef = useRef<HTMLDivElement>(null);
     const { isSearchOpen, closeSearch } = useSearchModal();
+    const { t } = useTranslation();
 
     // Theme Long Press Logic
     const [showThemeMenu, setShowThemeMenu] = useState(false);
@@ -78,23 +81,23 @@ const Sidebar: React.FC = () => {
     const isPro = user?.role === 'pro';
 
     const mainNavItems = [
-        { name: 'Início', path: '/', icon: HomeIcon, activeIcon: HomeIconSolid },
-        { name: 'Quizzes', path: '/my-quizzes', icon: DocumentTextIcon, activeIcon: DocumentTextIconSolid },
-        { name: 'Simulações', path: '/my-interviews', icon: ChatBubbleLeftRightIcon, activeIcon: ChatBubbleLeftRightIconSolid, badge: 'PRO', locked: !isPro && user?.role !== 'admin' },
-        { name: 'Flashcards', path: '/my-flashcards', icon: RectangleStackIcon, activeIcon: RectangleStackIconSolid, badge: 'PRO', locked: !isPro && user?.role !== 'admin' },
-        { name: 'Explorar', path: '/free-quizzes', icon: AcademicCapIcon, activeIcon: AcademicCapIconSolid },
+        { name: t('nav.home'), nameKey: 'nav.home', path: '/', icon: HomeIcon, activeIcon: HomeIconSolid },
+        { name: t('nav.quizzes'), nameKey: 'nav.quizzes', path: '/my-quizzes', icon: DocumentTextIcon, activeIcon: DocumentTextIconSolid },
+        { name: t('nav.simulations'), nameKey: 'nav.simulations', path: '/my-interviews', icon: ChatBubbleLeftRightIcon, activeIcon: ChatBubbleLeftRightIconSolid, badge: 'PRO', locked: !isPro && user?.role !== 'admin' },
+        { name: t('nav.flashcards'), nameKey: 'nav.flashcards', path: '/my-flashcards', icon: RectangleStackIcon, activeIcon: RectangleStackIconSolid, badge: 'PRO', locked: !isPro && user?.role !== 'admin' },
+        { name: t('nav.explore'), nameKey: 'nav.explore', path: '/free-quizzes', icon: AcademicCapIcon, activeIcon: AcademicCapIconSolid },
 
-        { name: 'Comunidade', path: '/search', icon: UsersIconLucide, activeIcon: UsersIconLucide },
-        { name: 'Evolução', path: '/desempenho', icon: ChartBarIcon, activeIcon: ChartBarIconSolid },
-        { name: 'Histórico', path: '/profile/reward-history', icon: ClockIcon, activeIcon: ClockIconSolid },
-        { name: 'Tokens', path: '/tokens', icon: TicketIcon, activeIcon: TicketIconSolid },
+        { name: t('nav.community'), nameKey: 'nav.community', path: '/search', icon: UsersIconLucide, activeIcon: UsersIconLucide },
+        { name: t('nav.evolution'), nameKey: 'nav.evolution', path: '/desempenho', icon: ChartBarIcon, activeIcon: ChartBarIconSolid },
+        { name: t('nav.history'), nameKey: 'nav.history', path: '/profile/reward-history', icon: ClockIcon, activeIcon: ClockIconSolid },
+        { name: t('nav.tokens'), nameKey: 'nav.tokens', path: '/tokens', icon: TicketIcon, activeIcon: TicketIconSolid },
     ];
 
     const adminNavItems = [
-        { name: 'Usuários', path: '/users', icon: UsersIconLucide, activeIcon: UsersIconLucide },
-        { name: 'Quizzes', path: '/admin/quizzes', icon: FileQuestion, activeIcon: FileQuestion },
-        { name: 'Cargos', path: '/roles', icon: ShieldCheckIcon, activeIcon: ShieldCheckIconSolid },
-        { name: 'Pacotes de Tokens', path: '/token-packages', icon: Gift, activeIcon: Gift },
+        { name: t('admin.users'), path: '/users', icon: UsersIconLucide, activeIcon: UsersIconLucide },
+        { name: t('admin.quizzes'), path: '/admin/quizzes', icon: FileQuestion, activeIcon: FileQuestion },
+        { name: t('admin.roles'), path: '/roles', icon: ShieldCheckIcon, activeIcon: ShieldCheckIconSolid },
+        { name: t('admin.tokenPackages'), path: '/token-packages', icon: Gift, activeIcon: Gift },
     ];
 
     const [subItems, setSubItems] = useState<Record<string, { label: string, icon: React.ElementType, path?: string } | null>>({});
@@ -114,9 +117,9 @@ const Sidebar: React.FC = () => {
     };
 
     const hoverActions: Record<string, { label: string, icon: React.ElementType, path: string }> = {
-        'Quizzes': { label: 'Novo Quiz', icon: PlusCircleIcon, path: '/create-quiz' },
-        'Simulações': { label: 'Nova Simulação', icon: PlusCircleIcon, path: '/create-interview' },
-        'Flashcards': { label: 'Novo Flashcard', icon: PlusCircleIcon, path: '/create-flashcard' },
+        [t('nav.quizzes')]: { label: t('nav.newQuiz'), icon: PlusCircleIcon, path: '/create-quiz' },
+        [t('nav.simulations')]: { label: t('nav.newSimulation'), icon: PlusCircleIcon, path: '/create-interview' },
+        [t('nav.flashcards')]: { label: t('nav.newFlashcard'), icon: PlusCircleIcon, path: '/create-flashcard' },
     };
 
     useEffect(() => {
@@ -132,7 +135,7 @@ const Sidebar: React.FC = () => {
                     try {
                         const { socialApi } = await import('../lib/socialApi');
                         const profile = await socialApi.getPublicProfile(userId);
-                        newSubItems['Comunidade'] = { label: profile.name, icon: UserIcon, path: `/profile/${userId}` };
+                        newSubItems[t('nav.community')] = { label: profile.name, icon: UserIcon, path: `/profile/${userId}` };
                     } catch (error) {
                         console.error('Error fetching viewed user:', error);
                     }
@@ -141,13 +144,13 @@ const Sidebar: React.FC = () => {
 
             // 2. Creation Contexts
             if (location.pathname === '/create-quiz') {
-                newSubItems['Quizzes'] = { label: 'Novo Quiz', icon: PlusCircleIcon, path: '/create-quiz' };
+                newSubItems[t('nav.quizzes')] = { label: t('nav.newQuiz'), icon: PlusCircleIcon, path: '/create-quiz' };
             }
             if (location.pathname === '/create-interview') {
-                newSubItems['Simulações'] = { label: 'Nova Simulação', icon: PlusCircleIcon, path: '/create-interview' };
+                newSubItems[t('nav.simulations')] = { label: t('nav.newSimulation'), icon: PlusCircleIcon, path: '/create-interview' };
             }
             if (location.pathname === '/create-flashcard') {
-                newSubItems['Flashcards'] = { label: 'Novo Flashcard', icon: PlusCircleIcon, path: '/create-flashcard' };
+                newSubItems[t('nav.flashcards')] = { label: t('nav.newFlashcard'), icon: PlusCircleIcon, path: '/create-flashcard' };
             }
 
             setSubItems(newSubItems);
@@ -338,7 +341,7 @@ const Sidebar: React.FC = () => {
                         <div
                             className={`group flex items-center ${isCollapsed ? 'justify-center w-10 h-10' : 'w-full px-3 py-2'} bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg hover:border-amber-400 dark:hover:border-amber-500 transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] cursor-pointer`}
                             onClick={() => handleNavClick('/tokens')}
-                            title={`${user.tokens || 0} Tokens Disponíveis`}
+                            title={t('user.tokensAvailable', { count: user.tokens || 0 })}
                         >
                             <div className={`flex items-center ${isCollapsed ? 'justify-center w-full' : ''}`}>
                                 {isCollapsed ? (
@@ -427,7 +430,7 @@ const Sidebar: React.FC = () => {
                             setPressProgress(0);
                         }}
                         className={`relative w-full flex items-center px-3 py-2 rounded-md text-slate-500 hover:bg-slate-50 hover:text-slate-900 transition-colors overflow-hidden ${isCollapsed ? 'justify-center' : ''}`}
-                        title={isCollapsed ? (resolvedTheme === 'dark' ? 'Modo Claro' : 'Modo Escuro') : undefined}
+                        title={isCollapsed ? (resolvedTheme === 'dark' ? t('theme.lightMode') : t('theme.darkMode')) : undefined}
                     >
                         {/* Progress Background */}
                         <div
@@ -442,7 +445,7 @@ const Sidebar: React.FC = () => {
                                 <MoonIcon className="w-4 h-4 flex-shrink-0" />
                             )}
                             <div className={`overflow-hidden whitespace-nowrap transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] ${isCollapsed ? 'max-w-0 opacity-0' : 'max-w-[200px] opacity-100'}`}>
-                                <span className="text-sm font-medium pl-3 block">{resolvedTheme === 'dark' ? 'Modo Claro' : 'Modo Escuro'}</span>
+                                <span className="text-sm font-medium pl-3 block">{resolvedTheme === 'dark' ? t('theme.lightMode') : t('theme.darkMode')}</span>
                             </div>
                         </div>
                     </button>
@@ -456,44 +459,50 @@ const Sidebar: React.FC = () => {
                             />
                             <div className={`absolute bottom-full ${isCollapsed ? 'left-1/2 -translate-x-1/2 mb-2' : 'left-0 mb-2 w-full'} z-50 bg-white dark:bg-slate-800 rounded-xl shadow-xl border border-slate-200 dark:border-slate-700 p-1.5 animate-in fade-in slide-in-from-bottom-2 duration-200 min-w-[200px]`}>
                                 <div className="text-xs font-semibold text-slate-400 px-2 py-1 uppercase tracking-wider mb-1">
-                                    Temas Especiais
+                                    {t('theme.specialThemes')}
                                 </div>
                                 <button
                                     onClick={() => { setTheme('light-orange'); setShowThemeMenu(false); }}
                                     className={`w-full flex items-center px-3 py-2 rounded-lg mb-1 transition-colors ${theme === 'light-orange' ? 'bg-orange-50 text-orange-700' : 'hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300'}`}
                                 >
                                     <SunIcon className="w-4 h-4 mr-3 text-orange-500" />
-                                    <span className="text-sm font-medium">Laranja Light</span>
+                                    <span className="text-sm font-medium">{t('theme.orangeLight')}</span>
                                 </button>
                                 <button
                                     onClick={() => { setTheme('dark-orange'); setShowThemeMenu(false); }}
                                     className={`w-full flex items-center px-3 py-2 rounded-lg mb-1 transition-colors ${theme === 'dark-orange' ? 'bg-orange-900/20 text-orange-500' : 'hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300'}`}
                                 >
                                     <FireIcon className="w-4 h-4 mr-3 text-orange-500" />
-                                    <span className="text-sm font-medium">Laranja Dark</span>
+                                    <span className="text-sm font-medium">{t('theme.orangeDark')}</span>
                                 </button>
                                 <button
                                     onClick={() => { setTheme('system'); setShowThemeMenu(false); }}
                                     className={`w-full flex items-center px-3 py-2 rounded-lg transition-colors ${theme === 'system' ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400' : 'hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300'}`}
                                 >
                                     <ComputerDesktopIcon className="w-4 h-4 mr-3" />
-                                    <span className="text-sm font-medium">Sistema</span>
+                                    <span className="text-sm font-medium">{t('theme.system')}</span>
                                 </button>
                             </div>
                         </>
                     )}
                 </div>
 
+                {/* Language Switcher */}
+                <LanguageSwitcher
+                  variant="inline"
+                  className={isCollapsed ? 'justify-center' : ''}
+                />
+
                 {/* Configurações - só para usuários logados */}
                 {user && (
                     <button
                         onClick={() => handleNavClick('/settings')}
                         className={`w-full flex items-center px-3 py-2 rounded-md text-slate-500 hover:bg-slate-50 hover:text-slate-900 transition-colors ${isCollapsed ? 'justify-center' : ''}`}
-                        title={isCollapsed ? 'Configurações' : undefined}
+                        title={isCollapsed ? t('user.settings') : undefined}
                     >
                         <Cog6ToothIcon className="w-4 h-4 flex-shrink-0" />
                         <div className={`overflow-hidden whitespace-nowrap transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] ${isCollapsed ? 'max-w-0 opacity-0' : 'max-w-[200px] opacity-100'}`}>
-                            <span className="text-sm font-medium pl-3 block">Configurações</span>
+                            <span className="text-sm font-medium pl-3 block">{t('user.settings')}</span>
                         </div>
                     </button>
                 )}
@@ -503,11 +512,11 @@ const Sidebar: React.FC = () => {
                     <button
                         onClick={handleLogout}
                         className={`w-full flex items-center px-3 py-2 rounded-md text-slate-500 hover:text-red-600 hover:bg-red-50 transition-colors ${isCollapsed ? 'justify-center' : ''}`}
-                        title={isCollapsed ? 'Sair' : undefined}
+                        title={isCollapsed ? t('user.logout') : undefined}
                     >
                         <ArrowRightOnRectangleIcon className="w-4 h-4 flex-shrink-0" />
                         <div className={`overflow-hidden whitespace-nowrap transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] ${isCollapsed ? 'max-w-0 opacity-0' : 'max-w-[200px] opacity-100'}`}>
-                            <span className="text-sm font-medium pl-3 block">Sair</span>
+                            <span className="text-sm font-medium pl-3 block">{t('user.logout')}</span>
                         </div>
                     </button>
                 )}
@@ -539,7 +548,7 @@ const Sidebar: React.FC = () => {
                     <button
                         onClick={() => handleNavClick('/profile')}
                         className="flex justify-center pt-2 w-full hover:opacity-80 transition-opacity cursor-pointer"
-                        title="Perfil"
+                        title={t('nav.profile')}
                     >
                         {user.picture ? (
                             <img src={user.picture} alt={user.name} className="w-8 h-8 rounded-full object-cover bg-slate-100" />
@@ -560,7 +569,7 @@ const Sidebar: React.FC = () => {
                         className="w-full flex items-center px-3 py-2 mt-2 bg-slate-900 text-white rounded-md hover:bg-slate-800 transition-colors shadow-sm"
                     >
                         <ArrowLeftOnRectangleIcon className="w-4 h-4 flex-shrink-0" />
-                        <span className="text-sm font-medium pl-3 animate-fade-in">Entrar</span>
+                        <span className="text-sm font-medium pl-3 animate-fade-in">{t('user.login')}</span>
                     </button>
                 )}
 
@@ -569,7 +578,7 @@ const Sidebar: React.FC = () => {
                     <button
                         onClick={() => handleNavClick('/login')}
                         className="flex justify-center pt-2 w-full"
-                        title="Entrar"
+                        title={t('user.login')}
                     >
                         <div className="w-8 h-8 rounded-md bg-slate-900 flex items-center justify-center hover:bg-slate-800 transition-colors">
                             <ArrowLeftOnRectangleIcon className="w-4 h-4 text-white" />
@@ -581,10 +590,10 @@ const Sidebar: React.FC = () => {
     );
 
     const bottomNavItems = [
-        { name: 'Início', path: '/', icon: HomeIcon, activeIcon: HomeIconSolid },
-        { name: 'Quizzes', path: '/my-quizzes', icon: DocumentTextIcon, activeIcon: DocumentTextIconSolid },
-        { name: 'Novo Quiz', path: '/create-quiz', icon: PlusCircleIcon, activeIcon: PlusCircleIconSolid, badge: null, locked: false },
-        { name: 'Menu', path: '#menu', icon: Bars3Icon, activeIcon: Bars3Icon, action: () => setIsMobileOpen(true) },
+        { name: t('nav.home'), path: '/', icon: HomeIcon, activeIcon: HomeIconSolid },
+        { name: t('nav.quizzes'), path: '/my-quizzes', icon: DocumentTextIcon, activeIcon: DocumentTextIconSolid },
+        { name: t('nav.newQuiz'), path: '/create-quiz', icon: PlusCircleIcon, activeIcon: PlusCircleIconSolid, badge: null, locked: false },
+        { name: t('nav.menu'), path: '#menu', icon: Bars3Icon, activeIcon: Bars3Icon, action: () => setIsMobileOpen(true) },
     ];
 
     const NavItem = ({ item }: { item: typeof bottomNavItems[0] }) => {
@@ -646,7 +655,7 @@ const Sidebar: React.FC = () => {
                 className={`lg:hidden fixed left-0 top-0 h-full w-72 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-700 z-50 transform transition-transform duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] ${isMobileOpen ? 'translate-x-0' : '-translate-x-full'}`}
             >
                 <div className="flex items-center justify-between p-4 border-b border-slate-100 dark:border-slate-800">
-                    <span className="font-bold text-lg text-slate-900 dark:text-white">Menu</span>
+                    <span className="font-bold text-lg text-slate-900 dark:text-white">{t('nav.menu')}</span>
                     <button
                         onClick={() => setIsMobileOpen(false)}
                         className="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800"

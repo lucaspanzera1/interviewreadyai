@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 interface ActivityHeatmapProps {
     data: { date: string; count: number }[];
@@ -8,6 +9,7 @@ interface ActivityHeatmapProps {
 }
 
 const ActivityHeatmap: React.FC<ActivityHeatmapProps> = ({ data, totalActivities, startDate: propStartDate, endDate: propEndDate }) => {
+    const { t, i18n } = useTranslation('common');
     const [tooltip, setTooltip] = useState<{ x: number; y: number; content: React.ReactNode } | null>(null);
 
     // Group into weeks
@@ -103,7 +105,7 @@ const ActivityHeatmap: React.FC<ActivityHeatmapProps> = ({ data, totalActivities
             // GitHub logic is more complex but simple spacing check helps.
             if (month !== lastMonth) {
                 // Formatting: "jan"
-                const label = week[0].date.toLocaleString('pt-BR', { month: 'short' }).replace('.', '');
+                const label = week[0].date.toLocaleString(i18n.language, { month: 'short' }).replace('.', '');
                 // Capitalize first letter
                 const formattedLabel = label.charAt(0).toUpperCase() + label.slice(1);
 
@@ -147,7 +149,8 @@ const ActivityHeatmap: React.FC<ActivityHeatmapProps> = ({ data, totalActivities
             y: rect.top,
             content: (
                 <span>
-                    <strong>{count} atividades</strong> em {date.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })}
+                    <strong>{t('activityHeatmap.activitiesCount', { count })}</strong>{' '}
+                    {t('activityHeatmap.onDate', { date: date.toLocaleDateString(i18n.language, { day: '2-digit', month: '2-digit' }) })}
                 </span>
             )
         });
@@ -196,11 +199,11 @@ const ActivityHeatmap: React.FC<ActivityHeatmapProps> = ({ data, totalActivities
                         {/* Day labels */}
                         <div className="flex flex-col gap-[3px] text-[10px] text-slate-400 dark:text-slate-500 pr-2 pt-2 sticky left-0 bg-white dark:bg-slate-900 z-10">
                             <div className="h-[10px]"></div>
-                            <div className="h-[10px]">Seg</div>
+                            <div className="h-[10px]">{t('activityHeatmap.mon')}</div>
                             <div className="h-[10px]"></div>
-                            <div className="h-[10px]">Qua</div>
+                            <div className="h-[10px]">{t('activityHeatmap.wed')}</div>
                             <div className="h-[10px]"></div>
-                            <div className="h-[10px]">Sex</div>
+                            <div className="h-[10px]">{t('activityHeatmap.fri')}</div>
                             <div className="h-[10px]"></div>
                         </div>
 
@@ -222,17 +225,17 @@ const ActivityHeatmap: React.FC<ActivityHeatmapProps> = ({ data, totalActivities
                     <div className="mt-4 flex items-center justify-between text-xs text-slate-500 dark:text-slate-400 sticky left-0">
                         <div>
                             {totalActivities !== undefined && (
-                                <span>Total de {totalActivities} atividades no último ano</span>
+                                <span>{t('activityHeatmap.totalActivities', { count: totalActivities })}</span>
                             )}
                         </div>
                         <div className="flex items-center gap-1">
-                            <span>Menos</span>
+                            <span>{t('activityHeatmap.less')}</span>
                             <div className={`w-[10px] h-[10px] rounded-[2px] ${getColor(0)}`}></div>
                             <div className={`w-[10px] h-[10px] rounded-[2px] ${getColor(1)}`}></div>
                             <div className={`w-[10px] h-[10px] rounded-[2px] ${getColor(2)}`}></div>
                             <div className={`w-[10px] h-[10px] rounded-[2px] ${getColor(3)}`}></div>
                             <div className={`w-[10px] h-[10px] rounded-[2px] ${getColor(4)}`}></div>
-                            <span>Mais</span>
+                            <span>{t('activityHeatmap.more')}</span>
                         </div>
                     </div>
                 </div>

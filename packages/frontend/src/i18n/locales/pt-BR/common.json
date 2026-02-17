@@ -1,0 +1,76 @@
+{
+  "nav": {
+    "home": "Início",
+    "quizzes": "Quizzes",
+    "simulations": "Simulações",
+    "flashcards": "Flashcards",
+    "explore": "Explorar",
+    "community": "Comunidade",
+    "evolution": "Evolução",
+    "history": "Histórico",
+    "tokens": "Tokens",
+    "menu": "Menu",
+    "newQuiz": "Novo Quiz",
+    "newSimulation": "Nova Simulação",
+    "newFlashcard": "Novo Flashcard",
+    "profile": "Perfil",
+    "createQuiz": "Criar Quiz",
+    "myQuizzes": "Meus Quizzes",
+    "interviewSimulation": "Simulação Entrevista",
+    "mySimulations": "Minhas Simulações",
+    "createFlashcards": "Criar Flashcards",
+    "myFlashcards": "Meus Flashcards"
+  },
+  "admin": {
+    "title": "Admin",
+    "administration": "Administração",
+    "users": "Usuários",
+    "quizzes": "Quizzes",
+    "roles": "Cargos",
+    "tokenPackages": "Pacotes de Tokens"
+  },
+  "user": {
+    "myProfile": "Meu Perfil",
+    "settings": "Configurações",
+    "logout": "Sair",
+    "login": "Entrar",
+    "tokensAvailable": "{{count}} Tokens Disponíveis"
+  },
+  "theme": {
+    "lightMode": "Modo Claro",
+    "darkMode": "Modo Escuro",
+    "specialThemes": "Temas Especiais",
+    "orangeLight": "Laranja Light",
+    "orangeDark": "Laranja Dark",
+    "system": "Sistema",
+    "toggleTheme": "Alternar Tema"
+  },
+  "common": {
+    "closeSidebar": "Fechar barra lateral",
+    "loading": "Carregando...",
+    "error": "Erro",
+    "success": "Sucesso",
+    "cancel": "Cancelar",
+    "save": "Salvar",
+    "delete": "Excluir",
+    "edit": "Editar",
+    "back": "Voltar",
+    "next": "Próximo",
+    "previous": "Anterior",
+    "confirm": "Confirmar",
+    "close": "Fechar",
+    "search": "Buscar",
+    "yes": "Sim",
+    "no": "Não"
+  },
+  "activityHeatmap": {
+    "activitiesCount": "{{count}} atividades",
+    "onDate": "em {{date}}",
+    "totalActivities": "Total de {{count}} atividades no último ano",
+    "less": "Menos",
+    "more": "Mais",
+    "mon": "Seg",
+    "wed": "Qua",
+    "fri": "Sex"
+  }
+}

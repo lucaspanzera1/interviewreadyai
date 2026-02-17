@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import PageTitle from './PageTitle';
 import { ChatBubbleLeftRightIcon, LinkIcon, UserIcon, ClockIcon } from '@heroicons/react/24/outline';
+import { useTranslation } from 'react-i18next';
 import { apiClient } from '../lib/api';
 import { useAuth } from '../contexts/AuthContext';
 import { useToast } from '../contexts/ToastContext';
@@ -15,19 +16,20 @@ const CreateInterviewPage: React.FC = () => {
     const navigate = useNavigate();
     const { user, refreshUser } = useAuth();
     const { showToast } = useToast();
+    const { t } = useTranslation('interview');
 
-    const [loadingText, setLoadingText] = useState('Iniciando...'); // State for loading messages
+    const [loadingText, setLoadingText] = useState(t('create.loadingInitializing')); // State for loading messages
 
     // Cycle through loading messages to keep user engaged
     React.useEffect(() => {
         if (!isLoading) return;
 
         const messages = [
-            'Analisando vaga...',
-            'Identificando requisitos...',
-            'Criando perguntas...',
-            'Elaborando dicas...',
-            'Finalizando...'
+            t('create.loadingAnalyzing'),
+            t('create.loadingIdentifying'),
+            t('create.loadingCreating'),
+            t('create.loadingTips'),
+            t('create.loadingFinalizing')
         ];
 
         let index = 0;
@@ -52,12 +54,12 @@ const CreateInterviewPage: React.FC = () => {
             const isValidUrl = supportedSites.some(site => jobLink.includes(site));
 
             if (!isValidUrl) {
-                throw new Error('Por favor, insira um link válido de vaga de um dos sites suportados: LinkedIn, Gupy, Infojobs, Glassdoor ou Indeed');
+                throw new Error(t('create.invalidUrlError'));
             }
 
             // Verificar se o usuário tem tokens suficientes (2 tokens)
             if (!user?.tokens || user.tokens < 2) {
-                throw new Error('Você não tem tokens suficientes. Você precisa de pelo menos 2 tokens para gerar uma simulação de entrevista.');
+                throw new Error(t('create.notEnoughTokens'));
             }
 
             // Gerar a simulação de entrevista
@@ -71,7 +73,7 @@ const CreateInterviewPage: React.FC = () => {
             await refreshUser();
 
             // Mostrar mensagem de sucesso
-            showToast('Simulação de entrevista gerada com sucesso! 2 tokens foram deduzidos.', 'success');
+            showToast(t('create.successWithDeduction'), 'success');
 
             // Redirecionar para página de visualização da simulação
             if (result.interviewId) {
@@ -86,7 +88,7 @@ const CreateInterviewPage: React.FC = () => {
             }
         } catch (err: any) {
             console.error('Error generating interview:', err);
-            const errorMessage = err.response?.data?.message || err.message || 'Erro ao gerar simulação de entrevista. Tente novamente.';
+            const errorMessage = err.response?.data?.message || err.message || t('create.errorGenerating');
             setError(errorMessage);
         } finally {
             setIsLoading(false);
@@ -94,30 +96,30 @@ const CreateInterviewPage: React.FC = () => {
     };
 
     const experienceLevels = [
-        { value: '', label: 'Selecione o nível' },
-        { value: 'Estagiário', label: 'Estagiário' },
-        { value: 'Junior', label: 'Junior (0-2 anos)' },
-        { value: 'Pleno', label: 'Pleno (2-5 anos)' },
-        { value: 'Senior', label: 'Senior (5-8 anos)' },
-        { value: 'Especialista', label: 'Especialista (8+ anos)' },
-        { value: 'Liderança', label: 'Liderança/Gestão' },
+        { value: '', label: t('create.selectLevel') },
+        { value: 'Estagiário', label: t('create.intern') },
+        { value: 'Junior', label: t('create.juniorYears') },
+        { value: 'Pleno', label: t('create.midYears') },
+        { value: 'Senior', label: t('create.seniorYears') },
+        { value: 'Especialista', label: t('create.specialist') },
+        { value: 'Liderança', label: t('create.leadership') },
     ];
 
     return (
         <div className="min-h-full">
-            <PageTitle title="Criar Simulação de Entrevista - TreinaVagaAI" />
+            <PageTitle title={t('create.pageTitle')} />
 
             {/* Header */}
             <header className="sticky top-0 z-20 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 -mx-4 -mt-4 lg:-mx-8 lg:-mt-8 px-4 lg:px-8 py-4 mb-8">
                 <div className="max-w-4xl mx-auto">
                     <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 dark:text-white">
-                        Simulação de Entrevista com IA
+                        {t('create.title')}
                     </h1>
                     <p className="mt-2 text-sm sm:text-base text-slate-600 dark:text-slate-400">
-                        Gere uma simulação de entrevista personalizada baseada em uma vaga real do LinkedIn.
-                        <span className="font-medium text-primary-600 dark:text-primary-400"> Custa 2 tokens.</span>
+                        {t('create.subtitle')}
+                        <span className="font-medium text-primary-600 dark:text-primary-400"> {t('create.costs2Tokens')}.</span>
                         <br />
-                        <span className="text-xs text-slate-500 dark:text-slate-400">Após gerar, você poderá escolher entre simulação de texto ou vídeo com análise IA.</span>
+                        <span className="text-xs text-slate-500 dark:text-slate-400">{t('create.afterGenNote')}</span>
                     </p>
                 </div>
             </header>
@@ -132,25 +134,25 @@ const CreateInterviewPage: React.FC = () => {
                             <ChatBubbleLeftRightIcon className="w-6 h-6 text-blue-600 dark:text-blue-400 mt-1 shrink-0" />
                             <div>
                                 <h3 className="font-semibold text-blue-900 dark:text-blue-100 mb-2">
-                                    Como funciona?
+                                    {t('create.howItWorks')}
                                 </h3>
                                 <ul className="text-sm text-blue-800 dark:text-blue-200 space-y-1">
-                                    <li>• Nossa IA analisa a vaga do LinkedIn em detalhes</li>
-                                    <li>• Gera perguntas técnicas, comportamentais e situacionais</li>
-                                    <li>• Inclui dicas específicas para cada pergunta</li>
-                                    <li>• Fornece palavras-chave importantes para suas respostas</li>
-                                    <li>• Tempo estimado: {numberOfQuestions * 3}-{numberOfQuestions * 4} minutos</li>
+                                    <li>• {t('create.howStep1')}</li>
+                                    <li>• {t('create.howStep2')}</li>
+                                    <li>• {t('create.howStep3')}</li>
+                                    <li>• {t('create.howStep4')}</li>
+                                    <li>• {t('create.estimatedTime', { min: numberOfQuestions * 3, max: numberOfQuestions * 4 })}</li>
                                 </ul>
 
                                 {user && (
                                     <div className="mt-3 text-sm font-medium">
-                                        <span className="text-slate-700 dark:text-slate-300">Seus tokens: </span>
+                                        <span className="text-slate-700 dark:text-slate-300">{t('create.yourTokens')} </span>
                                         <span className={`${user?.tokens && user.tokens >= 2 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
                                             {user.tokens} {user.tokens === 1 ? 'token' : 'tokens'}
                                         </span>
                                         {user?.tokens && user.tokens < 2 && (
                                             <span className="ml-2 text-red-600 dark:text-red-400">
-                                                (Insuficiente - precisa de 2 tokens)
+                                                {t('create.insufficientTokens')}
                                             </span>
                                         )}
                                     </div>
@@ -165,20 +167,20 @@ const CreateInterviewPage: React.FC = () => {
                         <div>
                             <label htmlFor="jobLink" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                                 <LinkIcon className="w-4 h-4 inline mr-1" />
-                                Link da vaga do LinkedIn
+                                {t('create.jobLinkLabel')}
                             </label>
                             <input
                                 type="url"
                                 id="jobLink"
                                 value={jobLink}
                                 onChange={(e) => setJobLink(e.target.value)}
-                                placeholder="https://www.linkedin.com/jobs/view/... ou outros sites suportados"
+                                placeholder={t('create.jobLinkPlaceholderFull')}
                                 className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 placeholder-slate-500 dark:placeholder-slate-400 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-shadow duration-200"
                                 required
                                 disabled={isLoading}
                             />
                             <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-                                Cole o link completo da vaga (LinkedIn, Gupy, Infojobs, Glassdoor, Indeed)
+                                {t('create.jobLinkHint')}
                             </p>
                         </div>
 
@@ -186,7 +188,7 @@ const CreateInterviewPage: React.FC = () => {
                         <div>
                             <label htmlFor="numberOfQuestions" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                                 <ClockIcon className="w-4 h-4 inline mr-1" />
-                                Número de perguntas
+                                {t('create.questionCount')}
                             </label>
                             <select
                                 id="numberOfQuestions"
@@ -195,11 +197,11 @@ const CreateInterviewPage: React.FC = () => {
                                 className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-shadow duration-200"
                                 disabled={isLoading}
                             >
-                                <option value={5}>5 perguntas (15-20 min)</option>
-                                <option value={8}>8 perguntas (24-32 min)</option>
-                                <option value={10}>10 perguntas (30-40 min)</option>
-                                <option value={12}>12 perguntas (36-48 min)</option>
-                                <option value={15}>15 perguntas (45-60 min)</option>
+                                <option value={5}>{t('create.questionCountOption', { count: 5, min: 15, max: 20 })}</option>
+                                <option value={8}>{t('create.questionCountOption', { count: 8, min: 24, max: 32 })}</option>
+                                <option value={10}>{t('create.questionCountOption', { count: 10, min: 30, max: 40 })}</option>
+                                <option value={12}>{t('create.questionCountOption', { count: 12, min: 36, max: 48 })}</option>
+                                <option value={15}>{t('create.questionCountOption', { count: 15, min: 45, max: 60 })}</option>
                             </select>
                         </div>
 
@@ -207,7 +209,7 @@ const CreateInterviewPage: React.FC = () => {
                         <div>
                             <label htmlFor="experienceLevel" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                                 <UserIcon className="w-4 h-4 inline mr-1" />
-                                Seu nível de experiência (opcional)
+                                {t('create.experienceLevelOptional')}
                             </label>
                             <select
                                 id="experienceLevel"
@@ -223,7 +225,7 @@ const CreateInterviewPage: React.FC = () => {
                                 ))}
                             </select>
                             <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-                                Ajuda a personalizar o nível das perguntas para sua experiência
+                                {t('create.experienceLevelHint')}
                             </p>
                         </div>
 
@@ -242,7 +244,7 @@ const CreateInterviewPage: React.FC = () => {
                                 className="flex-1 sm:flex-none px-6 py-3.5 border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-700 transition-all duration-200 font-medium"
                                 disabled={isLoading}
                             >
-                                Cancelar
+                                {t('create.cancel')}
                             </button>
                             <button
                                 type="submit"
@@ -271,8 +273,8 @@ const CreateInterviewPage: React.FC = () => {
                                     ) : (
                                         <>
                                             <ChatBubbleLeftRightIcon className="w-5 h-5 transition-transform group-hover:scale-110" />
-                                            <span>Gerar Simulação</span>
-                                            <span className="bg-white/20 px-2 py-0.5 rounded text-xs font-semibold ml-1">2 tokens</span>
+                                            <span>{t('create.generateSimulation')}</span>
+                                            <span className="bg-white/20 px-2 py-0.5 rounded text-xs font-semibold ml-1">{t('create.tokenCost')}</span>
                                         </>
                                     )}
                                 </span>

@@ -11,25 +11,27 @@ import {
 } from '@heroicons/react/24/outline';
 import { Users as UsersIcon, FileQuestion, Gift } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
+import { useTranslation } from 'react-i18next';
 
 interface SidebarProps {
   onClose?: () => void;
 }
 
-const navigation = [
-  { name: 'Perfil', href: '/profile', icon: UserCircleIcon },
-  { name: 'Criar Quiz', href: '/create-quiz', icon: SparklesIcon },
-  { name: 'Meus Quizzes', href: '/my-quizzes', icon: FileQuestion },
-  { name: 'Simulação Entrevista', href: '/create-interview', icon: ChatBubbleLeftRightIcon },
-  { name: 'Minhas Simulações', href: '/my-interviews', icon: ChatBubbleLeftRightIcon },
-  { name: 'Criar Flashcards', href: '/create-flashcard', icon: PlusCircleIcon },
-  { name: 'Meus Flashcards', href: '/my-flashcards', icon: AcademicCapIcon },
-  { name: 'Tokens', href: '/tokens', icon: KeyIcon },
-];
-
 const Sidebar: React.FC<SidebarProps> = ({ onClose }) => {
   const { user } = useAuth();
   const isAdmin = user?.role === 'admin';
+  const { t } = useTranslation();
+
+  const navigation = [
+    { name: t('nav.profile'), href: '/profile', icon: UserCircleIcon },
+    { name: t('nav.createQuiz'), href: '/create-quiz', icon: SparklesIcon },
+    { name: t('nav.myQuizzes'), href: '/my-quizzes', icon: FileQuestion },
+    { name: t('nav.interviewSimulation'), href: '/create-interview', icon: ChatBubbleLeftRightIcon },
+    { name: t('nav.mySimulations'), href: '/my-interviews', icon: ChatBubbleLeftRightIcon },
+    { name: t('nav.createFlashcards'), href: '/create-flashcard', icon: PlusCircleIcon },
+    { name: t('nav.myFlashcards'), href: '/my-flashcards', icon: AcademicCapIcon },
+    { name: t('nav.tokens'), href: '/tokens', icon: KeyIcon },
+  ];
 
   return (
     <div className="flex flex-col flex-grow bg-white border-r border-slate-200 pt-5 pb-4 overflow-y-auto">
@@ -97,7 +99,7 @@ const Sidebar: React.FC<SidebarProps> = ({ onClose }) => {
           {isAdmin && (
             <div className="space-y-1">
               <h3 className="px-3 text-xs font-semibold text-slate-400 uppercase tracking-wider">
-                Administração
+                {t('admin.administration')}
               </h3>
               <NavLink
                 to="/users"
@@ -116,7 +118,7 @@ const Sidebar: React.FC<SidebarProps> = ({ onClose }) => {
                         }`}
                       aria-hidden="true"
                     />
-                    Usuários
+                    {t('admin.users')}
                   </>
                 )}
               </NavLink>
@@ -137,7 +139,7 @@ const Sidebar: React.FC<SidebarProps> = ({ onClose }) => {
                         }`}
                       aria-hidden="true"
                     />
-                    Quizzes
+                    {t('admin.quizzes')}
                   </>
                 )}
               </NavLink>
@@ -158,7 +160,7 @@ const Sidebar: React.FC<SidebarProps> = ({ onClose }) => {
                         }`}
                       aria-hidden="true"
                     />
-                    Pacotes de Tokens
+                    {t('admin.tokenPackages')}
                   </>
                 )}
               </NavLink>

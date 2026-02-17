@@ -15,10 +15,12 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { apiClient, Interview } from '../lib/api';
 import { useToast } from '../contexts/ToastContext';
+import { useTranslation } from 'react-i18next';
 
 const MyInterviewsPage: React.FC = () => {
     const navigate = useNavigate();
     const { showToast } = useToast();
+    const { t } = useTranslation('interview');
     const [interviews, setInterviews] = useState<Interview[]>([]);
     const [loading, setLoading] = useState(true);
     const [page, setPage] = useState(1);
@@ -50,18 +52,18 @@ const MyInterviewsPage: React.FC = () => {
             const fullInterview = await apiClient.getInterviewForPlaying(interview._id);
 
             if (!fullInterview || !fullInterview.questions || fullInterview.questions.length === 0) {
-                showToast('Esta simulação não está disponível ou não tem perguntas.', 'error');
+                showToast(t('myInterviews.simulationNotAvailable'), 'error');
                 return;
             }
 
             localStorage.setItem('generatedInterview', JSON.stringify(fullInterview));
             localStorage.setItem('currentInterviewId', fullInterview._id);
 
-            showToast('Simulação iniciada! Boa sorte! 🎯', 'success');
+            showToast(t('myInterviews.simulationStarted'), 'success');
             navigate('/interview/play');
         } catch (error: any) {
             console.error('Erro ao iniciar simulação:', error);
-            const message = error.response?.data?.message || 'Erro ao iniciar a simulação.';
+            const message = error.response?.data?.message || t('myInterviews.errorStarting');
             showToast(message, 'error');
         } finally {
             setStartingInterview(null);
@@ -69,12 +71,12 @@ const MyInterviewsPage: React.FC = () => {
     };
 
     const getInterviewTypeLabel = (type: string) => {
-        const types = {
-            'TECHNICAL': 'Técnica',
-            'BEHAVIORAL': 'Comportamental',
-            'MIXED': 'Mista'
+        const types: Record<string, string> = {
+            'TECHNICAL': t('myInterviews.interviewType.technical'),
+            'BEHAVIORAL': t('myInterviews.interviewType.behavioral'),
+            'MIXED': t('myInterviews.interviewType.mixed')
         };
-        return types[type as keyof typeof types] || type;
+        return types[type] || type;
     };
 
     const getInterviewTypeStyles = (type: string) => {
@@ -91,9 +93,9 @@ const MyInterviewsPage: React.FC = () => {
         const now = new Date();
         const diffInSeconds = Math.floor((now.getTime() - d.getTime()) / 1000);
 
-        if (diffInSeconds < 60) return 'Agora mesmo';
-        if (diffInSeconds < 3600) return `há ${Math.floor(diffInSeconds / 60)} min`;
-        if (diffInSeconds < 86400) return `há ${Math.floor(diffInSeconds / 3600)} h`;
+        if (diffInSeconds < 60) return t('attempts.timeAgo.now');
+        if (diffInSeconds < 3600) return t('attempts.timeAgo.minutes', { count: Math.floor(diffInSeconds / 60) });
+        if (diffInSeconds < 86400) return t('attempts.timeAgo.hours', { count: Math.floor(diffInSeconds / 3600) });
 
         return d.toLocaleDateString('pt-BR', {
             day: '2-digit',
@@ -104,7 +106,7 @@ const MyInterviewsPage: React.FC = () => {
 
     return (
         <div className="flex flex-col min-h-full">
-            <PageTitle title="Minhas Simulações - TreinaVagaAI" />
+            <PageTitle title={t('myInterviews.pageTitle')} />
 
             {/* Elegant Header */}
             <div className="bg-gradient-to-b from-white to-slate-50 dark:from-slate-900 dark:to-slate-900/50 pb-8 pt-6 px-4 sm:px-8 border-b border-slate-200 dark:border-slate-800 -mx-4 -mt-4 lg:-mx-8 lg:-mt-8 mb-8">
@@ -112,10 +114,10 @@ const MyInterviewsPage: React.FC = () => {
                     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                         <div>
                             <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white mb-2">
-                                Minhas Simulações
+                                {t('myInterviews.title')}
                             </h1>
                             <p className="text-slate-600 dark:text-slate-400 max-w-xl">
-                                Acompanhe seu progresso e continue praticando para conquistar sua vaga dos sonhos.
+                                {t('myInterviews.subtitle')}
                             </p>
                         </div>
                         <button
@@ -123,7 +125,7 @@ const MyInterviewsPage: React.FC = () => {
                             className="group relative inline-flex items-center gap-2 px-5 py-3 bg-primary-600 hover:bg-primary-500 text-white rounded-xl font-medium transition-all duration-200 shadow-lg shadow-primary-600/25 hover:shadow-primary-600/40 hover:-translate-y-0.5"
                         >
                             <PlusCircleIcon className="w-5 h-5 transition-transform group-hover:rotate-90" />
-                            <span>Nova Simulação</span>
+                            <span>{t('myInterviews.newSimulation')}</span>
                         </button>
                     </div>
                 </div>
@@ -137,7 +139,7 @@ const MyInterviewsPage: React.FC = () => {
                             <div className="w-12 h-12 border-4 border-slate-200 dark:border-slate-700 rounded-full"></div>
                             <div className="w-12 h-12 border-4 border-primary-600 rounded-full border-t-transparent animate-spin absolute top-0 left-0"></div>
                         </div>
-                        <p className="text-slate-500 dark:text-slate-400 animate-pulse font-medium">Carregando suas simulações...</p>
+                        <p className="text-slate-500 dark:text-slate-400 animate-pulse font-medium">{t('myInterviews.loading')}</p>
                     </div>
                 ) : (
                     <>
@@ -148,17 +150,17 @@ const MyInterviewsPage: React.FC = () => {
                                         <SparklesIcon className="h-10 w-10 text-primary-600 dark:text-primary-400" />
                                     </div>
                                     <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-3">
-                                        Comece sua Jornada
+                                        {t('myInterviews.startJourney')}
                                     </h3>
                                     <p className="text-slate-600 dark:text-slate-400 mb-8 leading-relaxed">
-                                        Você ainda não criou nenhuma simulação. Crie sua primeira entrevista baseada em uma vaga real e comece a treinar agora mesmo!
+                                        {t('myInterviews.emptyStateDesc')}
                                     </p>
                                     <button
                                         onClick={() => navigate('/create-interview')}
                                         className="w-full inline-flex items-center justify-center gap-2 px-6 py-4 bg-primary-600 hover:bg-primary-500 text-white font-semibold rounded-xl transition-all shadow-lg hover:shadow-xl hover:-translate-y-1"
                                     >
                                         <PlusCircleIcon className="w-6 h-6" />
-                                        Criar Primeira Simulação
+                                        {t('myInterviews.emptyStateAction')}
                                     </button>
                                 </div>
                             </div>
@@ -209,21 +211,21 @@ const MyInterviewsPage: React.FC = () => {
                                                 <div className="flex flex-wrap gap-4 text-xs font-medium text-slate-500 dark:text-slate-400">
                                                     <div className="flex items-center gap-1.5 bg-slate-50 dark:bg-slate-900/50 px-2.5 py-1.5 rounded-lg">
                                                         <ChatBubbleLeftRightIcon className="w-4 h-4 text-slate-400" />
-                                                        {interview.numberOfQuestions} perguntas
+                                                        {interview.numberOfQuestions} {t('myInterviews.questions')}
                                                     </div>
                                                     <div className="flex items-center gap-1.5 bg-slate-50 dark:bg-slate-900/50 px-2.5 py-1.5 rounded-lg">
                                                         <ClockIcon className="w-4 h-4 text-slate-400" />
-                                                        ~{interview.estimatedDuration} min
+                                                        ~{interview.estimatedDuration} {t('myInterviews.min')}
                                                     </div>
                                                     {interview.totalAttempts > 0 ? (
                                                         <div className="flex items-center gap-1.5 bg-green-50 dark:bg-green-900/10 px-2.5 py-1.5 rounded-lg text-green-700 dark:text-green-400">
                                                             <SparklesIcon className="w-4 h-4" />
-                                                            {interview.totalAttempts} tentativas
+                                                            {interview.totalAttempts} {t('myInterviews.attempts')}
                                                         </div>
                                                     ) : (
                                                         <div className="flex items-center gap-1.5 bg-amber-50 dark:bg-amber-900/10 px-2.5 py-1.5 rounded-lg text-amber-700 dark:text-amber-400">
                                                             <SparklesIcon className="w-4 h-4" />
-                                                            Nova
+                                                            {t('myInterviews.new')}
                                                         </div>
                                                     )}
                                                 </div>
@@ -244,7 +246,7 @@ const MyInterviewsPage: React.FC = () => {
                                                     ) : (
                                                         <>
                                                             <PlayIcon className="w-4 h-4" />
-                                                            <span>Praticar</span>
+                                                            <span>{t('myInterviews.practice')}</span>
                                                         </>
                                                     )}
                                                 </button>
@@ -252,7 +254,7 @@ const MyInterviewsPage: React.FC = () => {
                                                     onClick={() => navigate(`/interview/${interview._id}`)}
                                                     className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-5 py-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 rounded-xl font-medium transition-colors"
                                                 >
-                                                    <span>Detalhes</span>
+                                                    <span>{t('myInterviews.details')}</span>
                                                     <ChevronRightIcon className="w-4 h-4" />
                                                 </button>
                                             </div>
@@ -270,7 +272,7 @@ const MyInterviewsPage: React.FC = () => {
                                     disabled={page === 1}
                                     className="px-4 py-2 rounded-lg text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
                                 >
-                                    Anterior
+                                    {t('myInterviews.previous')}
                                 </button>
 
                                 <div className="flex gap-2">
@@ -293,7 +295,7 @@ const MyInterviewsPage: React.FC = () => {
                                     disabled={page === totalPages}
                                     className="px-4 py-2 rounded-lg text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
                                 >
-                                    Próxima
+                                    {t('myInterviews.next')}
                                 </button>
                             </div>
                         )}
@@ -307,7 +309,7 @@ const MyInterviewsPage: React.FC = () => {
                             className="flex items-center gap-2 px-4 py-2 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 rounded-full text-sm font-medium hover:bg-blue-100 dark:hover:bg-blue-900/40 transition-colors shadow-sm"
                         >
                             <QuestionMarkCircleIcon className="w-5 h-5" />
-                            <span>Dúvidas sobre Simulações?</span>
+                            <span>{t('myInterviews.helpTitle')}</span>
                         </button>
                     ) : (
                         <div className="relative w-full p-4 sm:p-6 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-700 flex flex-col sm:flex-row gap-4 animate-fade-in-up">
@@ -322,12 +324,10 @@ const MyInterviewsPage: React.FC = () => {
                             </div>
                             <div className="flex-1 pr-8">
                                 <h4 className="font-bold text-slate-900 dark:text-white mb-2">
-                                    Como funcionam as Simulações?
+                                    {t('myInterviews.helpQuestion')}
                                 </h4>
                                 <p className="text-sm text-slate-600 dark:text-slate-400 mb-4 leading-relaxed">
-                                    Aqui você treina para entrevistas reais! A IA atua como uma recrutadora, criando perguntas técnicas e comportamentais baseadas na vaga.
-                                    Ela te da dicas de preparação, você grava um vídeo respondendo as perguntas.
-                                    Ao final, você recebe um feedback detalhado sobre suas respostas.
+                                    {t('myInterviews.helpDesc')}
                                 </p>
                                 <a
                                     href="https://wa.me/5531997313160"
@@ -335,7 +335,7 @@ const MyInterviewsPage: React.FC = () => {
                                     rel="noopener noreferrer"
                                     className="text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 text-sm font-semibold hover:underline inline-flex items-center gap-2"
                                 >
-                                    Precisa de ajuda? Fale com nosso suporte
+                                    {t('myInterviews.needHelp')}
                                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-3 h-3">
                                         <path fillRule="evenodd" d="M16.28 11.47a.75.75 0 010 1.06l-7.5 7.5a.75.75 0 01-1.06-1.06L14.69 12 7.72 5.03a.75.75 0 011.06-1.06l7.5 7.5z" clipRule="evenodd" />
                                     </svg>

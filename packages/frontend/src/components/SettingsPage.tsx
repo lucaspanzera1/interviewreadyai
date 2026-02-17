@@ -16,11 +16,13 @@ import {
     EyeSlashIcon,
     FireIcon
 } from '@heroicons/react/24/outline';
+import { useTranslation } from 'react-i18next';
 
 const SettingsPage: React.FC = () => {
     const { theme, setTheme } = useTheme();
     const { user, refreshUser } = useAuth();
     const { showToast } = useToast();
+    const { t } = useTranslation('settings');
 
     // Notification states (mock)
     const [emailNotifications, setEmailNotifications] = useState(true);
@@ -58,12 +60,12 @@ const SettingsPage: React.FC = () => {
             setIsProfilePublic(checked);
             await refreshUser(); // Refresh user data to update context
             showToast(
-                `Perfil ${checked ? 'público' : 'privado'} configurado com sucesso!`,
+                t('privacyUpdatedSuccess', { visibility: checked ? t('public') : t('private') }),
                 'success'
             );
         } catch (error) {
             console.error('Erro ao atualizar configurações de privacidade:', error);
-            showToast('Erro ao atualizar configurações de privacidade', 'error');
+            showToast(t('privacyUpdateError'), 'error');
         } finally {
             setIsUpdatingPrivacy(false);
         }
@@ -74,18 +76,18 @@ const SettingsPage: React.FC = () => {
     };
 
     const handlePasswordReset = () => {
-        showToast('Email de redefinição de senha enviado!', 'success');
+        showToast(t('passwordResetSent'), 'success');
     };
 
     const handleDeleteAccount = () => {
-        if (confirm('Tem certeza que deseja excluir sua conta? Esta ação não pode ser desfeita.')) {
-            showToast('Funcionalidade indisponível no momento.', 'error');
+        if (confirm(t('deleteAccountConfirm'))) {
+            showToast(t('featureUnavailable'), 'error');
         }
     };
 
     return (
         <>
-            <PageTitle title="Configurações - TreinaVagaAI" />
+            <PageTitle title={t('pageTitle')} />
 
             <div className="max-w-3xl mx-auto space-y-8">
 
@@ -94,10 +96,10 @@ const SettingsPage: React.FC = () => {
                     <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-800">
                         <h2 className="text-base font-semibold text-slate-900 dark:text-white flex items-center gap-2">
                             <SunIcon className="w-5 h-5 text-amber-500" />
-                            Aparência
+                            {t('appearance')}
                         </h2>
                         <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
-                            Personalize como o TreinaVagaAI aparece para você.
+                            {t('appearanceDesc')}
                         </p>
                     </div>
                     <div className="p-6">
@@ -105,7 +107,7 @@ const SettingsPage: React.FC = () => {
                             {[
                                 {
                                     id: 'light',
-                                    label: 'Claro',
+                                    label: t('themeLight'),
                                     icon: SunIcon,
                                     activeBorder: 'border-primary-500',
                                     activeRing: 'ring-primary-500/20',
@@ -120,7 +122,7 @@ const SettingsPage: React.FC = () => {
                                 },
                                 {
                                     id: 'dark',
-                                    label: 'Escuro',
+                                    label: t('themeDark'),
                                     icon: MoonIcon,
                                     activeBorder: 'border-primary-500',
                                     activeRing: 'ring-primary-500/20',
@@ -135,7 +137,7 @@ const SettingsPage: React.FC = () => {
                                 },
                                 {
                                     id: 'dark-orange',
-                                    label: 'Laranja Dark',
+                                    label: t('themeDarkOrange'),
                                     icon: FireIcon,
                                     activeBorder: 'border-orange-500',
                                     activeRing: 'ring-orange-500/20',
@@ -152,7 +154,7 @@ const SettingsPage: React.FC = () => {
                                 },
                                 {
                                     id: 'light-orange',
-                                    label: 'Laranja Light',
+                                    label: t('themeLightOrange'),
                                     icon: SunIcon,
                                     activeBorder: 'border-orange-500',
                                     activeRing: 'ring-orange-500/20',
@@ -169,7 +171,7 @@ const SettingsPage: React.FC = () => {
                                 },
                                 {
                                     id: 'system',
-                                    label: 'Sistema',
+                                    label: t('themeSystem'),
                                     icon: ComputerDesktopIcon,
                                     activeBorder: 'border-slate-500',
                                     activeRing: 'ring-slate-500/20',
@@ -234,17 +236,17 @@ const SettingsPage: React.FC = () => {
                     <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-800">
                         <h2 className="text-base font-semibold text-slate-900 dark:text-white flex items-center gap-2">
                             <BellIcon className="w-5 h-5 text-blue-500" />
-                            Notificações
+                            {t('notifications')}
                         </h2>
                         <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
-                            Gerencie como entramos em contato com você.
+                            {t('notificationsDesc')}
                         </p>
                     </div>
                     <div className="p-6 space-y-4">
                         <div className="flex items-center justify-between">
                             <div>
-                                <label className="text-sm font-medium text-slate-900 dark:text-white">Alertas de e-mail</label>
-                                <p className="text-xs text-slate-500 dark:text-slate-400">Receba notificações sobre seus quizzes e resultados.</p>
+                                <label className="text-sm font-medium text-slate-900 dark:text-white">{t('emailAlerts')}</label>
+                                <p className="text-xs text-slate-500 dark:text-slate-400">{t('emailAlertsDesc')}</p>
                             </div>
                             <label className="relative inline-flex items-center cursor-pointer">
                                 <input type="checkbox" checked={emailNotifications} onChange={(e) => setEmailNotifications(e.target.checked)} className="sr-only peer" />
@@ -253,8 +255,8 @@ const SettingsPage: React.FC = () => {
                         </div>
                         <div className="flex items-center justify-between pt-4 border-t border-slate-100 dark:border-slate-800">
                             <div>
-                                <label className="text-sm font-medium text-slate-900 dark:text-white">Emails de Marketing</label>
-                                <p className="text-xs text-slate-500 dark:text-slate-400">Receba novidades, ofertas e dicas sobre a plataforma.</p>
+                                <label className="text-sm font-medium text-slate-900 dark:text-white">{t('marketingEmails')}</label>
+                                <p className="text-xs text-slate-500 dark:text-slate-400">{t('marketingEmailsDesc')}</p>
                             </div>
                             <label className="relative inline-flex items-center cursor-pointer">
                                 <input type="checkbox" checked={marketingEmails} onChange={(e) => setMarketingEmails(e.target.checked)} className="sr-only peer" />
@@ -265,8 +267,8 @@ const SettingsPage: React.FC = () => {
 
                         <div className="flex items-center justify-between pt-4 border-t border-slate-100 dark:border-slate-800">
                             <div>
-                                <label className="text-sm font-medium text-slate-900 dark:text-white">Alertas de Segurança</label>
-                                <p className="text-xs text-slate-500 dark:text-slate-400">Seja notificado sobre acessos importantes em sua conta.</p>
+                                <label className="text-sm font-medium text-slate-900 dark:text-white">{t('securityAlerts')}</label>
+                                <p className="text-xs text-slate-500 dark:text-slate-400">{t('securityAlertsDesc')}</p>
                             </div>
                             <label className="relative inline-flex items-center cursor-pointer">
                                 <input type="checkbox" checked={securityAlerts} onChange={(e) => setSecurityAlerts(e.target.checked)} className="sr-only peer" />
@@ -281,10 +283,10 @@ const SettingsPage: React.FC = () => {
                     <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-800">
                         <h2 className="text-base font-semibold text-slate-900 dark:text-white flex items-center gap-2">
                             <EyeIcon className="w-5 h-5 text-green-500" />
-                            Privacidade do Perfil
+                            {t('profilePrivacy')}
                         </h2>
                         <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
-                            Controle quem pode ver seu perfil e informações.
+                            {t('profilePrivacyDesc')}
                         </p>
                     </div>
                     <div className="p-6">
@@ -296,12 +298,12 @@ const SettingsPage: React.FC = () => {
                                     ) : (
                                         <EyeSlashIcon className="w-4 h-4 text-red-500" />
                                     )}
-                                    Perfil Público
+                                    {t('publicProfile')}
                                 </label>
                                 <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
                                     {isProfilePublic
-                                        ? 'Seu perfil pode ser encontrado e visualizado por outros usuários.'
-                                        : 'Seu perfil está privado e não pode ser encontrado por outros usuários.'
+                                        ? t('profilePublicDesc')
+                                        : t('profilePrivateDesc')
                                     }
                                 </p>
                             </div>
@@ -320,7 +322,7 @@ const SettingsPage: React.FC = () => {
                         {!isProfilePublic && (
                             <div className="mt-4 p-3 bg-yellow-50 dark:bg-yellow-900/10 border border-yellow-200 dark:border-yellow-800 rounded-lg">
                                 <p className="text-sm text-yellow-800 dark:text-yellow-300">
-                                    ⚠️ Com o perfil privado, você não aparecerá nas buscas e outros usuários não poderão seguir você ou ver suas estatísticas.
+                                    {t('privateProfileWarning')}
                                 </p>
                             </div>
                         )}
@@ -332,17 +334,17 @@ const SettingsPage: React.FC = () => {
                     <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-800">
                         <h2 className="text-base font-semibold text-slate-900 dark:text-white flex items-center gap-2">
                             <ClockIcon className="w-5 h-5 text-purple-500" />
-                            Preferências de Quiz
+                            {t('quizPreferences')}
                         </h2>
                         <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
-                            Personalize sua experiência durante a resolução de questões.
+                            {t('quizPreferencesDesc')}
                         </p>
                     </div>
                     <div className="p-6">
                         <div className="flex items-center justify-between">
                             <div>
-                                <label className="text-sm font-medium text-slate-900 dark:text-white">Cronômetro em tempo real</label>
-                                <p className="text-xs text-slate-500 dark:text-slate-400">Exibir o tempo decorrido no canto da tela durante o quiz.</p>
+                                <label className="text-sm font-medium text-slate-900 dark:text-white">{t('realtimeTimer')}</label>
+                                <p className="text-xs text-slate-500 dark:text-slate-400">{t('realtimeTimerDesc')}</p>
                             </div>
                             <label className="relative inline-flex items-center cursor-pointer">
                                 <input
@@ -362,38 +364,38 @@ const SettingsPage: React.FC = () => {
                     <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-800">
                         <h2 className="text-base font-semibold text-slate-900 dark:text-white flex items-center gap-2">
                             <ShieldCheckIcon className="w-5 h-5 text-emerald-500" />
-                            Segurança & Conta
+                            {t('securityAccount')}
                         </h2>
                         <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
-                            Gerencie sua senha e acesso à conta.
+                            {t('securityAccountDesc')}
                         </p>
                     </div>
                     <div className="p-6">
                         <div className="flex items-center justify-between">
                             <div>
-                                <p className="text-sm font-medium text-slate-900 dark:text-white">Email cadastrado</p>
+                                <p className="text-sm font-medium text-slate-900 dark:text-white">{t('registeredEmail')}</p>
                                 <p className="text-sm text-slate-500 dark:text-slate-400">{user?.email}</p>
                             </div>
                             <button
                                 disabled
                                 onClick={handlePasswordReset}
-                                title="Funcionalidade indisponível no momento"
+                                title={t('featureUnavailable')}
                                 className="text-sm font-medium text-slate-400 dark:text-slate-600 cursor-not-allowed"
                             >
-                                Redefinir senha
+                                {t('resetPassword')}
                             </button>
                         </div>
 
                         <div className="mt-8 pt-6 border-t border-slate-100 dark:border-slate-800">
-                            <h3 className="text-sm font-medium text-red-600 dark:text-red-400 mb-4">Zona de Perigo</h3>
+                            <h3 className="text-sm font-medium text-red-600 dark:text-red-400 mb-4">{t('dangerZone')}</h3>
                             <button
                                 disabled
                                 onClick={handleDeleteAccount}
-                                title="Funcionalidade indisponível no momento"
+                                title={t('featureUnavailable')}
                                 className="flex items-center gap-2 px-4 py-2 text-sm text-slate-400 dark:text-slate-600 border border-slate-200 dark:border-slate-800 rounded-lg cursor-not-allowed"
                             >
                                 <TrashIcon className="w-4 h-4" />
-                                Excluir Conta
+                                {t('deleteAccount')}
                             </button>
                         </div>
                     </div>

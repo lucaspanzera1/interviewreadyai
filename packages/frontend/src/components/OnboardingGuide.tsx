@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
     XMarkIcon,
     ChevronRightIcon,
@@ -17,52 +18,52 @@ interface OnboardingGuideProps {
     onClose: () => void;
 }
 
-const steps = [
+const stepConfigs = [
     {
-        title: "Bem-vindo ao TreinaVaga",
-        description: "Sua plataforma definitiva para preparação técnica e evolução de carreira. Vamos fazer um tour rápido?",
+        titleKey: "guide.welcome.title",
+        descriptionKey: "guide.welcome.description",
         icon: SparklesIcon,
         color: "from-primary-500 to-indigo-600",
         image: "welcome"
     },
     {
-        title: "Simulados Inteligentes",
-        description: "Pratique com quizzes gerados por IA personalizados para sua senioridade ou explore nossa biblioteca comunitária.",
+        titleKey: "guide.quizzes.title",
+        descriptionKey: "guide.quizzes.description",
         icon: BoltIcon,
         color: "from-amber-400 to-orange-500",
         image: "quizzes"
     },
     {
-        title: "Flashcards Dinâmicos",
-        description: "Aprenda com flashcards interativos gerados por IA. Revise conceitos importantes e fixe conhecimentos de forma eficiente.",
+        titleKey: "guide.flashcards.title",
+        descriptionKey: "guide.flashcards.description",
         icon: AcademicCapIcon,
         color: "from-cyan-400 to-blue-500",
         image: "flashcards"
     },
     {
-        title: "Simulações de Entrevista",
-        description: "Pratique entrevistas técnicas com IA. Receba feedback detalhado sobre suas respostas e melhore sua performance.",
+        titleKey: "guide.interviews.title",
+        descriptionKey: "guide.interviews.description",
         icon: VideoCameraIcon,
         color: "from-rose-400 to-red-500",
         image: "interviews"
     },
     {
-        title: "Sistema de Tokens",
-        description: "Ganhe tokens completando desafios e mantendo sua ofensiva. Compre mais tokens ou use-os para gerar simulados avançados e mentorias.",
+        titleKey: "guide.tokens.title",
+        descriptionKey: "guide.tokens.description",
         icon: CurrencyDollarIcon,
         color: "from-emerald-400 to-teal-500",
         image: "tokens"
     },
     {
-        title: "Comunidade TreinaVaga",
-        description: "Conecte-se com outros usuários, veja o progresso da comunidade e compartilhe conquistas. Aprenda colaborativamente!",
+        titleKey: "guide.community.title",
+        descriptionKey: "guide.community.description",
         icon: UserGroupIcon,
         color: "from-violet-400 to-purple-500",
         image: "community"
     },
     {
-        title: "Métricas e Evolução",
-        description: "Acompanhe seu progresso detalhado. Identifique pontos fracos e compare seu desempenho no ranking global.",
+        titleKey: "guide.metrics.title",
+        descriptionKey: "guide.metrics.description",
         icon: ChartBarIcon,
         color: "from-purple-500 to-pink-500",
         image: "metrics"
@@ -71,11 +72,12 @@ const steps = [
 
 const OnboardingGuide: React.FC<OnboardingGuideProps> = ({ isOpen, onClose }) => {
     const [currentStep, setCurrentStep] = useState(0);
+    const { t } = useTranslation('onboarding');
 
     if (!isOpen) return null;
 
     const handleNext = () => {
-        if (currentStep < steps.length - 1) {
+        if (currentStep < stepConfigs.length - 1) {
             setCurrentStep(prev => prev + 1);
         } else {
             onClose();
@@ -89,7 +91,7 @@ const OnboardingGuide: React.FC<OnboardingGuideProps> = ({ isOpen, onClose }) =>
         }
     };
 
-    const stepData = steps[currentStep];
+    const stepData = stepConfigs[currentStep];
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
@@ -130,16 +132,16 @@ const OnboardingGuide: React.FC<OnboardingGuideProps> = ({ isOpen, onClose }) =>
                 <div className="p-8 pb-6">
                     <div className="min-h-[120px] text-center">
                         <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-3 transition-all">
-                            {stepData.title}
+                            {t(stepData.titleKey)}
                         </h3>
                         <p className="text-slate-600 dark:text-slate-300 leading-relaxed">
-                            {stepData.description}
+                            {t(stepData.descriptionKey)}
                         </p>
                     </div>
 
                     {/* Dots Indicator */}
                     <div className="flex justify-center space-x-2 my-6">
-                        {steps.map((_, idx) => (
+                        {stepConfigs.map((_, idx) => (
                             <div
                                 key={idx}
                                 className={`h-2 rounded-full transition-all duration-300 ${idx === currentStep
@@ -161,15 +163,15 @@ const OnboardingGuide: React.FC<OnboardingGuideProps> = ({ isOpen, onClose }) =>
                                 }`}
                         >
                             <ChevronLeftIcon className="w-4 h-4" />
-                            Anterior
+                            {t('guide.previous')}
                         </button>
 
                         <button
                             onClick={handleNext}
                             className="flex items-center gap-2 px-6 py-2.5 bg-primary-600 hover:bg-primary-700 text-white text-sm font-bold rounded-xl shadow-lg shadow-primary-600/20 hover:shadow-primary-600/40 transform active:scale-95 transition-all"
                         >
-                            {currentStep === steps.length - 1 ? 'Concluir' : 'Próximo'}
-                            {currentStep !== steps.length - 1 && <ChevronRightIcon className="w-4 h-4" />}
+                            {currentStep === stepConfigs.length - 1 ? t('guide.finish') : t('guide.next')}
+                            {currentStep !== stepConfigs.length - 1 && <ChevronRightIcon className="w-4 h-4" />}
                         </button>
                     </div>
                 </div>

@@ -2,6 +2,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import PageTitle from './PageTitle';
 import { useAuth } from '../contexts/AuthContext';
+import { useTranslation } from 'react-i18next';
 import Loading from './Loading';
 import {
     CheckCircleIcon,
@@ -16,6 +17,7 @@ const OrderConfirmationPage: React.FC = () => {
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
     const { user, refreshUser } = useAuth();
+    const { t, i18n } = useTranslation('tokens');
     const [isRefreshing, setIsRefreshing] = useState(true);
     const [isPolling, setIsPolling] = useState(false);
     const [hasDetectedChange, setHasDetectedChange] = useState(false);
@@ -145,8 +147,8 @@ const OrderConfirmationPage: React.FC = () => {
                 iconColor: 'text-green-500',
                 bgColor: 'bg-green-50 dark:bg-green-900/20',
                 borderColor: 'border-green-200 dark:border-green-800',
-                title: 'Pagamento Confirmado! 🎉',
-                description: 'Seu plano foi ativado com sucesso. Aproveite todos os benefícios!',
+                title: t('payment.confirmed.title'),
+                description: t('payment.confirmed.description'),
             };
         }
 
@@ -159,8 +161,8 @@ const OrderConfirmationPage: React.FC = () => {
                     iconColor: 'text-red-500',
                     bgColor: 'bg-red-50 dark:bg-red-900/20',
                     borderColor: 'border-red-200 dark:border-red-800',
-                    title: 'Pagamento Não Concluído',
-                    description: 'O pagamento não foi concluído. Você pode tentar novamente quando quiser.',
+                    title: t('payment.notCompleted.title'),
+                    description: t('payment.notCompleted.description'),
                 };
             default:
                 // Padrão: Azul (aguardando confirmação)
@@ -169,8 +171,8 @@ const OrderConfirmationPage: React.FC = () => {
                     iconColor: 'text-blue-500',
                     bgColor: 'bg-blue-50 dark:bg-blue-900/20',
                     borderColor: 'border-blue-200 dark:border-blue-800',
-                    title: 'Aguardando Confirmação',
-                    description: 'Estamos processando seu pagamento. Aguarde alguns instantes...',
+                    title: t('payment.pending.title'),
+                    description: t('payment.pending.description'),
                 };
         }
     };
@@ -184,7 +186,7 @@ const OrderConfirmationPage: React.FC = () => {
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 py-12 px-4">
-            <PageTitle title="Confirmação do Pedido - TreinaVagaAI" />
+            <PageTitle title={t('payment.pageTitle')} />
 
             <div className="max-w-2xl mx-auto">
                 {/* Status Card */}
@@ -229,7 +231,7 @@ const OrderConfirmationPage: React.FC = () => {
                     {billingId && (
                         <div className="mt-6 pt-6 border-t border-slate-200 dark:border-slate-700">
                             <p className="text-sm text-slate-500 dark:text-slate-400">
-                                ID do Pedido: <span className="font-mono font-bold">{billingId}</span>
+                            {t('payment.confirmed.orderId')} <span className="font-mono font-bold">{billingId}</span>
                             </p>
                         </div>
                     )}
@@ -252,10 +254,10 @@ const OrderConfirmationPage: React.FC = () => {
                         </div>
                         <div className="flex-1">
                             <p className="text-sm font-bold text-blue-900 dark:text-blue-100">
-                                Verificando atualizações...
+                                {t('payment.pending.checkingUpdates')}
                             </p>
                             <p className="text-xs text-blue-700 dark:text-blue-300 mt-1">
-                                Aguardando confirmação do pagamento. Isso pode levar alguns segundos.
+                                {t('payment.pending.waitingConfirmation')}
                             </p>
                         </div>
                     </div>
@@ -269,10 +271,10 @@ const OrderConfirmationPage: React.FC = () => {
                         </div>
                         <div className="flex-1">
                             <p className="text-sm font-bold text-green-900 dark:text-green-100">
-                                Atualização detectada! ✨
+                                {t('payment.pending.updateDetected')}
                             </p>
                             <p className="text-xs text-green-700 dark:text-green-300 mt-1">
-                                Seus dados foram atualizados com sucesso.
+                                {t('payment.pending.dataUpdated')}
                             </p>
                         </div>
                     </div>
@@ -282,7 +284,7 @@ const OrderConfirmationPage: React.FC = () => {
                 {user && (
                     <div className="bg-white dark:bg-slate-900 rounded-3xl border-2 border-slate-200 dark:border-slate-800 p-8 mb-8">
                         <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-6">
-                            Resumo da Conta
+                            {t('payment.confirmed.accountSummary')}
                         </h2>
 
                         <div className="space-y-4">
@@ -294,7 +296,7 @@ const OrderConfirmationPage: React.FC = () => {
                                     </div>
                                     <div>
                                         <p className="text-sm font-medium text-slate-600 dark:text-slate-400">
-                                            Saldo de Créditos
+                                            {t('payment.confirmed.creditBalance')}
                                         </p>
                                         <p className="text-2xl font-bold text-slate-900 dark:text-white">
                                             {user.tokens || 0}
@@ -308,7 +310,7 @@ const OrderConfirmationPage: React.FC = () => {
                                 <div className="flex items-center justify-between p-4 bg-primary-50 dark:bg-primary-900/20 rounded-2xl border border-primary-200 dark:border-primary-800">
                                     <div>
                                         <p className="text-sm font-medium text-slate-600 dark:text-slate-400">
-                                            Plano Ativo
+                                            {t('payment.confirmed.activePlan')}
                                         </p>
                                         <p className="text-lg font-bold text-slate-900 dark:text-white capitalize">
                                             {user.role}
@@ -316,10 +318,10 @@ const OrderConfirmationPage: React.FC = () => {
                                     </div>
                                     <div className="text-right">
                                         <p className="text-xs text-slate-500 dark:text-slate-400">
-                                            Válido até
+                                            {t('payment.confirmed.validUntil')}
                                         </p>
                                         <p className="text-sm font-bold text-slate-900 dark:text-white">
-                                            {new Date(user.roleExpiresAt).toLocaleDateString('pt-BR')}
+                                            {new Date(user.roleExpiresAt).toLocaleDateString(i18n.language)}
                                         </p>
                                     </div>
                                 </div>
@@ -334,7 +336,7 @@ const OrderConfirmationPage: React.FC = () => {
                         onClick={() => navigate('/free-quizzes')}
                         className="w-full py-4 px-6 bg-primary-500 text-white font-bold rounded-2xl hover:bg-primary-600 transition-all flex items-center justify-center gap-3 shadow-lg shadow-primary-500/20"
                     >
-                        Começar a Praticar
+                        {t('payment.confirmed.startPracticing')}
                         <ArrowRightIcon className="w-5 h-5" />
                     </button>
 
@@ -342,21 +344,21 @@ const OrderConfirmationPage: React.FC = () => {
                         onClick={() => navigate('/tokens')}
                         className="w-full py-4 px-6 bg-white dark:bg-slate-900 text-slate-900 dark:text-white font-bold rounded-2xl border-2 border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all"
                     >
-                        Ver Planos e Créditos
+                        {t('payment.confirmed.viewPlans')}
                     </button>
 
                     <button
                         onClick={() => navigate('/profile')}
                         className="w-full py-4 px-6 bg-transparent text-slate-600 dark:text-slate-400 font-medium rounded-2xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-all"
                     >
-                        Ir para Perfil
+                        {t('payment.confirmed.goToProfile')}
                     </button>
                 </div>
 
                 {/* Help Text */}
                 <div className="mt-8 text-center">
                     <p className="text-sm text-slate-500 dark:text-slate-400">
-                        Precisa de ajuda? Entre em contato com nosso suporte.
+                        {t('payment.confirmed.needHelp')}
                     </p>
                 </div>
             </div>

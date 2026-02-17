@@ -11,11 +11,14 @@ import {
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
+import LanguageSwitcher from './LanguageSwitcher';
 
 const Header: React.FC = () => {
   const { user, logout } = useAuth();
   const { toggleTheme, resolvedTheme } = useTheme();
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const handleLogout = async () => {
     try {
@@ -120,7 +123,7 @@ const Header: React.FC = () => {
                             } flex items-center w-full px-4 py-2.5 text-sm rounded-xl transition-colors`}
                         >
                           <UserCircleIcon className={`h-4 w-4 mr-3 ${active ? 'text-primary-500' : 'text-slate-400'}`} />
-                          Meu Perfil
+                          {t('user.myProfile')}
                         </button>
                       )}
                     </Menu.Item>
@@ -131,10 +134,13 @@ const Header: React.FC = () => {
                             } flex items-center w-full px-4 py-2.5 text-sm rounded-xl transition-colors`}
                         >
                           <Cog6ToothIcon className={`h-4 w-4 mr-3 ${active ? 'text-primary-500' : 'text-slate-400'}`} />
-                          Configurações
+                          {t('user.settings')}
                         </button>
                       )}
                     </Menu.Item>
+                  </div>
+                  <div className="p-1">
+                    <LanguageSwitcher variant="dropdown" />
                   </div>
                   <div className="p-1">
                     <Menu.Item>
@@ -145,7 +151,7 @@ const Header: React.FC = () => {
                             } flex items-center w-full px-4 py-2.5 text-sm rounded-xl transition-colors`}
                         >
                           <ArrowRightOnRectangleIcon className="h-4 w-4 mr-3" />
-                          Sair
+                          {t('user.logout')}
                         </button>
                       )}
                     </Menu.Item>

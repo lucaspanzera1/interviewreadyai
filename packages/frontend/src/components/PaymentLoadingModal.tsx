@@ -1,11 +1,13 @@
 import React from 'react';
 import { CreditCardIcon } from '@heroicons/react/24/outline';
+import { useTranslation } from 'react-i18next';
 
 interface PaymentLoadingModalProps {
     isOpen: boolean;
 }
 
 const PaymentLoadingModal: React.FC<PaymentLoadingModalProps> = ({ isOpen }) => {
+    const { t } = useTranslation('tokens');
     if (!isOpen) return null;
 
     return (
@@ -28,10 +30,10 @@ const PaymentLoadingModal: React.FC<PaymentLoadingModalProps> = ({ isOpen }) => 
                 {/* Text Content */}
                 <div className="text-center space-y-3">
                     <h2 className="text-2xl font-bold text-slate-900 dark:text-white">
-                        Direcionando para pagamento
+                        {t('payment.loadingModal.title')}
                     </h2>
                     <p className="text-slate-600 dark:text-slate-400">
-                        Aguarde enquanto preparamos sua página de checkout segura...
+                        {t('payment.loadingModal.description')}
                     </p>
                 </div>
 
@@ -48,7 +50,7 @@ const PaymentLoadingModal: React.FC<PaymentLoadingModalProps> = ({ isOpen }) => 
                         <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                             <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
                         </svg>
-                        <span>Pagamento 100% seguro</span>
+                        <span>{t('payment.loadingModal.secure')}</span>
                     </div>
                 </div>
             </div>

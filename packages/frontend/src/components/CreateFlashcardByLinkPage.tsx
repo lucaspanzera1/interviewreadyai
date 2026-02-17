@@ -6,6 +6,7 @@ import { apiClient } from '../lib/api';
 import { FlashcardLevel } from '../lib/api';
 import { useAuth } from '../contexts/AuthContext';
 import { useToast } from '../contexts/ToastContext';
+import { useTranslation } from 'react-i18next';
 
 const CreateFlashcardByLinkPage: React.FC = () => {
     const [jobLink, setJobLink] = useState('');
@@ -16,6 +17,7 @@ const CreateFlashcardByLinkPage: React.FC = () => {
     const navigate = useNavigate();
     const { user, refreshUser } = useAuth();
     const { showToast } = useToast();
+    const { t } = useTranslation('flashcard');
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -28,12 +30,12 @@ const CreateFlashcardByLinkPage: React.FC = () => {
             const isValidUrl = supportedSites.some(site => jobLink.includes(site));
 
             if (!isValidUrl) {
-                throw new Error('Por favor, insira um link válido de vaga de um dos sites suportados: LinkedIn, Gupy, Infojobs, Glassdoor ou Indeed');
+                throw new Error(t('create.invalidLink'));
             }
 
             // Verificar se o usuário tem tokens
             if (!user?.tokens || user.tokens < 2) {
-                throw new Error('Você não tem tokens suficientes. Você precisa de pelo menos 2 tokens para gerar flashcards.');
+                throw new Error(t('create.notEnoughTokens'));
             }
 
             // Gerar os flashcards
@@ -47,7 +49,7 @@ const CreateFlashcardByLinkPage: React.FC = () => {
             await refreshUser();
 
             // Mostrar mensagem de sucesso
-            showToast('Flashcards gerados com sucesso! 2 tokens foram deduzidos.', 'success');
+            showToast(t('create.successGenerated'), 'success');
 
             // Redirecionar para página de Meus Flashcards
             setTimeout(() => {
@@ -55,7 +57,7 @@ const CreateFlashcardByLinkPage: React.FC = () => {
             }, 500);
         } catch (err: any) {
             console.error('Error generating flashcards:', err);
-            const errorMessage = err.response?.data?.message || err.message || 'Erro ao gerar flashcards. Tente novamente.';
+            const errorMessage = err.response?.data?.message || err.message || t('create.errorGenerating');
             setError(errorMessage);
         } finally {
             setIsLoading(false);
@@ -67,16 +69,16 @@ const CreateFlashcardByLinkPage: React.FC = () => {
 
     return (
         <div className="flex flex-col min-h-full transition-colors duration-300">
-            <PageTitle title="Criar Flashcards com IA - TreinaVagaAI" />
+            <PageTitle title={t('create.pageTitle')} />
 
             {/* Header */}
             <header className="sticky top-0 z-20 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 -mx-4 -mt-4 lg:-mx-8 lg:-mt-8 px-4 lg:px-8 py-4 mb-8">
                 <div className="max-w-4xl mx-auto">
                     <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 dark:text-white">
-                        Criar Flashcards com IA
+                        {t('create.title')}
                     </h1>
                     <p className="mt-1 text-sm sm:text-base text-slate-600 dark:text-slate-400">
-                        Transforme qualquer vaga de emprego em flashcards de estudo personalizados no estilo Anki.
+                        {t('create.subtitle')}
                     </p>
                 </div>
             </header>
@@ -101,10 +103,10 @@ const CreateFlashcardByLinkPage: React.FC = () => {
                                     </div>
                                     <div className="flex-1">
                                         <h3 className="text-lg font-bold text-primary-800 dark:text-primary-200">
-                                            Link Detectado
+                                            {t('create.linkDetected')}
                                         </h3>
                                         <p className="text-primary-700 dark:text-primary-300 mt-1">
-                                            Você tem <span className="font-bold">{user?.tokens || 0} tokens</span> disponíveis. Cada conjunto de flashcards personalizado custa 2 tokens.
+                                            {t('create.tokensInfo', { count: user?.tokens || 0 })}
                                         </p>
                                     </div>
                                 </div>
@@ -112,7 +114,7 @@ const CreateFlashcardByLinkPage: React.FC = () => {
                                 {/* Platform Selection (Fixed to LinkedIn for now) */}
                                 <div className="space-y-3">
                                     <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 block">
-                                        Plataforma
+                                        {t('create.platform')}
                                     </label>
                                     <div className="flex items-center gap-4 p-4 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-700">
                                         <div className="flex items-center gap-3 flex-1">
@@ -122,7 +124,7 @@ const CreateFlashcardByLinkPage: React.FC = () => {
                                             <div>
                                                 <h3 className="font-medium text-slate-900 dark:text-white">LinkedIn</h3>
                                                 <p className="text-sm text-slate-600 dark:text-slate-400">
-                                                    Cole o link de uma vaga do LinkedIn
+                                                    {t('create.jobLinkPlaceholder')}
                                                 </p>
                                             </div>
                                         </div>
@@ -135,7 +137,7 @@ const CreateFlashcardByLinkPage: React.FC = () => {
                                 {/* Job Link Input */}
                                 <div className="space-y-3">
                                     <label htmlFor="jobLink" className="text-sm font-semibold text-slate-700 dark:text-slate-300 block">
-                                        Link da Vaga
+                                        {t('create.jobLinkLabel')}
                                     </label>
                                     <div className="relative">
                                         <input
@@ -162,13 +164,13 @@ const CreateFlashcardByLinkPage: React.FC = () => {
                                 {/* Level Selection */}
                                 <div className="space-y-3">
                                     <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 block">
-                                        Nível de Dificuldade
+                                        {t('create.difficultyLabel')}
                                     </label>
                                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                                         {[
-                                            { value: FlashcardLevel.FACIL, label: 'Fácil', desc: 'Conceitos básicos e definições' },
-                                            { value: FlashcardLevel.MEDIO, label: 'Médio', desc: 'Aplicações práticas e cenários' },
-                                            { value: FlashcardLevel.DIFICIL, label: 'Difícil', desc: 'Cenários avançados e otimizações' }
+                                            { value: FlashcardLevel.FACIL, label: t('create.easy'), desc: t('create.easyDesc') },
+                                            { value: FlashcardLevel.MEDIO, label: t('create.medium'), desc: t('create.mediumDesc') },
+                                            { value: FlashcardLevel.DIFICIL, label: t('create.hard'), desc: t('create.hardDesc') }
                                         ].map((level) => (
                                             <label
                                                 key={level.value}
@@ -206,7 +208,7 @@ const CreateFlashcardByLinkPage: React.FC = () => {
                                 {/* Card Count */}
                                 <div className="space-y-3">
                                     <label htmlFor="cardCount" className="text-sm font-semibold text-slate-700 dark:text-slate-300 block">
-                                        Quantidade de Flashcards
+                                        {t('create.cardCount')}
                                     </label>
                                     <div className="flex items-center gap-4">
                                         <input
@@ -223,7 +225,7 @@ const CreateFlashcardByLinkPage: React.FC = () => {
                                         </div>
                                     </div>
                                     <p className="text-sm text-slate-600 dark:text-slate-400">
-                                        Recomendamos entre 10-20 flashcards para um bom equilíbrio entre abrangência e tempo de estudo.
+                                        {t('create.cardCountRecommendation')}
                                     </p>
                                 </div>
 
@@ -244,12 +246,12 @@ const CreateFlashcardByLinkPage: React.FC = () => {
                                         {isLoading ? (
                                             <>
                                                 <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                                                Gerando Flashcards...
+                                                {t('create.generating')}
                                             </>
                                         ) : (
                                             <>
                                                 <SparklesIcon className="w-5 h-5" />
-                                                Gerar Flashcards (2 tokens)
+                                                {t('create.generateButton')}
                                             </>
                                         )}
                                     </button>

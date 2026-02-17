@@ -1,0 +1,88 @@
+{
+  "pageTitle": "Home - TreinaVagaAI",
+  "greeting": "Hello,",
+  "guestLabel": "Guest",
+  "guestSubtitle": "Try a little of what we offer.",
+  "userSubtitle": "Let's boost your career today?",
+  "loginButton": "Log in",
+  "tokens": "Tokens",
+  "stats": {
+    "questionsCompleted": "Questions Done",
+    "hitRate": "Hit Rate",
+    "streak": "Streak",
+    "streakDays": "{{count}} days",
+    "level": "Level",
+    "levelSenior": "Senior",
+    "activities": "Activities",
+    "freeQuizzes": "Free Quizzes",
+    "flashcardSessions": "Flashcard Sessions"
+  },
+  "quickActions": {
+    "title": "Quick Actions",
+    "guestTitle": "Get Started",
+    "createFreeAccount": "Create Free Account",
+    "createFreeAccountDesc": "Start now and save your progress",
+    "freeQuiz": "Free Quiz",
+    "freeQuizDesc": "Test your knowledge",
+    "premiumPlans": "See Premium Plans",
+    "premiumPlansDesc": "Unlock the full potential",
+    "newQuiz": "New Quiz",
+    "newQuizDesc": "Generate a personalized quiz",
+    "interviewSim": "Interview Simulation",
+    "interviewSimDesc": "Practice for interviews",
+    "continue": "Continue",
+    "continueDesc": "Resume last quiz",
+    "evolution": "Progress",
+    "evolutionDesc": "Track your progress",
+    "ranking": "Ranking",
+    "rankingDesc": "Coming soon"
+  },
+  "tip": {
+    "guestLabel": "Career Tip",
+    "userLabel": "Pro Tip",
+    "guestText": "Recruiters spend an average of 6 seconds per resume. Your quiz results generate a verifiable portfolio that catches attention.",
+    "userText": "Review your mistakes from previous quizzes. Users who review mistakes are 40% more likely to pass."
+  },
+  "suggested": {
+    "guestTitle": "Try It (Free)",
+    "userTitle": "Recommended for You",
+    "viewAll": "View all",
+    "loadingSuggestions": "Loading suggestions..."
+  },
+  "recentActivities": "Recent Activities",
+  "fullHistory": "Full history",
+  "questions": "questions",
+  "guestHero": {
+    "badge": "For all careers",
+    "titleWhite": "Land your job in ",
+    "titleGradient": "any field",
+    "description": "Tech, Healthcare, Sales, Law, Engineering... TreinaVaga uses AI to create personalized quizzes for your reality, whatever it may be.",
+    "startNow": "Get Started",
+    "watchDemo": "Watch Demo",
+    "joinProfessionals": "Join professionals from all fields"
+  },
+  "guestFeatures": {
+    "title": "What you'll find here",
+    "aiQuizzes": "AI-Powered Quizzes",
+    "aiQuizzesDesc": "Generate personalized quizzes based on job descriptions in seconds. Prepare for what really matters.",
+    "interviewSim": "Interview Simulation",
+    "interviewSimDesc": "Practice with an AI that simulates real recruiters. Get instant feedback on your answers.",
+    "flashcardsSRS": "SRS Flashcards",
+    "flashcardsSRSDesc": "Long-term memorization with spaced repetition. Never forget important concepts again."
+  },
+  "lockedPanel": {
+    "title": "Progress Dashboard",
+    "description": "Access detailed charts, error history, and receive insights to accelerate your success.",
+    "createFreeAccount": "Create Free Account"
+  },
+  "guestCard": {
+    "preparedCandidate": "Prepared Candidate",
+    "readyForChallenge": "Ready for the challenge",
+    "ready100": "100% Ready",
+    "startQuiz": "Start Quiz",
+    "approved": "Approved!"
+  },
+  "help": "Help",
+  "quizUnavailable": "Quiz unavailable at the moment",
+  "errorStartingQuiz": "Error starting quiz"
+}

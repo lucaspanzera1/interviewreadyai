@@ -5,8 +5,10 @@ import { socialApi, UserConnections, PublicUser } from '../lib/socialApi';
 import { useAuth } from '../contexts/AuthContext';
 import { toast } from 'react-toastify';
 import Loading from './Loading';
+import { useTranslation } from 'react-i18next';
 
 const SocialConnectionsComponent: React.FC = () => {
+  const { t } = useTranslation('social');
   const { user } = useAuth();
   const navigate = useNavigate();
 
@@ -27,7 +29,7 @@ const SocialConnectionsComponent: React.FC = () => {
       setConnections(connectionsData);
     } catch (error) {
       console.error('Erro ao carregar conexões:', error);
-      toast.error('Erro ao carregar conexões');
+      toast.error(t('connections.errorLoadingConnections'));
     } finally {
       setLoading(false);
     }
@@ -36,7 +38,7 @@ const SocialConnectionsComponent: React.FC = () => {
   const handleUnfollow = async (userId: string) => {
     try {
       await socialApi.unfollowUser(userId);
-      toast.success('Parou de seguir usuário');
+      toast.success(t('connections.unfollowed'));
 
       // Atualizar conexões localmente
       if (connections) {
@@ -48,7 +50,7 @@ const SocialConnectionsComponent: React.FC = () => {
       }
     } catch (error) {
       console.error('Erro ao deixar de seguir:', error);
-      toast.error('Erro ao deixar de seguir');
+      toast.error(t('connections.errorUnfollowing'));
     }
   };
 
@@ -56,7 +58,7 @@ const SocialConnectionsComponent: React.FC = () => {
     return (
       <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg shadow-sm p-6 flex flex-col items-center justify-center min-h-[200px]">
         <Loading size="md" />
-        <span className="text-sm text-slate-500 mt-2">Carregando conexões...</span>
+        <span className="text-sm text-slate-500 mt-2">{t('connections.loading')}</span>
       </div>
     );
   }
@@ -73,14 +75,14 @@ const SocialConnectionsComponent: React.FC = () => {
       <div className="px-5 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
         <h2 className="text-base font-semibold text-slate-900 dark:text-white flex items-center gap-2">
           <Users className="h-4 w-4 text-indigo-500" />
-          Conexões
+          {t('connections.title')}
         </h2>
         <button
           onClick={() => navigate('/search')}
           className="text-xs font-medium text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 flex items-center gap-1 transition-colors"
         >
           <Search size={14} />
-          Buscar
+          {t('connections.search')}
         </button>
       </div>
 
@@ -93,7 +95,7 @@ const SocialConnectionsComponent: React.FC = () => {
             : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/50'
             }`}
         >
-          Seguindo
+          {t('connections.followingTab')}
           <span className="ml-1.5 px-1.5 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-xs">
             {connections.followingCount}
           </span>
@@ -108,7 +110,7 @@ const SocialConnectionsComponent: React.FC = () => {
             : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/50'
             }`}
         >
-          Seguidores
+          {t('connections.followersTab')}
           <span className="ml-1.5 px-1.5 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-xs">
             {connections.followersCount}
           </span>
@@ -127,15 +129,15 @@ const SocialConnectionsComponent: React.FC = () => {
             </div>
             <p className="text-sm text-slate-500 dark:text-slate-400 mb-4">
               {activeTab === 'following'
-                ? "Você não segue ninguém ainda."
-                : "Você ainda não tem seguidores."}
+                ? t('connections.notFollowingAnyone')
+                : t('connections.noFollowers')}
             </p>
             {activeTab === 'following' && (
               <button
                 onClick={() => navigate('/search')}
                 className="btn btn-sm btn-outline text-xs px-3"
               >
-                Encontrar pessoas
+                {t('connections.findPeople')}
               </button>
             )}
           </div>
@@ -160,7 +162,7 @@ const SocialConnectionsComponent: React.FC = () => {
             onClick={() => navigate('/search')}
             className="w-full py-1.5 text-xs font-medium text-center text-slate-500 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors flex items-center justify-center gap-1"
           >
-            Ver todos
+            {t('connections.viewAll')}
             <ChevronRight size={12} />
           </button>
         </div>
@@ -177,6 +179,8 @@ interface ConnectionItemProps {
 }
 
 const ConnectionItem: React.FC<ConnectionItemProps> = ({ user, isFollowingTab, onUnfollow, onClick }) => {
+  const { t } = useTranslation('social');
+
   return (
     <div className="p-3 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors flex items-center gap-3 group">
       <div
@@ -189,7 +193,7 @@ const ConnectionItem: React.FC<ConnectionItemProps> = ({ user, isFollowingTab, o
           className="w-10 h-10 rounded-full object-cover border border-slate-100 dark:border-slate-700"
         />
         {user.isFollowing && !isFollowingTab && (
-          <div className="absolute -bottom-1 -right-1 bg-green-500 text-white p-0.5 rounded-full border-2 border-white dark:border-slate-900" title="Você segue">
+          <div className="absolute -bottom-1 -right-1 bg-green-500 text-white p-0.5 rounded-full border-2 border-white dark:border-slate-900" title={t('connections.youFollow')}>
             <div className="w-1.5 h-1.5 rounded-full bg-white" />
           </div>
         )}
@@ -200,7 +204,7 @@ const ConnectionItem: React.FC<ConnectionItemProps> = ({ user, isFollowingTab, o
           {user.name}
         </h3>
         <p className="text-xs text-slate-500 dark:text-slate-400 truncate">
-          {user.niche ? user.niche : `${user.quizStats.totalCompleted} quizzes`}
+          {user.niche ? user.niche : t('connections.quizzesCount', { count: user.quizStats.totalCompleted })}
         </p>
       </div>
 
@@ -211,7 +215,7 @@ const ConnectionItem: React.FC<ConnectionItemProps> = ({ user, isFollowingTab, o
             onUnfollow(user.id);
           }}
           className="text-slate-400 hover:text-red-500 dark:hover:text-red-400 p-1.5 rounded-md hover:bg-red-50 dark:hover:bg-red-900/20 transition-all opacity-0 group-hover:opacity-100 focus:opacity-100"
-          title="Deixar de seguir"
+          title={t('connections.unfollowTitle')}
         >
           <UserMinus size={16} />
         </button>

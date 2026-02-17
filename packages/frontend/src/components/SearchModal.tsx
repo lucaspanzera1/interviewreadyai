@@ -8,8 +8,10 @@ import {
 } from '@heroicons/react/24/outline';
 import { Users as UsersIconLucide } from 'lucide-react';
 import { SearchModalProps, SearchCategory } from '../types/navigation';
+import { useTranslation } from 'react-i18next';
 
 const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
+  const { t } = useTranslation('social');
   const [query, setQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const navigate = useNavigate();
@@ -19,31 +21,31 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
   const categories: SearchCategory[] = [
     {
       id: 'all',
-      name: 'Tudo',
+      name: t('searchModal.categoryAll'),
       icon: MagnifyingGlassIcon,
       path: '/search',
-      description: 'Pesquisar em todo o conteúdo'
+      description: t('searchModal.categoryAllDesc')
     },
     {
       id: 'my-quizzes',
-      name: 'Meus Quizzes',
+      name: t('searchModal.categoryMyQuizzes'),
       icon: DocumentTextIcon,
       path: '/my-quizzes',
-      description: 'Pesquisar nos seus quizzes'
+      description: t('searchModal.categoryMyQuizzesDesc')
     },
     {
       id: 'explore',
-      name: 'Explorar',
+      name: t('searchModal.categoryExplore'),
       icon: AcademicCapIcon,
       path: '/free-quizzes',
-      description: 'Pesquisar quizzes gratuitos'
+      description: t('searchModal.categoryExploreDesc')
     },
     {
       id: 'community',
-      name: 'Comunidade',
+      name: t('searchModal.categoryCommunity'),
       icon: UsersIconLucide,
       path: '/search',
-      description: 'Pesquisar na comunidade'
+      description: t('searchModal.categoryCommunityDesc')
     }
   ];
 
@@ -134,7 +136,7 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-slate-200 dark:border-slate-700">
           <h2 className="text-lg font-semibold text-slate-900 dark:text-white">
-            Pesquisa Rápida
+            {t('searchModal.title')}
           </h2>
           <button
             onClick={onClose}
@@ -153,7 +155,7 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
               type="text"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Digite sua pesquisa..."
+              placeholder={t('searchModal.placeholder')}
               className="w-full pl-10 pr-4 py-3 text-sm bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent text-slate-900 dark:text-white placeholder-slate-500 dark:placeholder-slate-400"
             />
           </div>
@@ -161,7 +163,7 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
           {/* Categories */}
           <div className="space-y-2">
             <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
-              Pesquisar em:
+              {t('searchModal.searchIn')}
             </label>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
               {categories.map((category) => {
@@ -224,7 +226,7 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
                       className="w-full flex items-center p-2 rounded-lg text-sm text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors text-left"
                     >
                       <Icon className="w-4 h-4 mr-3 text-slate-400" />
-                      Ir para {category.name}
+                      {t('searchModal.goTo', { name: category.name })}
                     </button>
                   );
                 })}
@@ -237,9 +239,9 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
         <div className="px-4 py-3 bg-slate-50 dark:bg-slate-700/50 border-t border-slate-200 dark:border-slate-600">
           <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
             <div className="flex items-center space-x-4">
-              <span>Pressione <kbd className="px-1.5 py-0.5 bg-slate-200 dark:bg-slate-600 rounded text-xs">Enter</kbd> para pesquisar</span>
+              <span>{t('searchModal.press')} <kbd className="px-1.5 py-0.5 bg-slate-200 dark:bg-slate-600 rounded text-xs">Enter</kbd> {t('searchModal.toSearch')}</span>
             </div>
-            <span>Pressione <kbd className="px-1.5 py-0.5 bg-slate-200 dark:bg-slate-600 rounded text-xs">Esc</kbd> para fechar</span>
+            <span>{t('searchModal.press')} <kbd className="px-1.5 py-0.5 bg-slate-200 dark:bg-slate-600 rounded text-xs">Esc</kbd> {t('searchModal.toClose')}</span>
           </div>
         </div>
       </div>

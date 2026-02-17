@@ -1,23 +1,25 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 import { useTheme } from '../contexts/ThemeContext';
 
 
 const Footer: React.FC = () => {
     const { theme } = useTheme();
+    const { t } = useTranslation('footer');
     const currentYear = new Date().getFullYear();
     // Using default if env isn't loaded for some reason, though it should be
     const appVersion = import.meta.env.VITE_APP_VERSION || 'Beta';
     const logoSrc = theme.includes('orange') ? '/logo-orange.png' : '/logo.png';
 
     const mainNavItems = [
-        { name: 'Início', path: '/' },
-        { name: 'Meus Quizzes', path: '/my-quizzes' },
-        { name: 'Criar', path: '/create-quiz' },
-        { name: 'Explorar', path: '/free-quizzes' },
-        { name: 'Evolução', path: '/desempenho' },
-        { name: 'Tokens', path: '/tokens' },
+        { name: t('navigation.home'), path: '/' },
+        { name: t('navigation.myQuizzes'), path: '/my-quizzes' },
+        { name: t('navigation.create'), path: '/create-quiz' },
+        { name: t('navigation.explore'), path: '/free-quizzes' },
+        { name: t('navigation.evolution'), path: '/desempenho' },
+        { name: t('navigation.tokens'), path: '/tokens' },
     ];
 
     return (
@@ -40,7 +42,7 @@ const Footer: React.FC = () => {
                             </span>
                         </Link>
                         <p className="text-slate-600 dark:text-slate-400 text-sm leading-relaxed mb-6 max-w-sm">
-                            A plataforma utiliza IA para ler os requisitos da vaga e gerar um Quiz de preparação para garantir que você não "trave" na hora do papo com o recrutador.
+                            {t('platformDescription')}
                         </p>
 
                         {/* Social Icons */}
@@ -66,7 +68,7 @@ const Footer: React.FC = () => {
                     {/* Links Columns */}
                     <div className="lg:col-span-4 grid grid-cols-2 md:grid-cols-3 gap-8 md:gap-12 mt-8 lg:mt-0">
                         <div>
-                            <h4 className="text-sm font-bold uppercase tracking-wider text-slate-900 dark:text-white mb-4">Produto</h4>
+                            <h4 className="text-sm font-bold uppercase tracking-wider text-slate-900 dark:text-white mb-4">{t('product.title')}</h4>
                             <ul className="space-y-3">
                                 <li>
                                     <a
@@ -76,7 +78,7 @@ const Footer: React.FC = () => {
                                         className="text-slate-500 dark:text-slate-400 hover:text-primary-600 dark:hover:text-primary-400 text-sm font-medium transition-colors duration-200 flex items-center gap-1 group"
                                     >
                                         <span className="w-0 group-hover:w-1.5 h-1.5 bg-primary-500 rounded-full transition-all duration-200 opacity-0 group-hover:opacity-100"></span>
-                                        <span className="transform group-hover:translate-x-1 transition-transform duration-200">Website</span>
+                                        <span className="transform group-hover:translate-x-1 transition-transform duration-200">{t('product.website')}</span>
                                     </a>
                                 </li>
                                 <li>
@@ -87,7 +89,7 @@ const Footer: React.FC = () => {
                                         className="text-slate-500 dark:text-slate-400 hover:text-primary-600 dark:hover:text-primary-400 text-sm font-medium transition-colors duration-200 flex items-center gap-1 group"
                                     >
                                         <span className="w-0 group-hover:w-1.5 h-1.5 bg-primary-500 rounded-full transition-all duration-200 opacity-0 group-hover:opacity-100"></span>
-                                        <span className="transform group-hover:translate-x-1 transition-transform duration-200">Planos</span>
+                                        <span className="transform group-hover:translate-x-1 transition-transform duration-200">{t('product.plans')}</span>
                                     </a>
                                 </li>
                                 <li>
@@ -98,7 +100,7 @@ const Footer: React.FC = () => {
                                         className="text-slate-500 dark:text-slate-400 hover:text-primary-600 dark:hover:text-primary-400 text-sm font-medium transition-colors duration-200 flex items-center gap-1 group"
                                     >
                                         <span className="w-0 group-hover:w-1.5 h-1.5 bg-primary-500 rounded-full transition-all duration-200 opacity-0 group-hover:opacity-100"></span>
-                                        <span className="transform group-hover:translate-x-1 transition-transform duration-200">Funcionalidades</span>
+                                        <span className="transform group-hover:translate-x-1 transition-transform duration-200">{t('product.features')}</span>
                                     </a>
                                 </li>
                                 <li>
@@ -109,13 +111,13 @@ const Footer: React.FC = () => {
                                         className="text-slate-500 dark:text-slate-400 hover:text-primary-600 dark:hover:text-primary-400 text-sm font-medium transition-colors duration-200 flex items-center gap-1 group"
                                     >
                                         <span className="w-0 group-hover:w-1.5 h-1.5 bg-primary-500 rounded-full transition-all duration-200 opacity-0 group-hover:opacity-100"></span>
-                                        <span className="transform group-hover:translate-x-1 transition-transform duration-200">Roadmap</span>
+                                        <span className="transform group-hover:translate-x-1 transition-transform duration-200">{t('product.roadmap')}</span>
                                     </a>
                                 </li>
                             </ul>
                         </div>
                         <div>
-                            <h4 className="text-sm font-bold uppercase tracking-wider text-slate-900 dark:text-white mb-4">Navegação</h4>
+                            <h4 className="text-sm font-bold uppercase tracking-wider text-slate-900 dark:text-white mb-4">{t('navigation.title')}</h4>
                             <ul className="space-y-3">
                                 {mainNavItems.map((item) => (
                                     <FooterLink key={item.path} to={item.path}>{item.name}</FooterLink>
@@ -124,7 +126,7 @@ const Footer: React.FC = () => {
                         </div>
 
                         <div>
-                            <h4 className="text-sm font-bold uppercase tracking-wider text-slate-900 dark:text-white mb-4">Legal</h4>
+                            <h4 className="text-sm font-bold uppercase tracking-wider text-slate-900 dark:text-white mb-4">{t('legal.title')}</h4>
                             <ul className="space-y-3">
                                 <li>
                                     <a
@@ -134,7 +136,7 @@ const Footer: React.FC = () => {
                                         className="text-slate-500 dark:text-slate-400 hover:text-primary-600 dark:hover:text-primary-400 text-sm font-medium transition-colors duration-200 flex items-center gap-1 group"
                                     >
                                         <span className="w-0 group-hover:w-1.5 h-1.5 bg-primary-500 rounded-full transition-all duration-200 opacity-0 group-hover:opacity-100"></span>
-                                        <span className="transform group-hover:translate-x-1 transition-transform duration-200">Termos de Uso</span>
+                                        <span className="transform group-hover:translate-x-1 transition-transform duration-200">{t('legal.terms')}</span>
                                     </a>
                                 </li>
                                 <li>
@@ -145,7 +147,7 @@ const Footer: React.FC = () => {
                                         className="text-slate-500 dark:text-slate-400 hover:text-primary-600 dark:hover:text-primary-400 text-sm font-medium transition-colors duration-200 flex items-center gap-1 group"
                                     >
                                         <span className="w-0 group-hover:w-1.5 h-1.5 bg-primary-500 rounded-full transition-all duration-200 opacity-0 group-hover:opacity-100"></span>
-                                        <span className="transform group-hover:translate-x-1 transition-transform duration-200">Política de Privacidade</span>
+                                        <span className="transform group-hover:translate-x-1 transition-transform duration-200">{t('legal.privacy')}</span>
                                     </a>
                                 </li>
                                 <li>
@@ -166,7 +168,7 @@ const Footer: React.FC = () => {
 
                 <div className="pt-8 border-t border-slate-200 dark:border-slate-800 flex flex-col md:flex-row justify-between items-center gap-4">
                     <p className="text-sm text-slate-500 dark:text-slate-500 font-medium">
-                        © {currentYear} TreinaVagaAI Inc.
+                        {t('copyright', { year: currentYear })}
                     </p>
                     <div className="flex items-center gap-4">
                         <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
@@ -178,7 +180,7 @@ const Footer: React.FC = () => {
                             </span>
                         </div>
                         <span className="text-xs text-slate-400 dark:text-slate-600">
-                            Powered By <span className="font-semibold text-slate-500 dark:text-slate-500">Stelestial Software</span>
+                            {t('poweredBy')} <span className="font-semibold text-slate-500 dark:text-slate-500">Stelestial Software</span>
                         </span>
                     </div>
                 </div>

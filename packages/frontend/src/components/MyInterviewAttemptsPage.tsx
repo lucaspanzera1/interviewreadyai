@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import PageTitle from './PageTitle';
 import {
     VideoCameraIcon,
@@ -40,6 +41,7 @@ interface InterviewAttempt {
 }
 
 const MyInterviewAttemptsPage: React.FC = () => {
+    const { t, i18n } = useTranslation('interview');
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
     const { showToast } = useToast();
@@ -69,7 +71,7 @@ const MyInterviewAttemptsPage: React.FC = () => {
             }
         } catch (error) {
             console.error('Error loading attempts:', error);
-            showToast('Erro ao carregar tentativas', 'error');
+            showToast(t('attempts.errorLoading'), 'error');
         } finally {
             setLoading(false);
         }
@@ -79,7 +81,7 @@ const MyInterviewAttemptsPage: React.FC = () => {
         setRefreshing(true);
         await loadAttempts();
         setRefreshing(false);
-        showToast('Tentativas atualizadas', 'success');
+        showToast(t('attempts.updatedSuccess'), 'success');
     };
 
     const getStatusIcon = (status: string) => {
@@ -98,13 +100,13 @@ const MyInterviewAttemptsPage: React.FC = () => {
     const getStatusLabel = (status: string) => {
         switch (status) {
             case 'completed':
-                return 'Análise Completa';
+                return t('attempts.status.complete');
             case 'processing':
-                return 'Processando Vídeo';
+                return t('attempts.status.processing');
             case 'completed_with_errors':
-                return 'Análise com Erros';
+                return t('attempts.status.error');
             default:
-                return 'Aguardando Análise';
+                return t('attempts.status.pending');
         }
     };
 
@@ -126,11 +128,11 @@ const MyInterviewAttemptsPage: React.FC = () => {
         const now = new Date();
         const diffInSeconds = Math.floor((now.getTime() - d.getTime()) / 1000);
 
-        if (diffInSeconds < 60) return 'Agora mesmo';
-        if (diffInSeconds < 3600) return `há ${Math.floor(diffInSeconds / 60)} min`;
-        if (diffInSeconds < 86400) return `há ${Math.floor(diffInSeconds / 3600)} h`;
+        if (diffInSeconds < 60) return t('attempts.timeAgo.now');
+        if (diffInSeconds < 3600) return t('attempts.timeAgo.minutes', { count: Math.floor(diffInSeconds / 60) });
+        if (diffInSeconds < 86400) return t('attempts.timeAgo.hours', { count: Math.floor(diffInSeconds / 3600) });
 
-        return d.toLocaleDateString('pt-BR', {
+        return d.toLocaleDateString(i18n.language, {
             day: '2-digit',
             month: '2-digit',
             year: 'numeric',
@@ -152,7 +154,7 @@ const MyInterviewAttemptsPage: React.FC = () => {
 
     return (
         <div className="flex flex-col min-h-full">
-            <PageTitle title={`Tentativas de Vídeo - ${interviewTitle || 'TreinaVagaAI'}`} />
+            <PageTitle title={t('attempts.pageTitle', { title: interviewTitle || 'TreinaVagaAI' })} />
 
             {/* Elegant Header */}
             <div className="bg-gradient-to-b from-white to-slate-50 dark:from-slate-900 dark:to-slate-900/50 pb-8 pt-6 px-4 sm:px-8 border-b border-slate-200 dark:border-slate-800 -mx-4 -mt-4 lg:-mx-8 lg:-mt-8 mb-8">
@@ -160,12 +162,12 @@ const MyInterviewAttemptsPage: React.FC = () => {
                     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                         <div>
                             <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white mb-2">
-                                Tentativas de Vídeo
+                                {t('attempts.title')}
                             </h1>
                             <p className="text-slate-600 dark:text-slate-400 max-w-xl">
                                 {interviewTitle 
-                                    ? `Acompanhe suas gravações de vídeo para "${interviewTitle}" e veja as análises da IA.`
-                                    : 'Acompanhe suas gravações de vídeo e veja as análises da IA para melhorar seu desempenho.'
+                                    ? t('attempts.subtitleWithTitle', { title: interviewTitle })
+                                    : t('attempts.subtitleDefault')
                                 }
                             </p>
                         </div>
@@ -175,7 +177,7 @@ const MyInterviewAttemptsPage: React.FC = () => {
                             className="group relative inline-flex items-center gap-2 px-5 py-3 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-xl font-medium transition-all duration-200 disabled:opacity-50"
                         >
                             <ArrowPathIcon className={`w-5 h-5 transition-transform ${refreshing ? 'animate-spin' : 'group-hover:rotate-180'}`} />
-                            <span>Atualizar</span>
+                            <span>{t('attempts.refresh')}</span>
                         </button>
                     </div>
                 </div>
@@ -189,7 +191,7 @@ const MyInterviewAttemptsPage: React.FC = () => {
                             <div className="w-12 h-12 border-4 border-slate-200 dark:border-slate-700 rounded-full"></div>
                             <div className="w-12 h-12 border-4 border-primary-600 rounded-full border-t-transparent animate-spin absolute top-0 left-0"></div>
                         </div>
-                        <p className="text-slate-500 dark:text-slate-400 animate-pulse font-medium">Carregando suas tentativas...</p>
+                        <p className="text-slate-500 dark:text-slate-400 animate-pulse font-medium">{t('attempts.loading')}</p>
                     </div>
                 ) : (
                     <>
@@ -200,17 +202,17 @@ const MyInterviewAttemptsPage: React.FC = () => {
                                         <VideoCameraIcon className="h-10 w-10 text-primary-600 dark:text-primary-400" />
                                     </div>
                                     <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-3">
-                                        Nenhuma Tentativa Ainda
+                                        {t('attempts.empty')}
                                     </h3>
                                     <p className="text-slate-600 dark:text-slate-400 mb-8 leading-relaxed">
-                                        Você ainda não fez nenhuma tentativa com vídeo para esta simulação. Pratique e grave suas respostas para receber feedback da IA!
+                                        {t('attempts.emptyDesc')}
                                     </p>
                                     <button
                                         onClick={() => interviewId ? navigate(`/interview/${interviewId}`) : navigate('/my-interviews')}
                                         className="w-full inline-flex items-center justify-center gap-2 px-6 py-4 bg-primary-600 hover:bg-primary-500 text-white font-semibold rounded-xl transition-all shadow-lg hover:shadow-xl hover:-translate-y-1"
                                     >
                                         <PlayIcon className="w-6 h-6" />
-                                        {interviewId ? 'Voltar para Simulação' : 'Ver Minhas Simulações'}
+                                        {interviewId ? t('attempts.backToSimulation') : t('attempts.viewMySimulations')}
                                     </button>
                                 </div>
                             </div>
@@ -247,11 +249,11 @@ const MyInterviewAttemptsPage: React.FC = () => {
                                                 </div>
 
                                                 <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-1 group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors truncate">
-                                                    Tentativa #{index + 1 + ((page - 1) * 10)}
+                                                    {t('attempts.attemptNumber', { number: index + 1 + ((page - 1) * 10) })}
                                                 </h3>
 
                                                 <div className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400 mb-4">
-                                                    <span className="font-medium">{interviewTitle || 'Simulação de Entrevista'}</span>
+                                                    <span className="font-medium">{interviewTitle || t('attempts.interviewSimulation')}</span>
                                                 </div>
 
                                                 <div className="flex flex-wrap gap-4 text-xs font-medium text-slate-500 dark:text-slate-400">
@@ -262,13 +264,13 @@ const MyInterviewAttemptsPage: React.FC = () => {
                                                     {attempt.analysisStatus === 'completed' && attempt.preparednessScore && (
                                                         <div className="flex items-center gap-1.5 bg-green-50 dark:bg-green-900/10 px-2.5 py-1.5 rounded-lg text-green-700 dark:text-green-400">
                                                             <SparklesIcon className="w-4 h-4" />
-                                                            Score: {attempt.preparednessScore}/100
+                                                            {t('attempts.score', { score: attempt.preparednessScore })}
                                                         </div>
                                                     )}
                                                     {attempt.videoAnalysis?.moments && (
                                                         <div className="flex items-center gap-1.5 bg-blue-50 dark:bg-blue-900/10 px-2.5 py-1.5 rounded-lg text-blue-700 dark:text-blue-400">
                                                             <EyeIcon className="w-4 h-4" />
-                                                            {attempt.videoAnalysis.moments.length} feedbacks
+                                                            {t('attempts.feedbacksCount', { count: attempt.videoAnalysis.moments.length })}
                                                         </div>
                                                     )}
                                                 </div>
@@ -277,9 +279,9 @@ const MyInterviewAttemptsPage: React.FC = () => {
                                                 {attempt.analysisStatus === 'completed' && attempt.videoAnalysis && (
                                                     <div className="mt-4 p-3 bg-slate-50 dark:bg-slate-900/50 rounded-lg">
                                                         <div className="flex items-center justify-between mb-2">
-                                                            <span className="text-sm font-medium text-slate-700 dark:text-slate-300">Pontos Fortes</span>
+                                                            <span className="text-sm font-medium text-slate-700 dark:text-slate-300">{t('attempts.strengths')}</span>
                                                             <span className="text-xs text-slate-500 dark:text-slate-400">
-                                                                {attempt.videoAnalysis.summary?.strengths?.length || 0} itens
+                                                                {t('attempts.itemCount', { count: attempt.videoAnalysis.summary?.strengths?.length || 0 })}
                                                             </span>
                                                         </div>
                                                         {attempt.videoAnalysis.summary?.strengths?.slice(0, 2).map((strength, idx) => (
@@ -289,7 +291,7 @@ const MyInterviewAttemptsPage: React.FC = () => {
                                                         ))}
                                                         {attempt.videoAnalysis.summary?.strengths?.length > 2 && (
                                                             <div className="text-xs text-slate-500 dark:text-slate-500">
-                                                                +{attempt.videoAnalysis.summary.strengths.length - 2} mais...
+                                                                {t('attempts.moreItems', { count: attempt.videoAnalysis.summary.strengths.length - 2 })}
                                                             </div>
                                                         )}
                                                     </div>
@@ -304,7 +306,7 @@ const MyInterviewAttemptsPage: React.FC = () => {
                                                         className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-5 py-2.5 bg-primary-600 hover:bg-primary-500 text-white rounded-xl font-medium transition-all shadow-md shadow-primary-600/20 hover:shadow-lg hover:shadow-primary-600/30 active:scale-95 min-w-[120px]"
                                                     >
                                                         <EyeIcon className="w-4 h-4" />
-                                                        <span>Ver Análise</span>
+                                                        <span>{t('attempts.viewAnalysis')}</span>
                                                     </button>
                                                 )}
                                                 <button
@@ -312,7 +314,7 @@ const MyInterviewAttemptsPage: React.FC = () => {
                                                     className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-5 py-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 rounded-xl font-medium transition-colors"
                                                 >
                                                     <PlayIcon className="w-4 h-4" />
-                                                    <span>Refazer</span>
+                                                    <span>{t('attempts.redo')}</span>
                                                 </button>
                                             </div>
                                         </div>
@@ -329,7 +331,7 @@ const MyInterviewAttemptsPage: React.FC = () => {
                                     disabled={page === 1}
                                     className="px-4 py-2 rounded-lg text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
                                 >
-                                    Anterior
+                                    {t('attempts.previous')}
                                 </button>
 
                                 <div className="flex gap-2">
@@ -352,7 +354,7 @@ const MyInterviewAttemptsPage: React.FC = () => {
                                     disabled={page === totalPages}
                                     className="px-4 py-2 rounded-lg text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
                                 >
-                                    Próxima
+                                    {t('attempts.next')}
                                 </button>
                             </div>
                         )}

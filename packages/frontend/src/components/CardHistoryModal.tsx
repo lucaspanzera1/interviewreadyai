@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { XMarkIcon, ClockIcon, ChartBarIcon, CalendarIcon } from '@heroicons/react/24/outline';
 import { apiClient } from '../lib/api';
 import { useToast } from '../contexts/ToastContext';
+import { useTranslation } from 'react-i18next';
 
 interface CardHistoryModalProps {
   isOpen: boolean;
@@ -39,6 +40,7 @@ const CardHistoryModal: React.FC<CardHistoryModalProps> = ({
   question
 }) => {
   const { showToast } = useToast();
+  const { t } = useTranslation('flashcard');
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState<CardHistoryData | null>(null);
 
@@ -55,7 +57,7 @@ const CardHistoryModal: React.FC<CardHistoryModalProps> = ({
       setData(response);
     } catch (error: any) {
       console.error('Error loading card history:', error);
-      showToast('Erro ao carregar histórico do card.', 'error');
+      showToast(t('cardHistory.errorLoading'), 'error');
     } finally {
       setLoading(false);
     }
@@ -77,11 +79,11 @@ const CardHistoryModal: React.FC<CardHistoryModalProps> = ({
   const formatDifficulty = (difficulty: string) => {
     switch (difficulty) {
       case 'EASY':
-        return 'Fácil';
+        return t('study.easy');
       case 'NORMAL':
-        return 'Normal';
+        return t('study.normal');
       case 'HARD':
-        return 'Difícil';
+        return t('study.hard');
       default:
         return difficulty;
     }
@@ -98,11 +100,14 @@ const CardHistoryModal: React.FC<CardHistoryModalProps> = ({
   };
 
   const formatInterval = (days: number) => {
-    if (days === 1) return '1 dia';
-    if (days < 7) return `${days} dias`;
-    if (days < 30) return `${Math.round(days / 7)} semana${Math.round(days / 7) > 1 ? 's' : ''}`;
-    if (days < 365) return `${Math.round(days / 30)} mês${Math.round(days / 30) > 1 ? 'es' : ''}`;
-    return `${Math.round(days / 365)} ano${Math.round(days / 365) > 1 ? 's' : ''}`;
+    if (days === 1) return t('intervals.day');
+    if (days < 7) return t('intervals.days', { count: days });
+    const weeks = Math.round(days / 7);
+    if (days < 30) return t(weeks === 1 ? 'intervals.week' : 'intervals.weeks', { count: weeks });
+    const months = Math.round(days / 30);
+    if (days < 365) return t(months === 1 ? 'intervals.month' : 'intervals.months', { count: months });
+    const years = Math.round(days / 365);
+    return t(years === 1 ? 'intervals.year' : 'intervals.years', { count: years });
   };
 
   if (!isOpen) return null;
@@ -114,7 +119,7 @@ const CardHistoryModal: React.FC<CardHistoryModalProps> = ({
         <div className="flex items-center justify-between p-6 border-b border-slate-200 dark:border-slate-700">
           <div>
             <h2 className="text-xl font-bold text-slate-900 dark:text-white">
-              Histórico do Card
+              {t('cardHistory.title')}
             </h2>
             <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">
               Card {cardIndex + 1}: {question.substring(0, 50)}...
@@ -140,31 +145,31 @@ const CardHistoryModal: React.FC<CardHistoryModalProps> = ({
               <div className="bg-slate-50 dark:bg-slate-700/50 rounded-xl p-4">
                 <h3 className="font-semibold text-slate-900 dark:text-white mb-3 flex items-center gap-2">
                   <ChartBarIcon className="w-5 h-5" />
-                  Estatísticas Atuais
+                  {t('cardHistory.currentStats')}
                 </h3>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   <div className="text-center">
                     <div className="text-2xl font-bold text-primary-600">{data.currentStats.timesStudied}</div>
-                    <div className="text-sm text-slate-600 dark:text-slate-400">Vezes Estudado</div>
+                    <div className="text-sm text-slate-600 dark:text-slate-400">{t('cardHistory.timesStudied')}</div>
                   </div>
                   <div className="text-center">
                     <div className="text-2xl font-bold text-primary-600">{data.currentStats.repetitions}</div>
-                    <div className="text-sm text-slate-600 dark:text-slate-400">Repetições</div>
+                    <div className="text-sm text-slate-600 dark:text-slate-400">{t('cardHistory.repetitions')}</div>
                   </div>
                   <div className="text-center">
                     <div className="text-2xl font-bold text-primary-600">{data.currentStats.easeFactor.toFixed(1)}</div>
-                    <div className="text-sm text-slate-600 dark:text-slate-400">Fator de Facilidade</div>
+                    <div className="text-sm text-slate-600 dark:text-slate-400">{t('cardHistory.easeFactor')}</div>
                   </div>
                   <div className="text-center">
                     <div className="text-2xl font-bold text-primary-600">{formatInterval(data.currentStats.interval)}</div>
-                    <div className="text-sm text-slate-600 dark:text-slate-400">Próximo Intervalo</div>
+                    <div className="text-sm text-slate-600 dark:text-slate-400">{t('cardHistory.nextInterval')}</div>
                   </div>
                 </div>
                 {data.currentStats.nextReviewAt && (
                   <div className="mt-4 pt-4 border-t border-slate-200 dark:border-slate-600">
                     <div className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400">
                       <CalendarIcon className="w-4 h-4" />
-                      Próxima revisão: {formatDate(data.currentStats.nextReviewAt)}
+                      {t('cardHistory.nextReview')} {formatDate(data.currentStats.nextReviewAt)}
                     </div>
                   </div>
                 )}
@@ -174,12 +179,12 @@ const CardHistoryModal: React.FC<CardHistoryModalProps> = ({
               <div>
                 <h3 className="font-semibold text-slate-900 dark:text-white mb-3 flex items-center gap-2">
                   <ClockIcon className="w-5 h-5" />
-                  Histórico de Revisões ({data.history.length})
+                  {t('cardHistory.reviewHistory')} ({data.history.length})
                 </h3>
 
                 {data.history.length === 0 ? (
                   <div className="text-center py-8 text-slate-500 dark:text-slate-400">
-                    Nenhuma revisão registrada ainda.
+                    {t('cardHistory.noReviews')}
                   </div>
                 ) : (
                   <div className="space-y-3">
@@ -198,19 +203,19 @@ const CardHistoryModal: React.FC<CardHistoryModalProps> = ({
                         </div>
                         <div className="grid grid-cols-3 gap-4 text-sm">
                           <div>
-                            <div className="text-slate-600 dark:text-slate-400">Intervalo Antes</div>
+                            <div className="text-slate-600 dark:text-slate-400">{t('cardHistory.intervalBefore')}</div>
                             <div className="font-medium text-slate-900 dark:text-white">
                               {formatInterval(review.intervalBefore)}
                             </div>
                           </div>
                           <div>
-                            <div className="text-slate-600 dark:text-slate-400">Intervalo Depois</div>
+                            <div className="text-slate-600 dark:text-slate-400">{t('cardHistory.intervalAfter')}</div>
                             <div className="font-medium text-slate-900 dark:text-white">
                               {formatInterval(review.intervalAfter)}
                             </div>
                           </div>
                           <div>
-                            <div className="text-slate-600 dark:text-slate-400">Fator de Facilidade</div>
+                            <div className="text-slate-600 dark:text-slate-400">{t('cardHistory.easeFactor')}</div>
                             <div className="font-medium text-slate-900 dark:text-white">
                               {review.easeFactor.toFixed(1)}
                             </div>
@@ -224,7 +229,7 @@ const CardHistoryModal: React.FC<CardHistoryModalProps> = ({
             </div>
           ) : (
             <div className="text-center py-8 text-slate-500 dark:text-slate-400">
-              Erro ao carregar dados.
+              {t('cardHistory.errorLoadingData')}
             </div>
           )}
         </div>

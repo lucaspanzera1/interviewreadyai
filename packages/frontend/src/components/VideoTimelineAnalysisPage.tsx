@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import {
     ArrowPathIcon,
     CheckCircleIcon,
@@ -130,6 +131,7 @@ const AnimatedCircularProgress = ({ value, label, icon: Icon, color }: { value: 
 // --- Main Component ---
 
 const VideoTimelineAnalysisPage: React.FC = () => {
+    const { t } = useTranslation('interview');
     const { attemptId } = useParams<{ attemptId: string }>();
     const navigate = useNavigate();
     const videoRef = useRef<HTMLVideoElement>(null);
@@ -278,18 +280,18 @@ const VideoTimelineAnalysisPage: React.FC = () => {
                             <div className="p-2 rounded-full group-hover:bg-slate-100 dark:group-hover:bg-slate-800 transition-colors">
                                 <ChevronLeftIcon className="w-5 h-5" />
                             </div>
-                            <span className="font-medium text-sm hidden sm:block">Back</span>
+                            <span className="font-medium text-sm hidden sm:block">{t('videoAnalysis.back')}</span>
                         </button>
                         <div className="h-6 w-px bg-slate-200 dark:bg-slate-800" />
                         <div>
-                            <h1 className="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-wider">Analysis Report</h1>
+                            <h1 className="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-wider">{t('videoAnalysis.analysisReport')}</h1>
                             <p className="text-xs text-slate-500 font-mono">ID: {attemptId?.substring(0, 8).toUpperCase()}</p>
                         </div>
                     </div>
 
                     <div className="flex items-center gap-6">
                         <div className="flex items-center gap-3 bg-slate-100 dark:bg-slate-900 rounded-lg px-4 py-2 border border-slate-200 dark:border-slate-800">
-                            <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Overall Score</span>
+                            <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">{t('videoAnalysis.overallScore')}</span>
                             <span className={cn(
                                 "text-lg font-bold font-mono",
                                 analysis.overall_score >= 80 ? 'text-emerald-600 dark:text-emerald-400' :
@@ -420,7 +422,7 @@ const VideoTimelineAnalysisPage: React.FC = () => {
                             <div className="h-full flex items-center justify-center bg-slate-100 dark:bg-slate-900 text-slate-400">
                                 <div className="text-center">
                                     <VideoCameraIcon className="w-16 h-16 mx-auto mb-2 opacity-50" />
-                                    <p>No Video Source Available</p>
+                                    <p>{t('videoAnalysis.noVideoSource')}</p>
                                 </div>
                             </div>
                         )}
@@ -428,10 +430,10 @@ const VideoTimelineAnalysisPage: React.FC = () => {
 
                     {/* Metrics Strip */}
                     <div className="h-40 grid grid-cols-2 lg:grid-cols-4 gap-4 flex-none">
-                        <AnimatedCircularProgress value={analysis.metrics?.speech_clarity || 0} label="Clarity" icon={SpeakerWaveIcon} color="blue" />
-                        <AnimatedCircularProgress value={analysis.metrics?.confidence_level || 0} label="Confidence" icon={ChartBarIcon} color="green" />
-                        <AnimatedCircularProgress value={analysis.metrics?.engagement || 0} label="Engagement" icon={CpuChipIcon} color="purple" />
-                        <AnimatedCircularProgress value={analysis.metrics?.technical_accuracy || 0} label="Accuracy" icon={CheckCircleIcon} color="yellow" />
+                        <AnimatedCircularProgress value={analysis.metrics?.speech_clarity || 0} label={t('videoAnalysis.clarity')} icon={SpeakerWaveIcon} color="blue" />
+                        <AnimatedCircularProgress value={analysis.metrics?.confidence_level || 0} label={t('videoAnalysis.confidence')} icon={ChartBarIcon} color="green" />
+                        <AnimatedCircularProgress value={analysis.metrics?.engagement || 0} label={t('videoAnalysis.engagement')} icon={CpuChipIcon} color="purple" />
+                        <AnimatedCircularProgress value={analysis.metrics?.technical_accuracy || 0} label={t('videoAnalysis.accuracy')} icon={CheckCircleIcon} color="yellow" />
                     </div>
                 </div>
 
@@ -448,7 +450,7 @@ const VideoTimelineAnalysisPage: React.FC = () => {
                             )}
                         >
                             <div className="flex items-center justify-center gap-2">
-                                <ListBulletIcon className="w-4 h-4" /> Feedback
+                                <ListBulletIcon className="w-4 h-4" /> {t('videoAnalysis.feedback')}
                             </div>
                         </button>
                         <button
@@ -460,7 +462,7 @@ const VideoTimelineAnalysisPage: React.FC = () => {
                             )}
                         >
                             <div className="flex items-center justify-center gap-2">
-                                <LightBulbIcon className="w-4 h-4" /> Insights
+                                <LightBulbIcon className="w-4 h-4" /> {t('videoAnalysis.insights')}
                             </div>
                         </button>
                         {analysisData.videoPaths && analysisData.videoPaths.length > 1 && (
@@ -473,7 +475,7 @@ const VideoTimelineAnalysisPage: React.FC = () => {
                                 )}
                             >
                                 <div className="flex items-center justify-center gap-2">
-                                    <VideoCameraIcon className="w-4 h-4" /> Clips ({analysisData.videoPaths.length})
+                                    <VideoCameraIcon className="w-4 h-4" /> {t('videoAnalysis.clipsCount', { count: analysisData.videoPaths.length })}
                                 </div>
                             </button>
                         )}
@@ -487,10 +489,10 @@ const VideoTimelineAnalysisPage: React.FC = () => {
                                 {/* Filters */}
                                 <div className="p-3 grid grid-cols-4 gap-2 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
                                     {[
-                                        { id: 'all', icon: ChartBarIcon, label: 'All' },
-                                        { id: 'positive', icon: CheckCircleIcon, label: 'Good' },
-                                        { id: 'improvement', icon: ArrowPathIcon, label: 'Fix' },
-                                        { id: 'warning', icon: ExclamationTriangleIcon, label: 'Alert' }
+                                        { id: 'all', icon: ChartBarIcon, label: t('videoAnalysis.filterAll') },
+                                        { id: 'positive', icon: CheckCircleIcon, label: t('videoAnalysis.filterGood') },
+                                        { id: 'improvement', icon: ArrowPathIcon, label: t('videoAnalysis.filterFix') },
+                                        { id: 'warning', icon: ExclamationTriangleIcon, label: t('videoAnalysis.filterAlert') }
                                     ].map(f => (
                                         <button
                                             key={f.id}
@@ -513,7 +515,7 @@ const VideoTimelineAnalysisPage: React.FC = () => {
                                     {moments.length === 0 ? (
                                         <div className="h-64 flex flex-col items-center justify-center text-slate-400 text-center">
                                             <InformationCircleIcon className="w-10 h-10 mb-2 opacity-50" />
-                                            <p className="text-sm">No moments found for this filter.</p>
+                                            <p className="text-sm">{t('videoAnalysis.noMomentsFound')}</p>
                                         </div>
                                     ) : (
                                         moments.map((moment, idx) => {
@@ -573,7 +575,7 @@ const VideoTimelineAnalysisPage: React.FC = () => {
                             <div className="h-full overflow-y-auto p-6 space-y-8 custom-scrollbar">
                                 <div>
                                     <h3 className="text-sm font-bold text-emerald-600 dark:text-emerald-500 uppercase tracking-widest mb-4 flex items-center gap-2">
-                                        <CheckCircleIcon className="w-5 h-5" /> Key Strengths
+                                        <CheckCircleIcon className="w-5 h-5" /> {t('videoAnalysis.keyStrengths')}
                                     </h3>
                                     <ul className="space-y-3">
                                         {analysis.summary.strengths.map((s, i) => (
@@ -589,7 +591,7 @@ const VideoTimelineAnalysisPage: React.FC = () => {
 
                                 <div>
                                     <h3 className="text-sm font-bold text-amber-600 dark:text-amber-500 uppercase tracking-widest mb-4 flex items-center gap-2">
-                                        <ArrowPathIcon className="w-5 h-5" /> Areas for Growth
+                                        <ArrowPathIcon className="w-5 h-5" /> {t('videoAnalysis.areasForGrowth')}
                                     </h3>
                                     <ul className="space-y-3">
                                         {analysis.summary.improvements.map((s, i) => (
@@ -606,7 +608,7 @@ const VideoTimelineAnalysisPage: React.FC = () => {
                                         <div className="h-px bg-slate-200 dark:bg-slate-800" />
                                         <div>
                                             <h3 className="text-sm font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-widest mb-4 flex items-center gap-2">
-                                                <CpuChipIcon className="w-5 h-5" /> Analysis Notes
+                                                <CpuChipIcon className="w-5 h-5" /> {t('videoAnalysis.analysisNotes')}
                                             </h3>
                                             <ul className="space-y-3">
                                                 {analysis.summary.keyPoints.map((s, i) => (
@@ -645,8 +647,8 @@ const VideoTimelineAnalysisPage: React.FC = () => {
                                                 <VideoCameraIcon className="w-6 h-6" />
                                             </div>
                                             <div>
-                                                <h4 className="font-semibold text-slate-900 dark:text-white">Video Segment {index + 1}</h4>
-                                                <p className="text-xs text-slate-500 dark:text-slate-400">Question {index + 1}</p>
+                                                <h4 className="font-semibold text-slate-900 dark:text-white">{t('videoAnalysis.videoSegment', { number: index + 1 })}</h4>
+                                                <p className="text-xs text-slate-500 dark:text-slate-400">{t('videoAnalysis.question', { number: index + 1 })}</p>
                                             </div>
                                             {index === currentVideoIndex && (
                                                 <div className="ml-auto w-2 h-2 bg-blue-500 rounded-full animate-pulse" />
@@ -684,19 +686,24 @@ const VideoTimelineAnalysisPage: React.FC = () => {
 
 // --- Helper Screens ---
 
-const LoadingScreen = () => (
+const LoadingScreen = () => {
+    const { t } = useTranslation('interview');
+    return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex flex-col items-center justify-center p-4">
         <div className="relative w-24 h-24 mb-8">
             <div className="absolute inset-0 border-4 border-indigo-100 dark:border-indigo-900/30 rounded-full"></div>
             <div className="absolute inset-0 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
             <CpuChipIcon className="absolute inset-0 m-auto w-8 h-8 text-indigo-500 animate-pulse" />
         </div>
-        <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-2 tracking-tight">Initializing Analysis Engine</h2>
-        <p className="text-slate-500 dark:text-slate-400">Decryption and biometric processing in progress...</p>
+        <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-2 tracking-tight">{t('videoAnalysis.loadingTitle')}</h2>
+        <p className="text-slate-500 dark:text-slate-400">{t('videoAnalysis.loadingDesc')}</p>
     </div>
-);
+    );
+};
 
-const ProcessingScreen = ({ status }: { status: string }) => (
+const ProcessingScreen = ({ status }: { status: string }) => {
+    const { t } = useTranslation('interview');
+    return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex flex-col items-center justify-center p-4">
         <div className="max-w-md w-full bg-white dark:bg-slate-900 rounded-2xl shadow-xl border border-slate-200 dark:border-slate-800 p-8 text-center relative overflow-hidden">
             <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-indigo-500 via-purple-500 to-indigo-500 animate-gradient-x"></div>
@@ -705,14 +712,14 @@ const ProcessingScreen = ({ status }: { status: string }) => (
                 <ArrowsPointingOutIcon className="w-8 h-8 text-indigo-600 dark:text-indigo-400 animate-pulse" />
             </div>
 
-            <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">Analyzing Interview</h2>
+            <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">{t('videoAnalysis.processingTitle')}</h2>
             <p className="text-slate-600 dark:text-slate-400 mb-8">
-                Our AI is currently processing your video content. This usually takes 1-2 minutes.
+                {t('videoAnalysis.processingDesc')}
             </p>
 
             <div className="space-y-3">
                 <div className="flex items-center justify-between text-sm">
-                    <span className="text-slate-500">Status</span>
+                    <span className="text-slate-500">{t('videoAnalysis.status')}</span>
                     <span className="font-mono font-medium text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/10 px-2 py-1 rounded uppercase">{status}</span>
                 </div>
                 <div className="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-2 overflow-hidden">
@@ -724,7 +731,7 @@ const ProcessingScreen = ({ status }: { status: string }) => (
                 onClick={() => window.location.href = '/my-interviews'}
                 className="mt-8 text-sm text-slate-500 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
             >
-                Return to Dashboard
+                {t('videoAnalysis.returnToDashboard')}
             </button>
         </div>
         <style>{`
@@ -737,24 +744,28 @@ const ProcessingScreen = ({ status }: { status: string }) => (
             }
         `}</style>
     </div>
-);
+    );
+};
 
-const ErrorScreen = ({ error, onBack }: { error: string, onBack: () => void }) => (
+const ErrorScreen = ({ error, onBack }: { error: string, onBack: () => void }) => {
+    const { t } = useTranslation('interview');
+    return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex flex-col items-center justify-center">
         <div className="bg-white dark:bg-slate-900 p-8 rounded-2xl shadow-xl border border-red-100 dark:border-red-900/30 max-w-md w-full text-center">
             <div className="w-16 h-16 bg-red-50 dark:bg-red-900/20 rounded-full flex items-center justify-center mx-auto mb-6">
                 <ExclamationTriangleIcon className="w-8 h-8 text-red-500" />
             </div>
-            <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2">Analysis Failed</h3>
+            <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2">{t('videoAnalysis.analysisFailed')}</h3>
             <p className="text-slate-500 dark:text-slate-400 mb-6">{error}</p>
             <button
                 onClick={onBack}
                 className="w-full py-2.5 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-lg hover:opacity-90 transition-opacity font-medium"
             >
-                Return to Dashboard
+                {t('videoAnalysis.returnToDashboard')}
             </button>
         </div>
     </div>
-);
+    );
+};
 
 export default VideoTimelineAnalysisPage;

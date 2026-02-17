@@ -1,0 +1,76 @@
+{
+  "nav": {
+    "home": "Home",
+    "quizzes": "Quizzes",
+    "simulations": "Simulations",
+    "flashcards": "Flashcards",
+    "explore": "Explore",
+    "community": "Community",
+    "evolution": "Progress",
+    "history": "History",
+    "tokens": "Tokens",
+    "menu": "Menu",
+    "newQuiz": "New Quiz",
+    "newSimulation": "New Simulation",
+    "newFlashcard": "New Flashcard",
+    "profile": "Profile",
+    "createQuiz": "Create Quiz",
+    "myQuizzes": "My Quizzes",
+    "interviewSimulation": "Interview Simulation",
+    "mySimulations": "My Simulations",
+    "createFlashcards": "Create Flashcards",
+    "myFlashcards": "My Flashcards"
+  },
+  "admin": {
+    "title": "Admin",
+    "administration": "Administration",
+    "users": "Users",
+    "quizzes": "Quizzes",
+    "roles": "Roles",
+    "tokenPackages": "Token Packages"
+  },
+  "user": {
+    "myProfile": "My Profile",
+    "settings": "Settings",
+    "logout": "Log out",
+    "login": "Log in",
+    "tokensAvailable": "{{count}} Tokens Available"
+  },
+  "theme": {
+    "lightMode": "Light Mode",
+    "darkMode": "Dark Mode",
+    "specialThemes": "Special Themes",
+    "orangeLight": "Orange Light",
+    "orangeDark": "Orange Dark",
+    "system": "System",
+    "toggleTheme": "Toggle Theme"
+  },
+  "common": {
+    "closeSidebar": "Close sidebar",
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "cancel": "Cancel",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "back": "Back",
+    "next": "Next",
+    "previous": "Previous",
+    "confirm": "Confirm",
+    "close": "Close",
+    "search": "Search",
+    "yes": "Yes",
+    "no": "No"
+  },
+  "activityHeatmap": {
+    "activitiesCount": "{{count}} activities",
+    "onDate": "on {{date}}",
+    "totalActivities": "Total of {{count}} activities in the last year",
+    "less": "Less",
+    "more": "More",
+    "mon": "Mon",
+    "wed": "Wed",
+    "fri": "Fri"
+  }
+}

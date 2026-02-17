@@ -1,0 +1,66 @@
+{
+  "pageTitle": "History - TreinaVagaAI",
+  "myJourney": "My Journey",
+  "history": "History",
+  "subtitle": "Your progress and accumulated achievements.",
+  "title": "Reward History",
+  "totalEarned": "Total Earned",
+  "totalSpent": "Spent",
+  "currentBalance": "Current Balance",
+  "totalEarnedCard": "Total Earned",
+  "totalSpentCard": "Total Spent",
+  "timeline": "Timeline",
+  "weeklyGoal": "Weekly Goal",
+  "weeklyGoalDesc": "Keep completing quizzes to unlock more bonuses.",
+  "nextBonusProgress": "{{current}}/5 to next bonus",
+  "events": "{{count}} Events",
+  "emptyState": "No records yet",
+  "emptyStateDesc": "Your rewards will appear here once you complete quizzes.",
+  "startNow": "START NOW",
+  "tokensLabel": "tokens",
+  "rewardLabels": {
+    "quiz_completion": "Quiz Completed",
+    "quiz_perfect_score": "Quiz Perfect Score",
+    "daily_bonus": "Daily Bonus",
+    "streak_bonus": "Streak Bonus",
+    "profile_completed": "Profile Completed",
+    "first_quiz": "First Quiz",
+    "first_interview": "First Interview",
+    "first_flashcard": "First Flashcard",
+    "referral": "Referral",
+    "token_purchase": "Token Purchase",
+    "plan_redeemed": "Plan Redeemed",
+    "quiz_generation": "Quiz Generation",
+    "interview_generation": "Interview Generation",
+    "flashcard_generation": "Flashcard Generation",
+    "video_analysis": "Video Analysis"
+  },
+  "rewardTitles": {
+    "tokenAmount_one": "{{sign}}{{amount}} Token",
+    "tokenAmount_other": "{{sign}}{{amount}} Tokens",
+    "newAchievement": "New Achievement",
+    "planActivated": "Plan Activated",
+    "packageAcquired": "Package Acquired",
+    "reward": "Reward"
+  },
+  "descriptions": {
+    "accountUpgrade": "Account upgrade + {{amount}} tokens",
+    "quiz_completion": "Completed free quizzes",
+    "quiz_generation": "Custom quiz generation",
+    "flashcard_generation": "Flashcard generation",
+    "interview_generation": "Interview simulation generation",
+    "quiz_play": "Played another user's quiz",
+    "referral": "Friend referral",
+    "achievement": "Achievement unlocked",
+    "package_redemption": "Promotional package redemption",
+    "token_added": "Tokens added",
+    "token_spent": "Tokens spent"
+  },
+  "errors": {
+    "loadHistory": "Error loading reward history"
+  },
+  "types": {
+    "earned": "Earned",
+    "spent": "Spent"
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "title": "Quick Search",
+  "placeholder": "What are you looking for?",
+  "categories": {
+    "all": "All",
+    "myQuizzes": "My Quizzes",
+    "explore": "Explore",
+    "community": "Community"
+  },
+  "quickNav": {
+    "title": "Quick Navigation",
+    "home": "Home",
+    "quizzes": "Quizzes",
+    "interviews": "Interviews",
+    "flashcards": "Flashcards",
+    "community": "Community",
+    "profile": "Profile",
+    "settings": "Settings"
+  },
+  "recentSearches": "Recent Searches",
+  "noResults": "No results found",
+  "close": "Close"
+}

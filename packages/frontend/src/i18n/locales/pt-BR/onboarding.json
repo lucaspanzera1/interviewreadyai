@@ -1,0 +1,115 @@
+{
+  "modal": {
+    "welcome": "Bem-vindo ao TreinaVaga! 🎉",
+    "welcomeDesc": "Vamos personalizar sua experiência em poucos passos.",
+    "stepFocusTitle": "Qual seu foco? 🎯",
+    "stepFocusDesc": "Selecione sua área de atuação principal.",
+    "stepFocus": "Qual seu foco principal?",
+    "stepCareerTimeTitle": "Tempo de jornada ⏳",
+    "stepCareerTimeDesc": "Para sugerirmos vagas no seu nível.",
+    "stepCareerTime": "Há quanto tempo está na carreira?",
+    "stepToolsTitle": "Suas ferramentas 🛠️",
+    "stepToolsDesc": "O que você domina ou está aprendendo.",
+    "stepTools": "Quais ferramentas você usa no dia a dia?",
+    "stepFinalTitle": "Toque final ✨",
+    "stepFinalWhereDesc": "Onde te encontrar?",
+    "stepFinalTouch": "Toque final!",
+    "stepFinalDesc": "Adicione uma descrição ao seu perfil",
+    "selectMainArea": "Selecione sua área de atuação principal",
+    "techExperience": "Tempo de experiência na área tech",
+    "professionalExperience": "Tempo de experiência profissional",
+    "selectTechnologies": "Selecione as tecnologias que você utiliza",
+    "whereAreYou": "Onde você está?",
+    "locationPlaceholder": "Ex: São Paulo, SP",
+    "shortBio": "Bio curta",
+    "bioPlaceholder": "Resuma sua jornada profissional...",
+    "skipSetup": "Pular configuração",
+    "continue": "Continuar",
+    "completeProfile": "Concluir Perfil",
+    "profileCreatedSuccess": "Perfil profissional criado com sucesso!",
+    "descriptionPlaceholder": "Conte um pouco sobre você...",
+    "next": "Próximo",
+    "back": "Voltar",
+    "finish": "Finalizar",
+    "skip": "Pular",
+    "saving": "Salvando...",
+    "errorSaving": "Erro ao salvar perfil. Tente novamente.",
+    "selectAtLeastOne": "Selecione pelo menos uma opção.",
+    "nicheOptions": {
+      "tecnologia": "Tecnologia",
+      "educacao": "Educação",
+      "recursos_humanos": "Recursos Humanos",
+      "financeiro": "Financeiro",
+      "saude": "Saúde",
+      "vendas": "Vendas",
+      "marketing": "Marketing",
+      "juridico": "Jurídico",
+      "engenharia": "Engenharia",
+      "design": "Design",
+      "produto": "Produto",
+      "outro": "Outro"
+    },
+    "careerTimeOptions": {
+      "0-1": "0-1 ano",
+      "1-3": "1-3 anos",
+      "3-5": "3-5 anos",
+      "5-10": "5-10 anos",
+      "10+": "10+ anos"
+    },
+    "focusOptions": {
+      "frontend": "Front-end",
+      "backend": "Back-end",
+      "fullstack": "Full Stack",
+      "mobile": "Mobile",
+      "devops": "DevOps",
+      "data": "Dados",
+      "qa": "QA / Testes",
+      "design": "UI/UX Design"
+    }
+  },
+  "guide": {
+    "welcome": {
+      "title": "Bem-vindo ao TreinaVaga",
+      "description": "Sua plataforma definitiva para preparação técnica e evolução de carreira. Vamos fazer um tour rápido?"
+    },
+    "quizzes": {
+      "title": "Simulados Inteligentes",
+      "description": "Pratique com quizzes gerados por IA personalizados para sua senioridade ou explore nossa biblioteca comunitária."
+    },
+    "flashcards": {
+      "title": "Flashcards Dinâmicos",
+      "description": "Aprenda com flashcards interativos gerados por IA. Revise conceitos importantes e fixe conhecimentos de forma eficiente."
+    },
+    "interviews": {
+      "title": "Simulações de Entrevista",
+      "description": "Pratique entrevistas técnicas com IA. Receba feedback detalhado sobre suas respostas e melhore sua performance."
+    },
+    "tokens": {
+      "title": "Sistema de Tokens",
+      "description": "Ganhe tokens completando desafios e mantendo sua ofensiva. Compre mais tokens ou use-os para gerar simulados avançados e mentorias."
+    },
+    "community": {
+      "title": "Comunidade TreinaVaga",
+      "description": "Conecte-se com outros usuários, veja o progresso da comunidade e compartilhe conquistas. Aprenda colaborativamente!"
+    },
+    "metrics": {
+      "title": "Métricas e Evolução",
+      "description": "Acompanhe seu progresso detalhado. Identifique pontos fracos e compare seu desempenho no ranking global."
+    },
+    "previous": "Anterior",
+    "next": "Próximo",
+    "finish": "Concluir",
+    "createQuiz": {
+      "title": "Crie seu primeiro Quiz",
+      "description": "Gere quizzes personalizados a partir de links de vagas de emprego."
+    },
+    "practice": {
+      "title": "Pratique Entrevistas",
+      "description": "Simule entrevistas técnicas com IA e receba feedback detalhado."
+    },
+    "complete": "Completo!",
+    "letsGo": "Vamos lá!",
+    "gotIt": "Entendi!",
+    "stepOf": "Passo {{current}} de {{total}}"
+  }
+}

@@ -26,11 +26,13 @@ import {
 import OnboardingGuide from './OnboardingGuide';
 import ActivityHeatmap from './ActivityHeatmap';
 import { getNicheIcon } from '../utils/nicheIcons';
+import { useTranslation } from 'react-i18next';
 
 const HomePage: React.FC = () => {
   const { user, isLoading } = useAuth();
   const navigate = useNavigate();
   const { isCollapsed } = useSidebar();
+  const { t } = useTranslation('home');
   const [userStats, setUserStats] = useState<any>(null);
   const [suggestedQuizzes, setSuggestedQuizzes] = useState<any[]>([]);
   const [startingQuizId, setStartingQuizId] = useState<string | null>(null);
@@ -112,7 +114,7 @@ const HomePage: React.FC = () => {
       const fullQuiz = await apiClient.getQuizForPlaying(quizId);
 
       if (!fullQuiz || !fullQuiz.questions || fullQuiz.questions.length === 0) {
-        toast.error('Quiz indísponivel no momento');
+        toast.error(t('quizUnavailable'));
         return;
       }
 
@@ -124,7 +126,7 @@ const HomePage: React.FC = () => {
 
       navigate('/quiz/generated');
     } catch (error) {
-      toast.error('Erro ao iniciar quiz');
+      toast.error(t('errorStartingQuiz'));
       console.error(error);
     } finally {
       setStartingQuizId(null);
@@ -136,28 +138,28 @@ const HomePage: React.FC = () => {
 
   const statsConfig = isGuest ? [
     // Demo/Preview Stats for Guests (Locked State)
-    { label: 'Questões Feitas', value: '428', icon: DocumentTextIcon, color: 'indigo', blur: true },
-    { label: 'Taxa de Acerto', value: '76%', icon: CheckCircleIcon, color: 'green', blur: true },
-    { label: 'Sequência', value: '12 dias', icon: FireIcon, color: 'amber', blur: true },
-    { label: 'Nível', value: 'Sênior', icon: TrophyIcon, color: 'primary', blur: true },
+    { label: t('stats.questionsCompleted'), value: '428', icon: DocumentTextIcon, color: 'indigo', blur: true },
+    { label: t('stats.hitRate'), value: '76%', icon: CheckCircleIcon, color: 'green', blur: true },
+    { label: t('stats.streak'), value: t('stats.streakDays', { count: 12 }), icon: FireIcon, color: 'amber', blur: true },
+    { label: t('stats.level'), value: t('stats.levelSenior'), icon: TrophyIcon, color: 'primary', blur: true },
   ] : userStats ? [
     // Real User Stats
-    { label: 'Atividades', value: (userStats.totalAttempts ?? 0).toString(), icon: DocumentTextIcon, color: 'indigo', blur: false },
-    { label: 'Taxa de Acerto', value: `${((userStats.averageScore ?? 0) * 10).toFixed(0)}%`, icon: CheckCircleIcon, color: 'green', blur: false },
-    { label: 'Quizzes Gratuitos', value: (userStats.totalFreeQuizzesCompleted ?? 0).toString(), icon: SparklesIcon, color: 'amber', blur: false },
-    { label: 'Sessões Flashcard', value: (userStats.flashcardSessions ?? 0).toString(), icon: DocumentTextIcon, color: 'primary', blur: false },
+    { label: t('stats.activities'), value: (userStats.totalAttempts ?? 0).toString(), icon: DocumentTextIcon, color: 'indigo', blur: false },
+    { label: t('stats.hitRate'), value: `${((userStats.averageScore ?? 0) * 10).toFixed(0)}%`, icon: CheckCircleIcon, color: 'green', blur: false },
+    { label: t('stats.freeQuizzes'), value: (userStats.totalFreeQuizzesCompleted ?? 0).toString(), icon: SparklesIcon, color: 'amber', blur: false },
+    { label: t('stats.flashcardSessions'), value: (userStats.flashcardSessions ?? 0).toString(), icon: DocumentTextIcon, color: 'primary', blur: false },
   ] : [
     // Empty User Stats
-    { label: 'Atividades', value: '0', icon: DocumentTextIcon, color: 'indigo', blur: false },
-    { label: 'Taxa de Acerto', value: '0%', icon: CheckCircleIcon, color: 'green', blur: false },
-    { label: 'Quizzes Gratuitos', value: '0', icon: SparklesIcon, color: 'amber', blur: false },
-    { label: 'Sessões Flashcard', value: '0', icon: DocumentTextIcon, color: 'primary', blur: false },
+    { label: t('stats.activities'), value: '0', icon: DocumentTextIcon, color: 'indigo', blur: false },
+    { label: t('stats.hitRate'), value: '0%', icon: CheckCircleIcon, color: 'green', blur: false },
+    { label: t('stats.freeQuizzes'), value: '0', icon: SparklesIcon, color: 'amber', blur: false },
+    { label: t('stats.flashcardSessions'), value: '0', icon: DocumentTextIcon, color: 'primary', blur: false },
   ];
 
   const quickActions = isGuest ? [
     {
-      label: 'Criar Conta Grátis',
-      desc: 'Comece agora e salve seu progresso',
+      label: t('quickActions.createFreeAccount'),
+      desc: t('quickActions.createFreeAccountDesc'),
       icon: SparklesIcon,
       action: () => navigate('/login'),
       primary: true,
@@ -166,8 +168,8 @@ const HomePage: React.FC = () => {
       animate: true
     },
     {
-      label: 'Quiz Gratuito',
-      desc: 'Teste seus conhecimentos',
+      label: t('quickActions.freeQuiz'),
+      desc: t('quickActions.freeQuizDesc'),
       icon: PlayIcon,
       action: () => navigate('/free-quizzes'),
       primary: false,
@@ -175,8 +177,8 @@ const HomePage: React.FC = () => {
       text: 'text-indigo-600 dark:text-indigo-400'
     },
     {
-      label: 'Ver Planos Premium',
-      desc: 'Desbloqueie todo o potencial',
+      label: t('quickActions.premiumPlans'),
+      desc: t('quickActions.premiumPlansDesc'),
       icon: TrophyIcon,
       action: () => navigate('/pricing'),
       primary: false,
@@ -185,8 +187,8 @@ const HomePage: React.FC = () => {
     },
   ] : [
     {
-      label: 'Novo Simulado',
-      desc: 'Gerar quiz personalizado',
+      label: t('quickActions.newQuiz'),
+      desc: t('quickActions.newQuizDesc'),
       icon: PlusIcon,
       action: () => navigate('/create-quiz'),
       primary: true,
@@ -194,8 +196,8 @@ const HomePage: React.FC = () => {
       text: 'text-white'
     },
     {
-      label: 'Simulação Entrevista',
-      desc: 'Pratique para entrevistas',
+      label: t('quickActions.interviewSim'),
+      desc: t('quickActions.interviewSimDesc'),
       icon: ChatBubbleLeftRightIcon,
       action: () => navigate('/create-interview'),
       primary: false,
@@ -203,8 +205,8 @@ const HomePage: React.FC = () => {
       text: 'text-green-600 dark:text-green-400'
     },
     {
-      label: 'Continuar',
-      desc: 'Retomar último quiz',
+      label: t('quickActions.continue'),
+      desc: t('quickActions.continueDesc'),
       icon: PlayIcon,
       action: () => navigate('/my-quizzes'),
       primary: false,
@@ -212,8 +214,8 @@ const HomePage: React.FC = () => {
       text: 'text-indigo-600 dark:text-indigo-400'
     },
     {
-      label: 'Evolução',
-      desc: 'Acompanhe seu progresso',
+      label: t('quickActions.evolution'),
+      desc: t('quickActions.evolutionDesc'),
       icon: ArrowTrendingUpIcon,
       action: () => navigate('/desempenho'),
       primary: false,
@@ -221,8 +223,8 @@ const HomePage: React.FC = () => {
       text: 'text-primary-600 dark:text-primary-400'
     },
     {
-      label: 'Ranking',
-      desc: 'Em breve',
+      label: t('quickActions.ranking'),
+      desc: t('quickActions.rankingDesc'),
       icon: TrophyIcon,
       action: () => { },
       primary: false,
@@ -236,7 +238,7 @@ const HomePage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-50 transition-colors duration-200">
-      <PageTitle title="Início - TreinaVagaAI" />
+      <PageTitle title={t('pageTitle')} />
       <Sidebar />
 
       <main className={`min-h-screen transition-all duration-300 ${isCollapsed ? 'lg:ml-16' : 'lg:ml-64'}`}>
@@ -247,20 +249,20 @@ const HomePage: React.FC = () => {
               <div>
                 <h1 className="text-xl font-bold text-slate-900 dark:text-white tracking-tight">
                   {isGuest ? (
-                    <span>Olá, <span className="text-primary-600 dark:text-primary-400">Visitante</span></span>
+                    <span>{t('greeting')} <span className="text-primary-600 dark:text-primary-400">{t('guestLabel')}</span></span>
                   ) : (
-                    <span>Olá, <span className="text-primary-600 dark:text-primary-400">{user?.name?.split(' ')[0]}</span></span>
+                    <span>{t('greeting')} <span className="text-primary-600 dark:text-primary-400">{user?.name?.split(' ')[0]}</span></span>
                   )}
                 </h1>
                 <p className="text-sm text-slate-500 dark:text-slate-400">
-                  {isGuest ? 'Experimente um pouco do que oferecemos.' : 'Vamos evoluir sua carreira hoje?'}
+                  {isGuest ? t('guestSubtitle') : t('userSubtitle')}
                 </p>
               </div>
               <div className="flex items-center gap-3">
                 {!isGuest && (
                   <div className="hidden sm:flex items-center px-3 py-1.5 bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400 rounded-lg text-sm font-medium border border-amber-200 dark:border-amber-800">
                     <SparklesIcon className="w-4 h-4 mr-2" />
-                    <span>{user.tokens} Tokens</span>
+                    <span>{user.tokens} {t('tokens')}</span>
                   </div>
                 )}
                 {isGuest && (
@@ -268,7 +270,7 @@ const HomePage: React.FC = () => {
                     onClick={() => navigate('/login')}
                     className="text-sm font-semibold text-primary-600 dark:text-primary-400 hover:opacity-80 transition-opacity"
                   >
-                    Efetuar Login
+                    {t('loginButton')}
                   </button>
                 )}
               </div>
@@ -295,18 +297,18 @@ const HomePage: React.FC = () => {
                 <div className="flex-1 text-center md:text-left">
                   <div className="inline-flex items-center gap-2 px-3 py-1 bg-primary-500/10 text-primary-400 rounded-full text-xs font-bold uppercase tracking-wider mb-6 border border-primary-500/20">
                     <SparklesIcon className="w-3 h-3" />
-                    <span>Para todas as carreiras</span>
+                    <span>{t('guestHero.badge')}</span>
                   </div>
 
                   <h1 className="text-4xl lg:text-5xl font-black text-white mb-6 leading-tight">
-                    <span className="text-white">Conquiste sua vaga em </span>
+                    <span className="text-white">{t('guestHero.titleWhite')}</span>
                     <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary-400 to-blue-400">
-                      qualquer área
+                      {t('guestHero.titleGradient')}
                     </span>
                   </h1>
 
                   <p className="text-lg text-slate-400 mb-8 leading-relaxed max-w-xl mx-auto md:mx-0">
-                    Tech, Saúde, Vendas, Direito, Engenharia... O TreinaVaga usa IA para criar simulados personalizados para <b>sua</b> realidade, qualquer que seja ela.
+                    {t('guestHero.description')}
                   </p>
 
                   <div className="flex flex-col sm:flex-row gap-4 justify-center md:justify-start">
@@ -315,7 +317,7 @@ const HomePage: React.FC = () => {
                       className="group relative px-8 py-4 bg-primary-600 hover:bg-primary-500 text-white rounded-xl font-bold text-lg shadow-lg shadow-primary-900/50 hover:shadow-primary-600/50 transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]"
                     >
                       <span className="relative z-10 flex items-center justify-center gap-2">
-                        Começar Agora
+                        {t('guestHero.startNow')}
                         <ArrowRightOnRectangleIcon className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                       </span>
                     </button>
@@ -324,7 +326,7 @@ const HomePage: React.FC = () => {
                       className="px-8 py-4 bg-white/5 hover:bg-white/10 text-white rounded-xl font-bold text-lg backdrop-blur-sm border border-white/10 hover:border-white/20 transition-all duration-300 flex items-center justify-center gap-2"
                     >
                       <PlayIcon className="w-5 h-5 text-primary-400" />
-                      <span>Ver Demonstração</span>
+                      <span>{t('guestHero.watchDemo')}</span>
                     </button>
                   </div>
 
@@ -342,7 +344,7 @@ const HomePage: React.FC = () => {
                         </div>
                       ))}
                     </div>
-                    <p>Junte-se a profissionais de todas as áreas</p>
+                    <p>{t('guestHero.joinProfessionals')}</p>
                   </div>
                 </div>
 
@@ -355,11 +357,11 @@ const HomePage: React.FC = () => {
                           <TrophyIcon className="w-6 h-6" />
                         </div>
                         <div>
-                          <div className="text-white font-bold">Candidato Preparado</div>
-                          <div className="text-xs text-slate-500">Pronto para o desafio</div>
+                          <div className="text-white font-bold">{t('guestCard.preparedCandidate')}</div>
+                          <div className="text-xs text-slate-500">{t('guestCard.readyForChallenge')}</div>
                         </div>
                       </div>
-                      <div className="px-2 py-1 bg-green-500/10 text-green-400 text-xs rounded font-bold">100% Pronto</div>
+                      <div className="px-2 py-1 bg-green-500/10 text-green-400 text-xs rounded font-bold">{t('guestCard.ready100')}</div>
                     </div>
                     <div className="space-y-3">
                       <div className="h-2 bg-slate-800 rounded w-3/4"></div>
@@ -367,13 +369,13 @@ const HomePage: React.FC = () => {
                       <div className="h-2 bg-slate-800 rounded w-5/6"></div>
                     </div>
                     <div className="mt-6 flex gap-2">
-                      <div className="flex-1 h-10 bg-primary-600 rounded-lg flex items-center justify-center text-white font-bold text-sm">Iniciar Simulado</div>
+                      <div className="flex-1 h-10 bg-primary-600 rounded-lg flex items-center justify-center text-white font-bold text-sm">{t('guestCard.startQuiz')}</div>
                     </div>
 
                     {/* Floating Badge */}
                     <div className="absolute -bottom-4 -right-4 bg-slate-800 border border-slate-700 p-3 rounded-xl shadow-xl flex items-center gap-3 animate-bounce delay-700">
                       <CheckCircleIcon className="w-5 h-5 text-green-400" />
-                      <span className="text-white font-bold text-sm">Aprovado!</span>
+                      <span className="text-white font-bold text-sm">{t('guestCard.approved')}</span>
                     </div>
                   </div>
                 </div>
@@ -385,7 +387,7 @@ const HomePage: React.FC = () => {
           {isGuest && (
             <div className="mb-8">
               <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-6">
-                O que você encontrará aqui
+                {t('guestFeatures.title')}
               </h2>
               <div className="grid md:grid-cols-3 gap-6">
                 {/* Feature 1: Simulados IA */}
@@ -394,10 +396,10 @@ const HomePage: React.FC = () => {
                     <BoltIcon className="w-7 h-7 text-primary-600 dark:text-primary-400" />
                   </div>
                   <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-2">
-                    Simulados com IA
+                    {t('guestFeatures.aiQuizzes')}
                   </h3>
                   <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
-                    Gere quizzes personalizados baseados na descrição da vaga em segundos. Prepare-se para o que realmente importa.
+                    {t('guestFeatures.aiQuizzesDesc')}
                   </p>
                 </div>
 
@@ -407,10 +409,10 @@ const HomePage: React.FC = () => {
                     <ChatBubbleLeftRightIcon className="w-7 h-7 text-green-600 dark:text-green-400" />
                   </div>
                   <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-2">
-                    Simulação de Entrevista
+                    {t('guestFeatures.interviewSim')}
                   </h3>
                   <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
-                    Pratique com uma IA que simula recrutadores reais. Receba feedback instantâneo sobre suas respostas.
+                    {t('guestFeatures.interviewSimDesc')}
                   </p>
                 </div>
 
@@ -420,10 +422,10 @@ const HomePage: React.FC = () => {
                     <DocumentTextIcon className="w-7 h-7 text-amber-600 dark:text-amber-400" />
                   </div>
                   <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-2">
-                    Flashcards SRS
+                    {t('guestFeatures.flashcardsSRS')}
                   </h3>
                   <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
-                    Memorização de longo prazo com repetição espaçada. Nunca mais esqueça conceitos importantes.
+                    {t('guestFeatures.flashcardsSRSDesc')}
                   </p>
                 </div>
               </div>
@@ -460,7 +462,7 @@ const HomePage: React.FC = () => {
               {/* Quick Actions */}
               <section>
                 <h2 className="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-wider mb-4">
-                  {isGuest ? 'Comece Agora' : 'Ações Rápidas'}
+                  {isGuest ? t('quickActions.guestTitle') : t('quickActions.title')}
                 </h2>
                 <div className="space-y-3">
                   {quickActions.map((action, index) => {
@@ -505,12 +507,12 @@ const HomePage: React.FC = () => {
                   </div>
                   <div>
                     <p className="text-xs font-bold text-amber-900 dark:text-amber-400 uppercase tracking-widest mb-2">
-                      {isGuest ? 'Dica de Carreira' : 'Dica Pro'}
+                      {isGuest ? t('tip.guestLabel') : t('tip.userLabel')}
                     </p>
                     <p className="text-sm text-slate-700 dark:text-slate-300 leading-relaxed font-medium">
                       {isGuest
-                        ? 'Recrutadores gastam em média 6 segundos por currículo. Seus resultados nos simulados geram um portfólio verificável que chama a atenção.'
-                        : 'Revise seus erros nos simulados anteriores. Usuários que revisam erros têm 40% mais chances de aprovação.'}
+                        ? t('tip.guestText')
+                        : t('tip.userText')}
                     </p>
                   </div>
                 </div>
@@ -523,9 +525,9 @@ const HomePage: React.FC = () => {
               <section>
                 <div className="flex items-center justify-between mb-4">
                   <h2 className="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-wider">
-                    {isGuest ? 'Experimente (Gratuito)' : 'Recomendados para Você'}
+                    {isGuest ? t('suggested.guestTitle') : t('suggested.userTitle')}
                   </h2>
-                  <button onClick={() => navigate('/free-quizzes')} className="text-xs font-medium text-primary-600 dark:text-primary-400 hover:underline">Ver todos</button>
+                  <button onClick={() => navigate('/free-quizzes')} className="text-xs font-medium text-primary-600 dark:text-primary-400 hover:underline">{t('suggested.viewAll')}</button>
                 </div>
                 <div className="grid sm:grid-cols-2 gap-4">
                   {suggestedQuizzes.map((quiz) => (
@@ -551,13 +553,13 @@ const HomePage: React.FC = () => {
                       <div className="flex items-center gap-3 text-xs text-slate-500 dark:text-slate-400 mt-2">
                         <span className="flex items-center gap-1"><ClockIcon className="w-3 h-3" /> {quiz.nivel}</span>
                         <span>•</span>
-                        <span className="flex items-center gap-1"><DocumentTextIcon className="w-3 h-3" /> {quiz.quantidade_questoes} questões</span>
+                        <span className="flex items-center gap-1"><DocumentTextIcon className="w-3 h-3" /> {quiz.quantidade_questoes} {t('questions')}</span>
                       </div>
                     </div>
                   ))}
                   {suggestedQuizzes.length === 0 && (
                     <div className="col-span-1 sm:col-span-2 text-center py-8 bg-slate-50 dark:bg-slate-900 rounded-xl border border-dashed border-slate-200 dark:border-slate-800">
-                      <p className="text-slate-500 text-sm">Carregando sugestões...</p>
+                      <p className="text-slate-500 text-sm">{t('suggested.loadingSuggestions')}</p>
                     </div>
                   )}
                 </div>
@@ -566,9 +568,9 @@ const HomePage: React.FC = () => {
               {/* Recent Grid */}
               <section>
                 <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-wider">Atividades Recentes</h2>
+                  <h2 className="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-wider">{t('recentActivities')}</h2>
                   {!isGuest && (
-                    <button onClick={() => navigate('/profile/quiz-history')} className="text-xs font-medium text-primary-600 dark:text-primary-400 hover:underline">Histórico completo</button>
+                    <button onClick={() => navigate('/profile/quiz-history')} className="text-xs font-medium text-primary-600 dark:text-primary-400 hover:underline">{t('fullHistory')}</button>
                   )}
                 </div>
 
@@ -615,16 +617,16 @@ const HomePage: React.FC = () => {
                           <LockClosedIcon className="w-6 h-6" />
                         </div>
                         <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-2">
-                          Painel de Evolução
+                          {t('lockedPanel.title')}
                         </h3>
                         <p className="text-sm text-slate-500 dark:text-slate-400 mb-5 leading-relaxed">
-                          Acesse gráficos detalhados, histórico de erros e receba insights para acelerar sua aprovação.
+                          {t('lockedPanel.description')}
                         </p>
                         <button
                           onClick={() => navigate('/login')}
                           className="w-full py-3 bg-slate-900 dark:bg-white hover:bg-slate-800 dark:hover:bg-slate-200 text-white dark:text-slate-900 font-bold rounded-xl transition-all shadow-lg text-sm"
                         >
-                          Criar Conta Grátis
+                          {t('lockedPanel.createFreeAccount')}
                         </button>
                       </div>
                     </div>
@@ -654,7 +656,7 @@ const HomePage: React.FC = () => {
                               <div className="min-w-0 flex-1">
                                 <p className="font-semibold text-slate-900 dark:text-white text-sm truncate">{simulado.title}</p>
                                 <p className="text-xs text-slate-500 dark:text-slate-400 truncate">
-                                  {new Date(simulado.date).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })} • {simulado.questionsCount} questões
+                                  {new Date(simulado.date).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })} • {simulado.questionsCount} {t('questions')}
                                 </p>
                               </div>
                             </div>
@@ -683,11 +685,11 @@ const HomePage: React.FC = () => {
       <button
         onClick={() => setIsOnboardingOpen(true)}
         className="fixed bottom-24 lg:bottom-6 right-6 z-40 p-3 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 hover:text-primary-600 dark:hover:text-primary-400 rounded-full shadow-lg shadow-slate-200/50 dark:shadow-slate-900/50 hover:shadow-xl hover:scale-105 active:scale-95 transition-all duration-300 group"
-        aria-label="Ajuda e Tutorial"
+        aria-label={t('help')}
       >
         <QuestionMarkCircleIcon className="w-6 h-6" />
         <span className="absolute right-full mr-4 top-1/2 -translate-y-1/2 px-3 py-1.5 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-xs font-semibold rounded-lg shadow-xl border border-slate-100 dark:border-slate-700 opacity-0 transform translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300 pointer-events-none whitespace-nowrap">
-          Ajuda
+          {t('help')}
         </span>
       </button>
 

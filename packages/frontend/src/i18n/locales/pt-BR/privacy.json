@@ -1,0 +1,49 @@
+{
+  "pageTitle": "Política de Privacidade - TreinaVagaAI",
+  "title": "Política de Privacidade",
+  "subtitle": "Transparência sobre como tratamos seus dados pessoais.",
+  "updatedAt": "Atualizado em {{date}}",
+  "back": "Voltar",
+  "allRightsReserved": "© {{year}} TreinaVagaAI. Todos os direitos reservados.",
+  "sections": {
+    "introduction": {
+      "title": "1. Introdução",
+      "content": "A sua privacidade é extremamente importante para nós. Esta Política de Privacidade detalha de forma transparente como a TreinaVagaAI coleta, armazena, protege e utiliza suas informações pessoais ao utilizar nossa plataforma."
+    },
+    "informationCollection": {
+      "title": "2. Coleta de Informações",
+      "content": "Para proporcionar a melhor experiência, podemos coletar os seguintes tipos de informações:",
+      "list": [
+        "Informações Pessoais: Nome completo, email e foto (via login social).",
+        "Dados de Uso: Estatísticas de quizzes, progresso e interações.",
+        "Dados Técnicos: Endereço IP, dispositivo e navegador."
+      ]
+    },
+    "useOfInformation": {
+      "title": "3. Uso das Informações",
+      "content": "Utilizamos seus dados estritamente para:",
+      "list": [
+        "Operar e manter os serviços da plataforma.",
+        "Personalizar recomendações de estudo baseadas no desempenho.",
+        "Análises estatísticas para aprimoramento da IA.",
+        "Envio de comunicados importantes e suporte."
+      ]
+    },
+    "sharing": {
+      "title": "4. Compartilhamento",
+      "content": "Não vendemos suas informações pessoais. O compartilhamento ocorre apenas com prestadores de serviços essenciais (como infraestrutura de nuvem) que possuem obrigações contratuais de confidencialidade."
+    },
+    "dataSecurity": {
+      "title": "5. Segurança de Dados",
+      "content": "Adotamos rigorosas medidas de segurança técnicas e administrativas, incluindo criptografia e controles de acesso, para proteger seus dados contra acesso não autorizado, perda ou alteração."
+    },
+    "yourRights": {
+      "title": "6. Seus Direitos",
+      "content": "Você possui total controle sobre seus dados. A qualquer momento, você pode solicitar o acesso, correção ou exclusão de suas informações pessoais através das configurações da conta ou suporte."
+    },
+    "cookies": {
+      "title": "7. Cookies",
+      "content": "Utilizamos cookies para melhorar a navegação, lembrar preferências e analisar tráfego. Você pode gerenciar as preferências diretamente em seu navegador."
+    }
+  }
+}

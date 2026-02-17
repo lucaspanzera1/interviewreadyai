@@ -1,0 +1,27 @@
+{
+  "boundary": {
+    "title": "Oops! Algo deu errado",
+    "description": "Ocorreu um erro inesperado. Por favor, tente novamente.",
+    "detailedDescription": "Ocorreu um erro inesperado na aplicação. Nossa equipe foi notificada e está trabalhando para resolver o problema.",
+    "errorDetailsLabel": "Detalhes do Erro (Desenvolvimento):",
+    "tryAgain": "Tentar Novamente",
+    "reloadPage": "Recarregar Página",
+    "backHome": "Voltar ao Início",
+    "supportMessage": "Se o problema persistir, entre em contato com o suporte:"
+  },
+  "notFound": {
+    "title": "Página não encontrada",
+    "description": "A página que você está procurando não existe ou foi movida.",
+    "backHome": "Voltar ao Início"
+  },
+  "network": {
+    "offline": "Você está offline. Verifique sua conexão.",
+    "timeout": "A requisição demorou demais. Tente novamente.",
+    "serverError": "Erro no servidor. Tente novamente mais tarde."
+  },
+  "generic": {
+    "somethingWrong": "Algo deu errado",
+    "tryAgain": "Tente novamente",
+    "contactSupport": "Se o problema persistir, entre em contato com o suporte."
+  }
+}

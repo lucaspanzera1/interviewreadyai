@@ -1,0 +1,23 @@
+{
+  "title": "Pesquisa Rápida",
+  "placeholder": "O que você procura?",
+  "categories": {
+    "all": "Todos",
+    "myQuizzes": "Meus Quizzes",
+    "explore": "Explorar",
+    "community": "Comunidade"
+  },
+  "quickNav": {
+    "title": "Navegação Rápida",
+    "home": "Início",
+    "quizzes": "Quizzes",
+    "interviews": "Entrevistas",
+    "flashcards": "Flashcards",
+    "community": "Comunidade",
+    "profile": "Perfil",
+    "settings": "Configurações"
+  },
+  "recentSearches": "Buscas Recentes",
+  "noResults": "Nenhum resultado encontrado",
+  "close": "Fechar"
+}
