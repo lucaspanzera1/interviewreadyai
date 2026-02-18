@@ -38,7 +38,7 @@ const Footer: React.FC = () => {
                         <Link to="/" className="inline-flex items-center gap-2.5 mb-6 group">
                             <img src={logoSrc} alt="TreinaVaga" className="h-16 w-16 object-contain group-hover:scale-110 transition-transform duration-300" />
                             <span className="text-2xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-slate-900 via-slate-700 to-slate-900 dark:from-white dark:via-slate-200 dark:to-white">
-                                TreinaVaga<span className="text-primary-600 dark:text-primary-400">AI</span>
+                                {t('brandName')}<span className="text-primary-600 dark:text-primary-400">{t('brandHighlight')}</span>
                             </span>
                         </Link>
                         <p className="text-slate-600 dark:text-slate-400 text-sm leading-relaxed mb-6 max-w-sm">

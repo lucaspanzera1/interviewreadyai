@@ -30,7 +30,9 @@
     "privacy": "Privacy Policy",
     "faq": "FAQ"
   },
-  "copyright": "© {{year}} TreinaVagaAI Inc.",
+  "brandName": "Interview",
+  "brandHighlight": "Ready",
+  "copyright": "© {{year}} InterviewReady Inc.",
   "poweredBy": "Powered By",
   "madeWith": "Made with ❤️ for devs"
 }
