@@ -1,5 +1,6 @@
 import { Injectable, HttpException, HttpStatus, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
+import { t, SupportedLanguage } from '../common/i18n';
 import { Model } from 'mongoose';
 import { ModuleRef } from '@nestjs/core';
 import { Quiz, QuizDocument } from './schemas/quiz.schema';
@@ -15,6 +16,8 @@ import { HttpService } from '@nestjs/axios';
 import { firstValueFrom } from 'rxjs';
 import axios from 'axios';
 import * as cheerio from 'cheerio';
+import * as fs from 'fs';
+import * as path from 'path';
 
 @Injectable()
 export class QuizService {
@@ -55,11 +58,13 @@ export class QuizService {
       throw new HttpException('GROQ_API_KEY not configured', HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
+    const lang = (user.preferredLanguage as SupportedLanguage) || 'pt-BR';
+
     try {
-      const promptTemplate = this.getPromptTemplate();
+      const promptTemplate = this.getPromptTemplate(lang);
       const prompt = this.buildPrompt(promptTemplate, dto);
 
-      const response = await this.callGroqAPI(prompt, apiKey, false);
+      const response = await this.callGroqAPI(prompt, apiKey, false, lang);
 
       // Parse do JSON de resposta
       try {
@@ -135,7 +140,14 @@ export class QuizService {
     }
   }
 
-  private getPromptTemplate(): string {
+  private getPromptTemplate(lang: SupportedLanguage = 'pt-BR'): string {
+    try {
+      const filename = lang === 'en' ? 'free-quiz-en.md' : 'free-quiz.md';
+      const promptPath = path.join(__dirname, '../../../../prompt', filename);
+      return fs.readFileSync(promptPath, 'utf-8');
+    } catch (error) {
+      // Fallback to hardcoded template
+    }
     return `# Prompt para Geração de Quiz
 
 Você é um especialista em educação e tecnologia, especializado em criar quizzes de alta qualidade sobre programação, desenvolvimento de software e tecnologias relacionadas.
@@ -216,7 +228,28 @@ Gere agora {quantidade_questoes} questões de nível {nivel} sobre "{titulo}" na
       .replace(/{contexto}/g, dto.contexto || 'Nenhum contexto adicional fornecido');
   }
 
-  private buildSimplifiedPrompt(dto: GenerateQuizDto): string {
+  private buildSimplifiedPrompt(dto: GenerateQuizDto, lang: SupportedLanguage = 'pt-BR'): string {
+    if (lang === 'en') {
+      return `Generate a quiz with ${dto.quantidade_questoes} questions about "${dto.titulo}" in the category "${dto.categoria}" at level ${dto.nivel}.
+
+Description: ${dto.descricao}
+
+Tags: ${dto.tags.join(', ')}
+
+Additional context: ${dto.contexto || 'None'}
+
+EXACT FORMAT (JSON ONLY):
+{
+  "questions": [
+    {
+      "question": "Question text",
+      "options": ["A", "B", "C", "D"],
+      "correct_answer": 0,
+      "explanation": "Detailed explanation"
+    }
+  ]
+}`;
+    }
     return `Gere um quiz com ${dto.quantidade_questoes} perguntas sobre "${dto.titulo}" na categoria "${dto.categoria}" com nível ${dto.nivel}.
 
 Descrição: ${dto.descricao}
@@ -238,9 +271,29 @@ FORMATO EXATO (APENAS JSON):
 }`;
   }
 
-  private async callGroqAPI(prompt: string, apiKey: string, isJobQuiz: boolean = false): Promise<string> {
+  private async callGroqAPI(prompt: string, apiKey: string, isJobQuiz: boolean = false, lang: SupportedLanguage = 'pt-BR'): Promise<string> {
     const url = 'https://api.groq.com/openai/v1/chat/completions';
     const systemMessage = isJobQuiz ?
+      (lang === 'en' ?
+      `You are a senior technical recruiter and experienced software engineer with 15+ years of experience conducting technical interviews at top technology companies (FAANG, unicorns and high-growth startups).
+
+Your expertise includes:
+- Precise seniority assessment based on job titles and descriptions
+- Creating questions that simulate real technical interviews
+- Focus on practical skills, problem solving and deep technical knowledge
+- Difficulty adaptation based on expected seniority level (junior, mid, senior, staff)
+- Emphasis on real-world scenarios and architecture decisions
+
+For technical questions:
+- Use real and modern code from the mentioned technologies
+- Include code analysis, debugging and optimization
+- Focus on fundamental concepts and practical application
+- Avoid theoretical questions without practical context
+
+IMPORTANT:
+1. Return ONLY valid JSON, no additional text before or after.
+2. Ensure all questions are relevant to the specific job.
+3. Keep the difficulty level appropriate for the role.` :
       `Você é um recrutador técnico sênior e engenheiro de software experiente com 15+ anos de experiência conduzindo entrevistas técnicas em empresas de tecnologia de ponta (FAANG, unicórnios e startups de alto crescimento).
 
 Sua expertise inclui:
@@ -259,7 +312,36 @@ Para questões técnicas:
 IMPORTANTE:
 1. Retorne APENAS JSON válido, sem texto adicional antes ou depois.
 2. Garanta que todas as perguntas sejam relevantes para a vaga específica.
-3. Mantenha o nível de dificuldade apropriado para o cargo.` :
+3. Mantenha o nível de dificuldade apropriado para o cargo.`) :
+      (lang === 'en' ?
+      `You are an expert in education and technology, specialized in creating high-quality quizzes about programming, software development and related technologies.
+
+Your expertise includes:
+- Programming languages (JavaScript, TypeScript, Python, Java, C#, Go, Rust, etc.)
+- Frameworks and libraries (React, Next.js, Vue, Angular, Node.js, Express, Django, Flask, Spring, etc.)
+- Frontend technologies (HTML, CSS, Sass, Tailwind, Webpack, Vite, etc.)
+- Backend technologies (REST APIs, GraphQL, SQL/NoSQL databases, authentication, etc.)
+- DevOps and tools (Docker, Kubernetes, CI/CD, Git, Linux, etc.)
+- Development concepts (algorithms, data structures, design patterns, architecture, etc.)
+- Code best practices and development
+- Modern technologies (microservices, serverless, cloud computing, etc.)
+
+When generating code in your responses:
+- Use code blocks delimited by \`\`\`language
+- Always specify the language (javascript, typescript, python, etc.)
+- Keep code clean, well formatted and commented when necessary
+- Use practical and realistic examples
+- Avoid overly long code - focus on the essentials
+
+For code questions:
+- Include relevant snippets in questions when appropriate
+- Use proper formatting to highlight inline code with \`code\`
+- Ensure alternatives also follow formatting conventions
+
+IMPORTANT:
+1. Always format code properly using the specified markers.
+2. Return ONLY valid JSON, no additional text before or after.
+3. Do NOT include explanations, comments or text outside the JSON.` :
       `Você é um especialista em educação e tecnologia, especializado em criar quizzes de alta qualidade sobre programação, desenvolvimento de software e tecnologias relacionadas.
 
 Sua expertise inclui:
@@ -287,7 +369,7 @@ Para questões sobre código:
 IMPORTANTE:
 1. Sempre formate código adequadamente usando as marcações especificadas.
 2. Retorne APENAS JSON válido, sem texto adicional antes ou depois.
-3. NÃO inclua explicações, comentários ou texto fora do JSON.`;
+3. NÃO inclua explicações, comentários ou texto fora do JSON.`);
 
     const payload = {
       model: 'openai/gpt-oss-120b',
@@ -456,7 +538,7 @@ IMPORTANTE:
       const hasAccess = await userService.canDoFreeQuiz(userId);
       if (!hasAccess) {
         throw new HttpException(
-          'Você atingiu o limite diário de 3 quizzes gratuitos. Aguarde até amanhã ou compre tokens para continuar jogando.',
+          t('quiz.dailyLimitReached'),
           HttpStatus.FORBIDDEN
         );
       }
@@ -560,7 +642,7 @@ IMPORTANTE:
     const hasAccess = await userService.canDoFreeQuiz(userId);
     if (!hasAccess) {
       throw new HttpException(
-        'Você atingiu o limite diário de 3 quizzes gratuitos. Aguarde até amanhã ou compre tokens para continuar jogando.',
+        t('quiz.dailyLimitReached'),
         HttpStatus.FORBIDDEN
       );
     }
@@ -581,7 +663,7 @@ IMPORTANTE:
     }
 
     if (!quiz.isActive) {
-      throw new HttpException('Este quiz não está disponível no momento.', HttpStatus.FORBIDDEN);
+      throw new HttpException(t('quiz.notAvailable'), HttpStatus.FORBIDDEN);
     }
 
     // Verificar se o usuário é o criador do quiz
@@ -594,7 +676,7 @@ IMPORTANTE:
       const userTokens = await userService.getUserTokens(userId);
       if (userTokens < 1) {
         throw new HttpException(
-          'Você não tem tokens suficientes para jogar este quiz. Compre tokens para continuar.',
+          t('quiz.notEnoughTokens'),
           HttpStatus.FORBIDDEN
         );
       }
@@ -606,7 +688,7 @@ IMPORTANTE:
       const hasAccess = await userService.canDoFreeQuiz(userId);
       if (!hasAccess) {
         throw new HttpException(
-          'Você atingiu o limite diário de 3 quizzes gratuitos. Aguarde até amanhã ou compre tokens para continuar jogando.',
+          t('quiz.dailyLimitReached'),
           HttpStatus.FORBIDDEN
         );
       }
@@ -710,8 +792,10 @@ IMPORTANTE:
       // Detectar o site da vaga e fazer scraping apropriado
       const jobData = await this.scrapeJob(dto.jobUrl);
 
+      const lang = (user.preferredLanguage as SupportedLanguage) || 'pt-BR';
+
       // Gerar o quiz baseado nos dados da vaga
-      const quiz = await this.generateJobQuizFromData(jobData, userId);
+      const quiz = await this.generateJobQuizFromData(jobData, userId, lang);
 
       // Deduzir 1 token do usuário após sucesso
       await userService.removeTokensFromUser(userId, 1, 'quiz_generation');
@@ -774,20 +858,20 @@ IMPORTANTE:
       // Extrair informações da vaga
       const jobTitle = $('h1.top-card-layout__title, h2.top-card-layout__title, h1[data-test-id="job-title"]').first().text().trim() ||
                        $('h1').first().text().trim() ||
-                       'Título da Vaga Não Encontrado';
+                       t('quiz.jobTitleNotFound');
 
       const companyName = $('.top-card-layout__card .topcard__org-name-link, .topcard__flavor--black-link, [data-test-id="company-name"]').first().text().trim() ||
                          $('.top-card-layout__card a[data-tracking-control-name="public_jobs_topcard-org-name"]').first().text().trim() ||
-                         'Empresa Não Encontrada';
+                         t('quiz.companyNotFound');
 
       const location = $('.top-card-layout__card .topcard__flavor--bullet, .topcard__flavor, [data-test-id="job-location"]').first().text().trim() ||
-                      'Localização Não Encontrada';
+                      t('quiz.locationNotFound');
 
       // Tentar múltiplos seletores para descrição
       const description = $('.show-more-less-html__markup, .description__text, [data-test-id="job-description"]').text().trim() ||
                          $('div[class*="description"]').first().text().trim() ||
                          $('section[data-test-id="job-details"]').text().trim() ||
-                         'Descrição não disponível';
+                         t('quiz.descriptionNotAvailable');
 
       // Extrair requisitos e responsabilidades do texto da descrição
       const requirements: string[] = [];
@@ -920,7 +1004,7 @@ IMPORTANTE:
 
       // Extrair informações da vaga usando seletores melhorados baseados na análise da página
       const jobTitle = $('h1').first().text().trim() ||
-                       'Título da Vaga Não Encontrado';
+                       t('quiz.jobTitleNotFound');
 
       // Para empresa, tentar múltiplas abordagens
       let companyName = '';
@@ -936,7 +1020,7 @@ IMPORTANTE:
       if (!companyName) {
         companyName = $('[data-testid="company-name"], .company-name, .employer-name').first().text().trim() ||
                      $('.company-info a').first().text().trim() ||
-                     'Empresa Não Encontrada';
+                     t('quiz.companyNotFound');
       }
 
       // Para localização, extrair do título se estiver entre parênteses
@@ -950,7 +1034,7 @@ IMPORTANTE:
       if (!location) {
         location = $('[data-testid="job-location"], .job-location, .location').first().text().trim() ||
                   $('.location-info').first().text().trim() ||
-                  'Localização Não Encontrada';
+                  t('quiz.locationNotFound');
       }
 
       // Descrição da vaga - procurar pela seção "Descrição da vaga"
@@ -976,7 +1060,7 @@ IMPORTANTE:
       if (!description) {
         description = $('[data-testid="job-description"], .job-description, .description').text().trim() ||
                      $('.job-details-content').text().trim() ||
-                     'Descrição não disponível';
+                     t('quiz.descriptionNotAvailable');
       }
 
       // Extrair requisitos e responsabilidades do texto da descrição
@@ -1103,19 +1187,19 @@ IMPORTANTE:
 
       const jobTitle = $('h1[data-testid="job-title"], .job-title, h1').first().text().trim() ||
                        $('h1').first().text().trim() ||
-                       'Título da Vaga Não Encontrado';
+                       t('quiz.jobTitleNotFound');
 
       const companyName = $('[data-testid="company-name"], .company-name, .company').first().text().trim() ||
                          $('.company-info a').first().text().trim() ||
-                         'Empresa Não Encontrada';
+                         t('quiz.companyNotFound');
 
       const location = $('[data-testid="job-location"], .job-location, .location').first().text().trim() ||
                       $('.location-info').first().text().trim() ||
-                      'Localização Não Encontrada';
+                      t('quiz.locationNotFound');
 
       const description = $('[data-testid="job-description"], .job-description, .description').text().trim() ||
                          $('.job-content').text().trim() ||
-                         'Descrição não disponível';
+                         t('quiz.descriptionNotAvailable');
 
       // Similar extraction logic as Gupy
       const requirements: string[] = [];
@@ -1485,20 +1569,20 @@ IMPORTANTE:
   /**
    * Gera quiz baseado nos dados da vaga
    */
-  private async generateJobQuizFromData(jobData: any, userId: string): Promise<GeneratedQuiz> {
+  private async generateJobQuizFromData(jobData: any, userId: string, lang: SupportedLanguage = 'pt-BR'): Promise<GeneratedQuiz> {
     const apiKey = this.configService.get<string>('GROQ_API_KEY');
     if (!apiKey) {
       throw new HttpException('GROQ_API_KEY not configured', HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     // Ler o template de prompt para quiz de vagas
-    const promptTemplate = await this.getJobQuizPromptTemplate();
+    const promptTemplate = await this.getJobQuizPromptTemplate(lang);
 
     // Construir o prompt com os dados da vaga
     const prompt = this.buildJobQuizPrompt(promptTemplate, jobData);
 
     // Chamar a API do Groq
-    const response = await this.callGroqAPI(prompt, apiKey, true);
+    const response = await this.callGroqAPI(prompt, apiKey, true, lang);
 
     // Parse do JSON de resposta
     try {
@@ -1533,7 +1617,7 @@ IMPORTANTE:
       const userObjectId = new Types.ObjectId(userId);
 
       const savedQuiz = await this.quizModel.create({
-        categoria: 'Vaga de Emprego',
+        categoria: t('quiz.categoryJobPosting'),
         titulo: `Quiz: ${jobData.jobTitle} - ${jobData.companyName}`,
         descricao: `Quiz personalizado para a vaga de ${jobData.jobTitle} na empresa ${jobData.companyName}`,
         tags: ['vaga', 'emprego', jobData.jobTitle.toLowerCase()],
@@ -1563,23 +1647,73 @@ IMPORTANTE:
   /**
    * Obtém o template de prompt para quiz de vagas
    */
-  private async getJobQuizPromptTemplate(): Promise<string> {
+  private async getJobQuizPromptTemplate(lang: SupportedLanguage = 'pt-BR'): Promise<string> {
     const fs = require('fs');
     const path = require('path');
-    const promptPath = path.join(__dirname, '../../../../prompt/job-quiz.md');
+    const filename = lang === 'en' ? 'job-quiz-en.md' : 'job-quiz.md';
+    const promptPath = path.join(__dirname, '../../../../prompt', filename);
     try {
       const template = fs.readFileSync(promptPath, 'utf-8');
       return template;
     } catch (error) {
       // Fallback para template hardcoded
-      return this.getDefaultJobQuizPrompt();
+      return this.getDefaultJobQuizPrompt(lang);
     }
   }
 
   /**
    * Template padrão para quiz de vagas (fallback)
    */
-  private getDefaultJobQuizPrompt(): string {
+  private getDefaultJobQuizPrompt(lang: SupportedLanguage = 'pt-BR'): string {
+    if (lang === 'en') {
+      return `# Job Quiz Generation Prompt
+
+You are a senior technical recruiter and experienced software engineer with 15+ years of experience conducting technical interviews at top technology companies (FAANG, unicorns and high-growth startups).
+
+Your expertise includes:
+- Precise seniority assessment based on job titles and descriptions
+- Creating questions that simulate real technical interviews
+- Focus on practical skills, problem solving and deep technical knowledge
+- Difficulty adaptation based on expected seniority level (junior, mid, senior, staff)
+- Emphasis on real-world scenarios and architecture decisions
+
+For technical questions:
+- Use real and modern code from the mentioned technologies
+- Include code analysis, debugging and optimization
+- Focus on fundamental concepts and practical application
+- Avoid theoretical questions without practical context
+
+IMPORTANT:
+1. Return ONLY valid JSON, no additional text before or after.
+2. Ensure all questions are relevant to the specific job.
+3. Keep the difficulty level appropriate for the role.
+
+EXACT FORMAT (JSON ONLY):
+{
+  "questions": [
+    {
+      "question": "Question text here?",
+      "options": [
+        "Option A",
+        "Option B",
+        "Option C",
+        "Option D"
+      ],
+      "correct_answer": 0,
+      "explanation": "Detailed explanation of why the correct answer is right and why the others are wrong."
+    }
+  ]
+}
+
+## Important Rules:
+- The \`correct_answer\` field must be the index of the correct answer (0, 1, 2 or 3)
+- Use professional and clear language
+- Explanations should be educational and prepare the candidate
+- Vary question types (conceptual, practical, situational)
+- Keep relevance to the specific job
+
+Generate 10 questions to prepare the candidate for this job.`;
+    }
     return `# Prompt para Geração de Quiz de Vaga de Emprego
 
 Você é um recrutador técnico sênior e engenheiro de software experiente com 15+ anos de experiência conduzindo entrevistas técnicas em empresas de tecnologia de ponta (FAANG, unicórnios e startups de alto crescimento).

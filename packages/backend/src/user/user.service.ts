@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
+import { t, SupportedLanguage } from '../common/i18n';
 import { HttpService } from '@nestjs/axios';
 import { ModuleRef } from '@nestjs/core';
 import { firstValueFrom } from 'rxjs';
@@ -147,7 +148,7 @@ export class UserService {
       return await user.save();
     } catch (error) {
       console.error('Error in findOrCreateUser:', error);
-      throw new DatabaseException('Erro ao buscar ou criar usuário', 'USER_OPERATION_FAILED');
+      throw new DatabaseException(t('user.fetchOrCreateError'), 'USER_OPERATION_FAILED');
     }
   }
 
@@ -164,7 +165,7 @@ export class UserService {
     );
 
     if (!user) {
-      throw new NotFoundException(`Usuário com ID ${id} não encontrado`, 'USER_NOT_FOUND');
+      throw new NotFoundException(t('user.notFoundWithId', 'pt-BR', { id }), 'USER_NOT_FOUND');
     }
 
     return user;
@@ -180,7 +181,7 @@ export class UserService {
     const user = await this.userModel.findById(id);
 
     if (!user) {
-      throw new NotFoundException(`Usuário com ID ${id} não encontrado`, 'USER_NOT_FOUND');
+      throw new NotFoundException(t('user.notFoundWithId', 'pt-BR', { id }), 'USER_NOT_FOUND');
     }
 
     return user;
@@ -236,7 +237,7 @@ export class UserService {
     );
 
     if (!user) {
-      throw new NotFoundException(`Usuário com ID ${id} não encontrado`, 'USER_NOT_FOUND');
+      throw new NotFoundException(t('user.notFoundWithId', 'pt-BR', { id }), 'USER_NOT_FOUND');
     }
 
     return user;
@@ -344,7 +345,7 @@ export class UserService {
       module: 'UserModule',
       status: 'active',
       database: 'MongoDB',
-      description: 'Módulo de gerenciamento de usuários',
+      description: t('user.statusDescription'),
       timestamp: new Date().toISOString(),
     };
   }

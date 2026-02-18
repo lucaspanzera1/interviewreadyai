@@ -21,6 +21,7 @@ import { AuthService } from './auth.service';
 import { LoginDto, TokenResponseDto, RefreshTokenDto } from './dto';
 import { GoogleOAuthGuard, GitHubOAuthGuard, JwtAuthGuard } from './guards';
 import { Public, CurrentUser } from './decorators';
+import { t, SupportedLanguage } from '../common/i18n';
 import { 
   UnauthorizedErrorDto, 
   ValidationErrorDto 
@@ -188,7 +189,7 @@ export class AuthController {
   async logout(@CurrentUser() user: any): Promise<{ message: string }> {
     // Em uma implementação completa, você poderia invalidar o token no servidor
     // Por enquanto, o logout é feito no frontend removendo os tokens
-    return { message: 'Logout realizado com sucesso' };
+    return { message: t('auth.logoutSuccess', (user.preferredLanguage as SupportedLanguage) || 'pt-BR') };
   }
 
   /**

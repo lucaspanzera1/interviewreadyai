@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Plan Redeemed Successfully</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
+
+    body, table, td, a { -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
+    table, td { mso-table-lspace: 0pt; mso-table-rspace: 0pt; }
+    img { -ms-interpolation-mode: bicubic; }
+
+    body {
+      margin: 0;
+      padding: 0;
+      width: 100% !important;
+      font-family: 'Poppins', 'Segoe UI', Helvetica, Arial, sans-serif;
+      background-color: #fcfbfd;
+      color: #1a1a2e;
+    }
+
+    @media screen and (max-width: 600px) {
+      .container { width: 100% !important; border-radius: 0 !important; }
+      .wrapper { padding: 0 !important; }
+      .content { padding: 24px 20px !important; }
+      .header { padding: 32px 20px !important; }
+      h1 { font-size: 24px !important; }
+    }
+  </style>
+</head>
+<body style="margin: 0; padding: 0; background-color: #fcfbfd;">
+
+  <table border="0" cellpadding="0" cellspacing="0" width="100%" class="wrapper" style="background-color: #fcfbfd;">
+    <tr>
+      <td align="center" style="padding: 40px 10px;">
+
+        <table border="0" cellpadding="0" cellspacing="0" width="600" class="container" style="background-color: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05); border: 1px solid #edebf3;">
+
+          <!-- Header -->
+          <tr>
+            <td class="header" align="center" style="background-color: #8a2be2; background-image: linear-gradient(135deg, #7f00ff 0%, #4c1d95 100%); padding: 40px; text-align: center;">
+              <h1 style="color: #ffffff; margin: 0; font-family: 'Poppins', Helvetica, Arial, sans-serif; font-size: 28px; font-weight: 700; letter-spacing: -0.5px; text-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                🎉 Plan Redeemed!
+              </h1>
+            </td>
+          </tr>
+
+          <!-- Content -->
+          <tr>
+            <td class="content" style="padding: 40px;">
+              <table border="0" cellpadding="0" cellspacing="0" width="100%">
+                <tr>
+                  <td style="padding-bottom: 24px;">
+                    <h2 style="margin: 0 0 16px 0; font-family: 'Poppins', Helvetica, Arial, sans-serif; font-size: 20px; font-weight: 600; color: #1a1a2e;">
+                      Hi, {{name}}!
+                    </h2>
+                    <p style="margin: 0 0 20px 0; font-family: 'Poppins', Helvetica, Arial, sans-serif; font-size: 16px; line-height: 1.6; color: #4a5568;">
+                      Congratulations! Your payment has been approved and the plan was redeemed successfully.
+                    </p>
+                  </td>
+                </tr>
+
+                <tr>
+                  <td style="padding-bottom: 24px;">
+                    <div style="background-color: #f7fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 24px; text-align: center;">
+                      <h3 style="margin: 0 0 8px 0; font-family: 'Poppins', Helvetica, Arial, sans-serif; font-size: 18px; font-weight: 600; color: #2d3748;">
+                        {{planName}}
+                      </h3>
+                      <p style="margin: 0 0 16px 0; font-family: 'Poppins', Helvetica, Arial, sans-serif; font-size: 14px; color: #718096;">
+                        {{planDescription}}
+                      </p>
+                      {{#if tokensAdded}}
+                      <p style="margin: 0; font-family: 'Poppins', Helvetica, Arial, sans-serif; font-size: 24px; font-weight: 700; color: #7f00ff;">
+                        +{{tokensAdded}} tokens
+                      </p>
+                      {{/if}}
+                    </div>
+                  </td>
+                </tr>
+
+                {{#if newRole}}
+                <tr>
+                  <td style="padding-bottom: 24px;">
+                    <div style="background-color: #e6fffa; border: 1px solid #b2f5ea; border-radius: 8px; padding: 16px;">
+                      <p style="margin: 0; font-family: 'Poppins', Helvetica, Arial, sans-serif; font-size: 16px; color: #234e52;">
+                        <strong>🎯 New role:</strong> {{newRole}}
+                        {{#if roleExpiresAt}}
+                        <br><strong>📅 Valid until:</strong> {{roleExpiresAt}}
+                        {{/if}}
+                      </p>
+                    </div>
+                  </td>
+                </tr>
+                {{/if}}
+
+                <tr>
+                  <td style="padding-bottom: 24px;">
+                    <p style="margin: 0 0 16px 0; font-family: 'Poppins', Helvetica, Arial, sans-serif; font-size: 16px; line-height: 1.6; color: #4a5568;">
+                      Your new token balance is: <strong>{{newTokenBalance}}</strong>
+                    </p>
+                    <p style="margin: 0; font-family: 'Poppins', Helvetica, Arial, sans-serif; font-size: 16px; line-height: 1.6; color: #4a5568;">
+                      Now you can enjoy all the benefits of your plan! Access our platform to start using your new features.
+                    </p>
+                  </td>
+                </tr>
+
+                <tr>
+                  <td align="center" style="padding-top: 24px;">
+                    <a href="{{appUrl}}" style="display: inline-block; background-color: #7f00ff; background-image: linear-gradient(135deg, #7f00ff 0%, #4c1d95 100%); color: #ffffff; text-decoration: none; padding: 12px 32px; border-radius: 8px; font-family: 'Poppins', Helvetica, Arial, sans-serif; font-size: 16px; font-weight: 600; box-shadow: 0 4px 12px rgba(127, 0, 255, 0.3);">
+                      Start Using
+                    </a>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td style="background-color: #f7fafc; padding: 24px; text-align: center; border-top: 1px solid #edebf3;">
+              <p style="margin: 0; font-family: 'Poppins', Helvetica, Arial, sans-serif; font-size: 14px; color: #718096;">
+                This is an automated message from TreinaVagaAI. Please do not reply to this email.
+              </p>
+              <p style="margin: 8px 0 0 0; font-family: 'Poppins', Helvetica, Arial, sans-serif; font-size: 14px; color: #718096;">
+                © {{year}} TreinaVagaAI. All rights reserved.
+              </p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>

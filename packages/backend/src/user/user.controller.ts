@@ -4,6 +4,7 @@ import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiParam, ApiQuery, 
 import { UserService } from './user.service';
 import { UserSocialService } from './user-social.service';
 import { UserDto, UpdateUserDto, ProfileDto, CompleteOnboardingDto } from './dto';
+import { t, SupportedLanguage } from '../common/i18n';
 import { 
   SearchUsersDto, 
   FollowUserDto, 
@@ -154,7 +155,7 @@ export class UserController {
   ): Promise<{ success: boolean; data: UserDto; message: string }> {
     const userId = this.getUserId(user);
     const updatedUser = await this.userService.updateUser(userId, updateData);
-    return { success: true, data: this.userService.toDto(updatedUser), message: "Perfil atualizado com sucesso!" };
+    return { success: true, data: this.userService.toDto(updatedUser), message: t('user.profileUpdated', (user.preferredLanguage as SupportedLanguage) || 'pt-BR') };
   }
 
   /**
@@ -186,10 +187,11 @@ export class UserController {
     @Body() body: { isProfilePublic: boolean },
   ): Promise<{ success: boolean; message: string }> {
     const userId = this.getUserId(user);
+    const lang = (user.preferredLanguage as SupportedLanguage) || 'pt-BR';
     await this.userService.updateUser(userId, { isProfilePublic: body.isProfilePublic });
     return { 
       success: true, 
-      message: `Perfil ${body.isProfilePublic ? 'público' : 'privado'} configurado com sucesso!` 
+      message: body.isProfilePublic ? t('user.profilePublicSet', lang) : t('user.profilePrivateSet', lang)
     };
   }
 
@@ -243,7 +245,7 @@ export class UserController {
     @Body() updateData: UpdateUserDto,
   ): Promise<{ success: boolean; data: UserDto; message: string }> {
     const updatedUser = await this.userService.updateUser(userId, updateData);
-    return { success: true, data: this.userService.toDto(updatedUser), message: "Usuário atualizado com sucesso!" };
+    return { success: true, data: this.userService.toDto(updatedUser), message: t('user.updated') };
   }
 
 
@@ -577,7 +579,7 @@ export class UserController {
         githubUrl: updatedUser.githubUrl,
         headerImage: updatedUser.headerImage,
       },
-      message: "Perfil atualizado com sucesso!"
+      message: t('user.profileUpdated', (user.preferredLanguage as SupportedLanguage) || 'pt-BR')
     };
   }
 
@@ -616,7 +618,7 @@ export class UserController {
         linkedinUrl: updatedUser.linkedinUrl,
         githubUrl: updatedUser.githubUrl,
       },
-      message: "Onboarding completado com sucesso!"
+      message: t('user.onboardingCompleted', (user.preferredLanguage as SupportedLanguage) || 'pt-BR')
     };
   }
 
@@ -757,7 +759,7 @@ export class UserController {
 
     return {
       success: true,
-      message: `${amount} ${amount === 1 ? 'token adicionado' : 'tokens adicionados'} com sucesso`,
+      message: amount === 1 ? t('user.tokenAdded', 'pt-BR', { amount }) : t('user.tokensAdded', 'pt-BR', { amount }),
       newBalance
     };
   }
@@ -854,7 +856,7 @@ export class UserController {
   ): Promise<{ success: boolean; message: string }> {
     const followerId = this.getUserId(currentUser);
     await this.userSocialService.followUser(followerId, followUserDto.userId);
-    return { success: true, message: 'Usuário seguido com sucesso' };
+    return { success: true, message: t('social.followed', (currentUser.preferredLanguage as SupportedLanguage) || 'pt-BR') };
   }
 
   /**
@@ -889,7 +891,7 @@ export class UserController {
   ): Promise<{ success: boolean; message: string }> {
     const followerId = this.getUserId(currentUser);
     await this.userSocialService.unfollowUser(followerId, unfollowUserDto.userId);
-    return { success: true, message: 'Parou de seguir o usuário' };
+    return { success: true, message: t('social.unfollowed', (currentUser.preferredLanguage as SupportedLanguage) || 'pt-BR') };
   }
 
   /**

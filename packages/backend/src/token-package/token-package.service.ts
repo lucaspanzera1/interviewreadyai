@@ -4,6 +4,7 @@ import { Model, Types } from 'mongoose';
 import { TokenPackage, TokenPackageDocument } from './schemas/token-package.schema';
 import { User } from '../user/schemas/user.schema';
 import { EmailService } from '../common/services/email.service';
+import { t, SupportedLanguage } from '../common/i18n';
 
 @Injectable()
 export class TokenPackageService {
@@ -51,14 +52,14 @@ export class TokenPackageService {
   async redeem(id: string, user: any): Promise<{ message: string }> {
     const tokenPackage = await this.findOne(id);
     if (!tokenPackage || !tokenPackage.active) {
-      throw new NotFoundException('Pacote não encontrado ou inativo');
+      throw new NotFoundException(t('token.packageNotFound'));
     }
 
     const userId = user.id || user._id;
     const currentUser = await this.userModel.findById(userId);
     
     if (!currentUser) {
-      throw new NotFoundException('Usuário não encontrado');
+      throw new NotFoundException(t('token.userNotFound'));
     }
 
     const newRole = (tokenPackage.role as any).name;
@@ -70,7 +71,7 @@ export class TokenPackageService {
         const now = new Date();
         if (currentUser.roleExpiresAt > now) {
           throw new BadRequestException(
-            `Você já possui o plano ${newRole}. Válido até ${currentUser.roleExpiresAt.toLocaleDateString('pt-BR')}.`
+            t('token.alreadyHasPlan', 'pt-BR', { role: newRole, expiresAt: currentUser.roleExpiresAt.toLocaleDateString('pt-BR') })
           );
         }
       }
@@ -120,15 +121,15 @@ export class TokenPackageService {
     );
 
     if (!updatedUser) {
-      throw new NotFoundException('Usuário não encontrado');
+      throw new NotFoundException(t('token.userNotFound'));
     }
 
-    let message = `Pacote resgatado com sucesso! Você recebeu ${tokenPackage.tokenAmount} tokens.`;
+    let message = t('token.packageRedeemed', 'pt-BR', { amount: tokenPackage.tokenAmount });
     
     if (tokenPackage.packageType === 'subscription') {
-      message += ` Cargo atualizado para ${newRole}.`;
+      message += ` ${t('token.roleUpdated', 'pt-BR', { role: newRole })}`;
       if (roleExpiresAt) {
-        message += ` Válido até ${roleExpiresAt.toLocaleDateString('pt-BR')}.`;
+        message += ` ${t('token.validUntil', 'pt-BR', { date: roleExpiresAt.toLocaleDateString('pt-BR') })}`;
       }
     }
 

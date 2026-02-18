@@ -1,6 +1,7 @@
 import { Injectable, HttpException, HttpStatus, NotFoundException } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
+import { t, SupportedLanguage } from '../common/i18n';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { firstValueFrom } from 'rxjs';
@@ -62,8 +63,10 @@ export class FlashcardService {
       // Detectar o site da vaga e fazer scraping apropriado
       const jobData = await this.scrapeJob(dto.jobUrl);
 
+      const lang = (user.preferredLanguage as SupportedLanguage) || 'pt-BR';
+
       // Gerar os flashcards baseados nos dados da vaga
-      const flashcards = await this.generateFlashcardsFromJobData(jobData, dto, userId);
+      const flashcards = await this.generateFlashcardsFromJobData(jobData, dto, userId, lang);
 
       // Deduzir 2 tokens do usuário após sucesso
       await userService.removeTokensFromUser(userId, 2, 'flashcard_generation');
@@ -129,20 +132,20 @@ export class FlashcardService {
       // Extrair informações da vaga
       const jobTitle = $('h1.top-card-layout__title, h2.top-card-layout__title, h1[data-test-id="job-title"]').first().text().trim() || 
                        $('h1').first().text().trim() ||
-                       'Título da Vaga Não Encontrado';
+                       t('quiz.jobTitleNotFound');
       
       const companyName = $('.top-card-layout__card .topcard__org-name-link, .topcard__flavor--black-link, [data-test-id="company-name"]').first().text().trim() ||
                          $('.top-card-layout__card a[data-tracking-control-name="public_jobs_topcard-org-name"]').first().text().trim() ||
-                         'Empresa Não Encontrada';
+                         t('quiz.companyNotFound');
       
       const location = $('.top-card-layout__card .topcard__flavor--bullet, .topcard__flavor, [data-test-id="job-location"]').first().text().trim() ||
-                      'Localização Não Encontrada';
+                      t('quiz.locationNotFound');
       
       // Tentar múltiplos seletores para descrição
       const description = $('.show-more-less-html__markup, .description__text, [data-test-id="job-description"]').text().trim() ||
                          $('div[class*="description"]').first().text().trim() ||
                          $('section[data-test-id="job-details"]').text().trim() ||
-                         'Descrição não disponível';
+                         t('quiz.descriptionNotAvailable');
 
       console.log('Job data extracted successfully');
 
@@ -187,19 +190,19 @@ export class FlashcardService {
 
       const jobTitle = $('h1[data-testid="job-title"], .job-title, h1').first().text().trim() ||
                        $('h1').first().text().trim() ||
-                       'Título da Vaga Não Encontrado';
+                       t('quiz.jobTitleNotFound');
 
       const companyName = $('[data-testid="company-name"], .company-name, .employer-name').first().text().trim() ||
                          $('.company-info a').first().text().trim() ||
-                         'Empresa Não Encontrada';
+                         t('quiz.companyNotFound');
 
       const location = $('[data-testid="job-location"], .job-location, .location').first().text().trim() ||
                       $('.location-info').first().text().trim() ||
-                      'Localização Não Encontrada';
+                      t('quiz.locationNotFound');
 
       const description = $('[data-testid="job-description"], .job-description, .description').text().trim() ||
                          $('.job-details-content').text().trim() ||
-                         'Descrição não disponível';
+                         t('quiz.descriptionNotAvailable');
 
       return {
         title: jobTitle,
@@ -241,19 +244,19 @@ export class FlashcardService {
 
       const jobTitle = $('h1[data-testid="job-title"], .job-title, h1').first().text().trim() ||
                        $('h1').first().text().trim() ||
-                       'Título da Vaga Não Encontrado';
+                       t('quiz.jobTitleNotFound');
 
       const companyName = $('[data-testid="company-name"], .company-name, .company').first().text().trim() ||
                          $('.company-info a').first().text().trim() ||
-                         'Empresa Não Encontrada';
+                         t('quiz.companyNotFound');
 
       const location = $('[data-testid="job-location"], .job-location, .location').first().text().trim() ||
                       $('.location-info').first().text().trim() ||
-                      'Localização Não Encontrada';
+                      t('quiz.locationNotFound');
 
       const description = $('[data-testid="job-description"], .job-description, .description').text().trim() ||
                          $('.job-content').text().trim() ||
-                         'Descrição não disponível';
+                         t('quiz.descriptionNotAvailable');
 
       return {
         title: jobTitle,
@@ -385,7 +388,8 @@ export class FlashcardService {
   private async generateFlashcardsFromJobData(
     jobData: any, 
     dto: GenerateJobFlashcardDto,
-    userId: string
+    userId: string,
+    lang: SupportedLanguage = 'pt-BR'
   ): Promise<GeneratedFlashcard> {
     const apiKey = this.configService.get<string>('GROQ_API_KEY');
     if (!apiKey) {
@@ -394,7 +398,7 @@ export class FlashcardService {
 
     try {
       // Ler o template de prompt para flashcards
-      const promptTemplate = await this.getFlashcardPromptTemplate();
+      const promptTemplate = await this.getFlashcardPromptTemplate(lang);
       
       // Construir o prompt com os dados da vaga
       const prompt = this.buildFlashcardPrompt(promptTemplate, jobData, dto);
@@ -402,7 +406,7 @@ export class FlashcardService {
       console.log('Calling Groq API for flashcard generation');
       
       // Chamar a API do Groq
-      const response = await this.callGroqAPI(prompt, apiKey);
+      const response = await this.callGroqAPI(prompt, apiKey, lang);
 
       // Parse da resposta JSON
       let content = response.trim();
@@ -477,8 +481,8 @@ export class FlashcardService {
         console.log('JSON parsing failed, trying simplified prompt...');
         // Tentar novamente com prompt simplificado se o parsing do JSON falhou
         try {
-          const simplePrompt = this.buildSimplifiedFlashcardPrompt(jobData, dto);
-          const retryResponse = await this.callGroqAPI(simplePrompt, apiKey);
+          const simplePrompt = this.buildSimplifiedFlashcardPrompt(jobData, dto, lang);
+          const retryResponse = await this.callGroqAPI(simplePrompt, apiKey, lang);
           
           let content = retryResponse.trim();
           const jsonCodeBlockMatch = content.match(/```(?:json)?\s*(\{[\s\S]*\})\s*```/);
@@ -536,17 +540,61 @@ export class FlashcardService {
   /**
    * Métodos auxiliares para prompts e API
    */
-  private async getFlashcardPromptTemplate(): Promise<string> {
+  private async getFlashcardPromptTemplate(lang: SupportedLanguage = 'pt-BR'): Promise<string> {
     try {
-      const templatePath = path.join(process.cwd(), 'prompt', 'flashcard-job.md');
+      const filename = lang === 'en' ? 'flashcard-job-en.md' : 'flashcard-job.md';
+      const templatePath = path.join(process.cwd(), 'prompt', filename);
       return fs.readFileSync(templatePath, 'utf8');
     } catch (error) {
       console.warn('Flashcard prompt template not found, using default');
-      return this.getDefaultFlashcardPrompt();
+      return this.getDefaultFlashcardPrompt(lang);
     }
   }
 
-  private getDefaultFlashcardPrompt(): string {
+  private getDefaultFlashcardPrompt(lang: SupportedLanguage = 'pt-BR'): string {
+    if (lang === 'en') {
+      return `
+You are a specialist in creating educational flashcards for technical preparation.
+Based on the job posting provided, create Anki-style flashcards to help candidates prepare.
+
+JOB:
+Title: {vaga_titulo}
+Company: {vaga_empresa}
+Location: {vaga_localizacao}
+Description: {vaga_descricao}
+
+REQUIREMENTS:
+- Create {quantidade_cards} flashcards
+- Difficulty level: {nivel}
+- Each flashcard must have a question (front) and an answer (back)
+- Focus on technical knowledge relevant to the job
+- Include explanations when necessary
+- Use clear and objective language
+
+DIFFICULTY LEVEL:
+- FACIL: Basic concepts, simple definitions
+- MEDIO: Practical applications, intermediate scenarios
+- DIFICIL: Complex scenarios, optimizations, architecture
+
+Return ONLY valid JSON in the format:
+{
+  "titulo": "Flashcards: [Job Name]",
+  "categoria": "[Main technical area]",
+  "descricao": "Flashcards to prepare for the [role] position at [company]",
+  "tags": ["tag1", "tag2", "tag3"],
+  "nivel": "{nivel}",
+  "quantidade_cards": {quantidade_cards},
+  "cards": [
+    {
+      "question": "Flashcard question?",
+      "answer": "Detailed answer",
+      "explanation": "Additional explanation (optional)",
+      "tags": ["specific-tag"]
+    }
+  ]
+}
+`;
+    }
     return `
 Você é um especialista em criação de flashcards educacionais para preparação técnica.
 Baseado na vaga de emprego fornecida, crie flashcards no estilo Anki para ajudar candidatos a se prepararem.
@@ -600,7 +648,29 @@ Retorne APENAS um JSON válido no formato:
       .replace(/{nivel}/g, dto.nivel);
   }
 
-  private buildSimplifiedFlashcardPrompt(jobData: any, dto: GenerateJobFlashcardDto): string {
+  private buildSimplifiedFlashcardPrompt(jobData: any, dto: GenerateJobFlashcardDto, lang: SupportedLanguage = 'pt-BR'): string {
+    if (lang === 'en') {
+      return `
+Create ${dto.quantidade_cards || 10} flashcards at ${dto.nivel} level for the job:
+${jobData.title} at ${jobData.company}
+
+Job description:
+${jobData.description.substring(0, 1500)}
+
+Return JSON:
+{
+  "titulo": "Flashcards: ${jobData.title}",
+  "categoria": "Technology", 
+  "descricao": "Flashcards for ${jobData.title}",
+  "tags": ["javascript", "backend", "api"],
+  "nivel": "${dto.nivel}",
+  "quantidade_cards": ${dto.quantidade_cards || 10},
+  "cards": [
+    {"question": "What is...?", "answer": "Answer..."}
+  ]
+}
+`;
+    }
     return `
 Crie ${dto.quantidade_cards || 10} flashcards de nível ${dto.nivel} para a vaga:
 ${jobData.title} na ${jobData.company}
@@ -623,9 +693,23 @@ Retorne JSON:
 `;
   }
 
-  private async callGroqAPI(prompt: string, apiKey: string): Promise<string> {
+  private async callGroqAPI(prompt: string, apiKey: string, lang: SupportedLanguage = 'pt-BR'): Promise<string> {
     const url = 'https://api.groq.com/openai/v1/chat/completions';
-    const systemMessage = `Você é um especialista em criar flashcards educacionais no estilo Anki para preparação técnica. Sua tarefa é criar flashcards baseados na descrição de uma vaga de emprego para ajudar candidatos a se prepararem para entrevistas e testes técnicos.
+    const systemMessage = lang === 'en' ? 
+      `You are a specialist in creating educational Anki-style flashcards for technical preparation. Your task is to create flashcards based on a job description to help candidates prepare for interviews and technical tests.
+
+Your expertise includes:
+- Creating flashcards in question/answer format
+- Adapting content by difficulty level
+- Focus on practical technical knowledge
+- Programming languages and frameworks
+- Software development concepts
+
+IMPORTANT: 
+1. Return ONLY valid JSON, no additional text before or after.
+2. Each flashcard must have a clear question and complete answer.
+3. Adapt the complexity level as requested (FACIL, MEDIO, DIFICIL).` :
+      `Você é um especialista em criar flashcards educacionais no estilo Anki para preparação técnica. Sua tarefa é criar flashcards baseados na descrição de uma vaga de emprego para ajudar candidatos a se prepararem para entrevistas e testes técnicos.
 
 Sua expertise inclui:
 - Criação de flashcards no formato pergunta/resposta
@@ -832,7 +916,7 @@ IMPORTANTE:
     }
 
     if (!flashcard.isActive) {
-      throw new HttpException('Este flashcard não está disponível no momento.', HttpStatus.FORBIDDEN);
+      throw new HttpException(t('flashcard.notAvailable'), HttpStatus.FORBIDDEN);
     }
 
     // Verificar se o usuário é o criador do flashcard
@@ -845,7 +929,7 @@ IMPORTANTE:
       const userTokens = await userService.getUserTokens(userId);
       if (userTokens < 1) {
         throw new HttpException(
-          'Você não tem tokens suficientes para estudar este flashcard. Compre tokens para continuar.',
+          t('flashcard.notEnoughTokens'),
           HttpStatus.FORBIDDEN
         );
       }
@@ -1348,7 +1432,7 @@ IMPORTANTE:
     }).exec();
 
     if (!flashcard) {
-      throw new NotFoundException('Flashcard não encontrado');
+      throw new NotFoundException(t('flashcard.notFound'));
     }
 
     // Estatísticas de estudo para este flashcard

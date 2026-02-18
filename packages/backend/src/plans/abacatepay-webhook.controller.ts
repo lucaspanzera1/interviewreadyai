@@ -4,6 +4,7 @@ import { createHmac } from 'crypto';
 import { PlansService } from './plans.service';
 import { Request } from 'express';
 import { Public } from '../auth/decorators/public.decorator';
+import { t, SupportedLanguage } from '../common/i18n';
 
 @Controller('abacatepay')
 export class AbacatePayWebhookController {
@@ -29,7 +30,7 @@ export class AbacatePayWebhookController {
 
     if (!providedSecret || providedSecret !== webhookSecret) {
       console.error('❌ Webhook secret inválido. Recebido:', providedSecret, 'Esperado:', webhookSecret);
-      throw new BadRequestException('Autenticação do webhook falhou');
+      throw new BadRequestException(t('plan.webhookAuthFailed'));
     }
 
     // Verificar assinatura HMAC se fornecida e não estiver em devMode
