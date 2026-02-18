@@ -195,7 +195,7 @@ const PublicProfilePage: React.FC = () => {
                   )}
                   <div className="flex items-center gap-1.5">
                     <UsersIcon className="w-4 h-4" />
-                    <span>{t('profile.followersCount', { count: profile.followersCount })}</span>
+                    <span>{profile.followersCount} {tProfile('followers')}</span>
                   </div>
                 </div>
               </div>
