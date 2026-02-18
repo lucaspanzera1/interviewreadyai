@@ -1,26 +1,53 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import {
-  MapPin,
-  Briefcase,
-  Github,
-  Linkedin,
-  Users,
-  UserPlus,
-  UserMinus,
-  Clock,
-  Target
-} from 'lucide-react';
-import { socialApi, PublicUser, UserConnections } from '../lib/socialApi';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../contexts/AuthContext';
+import { socialApi, PublicUser, UserConnections } from '../lib/socialApi';
 import { toast } from 'react-toastify';
 import Loading from './Loading';
+import PageTitle from './PageTitle';
 import ActivityHeatmap from './ActivityHeatmap';
 import { getNicheIcon } from '../utils/nicheIcons';
-import { useTranslation } from 'react-i18next';
+import {
+  MapPinIcon,
+  BriefcaseIcon,
+  ClockIcon,
+  DocumentTextIcon,
+  UserPlusIcon,
+  UserMinusIcon,
+  UsersIcon,
+  ChevronRightIcon,
+  ShieldCheckIcon,
+  TrophyIcon
+} from '@heroicons/react/24/outline';
+
+const LinkedInIcon = (props: React.ComponentProps<'svg'>) => (
+  <svg fill="currentColor" viewBox="0 0 24 24" {...props}>
+    <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" />
+  </svg>
+);
+
+const GitHubIcon = (props: React.ComponentProps<'svg'>) => (
+  <svg fill="currentColor" viewBox="0 0 24 24" {...props}>
+    <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z" />
+  </svg>
+);
+
+const extractUsername = (url?: string) => {
+  if (!url) return '';
+  try {
+    const urlObj = new URL(url.startsWith('http') ? url : `https://${url}`);
+    const pathname = urlObj.pathname.replace(/\/$/, ''); // Remove trailing slash
+    const parts = pathname.split('/');
+    return parts[parts.length - 1] || url;
+  } catch {
+    return url;
+  }
+};
 
 const PublicProfilePage: React.FC = () => {
   const { t } = useTranslation('social');
+  const { t: tProfile } = useTranslation('profile');
   const { userId } = useParams<{ userId: string }>();
   const navigate = useNavigate();
   const { user: currentUser } = useAuth();
@@ -28,7 +55,7 @@ const PublicProfilePage: React.FC = () => {
   const [profile, setProfile] = useState<PublicUser | null>(null);
   const [connections, setConnections] = useState<UserConnections | null>(null);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<'profile' | 'followers' | 'following'>('profile');
+  const [connectionsTab, setConnectionsTab] = useState<'following' | 'followers'>('following');
 
   const isOwnProfile = currentUser?.id === userId;
 
@@ -69,7 +96,6 @@ const PublicProfilePage: React.FC = () => {
         toast.success(t('profile.followedToast', { name: profile.name }));
       }
 
-      // Atualizar profile local
       setProfile({
         ...profile,
         isFollowing: !profile.isFollowing,
@@ -77,131 +103,119 @@ const PublicProfilePage: React.FC = () => {
           ? profile.followersCount - 1
           : profile.followersCount + 1
       });
+
+      // Also update connections count if needed
+      if (connections && currentUser) {
+        if (profile.isFollowing) {
+          // We unfollowed
+          setConnections(prev => prev ? ({ ...prev, followersCount: prev.followersCount - 1 }) : null);
+        } else {
+          // We followed
+          setConnections(prev => prev ? ({ ...prev, followersCount: prev.followersCount + 1 }) : null);
+        }
+      }
     } catch (error) {
       console.error('Erro ao seguir/deixar de seguir:', error);
       toast.error(t('profile.errorUpdatingFollow'));
     }
   };
 
-  const formatTime = (seconds: number) => {
-    const hours = Math.floor(seconds / 3600);
-    const minutes = Math.floor((seconds % 3600) / 60);
 
-    if (hours > 0) {
-      return `${hours}h ${minutes}m`;
-    }
-    return `${minutes}m`;
-  };
 
   if (loading) {
     return <Loading fullScreen text={t('profile.loadingProfile')} />;
   }
 
   if (!profile) {
-    return (
-      <div className="flex items-center justify-center p-12">
-        <div className="text-center p-8 bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 max-w-md mx-auto">
-          <div className="w-16 h-16 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
-            <UserMinus className="text-red-500" size={32} />
-          </div>
-          <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-2">{t('profile.profileNotFound')}</h2>
-          <p className="text-slate-500 dark:text-slate-400 mb-6">{t('profile.profileNotFoundDesc')}</p>
-          <button
-            onClick={() => navigate('/search')}
-            className="btn btn-primary w-full"
-          >
-            {t('profile.backToSearch')}
-          </button>
-        </div>
-      </div>
-    );
+    return null;
   }
 
+  const activeList = connectionsTab === 'following' ? connections?.following || [] : connections?.followers || [];
+
   return (
-    <div className="space-y-6">
-      {/* Profile Header Card */}
-      <div className="card relative overflow-hidden bg-white dark:bg-slate-800 border-0 ring-1 ring-slate-200 dark:ring-slate-700">
-        <div className="relative w-full aspect-[3/1] max-h-[500px] min-h-[200px]">
-          {profile.headerImage ? (
-            <img
-              src={profile.headerImage}
-              alt="Header"
-              className="w-full h-full object-cover"
-            />
-          ) : (
-            <div className="w-full h-full bg-slate-50 dark:bg-slate-900 relative overflow-hidden group">
-              <div className="absolute inset-0 bg-gradient-to-br from-indigo-50/80 via-white to-blue-50/80 dark:from-slate-900 dark:via-slate-900 dark:to-slate-800"></div>
+    <>
+      <PageTitle title={profile.name} />
 
-              {/* Abstract Shapes */}
-              <div className="absolute top-0 right-0 -mr-32 -mt-32 w-96 h-96 bg-indigo-500/10 dark:bg-primary-500/20 rounded-full blur-3xl group-hover:bg-indigo-500/15 dark:group-hover:bg-primary-500/30 transition-all duration-1000"></div>
-              <div className="absolute bottom-0 left-0 -ml-32 -mb-32 w-96 h-96 bg-fuchsia-500/10 dark:bg-purple-500/20 rounded-full blur-3xl group-hover:bg-fuchsia-500/15 dark:group-hover:bg-purple-500/30 transition-all duration-1000"></div>
-              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-gradient-to-tr from-indigo-500/5 via-transparent to-purple-500/5 dark:from-blue-500/10 dark:to-pink-500/10"></div>
+      <div className="space-y-8 pb-32">
+        {/* Hero Section with Header & Avatar */}
+        <div className="relative mb-24 md:mb-32 group">
+          <div className="relative w-full aspect-[3/1] max-h-[500px] min-h-[200px] rounded-2xl overflow-hidden shadow-sm ring-1 ring-slate-900/5 dark:ring-white/10">
+            {/* Header Image */}
+            {profile.headerImage ? (
+              <img
+                src={profile.headerImage}
+                alt="Header"
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <div className="w-full h-full bg-slate-50 dark:bg-slate-900 relative overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-br from-indigo-50/80 via-white to-blue-50/80 dark:from-slate-900 dark:via-slate-900 dark:to-slate-800"></div>
 
-              {/* Grid Pattern */}
-              <div className="absolute inset-0 bg-[linear-gradient(to_right,#6366f112_1px,transparent_1px),linear-gradient(to_bottom,#6366f112_1px,transparent_1px)] dark:bg-[linear-gradient(to_right,#ffffff08_1px,transparent_1px),linear-gradient(to_bottom,#ffffff08_1px,transparent_1px)] bg-[size:24px_24px]"></div>
-            </div>
-          )}
-          {/* Overlay para melhorar legibilidade do texto */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/10 via-transparent to-transparent dark:from-black/60 dark:via-black/20"></div>
-        </div>
-        <div className="px-6 pb-6">
-          <div className="relative flex flex-col md:flex-row items-end -mt-20 md:-mt-24 mb-6 gap-6">
-            <div className="relative shrink-0">
+                {/* Abstract Shapes */}
+                <div className="absolute top-0 right-0 -mr-32 -mt-32 w-96 h-96 bg-indigo-500/10 dark:bg-primary-500/20 rounded-full blur-3xl transition-all duration-1000"></div>
+                <div className="absolute bottom-0 left-0 -ml-32 -mb-32 w-96 h-96 bg-fuchsia-500/10 dark:bg-purple-500/20 rounded-full blur-3xl transition-all duration-1000"></div>
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-gradient-to-tr from-indigo-500/5 via-transparent to-purple-500/5 dark:from-blue-500/10 dark:to-pink-500/10"></div>
+
+                {/* Grid Pattern */}
+                <div className="absolute inset-0 bg-[linear-gradient(to_right,#6366f112_1px,transparent_1px),linear-gradient(to_bottom,#6366f112_1px,transparent_1px)] dark:bg-[linear-gradient(to_right,#ffffff08_1px,transparent_1px),linear-gradient(to_bottom,#ffffff08_1px,transparent_1px)] bg-[size:24px_24px]"></div>
+              </div>
+            )}
+
+            <div className="absolute inset-0 bg-gradient-to-t from-black/10 via-transparent to-transparent dark:from-black/60 dark:via-black/20"></div>
+          </div>
+
+          {/* Overlapping Profile Info */}
+          <div className="absolute -bottom-16 md:-bottom-24 left-0 w-full px-6 md:px-10 flex flex-col md:flex-row items-center md:items-end gap-6 z-10 pointer-events-none">
+            <div className="relative shrink-0 pointer-events-auto">
               <img
                 src={profile.picture || `https://ui-avatars.com/api/?name=${encodeURIComponent(profile.name)}&background=3B82F6&color=ffffff&size=128`}
                 alt={profile.name}
-                className="w-32 h-32 md:w-40 md:h-40 rounded-2xl border-4 border-white dark:border-slate-800 shadow-xl object-cover bg-white dark:bg-slate-900"
+                className="w-32 h-32 md:w-48 md:h-48 rounded-full border-[6px] border-white dark:border-slate-900 shadow-2xl object-cover bg-white dark:bg-slate-900"
               />
-              {profile.isFollowing && (
-                <div className="absolute -bottom-2 -right-2 bg-green-500 p-1.5 rounded-full border-4 border-white dark:border-slate-800 shadow-sm" title={t('profile.following')}>
-                  <UserPlus size={20} className="text-white" />
+            </div>
+
+            <div className="flex-1 pb-4 md:pb-6 text-center md:text-left pointer-events-auto flex flex-col md:flex-row items-end justify-between gap-4 w-full">
+              <div>
+                <h1 className="text-3xl md:text-5xl font-bold text-slate-900 dark:text-white mb-2">
+                  {profile.name}
+                </h1>
+
+                <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 mt-3 text-sm font-medium text-slate-500 dark:text-slate-400">
+                  {profile.location && (
+                    <div className="flex items-center gap-1.5">
+                      <MapPinIcon className="w-4 h-4" />
+                      {profile.location}
+                    </div>
+                  )}
+                  {profile.niche && (
+                    <div className="flex items-center gap-1.5">
+                      {getNicheIcon(profile.niche, "w-4 h-4")}
+                      {t(`niches.${profile.niche}`) || profile.niche}
+                    </div>
+                  )}
+                  <div className="flex items-center gap-1.5">
+                    <UsersIcon className="w-4 h-4" />
+                    <span>{t('profile.followersCount', { count: profile.followersCount })}</span>
+                  </div>
                 </div>
-              )}
-            </div>
-
-            <div className="flex-1 text-center md:text-left mb-2 min-w-0">
-              <h1 className="text-3xl md:text-4xl font-bold text-slate-900 dark:text-white mb-2">
-                {profile.name}
-              </h1>
-              <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 text-sm text-slate-600 dark:text-slate-400">
-                {profile.niche && (
-                  <div className="flex items-center gap-1.5">
-                    {getNicheIcon(profile.niche, "w-4 h-4 text-primary-500")}
-                    <span>{t(`niches.${profile.niche}`) || profile.niche}</span>
-                  </div>
-                )}
-                {profile.location && (
-                  <div className="flex items-center gap-1.5">
-                    <MapPin size={16} className="text-slate-400" />
-                    <span>{profile.location}</span>
-                  </div>
-                )}
-                {profile.careerTime && (
-                  <div className="flex items-center gap-1.5">
-                    <Clock size={16} className="text-slate-400" />
-                    <span>{t(`careerTime.${profile.careerTime}`) || profile.careerTime}</span>
-                  </div>
-                )}
               </div>
-            </div>
 
-            <div className="flex gap-2 w-full md:w-auto mb-2">
               {!isOwnProfile && (
                 <button
                   onClick={toggleFollow}
-                  className={`flex-1 md:flex-none btn ${profile.isFollowing
-                    ? 'btn-outline border-slate-200 hover:border-red-500 hover:text-red-500 hover:bg-red-50 dark:border-slate-700 dark:hover:bg-red-900/20'
-                    : 'btn-primary'
-                    } gap-2 whitespace-nowrap`}
+                  className={`flex items-center gap-2 px-6 py-2.5 rounded-xl font-semibold transition-all shadow-lg active:scale-95 ${profile.isFollowing
+                    ? 'bg-white dark:bg-slate-800 text-slate-700 dark:text-white border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700'
+                    : 'bg-primary-600 hover:bg-primary-500 text-white shadow-primary-600/20'
+                    }`}
                 >
                   {profile.isFollowing ? (
                     <>
-                      <UserMinus size={18} />
+                      <UserMinusIcon className="h-5 w-5" />
                       {t('profile.unfollow')}
                     </>
                   ) : (
                     <>
-                      <UserPlus size={18} />
+                      <UserPlusIcon className="h-5 w-5" />
                       {t('profile.follow')}
                     </>
                   )}
@@ -209,244 +223,268 @@ const PublicProfilePage: React.FC = () => {
               )}
             </div>
           </div>
+        </div>
 
-          <div className="flex flex-col md:flex-row gap-6 border-t border-slate-100 dark:border-slate-700 pt-6">
-            <div className="flex-1 space-y-4">
-              {profile.bio && (
-                <div>
-                  <h3 className="text-sm font-semibold text-slate-900 dark:text-white mb-2">{t('profile.about')}</h3>
-                  <p className="text-slate-600 dark:text-slate-300 text-sm leading-relaxed">
-                    {profile.bio}
-                  </p>
-                </div>
-              )}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8 items-start">
 
-              {profile.niche === 'tecnologia' && profile.techStack && profile.techStack.length > 0 && (
-                <div>
-                  <h3 className="text-sm font-semibold text-slate-900 dark:text-white mb-2">{t('profile.techStack')}</h3>
-                  <div className="flex flex-wrap gap-2">
-                    {profile.techStack.map((tech, index) => (
-                      <span
-                        key={index}
-                        className="px-2.5 py-1 bg-slate-50 dark:bg-slate-700/50 text-slate-600 dark:text-slate-300 text-xs font-medium rounded-lg border border-slate-100 dark:border-slate-700"
-                      >
-                        {tech}
+          {/* Left Column Group */}
+          <div className="lg:col-span-2 space-y-6 lg:sticky lg:top-6">
+
+            {/* 1. PERSONAL INFO CARD */}
+            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg shadow-sm">
+              <div className="px-4 md:px-6 py-4 border-b border-slate-100 dark:border-slate-800">
+                <h2 className="text-base font-semibold text-slate-900 dark:text-white">{tProfile('personalInfo')}</h2>
+              </div>
+
+              <div className="p-4 md:p-6">
+                <div className="space-y-6 max-w-xl">
+                  {/* Bio */}
+                  <div>
+                    <div className="flex items-start gap-3 p-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 rounded-md">
+                      <DocumentTextIcon className="h-5 w-5 text-slate-400 dark:text-slate-500 mt-0.5" />
+                      <span className="text-slate-700 dark:text-slate-200 font-medium text-sm">
+                        {profile.bio || tProfile('notInformed')}
                       </span>
-                    ))}
+                    </div>
                   </div>
-                </div>
-              )}
-            </div>
 
-            <div className="md:w-72 flex-shrink-0 flex flex-col gap-4">
-              <div className="flex gap-2">
-                {profile.niche === 'tecnologia' && profile.githubUrl && (
-                  <a
-                    href={profile.githubUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex-1 btn btn-outline btn-sm gap-2 justify-center"
-                  >
-                    <Github size={16} />
-                    GitHub
-                  </a>
-                )}
-                {profile.linkedinUrl && (
-                  <a
-                    href={profile.linkedinUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex-1 btn btn-outline btn-sm gap-2 justify-center"
-                  >
-                    <Linkedin size={16} />
-                    LinkedIn
-                  </a>
-                )}
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div className="bg-slate-50 dark:bg-slate-700/30 rounded-xl p-3 text-center border border-slate-100 dark:border-slate-700/50">
-                  <div className="text-xl font-bold text-slate-900 dark:text-white">
-                    {connections?.followersCount || 0}
+                  {/* Location */}
+                  <div>
+                    <div className="flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 rounded-md">
+                      <MapPinIcon className="h-5 w-5 text-slate-400 dark:text-slate-500" />
+                      <span className="text-slate-700 dark:text-slate-200 font-medium text-sm">
+                        {profile.location || tProfile('notInformed')}
+                      </span>
+                    </div>
                   </div>
-                  <div className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">{t('profile.followers')}</div>
-                </div>
-                <div className="bg-slate-50 dark:bg-slate-700/30 rounded-xl p-3 text-center border border-slate-100 dark:border-slate-700/50">
-                  <div className="text-xl font-bold text-slate-900 dark:text-white">
-                    {connections?.followingCount || 0}
-                  </div>
-                  <div className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">{t('profile.followingLabel')}</div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Stats Cards */}
-        <div className="lg:col-span-3 grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div className="card p-4 flex items-center justify-between hover:scale-[1.02] transition-transform">
-            <div>
-              <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">{t('profile.quizzesCompleted')}</p>
-              <p className="text-2xl font-bold text-slate-900 dark:text-white mt-1">{profile.quizStats.totalCompleted}</p>
-            </div>
-            <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-xl text-blue-600 dark:text-blue-400">
-              <Briefcase size={24} />
-            </div>
-          </div>
-          <div className="card p-4 flex items-center justify-between hover:scale-[1.02] transition-transform">
-            <div>
-              <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">{t('profile.overallAverage')}</p>
-              <p className="text-2xl font-bold text-slate-900 dark:text-white mt-1">{profile.quizStats.averageScore}%</p>
-            </div>
-            <div className="p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-xl text-yellow-600 dark:text-yellow-400">
-              <Target size={24} />
-            </div>
-          </div>
-          <div className="card p-4 flex items-center justify-between hover:scale-[1.02] transition-transform">
-            <div>
-              <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">{t('profile.bestScore')}</p>
-              <p className="text-2xl font-bold text-green-600 dark:text-green-400 mt-1">{profile.quizStats.bestScore}%</p>
-            </div>
-            <div className="p-3 bg-green-50 dark:bg-green-900/20 rounded-xl text-green-600 dark:text-green-400">
-              <Target size={24} />
-            </div>
-          </div>
-          <div className="card p-4 flex items-center justify-between hover:scale-[1.02] transition-transform">
-            <div>
-              <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">{t('profile.totalTime')}</p>
-              <p className="text-lg font-bold text-purple-600 dark:text-purple-400 mt-1">{formatTime(profile.quizStats.totalTimeSpent)}</p>
-            </div>
-            <div className="p-3 bg-purple-50 dark:bg-purple-900/20 rounded-xl text-purple-600 dark:text-purple-400">
-              <Clock size={24} />
-            </div>
-          </div>
-        </div>
-
-        <div className="lg:col-span-3">
-          {/* Tabs & Content */}
-          <div className="card overflow-hidden">
-            <div className="border-b border-slate-100 dark:border-slate-700 px-6">
-              <nav className="flex gap-6">
-                {[
-                  { id: 'profile', label: t('profile.overview') },
-                  { id: 'followers', label: t('profile.followers') },
-                  { id: 'following', label: t('profile.followingLabel') }
-                ].map((tab) => (
-                  <button
-                    key={tab.id}
-                    onClick={() => setActiveTab(tab.id as any)}
-                    className={`py-4 text-sm font-medium border-b-2 transition-colors relative ${activeTab === tab.id
-                      ? 'border-primary-500 text-primary-600 dark:text-primary-400'
-                      : 'border-transparent text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
-                      }`}
-                  >
-                    {tab.label}
-                    {activeTab === tab.id && (
-                      <span className="absolute bottom-0 left-0 w-full h-0.5 bg-primary-500 rounded-t-full" />
-                    )}
-                  </button>
-                ))}
-              </nav>
-            </div>
-
-            <div className="p-6 min-h-[300px]">
-              {activeTab === 'profile' && (
-                <div className="py-6">
-                  {profile.activityData && profile.activityData.length > 0 ? (
-                    <div className="space-y-6">
-                      <h3 className="text-lg font-medium text-slate-900 dark:text-white px-4">{t('profile.recentActivity')}</h3>
-                      <div className="px-4 pb-4">
-                        <ActivityHeatmap
-                          data={profile.activityData}
-                          totalActivities={profile.activityData.reduce((acc, curr) => acc + curr.count, 0)}
-                        />
+                  {/* Links */}
+                  <div className={`grid grid-cols-1 ${profile.niche === 'tecnologia' ? 'md:grid-cols-2' : ''} gap-4`}>
+                    <div>
+                      <div className="flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 rounded-md">
+                        <LinkedInIcon className="h-5 w-5 text-[#0a66c2] dark:text-[#0a66c2]" />
+                        {profile.linkedinUrl ? (
+                          <a href={profile.linkedinUrl} target="_blank" rel="noopener noreferrer" className="text-primary-600 dark:text-primary-400 hover:underline text-sm font-medium">
+                            {extractUsername(profile.linkedinUrl)}
+                          </a>
+                        ) : <span className="text-slate-500 text-sm">N/A</span>}
                       </div>
                     </div>
-                  ) : (
-                    <div className="flex flex-col items-center justify-center h-full text-center py-10">
-                      <div className="w-16 h-16 bg-slate-50 dark:bg-slate-800 rounded-full flex items-center justify-center mb-4">
-                        <Target size={32} className="text-slate-300" />
+                    {profile.niche === 'tecnologia' && (
+                      <div>
+                        <div className="flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 rounded-md">
+                          <GitHubIcon className="h-5 w-5 text-[#24292f] dark:text-white" />
+                          {profile.githubUrl ? (
+                            <a href={profile.githubUrl} target="_blank" rel="noopener noreferrer" className="text-primary-600 dark:text-primary-400 hover:underline text-sm font-medium">
+                              {extractUsername(profile.githubUrl)}
+                            </a>
+                          ) : <span className="text-slate-500 text-sm">N/A</span>}
+                        </div>
                       </div>
-                      <h3 className="text-lg font-medium text-slate-900 dark:text-white">{t('profile.recentActivity')}</h3>
-                      <p className="text-slate-500 dark:text-slate-400 max-w-sm mt-2">
-                        {t('profile.noActivity')}
-                      </p>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* 2. PROFESSIONAL DATA CARD */}
+            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg shadow-sm">
+              <div className="px-4 md:px-6 py-4 border-b border-slate-100 dark:border-slate-800">
+                <h2 className="text-base font-semibold text-slate-900 dark:text-white">{tProfile('professionalData')}</h2>
+              </div>
+              <div className="p-4 md:p-6">
+                <div className="space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {/* Area/Niche */}
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                        {tProfile('areaOfExpertise')}
+                      </label>
+                      <div className="flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 rounded-md">
+                        {profile.niche ? getNicheIcon(profile.niche, "h-5 w-5 text-slate-400 dark:text-slate-500") : <BriefcaseIcon className="h-5 w-5 text-slate-400 dark:text-slate-500" />}
+                        <span className="text-slate-700 dark:text-slate-200 font-medium text-sm">
+                          {t(`niches.${profile.niche}`) || profile.niche || tProfile('notInformed')}
+                        </span>
+                      </div>
+                    </div>
+                    {/* Career Time */}
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                        {profile.niche === 'tecnologia' ? tProfile('techExperience') : tProfile('professionalExperience')}
+                      </label>
+                      <div className="flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 rounded-md">
+                        <ClockIcon className="h-5 w-5 text-slate-400 dark:text-slate-500" />
+                        <span className="text-slate-700 dark:text-slate-200 font-medium text-sm">
+                          {tProfile(`careerTime.${profile.careerTime}`) || profile.careerTime || tProfile('notInformed')}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Tech Stack */}
+                  {profile.niche === 'tecnologia' && (
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                        {tProfile('techStack')}
+                      </label>
+                      <div className="flex flex-wrap gap-2">
+                        {profile.techStack && profile.techStack.length > 0 ? (
+                          profile.techStack.map((tech, index) => (
+                            <span
+                              key={index}
+                              className="px-3 py-1 bg-slate-50 dark:bg-slate-800/50 text-slate-700 dark:text-slate-300 text-xs font-medium rounded-lg border border-slate-200 dark:border-slate-700"
+                            >
+                              {tech}
+                            </span>
+                          ))
+                        ) : (
+                          <span className="text-slate-500 text-sm italic">{tProfile('noTechSelected')}</span>
+                        )}
+                      </div>
                     </div>
                   )}
                 </div>
-              )}
-
-              {activeTab === 'followers' && (
-                <UserList
-                  users={connections?.followers || []}
-                  emptyMessage={t('profile.noFollowersYet')}
-                />
-              )}
-
-              {activeTab === 'following' && (
-                <UserList
-                  users={connections?.following || []}
-                  emptyMessage={t('profile.notFollowingAnyone')}
-                />
-              )}
+              </div>
             </div>
+
+          </div>
+
+          {/* Right Column Group */}
+          <div className="lg:col-span-1 space-y-6 lg:sticky lg:top-6">
+
+            {/* Account Details - Removed as not available in PublicUser */}
+
+
+            {/* Activities & Achievements */}
+            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg shadow-sm">
+              <div className="px-4 md:px-6 py-4 border-b border-slate-100 dark:border-slate-800">
+                <h2 className="text-base font-semibold text-slate-900 dark:text-white">{tProfile('activitiesAchievements')}</h2>
+              </div>
+              <div className="p-4 md:p-6 space-y-4">
+                <div className="py-4 overflow-x-auto">
+                  <ActivityHeatmap
+                    data={profile.activityData || []}
+                    totalActivities={profile.activityData?.reduce((acc, curr) => acc + curr.count, 0) || 0}
+                    startDate={new Date(2026, 1, 1)}
+                    endDate={new Date(2027, 1, 1)}
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4 pt-2">
+                  <div className="text-center p-3 bg-slate-50 dark:bg-slate-800/50 rounded-lg border border-slate-100 dark:border-slate-700">
+                    <DocumentTextIcon className="h-6 w-6 text-indigo-500 mx-auto mb-2" />
+                    <p className="text-xs text-slate-500 dark:text-slate-400">{t('profile.quizzesCompleted')}</p>
+                    <p className="text-lg font-bold text-slate-900 dark:text-white">{profile.quizStats.totalCompleted}</p>
+                  </div>
+                  <div className="text-center p-3 bg-slate-50 dark:bg-slate-800/50 rounded-lg border border-slate-100 dark:border-slate-700">
+                    <ShieldCheckIcon className="h-6 w-6 text-green-500 mx-auto mb-2" />
+                    <p className="text-xs text-slate-500 dark:text-slate-400">{tProfile('generalAverage')}</p>
+                    <p className="text-lg font-bold text-slate-900 dark:text-white">{profile.quizStats.averageScore}%</p>
+                  </div>
+                  <div className="text-center p-3 bg-slate-50 dark:bg-slate-800/50 rounded-lg border border-slate-100 dark:border-slate-700">
+                    <TrophyIcon className="h-6 w-6 text-amber-500 mx-auto mb-2" />
+                    <p className="text-xs text-slate-500 dark:text-slate-400">{t('profile.bestScore')}</p>
+                    <p className="text-lg font-bold text-slate-900 dark:text-white">{profile.quizStats.bestScore}%</p>
+                  </div>
+                  <div className="text-center p-3 bg-slate-50 dark:bg-slate-800/50 rounded-lg border border-slate-100 dark:border-slate-700">
+                    <ClockIcon className="h-6 w-6 text-purple-500 mx-auto mb-2" />
+                    <p className="text-xs text-slate-500 dark:text-slate-400">{t('profile.totalTime')}</p>
+                    <p className="text-sm font-bold text-slate-900 dark:text-white mt-1">
+                      {(profile.quizStats.totalTimeSpent / 3600).toFixed(1)}h
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Social Connections */}
+            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg shadow-sm flex flex-col h-full">
+              {/* Header */}
+              <div className="px-5 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
+                <h2 className="text-base font-semibold text-slate-900 dark:text-white flex items-center gap-2">
+                  <UsersIcon className="h-4 w-4 text-indigo-500" />
+                  {t('connections.title')}
+                </h2>
+              </div>
+
+              {/* Tabs */}
+              <div className="grid grid-cols-2 border-b border-slate-100 dark:border-slate-800">
+                <button
+                  onClick={() => setConnectionsTab('following')}
+                  className={`py-3 text-sm font-medium transition-all relative ${connectionsTab === 'following'
+                    ? 'text-indigo-600 dark:text-indigo-400 bg-indigo-50/50 dark:bg-indigo-900/10'
+                    : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/50'
+                    }`}
+                >
+                  {t('connections.followingTab')}
+                  <span className="ml-1.5 px-1.5 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-xs">
+                    {connections?.followingCount || 0}
+                  </span>
+                  {connectionsTab === 'following' && (
+                    <div className="absolute bottom-0 left-0 w-full h-[2px] bg-indigo-500" />
+                  )}
+                </button>
+                <button
+                  onClick={() => setConnectionsTab('followers')}
+                  className={`py-3 text-sm font-medium transition-all relative ${connectionsTab === 'followers'
+                    ? 'text-indigo-600 dark:text-indigo-400 bg-indigo-50/50 dark:bg-indigo-900/10'
+                    : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/50'
+                    }`}
+                >
+                  {t('connections.followersTab')}
+                  <span className="ml-1.5 px-1.5 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-xs">
+                    {connections?.followersCount || 0}
+                  </span>
+                  {connectionsTab === 'followers' && (
+                    <div className="absolute bottom-0 left-0 w-full h-[2px] bg-indigo-500" />
+                  )}
+                </button>
+              </div>
+
+              {/* Content List */}
+              <div className="flex-1 overflow-y-auto max-h-[300px] scrollbar-thin scrollbar-thumb-slate-200 dark:scrollbar-thumb-slate-700 scrollbar-track-transparent">
+                {activeList.length === 0 ? (
+                  <div className="p-8 text-center flex flex-col items-center justify-center">
+                    <div className="w-12 h-12 bg-slate-50 dark:bg-slate-800 rounded-full flex items-center justify-center mb-3">
+                      <UsersIcon className="h-6 w-6 text-slate-300 dark:text-slate-600" />
+                    </div>
+                    <p className="text-sm text-slate-500 dark:text-slate-400">
+                      {connectionsTab === 'following' ? t('connections.notFollowingAnyone') : t('connections.noFollowers')}
+                    </p>
+                  </div>
+                ) : (
+                  <div className="divide-y divide-slate-50 dark:divide-slate-800/50">
+                    {activeList.map((connUser) => (
+                      <div key={connUser.id} className="p-3 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors flex items-center gap-3 group">
+                        <div className="relative cursor-pointer" onClick={() => navigate(`/profile/${connUser.id}`)}>
+                          <img
+                            src={connUser.picture || `https://ui-avatars.com/api/?name=${encodeURIComponent(connUser.name)}&background=3B82F6&color=ffffff`}
+                            alt={connUser.name}
+                            className="w-10 h-10 rounded-full object-cover border border-slate-100 dark:border-slate-700"
+                          />
+                        </div>
+                        <div className="flex-1 min-w-0 cursor-pointer" onClick={() => navigate(`/profile/${connUser.id}`)}>
+                          <h3 className="text-sm font-medium text-slate-900 dark:text-white truncate group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+                            {connUser.name}
+                          </h3>
+                          <p className="text-xs text-slate-500 dark:text-slate-400 truncate">
+                            {connUser.niche ? connUser.niche : t('connections.quizzesCount', { count: connUser.quizStats?.totalCompleted || 0 })}
+                          </p>
+                        </div>
+                        <button onClick={() => navigate(`/profile/${connUser.id}`)} className="text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 p-1.5 transition-colors">
+                          <ChevronRightIcon className="h-4 w-4" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+
           </div>
         </div>
       </div>
-    </div>
-  );
-};
-
-// Componente para listar usuários
-const UserList: React.FC<{
-  users: PublicUser[];
-  emptyMessage: string;
-}> = ({ users, emptyMessage }) => {
-  const navigate = useNavigate();
-
-  if (users.length === 0) {
-    return (
-      <div className="text-center py-12">
-        <div className="bg-slate-50 dark:bg-slate-800/50 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-          <Users size={32} className="text-slate-300 dark:text-slate-600" />
-        </div>
-        <p className="text-slate-500 dark:text-slate-400">{emptyMessage}</p>
-      </div>
-    );
-  }
-
-  return (
-    <div className="space-y-4">
-      {users.map((user) => (
-        <div
-          key={user.id}
-          className="flex items-center gap-4 p-4 border border-slate-100 dark:border-slate-700 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800/50 cursor-pointer transition-colors group"
-          onClick={() => navigate(`/profile/${user.id}`)}
-        >
-          <img
-            src={user.picture || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}&background=3B82F6&color=ffffff`}
-            alt={user.name}
-            className="w-12 h-12 rounded-full object-cover group-hover:ring-2 group-hover:ring-primary-500 transition-all"
-          />
-          <div className="flex-1 min-w-0">
-            <h3 className="font-semibold text-slate-900 dark:text-white truncate">
-              {user.name}
-            </h3>
-            {user.bio && (
-              <p className="text-sm text-slate-500 dark:text-slate-400 truncate">
-                {user.bio}
-              </p>
-            )}
-          </div>
-          <div className="flex items-center gap-1.5 text-xs font-medium text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-2.5 py-1 rounded-full">
-            <Users size={12} />
-            {user.followersCount}
-          </div>
-        </div>
-      ))}
-    </div>
+    </>
   );
 };
 
