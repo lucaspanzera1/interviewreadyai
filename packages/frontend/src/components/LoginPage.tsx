@@ -132,11 +132,11 @@ const LoginPage: React.FC = () => {
             <div className="pt-8 text-center lg:text-left border-t border-slate-100 dark:border-slate-800/50">
               <p className="text-sm text-slate-500 dark:text-slate-500 leading-relaxed">
                 {t('termsAgreement')} <br className="hidden md:block" />
-                <Link to="/terms" className="text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 font-medium hover:underline transition-colors">
+                <Link to="https://www.treinavaga.tech/terms" className="text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 font-medium hover:underline transition-colors">
                   {t('termsOfUse')}
                 </Link>
                 {' '}{t('and')}{' '}
-                <Link to="/privacy" className="text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 font-medium hover:underline transition-colors">
+                <Link to="https://www.treinavaga.tech/privacy" className="text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 font-medium hover:underline transition-colors">
                   {t('privacyPolicy')}
                 </Link>.
               </p>
