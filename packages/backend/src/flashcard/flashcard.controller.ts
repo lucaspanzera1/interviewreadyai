@@ -68,48 +68,6 @@ export class FlashcardController {
     );
   }
 
-  @Get(':id')
-  @UseGuards(JwtAuthGuard)
-  async getFlashcardForStudy(
-    @Param('id') flashcardId: string,
-    @CurrentUser() user: UserDocument,
-  ) {
-    return this.flashcardService.getFlashcardForStudy(flashcardId, user._id.toString());
-  }
-
-  @Post(':id/study')
-  @UseGuards(JwtAuthGuard)
-  async recordStudySession(
-    @Param('id') flashcardId: string,
-    @Body() studySession: StudySessionDto,
-    @CurrentUser() user: UserDocument,
-  ) {
-    return this.flashcardService.recordStudySession(
-      flashcardId,
-      user._id.toString(),
-      studySession,
-    );
-  }
-
-  @Get(':id/progress')
-  @UseGuards(JwtAuthGuard)
-  async getStudyProgress(
-    @Param('id') flashcardId: string,
-    @CurrentUser() user: UserDocument,
-  ) {
-    return this.flashcardService.getStudyProgress(flashcardId, user._id.toString());
-  }
-
-  @Get(':id/card/:cardIndex/history')
-  @UseGuards(JwtAuthGuard)
-  async getCardHistory(
-    @Param('id') flashcardId: string,
-    @Param('cardIndex') cardIndex: string,
-    @CurrentUser() user: UserDocument,
-  ) {
-    return this.flashcardService.getCardHistory(flashcardId, user._id.toString(), parseInt(cardIndex));
-  }
-
   @Get('user/study-stats')
   @UseGuards(JwtAuthGuard)
   async getStudyStats(
@@ -124,55 +82,6 @@ export class FlashcardController {
     @CurrentUser() user: UserDocument,
   ) {
     return this.flashcardService.getCardsForReview(user._id.toString());
-  }
-
-  @Patch(':id/toggle-public')
-  @UseGuards(JwtAuthGuard)
-  async togglePublic(
-    @Param('id') flashcardId: string,
-    @CurrentUser() user: UserDocument,
-  ) {
-    return this.flashcardService.togglePublic(flashcardId, user._id.toString());
-  }
-
-  @Delete(':id')
-  @UseGuards(JwtAuthGuard)
-  async deleteFlashcard(
-    @Param('id') flashcardId: string,
-    @CurrentUser() user: UserDocument,
-  ) {
-    return this.flashcardService.deleteFlashcard(flashcardId, user._id.toString());
-  }
-
-  // Admin endpoints
-  @Get('admin/all')
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRole.ADMIN)
-  async getAllFlashcards(
-    @Query('page') page: string = '1',
-    @Query('limit') limit: string = '20',
-  ) {
-    return this.flashcardService.getAllFlashcards(parseInt(page), parseInt(limit));
-  }
-
-  @Patch('admin/:id/toggle-active')
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRole.ADMIN)
-  async toggleActive(
-    @Param('id') flashcardId: string,
-  ) {
-    return this.flashcardService.toggleActive(flashcardId);
-  }
-
-  @Get('admin/user/:userId')
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRole.ADMIN)
-  async getUserFlashcardsByAdmin(
-    @Param('userId') userId: string,
-    @Query('page') page: string = '1',
-    @Query('limit') limit: string = '100',
-  ) {
-    return this.flashcardService.getUserFlashcardsByAdmin(userId, parseInt(page), parseInt(limit));
   }
 
   /**
@@ -250,6 +159,98 @@ export class FlashcardController {
     @Query('days') days: string = '365'
   ) {
     return this.flashcardService.getUserActivityStats(user._id.toString(), parseInt(days));
+  }
+
+  // Admin endpoints
+  @Get('admin/all')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN)
+  async getAllFlashcards(
+    @Query('page') page: string = '1',
+    @Query('limit') limit: string = '20',
+  ) {
+    return this.flashcardService.getAllFlashcards(parseInt(page), parseInt(limit));
+  }
+
+  @Patch('admin/:id/toggle-active')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN)
+  async toggleActive(
+    @Param('id') flashcardId: string,
+  ) {
+    return this.flashcardService.toggleActive(flashcardId);
+  }
+
+  @Get('admin/user/:userId')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN)
+  async getUserFlashcardsByAdmin(
+    @Param('userId') userId: string,
+    @Query('page') page: string = '1',
+    @Query('limit') limit: string = '100',
+  ) {
+    return this.flashcardService.getUserFlashcardsByAdmin(userId, parseInt(page), parseInt(limit));
+  }
+
+  // Parameterized :id routes (MUST come after all static routes)
+  @Get(':id')
+  @UseGuards(JwtAuthGuard)
+  async getFlashcardForStudy(
+    @Param('id') flashcardId: string,
+    @CurrentUser() user: UserDocument,
+  ) {
+    return this.flashcardService.getFlashcardForStudy(flashcardId, user._id.toString());
+  }
+
+  @Post(':id/study')
+  @UseGuards(JwtAuthGuard)
+  async recordStudySession(
+    @Param('id') flashcardId: string,
+    @Body() studySession: StudySessionDto,
+    @CurrentUser() user: UserDocument,
+  ) {
+    return this.flashcardService.recordStudySession(
+      flashcardId,
+      user._id.toString(),
+      studySession,
+    );
+  }
+
+  @Get(':id/progress')
+  @UseGuards(JwtAuthGuard)
+  async getStudyProgress(
+    @Param('id') flashcardId: string,
+    @CurrentUser() user: UserDocument,
+  ) {
+    return this.flashcardService.getStudyProgress(flashcardId, user._id.toString());
+  }
+
+  @Get(':id/card/:cardIndex/history')
+  @UseGuards(JwtAuthGuard)
+  async getCardHistory(
+    @Param('id') flashcardId: string,
+    @Param('cardIndex') cardIndex: string,
+    @CurrentUser() user: UserDocument,
+  ) {
+    return this.flashcardService.getCardHistory(flashcardId, user._id.toString(), parseInt(cardIndex));
+  }
+
+  @Patch(':id/toggle-public')
+  @UseGuards(JwtAuthGuard)
+  async togglePublic(
+    @Param('id') flashcardId: string,
+    @CurrentUser() user: UserDocument,
+  ) {
+    return this.flashcardService.togglePublic(flashcardId, user._id.toString());
+  }
+
+  @Delete(':id')
+  @UseGuards(JwtAuthGuard)
+  async deleteFlashcard(
+    @Param('id') flashcardId: string,
+    @CurrentUser() user: UserDocument,
+  ) {
+    return this.flashcardService.deleteFlashcard(flashcardId, user._id.toString());
   }
 
   /**
