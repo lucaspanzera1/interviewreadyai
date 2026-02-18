@@ -8,7 +8,6 @@ import {
     InformationCircleIcon,
     ChartBarIcon,
     ChevronLeftIcon,
-    SpeakerWaveIcon,
     VideoCameraIcon,
     CpuChipIcon,
     LightBulbIcon,
@@ -77,56 +76,7 @@ const TechBadge = ({ children, color = 'blue', className }: { children: React.Re
     );
 };
 
-const AnimatedCircularProgress = ({ value, label, icon: Icon, color }: { value: number, label: string, icon: any, color: 'blue' | 'green' | 'purple' | 'yellow' }) => {
-    const radius = 34;
-    const circumference = 2 * Math.PI * radius;
-    const offset = circumference - (value / 100) * circumference;
 
-    const colorMap = {
-        blue: { stroke: 'text-blue-500', bg: 'bg-blue-50 dark:bg-blue-900/10', text: 'text-blue-600 dark:text-blue-400' },
-        green: { stroke: 'text-emerald-500', bg: 'bg-emerald-50 dark:bg-emerald-900/10', text: 'text-emerald-600 dark:text-emerald-400' },
-        purple: { stroke: 'text-indigo-500', bg: 'bg-indigo-50 dark:bg-indigo-900/10', text: 'text-indigo-600 dark:text-indigo-400' },
-        yellow: { stroke: 'text-amber-500', bg: 'bg-amber-50 dark:bg-amber-900/10', text: 'text-amber-600 dark:text-amber-400' },
-    };
-
-    const c = colorMap[color];
-
-    return (
-        <div className={cn("group relative flex flex-col items-center justify-center p-4 rounded-2xl border transition-all duration-300",
-            "bg-white dark:bg-slate-900/50 border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 hover:shadow-lg dark:hover:shadow-black/20")}>
-
-            <div className="relative w-24 h-24">
-                {/* Background Ring */}
-                <svg className="w-full h-full transform -rotate-90">
-                    <circle
-                        cx="48" cy="48" r={radius}
-                        className="text-slate-100 dark:text-slate-800"
-                        strokeWidth="8" fill="transparent" stroke="currentColor"
-                    />
-                    {/* Interactive Ring */}
-                    <circle
-                        cx="48" cy="48" r={radius}
-                        className={cn("transition-all duration-1000 ease-out", c.stroke)}
-                        strokeWidth="8"
-                        strokeLinecap="round"
-                        fill="transparent"
-                        strokeDasharray={circumference}
-                        strokeDashoffset={offset}
-                        stroke="currentColor"
-                    />
-                </svg>
-
-                {/* Center Icon/Value */}
-                <div className="absolute inset-0 flex flex-col items-center justify-center">
-                    <Icon className={cn("w-6 h-6 mb-1 opacity-50 group-hover:opacity-100 transition-opacity duration-300", c.text)} />
-                    <span className={cn("text-xl font-bold font-mono", c.text)}>{value}</span>
-                </div>
-            </div>
-
-            <span className="mt-2 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-widest">{label}</span>
-        </div>
-    );
-};
 
 // --- Main Component ---
 
@@ -271,7 +221,7 @@ const VideoTimelineAnalysisPage: React.FC = () => {
         <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-200 font-sans selection:bg-indigo-500/30">
             {/* --- Top Navigation Bar --- */}
             <header className="fixed top-0 left-0 right-0 z-50 h-16 bg-white/80 dark:bg-slate-950/80 backdrop-blur-xl border-b border-slate-200 dark:border-slate-800 transition-colors">
-                <div className="max-w-[1920px] mx-auto px-6 h-full flex items-center justify-between">
+                <div className="max-w-[1920px] mx-auto px-4 lg:px-6 h-full flex items-center justify-between">
                     <div className="flex items-center gap-6">
                         <button
                             onClick={() => navigate('/my-interviews')}
@@ -305,14 +255,14 @@ const VideoTimelineAnalysisPage: React.FC = () => {
             </header>
 
             {/* --- Main Dashboard Content --- */}
-            <main className="pt-24 pb-8 px-6 max-w-[1920px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-6 h-screen">
+            <main className="pt-20 lg:pt-24 pb-8 px-4 lg:px-6 max-w-[1920px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-6 min-h-screen lg:h-screen lg:overflow-hidden">
 
                 {/* Left Column: Video Player & Metrics (Span 8) */}
-                <div className="lg:col-span-8 flex flex-col gap-6 h-[calc(100vh-8rem)] min-h-[600px]">
+                <div className="lg:col-span-8 flex flex-col gap-4 lg:gap-6 h-auto lg:h-[calc(100vh-8rem)] min-h-0">
 
                     {/* Video Player Card */}
                     <div
-                        className="relative flex-1 bg-black rounded-3xl overflow-hidden shadow-2xl border border-slate-200 dark:border-slate-800 group"
+                        className="relative w-full aspect-video lg:aspect-auto lg:flex-1 bg-black rounded-2xl lg:rounded-3xl overflow-hidden shadow-xl lg:shadow-2xl border border-slate-200 dark:border-slate-800 group"
                         onMouseEnter={() => setIsHoveringVideo(true)}
                         onMouseLeave={() => setIsHoveringVideo(false)}
                     >
@@ -346,15 +296,15 @@ const VideoTimelineAnalysisPage: React.FC = () => {
                                 {!isPlaying && (
                                     <button
                                         onClick={togglePlayPause}
-                                        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-20 h-20 bg-white/10 hover:bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center border border-white/20 text-white transition-all transform hover:scale-110 shadow-xl group/btn"
+                                        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-16 h-16 lg:w-20 lg:h-20 bg-white/10 hover:bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center border border-white/20 text-white transition-all transform hover:scale-110 shadow-xl group/btn"
                                     >
-                                        <PlayIconSolid className="w-8 h-8 ml-1 group-hover/btn:text-indigo-300 transition-colors" />
+                                        <PlayIconSolid className="w-6 h-6 lg:w-8 lg:h-8 ml-1 group-hover/btn:text-indigo-300 transition-colors" />
                                     </button>
                                 )}
 
                                 {/* Bottom Controls Bar */}
                                 <div className={cn(
-                                    "absolute bottom-0 left-0 right-0 p-6 transition-all duration-300 transform",
+                                    "absolute bottom-0 left-0 right-0 p-4 lg:p-6 transition-all duration-300 transform",
                                     isHoveringVideo || !isPlaying ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'
                                 )}>
                                     {/* Timeline Slider */}
@@ -428,17 +378,11 @@ const VideoTimelineAnalysisPage: React.FC = () => {
                         )}
                     </div>
 
-                    {/* Metrics Strip */}
-                    <div className="h-40 grid grid-cols-2 lg:grid-cols-4 gap-4 flex-none">
-                        <AnimatedCircularProgress value={analysis.metrics?.speech_clarity || 0} label={t('videoAnalysis.clarity')} icon={SpeakerWaveIcon} color="blue" />
-                        <AnimatedCircularProgress value={analysis.metrics?.confidence_level || 0} label={t('videoAnalysis.confidence')} icon={ChartBarIcon} color="green" />
-                        <AnimatedCircularProgress value={analysis.metrics?.engagement || 0} label={t('videoAnalysis.engagement')} icon={CpuChipIcon} color="purple" />
-                        <AnimatedCircularProgress value={analysis.metrics?.technical_accuracy || 0} label={t('videoAnalysis.accuracy')} icon={CheckCircleIcon} color="yellow" />
-                    </div>
+
                 </div>
 
                 {/* Right Column: Interactive Sidebar (Span 4) */}
-                <div className="lg:col-span-4 flex flex-col h-[calc(100vh-8rem)] bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-xl overflow-hidden">
+                <div className="lg:col-span-4 flex flex-col h-[70vh] lg:h-[calc(100vh-8rem)] bg-white dark:bg-slate-900 rounded-2xl lg:rounded-3xl border border-slate-200 dark:border-slate-800 shadow-xl overflow-hidden">
                     {/* Sidebar Tabs */}
                     <div className="flex border-b border-slate-200 dark:border-slate-800">
                         <button
@@ -487,7 +431,7 @@ const VideoTimelineAnalysisPage: React.FC = () => {
                         {activeTab === 'feed' && (
                             <div className="h-full flex flex-col">
                                 {/* Filters */}
-                                <div className="p-3 grid grid-cols-4 gap-2 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
+                                <div className="p-3 grid grid-cols-2 sm:grid-cols-4 gap-2 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
                                     {[
                                         { id: 'all', icon: ChartBarIcon, label: t('videoAnalysis.filterAll') },
                                         { id: 'positive', icon: CheckCircleIcon, label: t('videoAnalysis.filterGood') },
@@ -689,52 +633,52 @@ const VideoTimelineAnalysisPage: React.FC = () => {
 const LoadingScreen = () => {
     const { t } = useTranslation('interview');
     return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex flex-col items-center justify-center p-4">
-        <div className="relative w-24 h-24 mb-8">
-            <div className="absolute inset-0 border-4 border-indigo-100 dark:border-indigo-900/30 rounded-full"></div>
-            <div className="absolute inset-0 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
-            <CpuChipIcon className="absolute inset-0 m-auto w-8 h-8 text-indigo-500 animate-pulse" />
+        <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex flex-col items-center justify-center p-4">
+            <div className="relative w-24 h-24 mb-8">
+                <div className="absolute inset-0 border-4 border-indigo-100 dark:border-indigo-900/30 rounded-full"></div>
+                <div className="absolute inset-0 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
+                <CpuChipIcon className="absolute inset-0 m-auto w-8 h-8 text-indigo-500 animate-pulse" />
+            </div>
+            <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-2 tracking-tight">{t('videoAnalysis.loadingTitle')}</h2>
+            <p className="text-slate-500 dark:text-slate-400">{t('videoAnalysis.loadingDesc')}</p>
         </div>
-        <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-2 tracking-tight">{t('videoAnalysis.loadingTitle')}</h2>
-        <p className="text-slate-500 dark:text-slate-400">{t('videoAnalysis.loadingDesc')}</p>
-    </div>
     );
 };
 
 const ProcessingScreen = ({ status }: { status: string }) => {
     const { t } = useTranslation('interview');
     return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex flex-col items-center justify-center p-4">
-        <div className="max-w-md w-full bg-white dark:bg-slate-900 rounded-2xl shadow-xl border border-slate-200 dark:border-slate-800 p-8 text-center relative overflow-hidden">
-            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-indigo-500 via-purple-500 to-indigo-500 animate-gradient-x"></div>
+        <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex flex-col items-center justify-center p-4">
+            <div className="max-w-md w-full bg-white dark:bg-slate-900 rounded-2xl shadow-xl border border-slate-200 dark:border-slate-800 p-8 text-center relative overflow-hidden">
+                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-indigo-500 via-purple-500 to-indigo-500 animate-gradient-x"></div>
 
-            <div className="w-16 h-16 bg-indigo-50 dark:bg-indigo-900/20 rounded-2xl flex items-center justify-center mx-auto mb-6">
-                <ArrowsPointingOutIcon className="w-8 h-8 text-indigo-600 dark:text-indigo-400 animate-pulse" />
-            </div>
-
-            <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">{t('videoAnalysis.processingTitle')}</h2>
-            <p className="text-slate-600 dark:text-slate-400 mb-8">
-                {t('videoAnalysis.processingDesc')}
-            </p>
-
-            <div className="space-y-3">
-                <div className="flex items-center justify-between text-sm">
-                    <span className="text-slate-500">{t('videoAnalysis.status')}</span>
-                    <span className="font-mono font-medium text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/10 px-2 py-1 rounded uppercase">{status}</span>
+                <div className="w-16 h-16 bg-indigo-50 dark:bg-indigo-900/20 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                    <ArrowsPointingOutIcon className="w-8 h-8 text-indigo-600 dark:text-indigo-400 animate-pulse" />
                 </div>
-                <div className="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-2 overflow-hidden">
-                    <div className="h-full bg-indigo-500 rounded-full w-2/3 animate-loading-bar"></div>
-                </div>
-            </div>
 
-            <button
-                onClick={() => window.location.href = '/my-interviews'}
-                className="mt-8 text-sm text-slate-500 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
-            >
-                {t('videoAnalysis.returnToDashboard')}
-            </button>
-        </div>
-        <style>{`
+                <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">{t('videoAnalysis.processingTitle')}</h2>
+                <p className="text-slate-600 dark:text-slate-400 mb-8">
+                    {t('videoAnalysis.processingDesc')}
+                </p>
+
+                <div className="space-y-3">
+                    <div className="flex items-center justify-between text-sm">
+                        <span className="text-slate-500">{t('videoAnalysis.status')}</span>
+                        <span className="font-mono font-medium text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/10 px-2 py-1 rounded uppercase">{status}</span>
+                    </div>
+                    <div className="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-2 overflow-hidden">
+                        <div className="h-full bg-indigo-500 rounded-full w-2/3 animate-loading-bar"></div>
+                    </div>
+                </div>
+
+                <button
+                    onClick={() => window.location.href = '/my-interviews'}
+                    className="mt-8 text-sm text-slate-500 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
+                >
+                    {t('videoAnalysis.returnToDashboard')}
+                </button>
+            </div>
+            <style>{`
             @keyframes loading-bar {
                 0% { transform: translateX(-100%); }
                 100% { transform: translateX(100%); }
@@ -743,28 +687,28 @@ const ProcessingScreen = ({ status }: { status: string }) => {
                 animation: loading-bar 1.5s infinite linear;
             }
         `}</style>
-    </div>
+        </div>
     );
 };
 
 const ErrorScreen = ({ error, onBack }: { error: string, onBack: () => void }) => {
     const { t } = useTranslation('interview');
     return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex flex-col items-center justify-center">
-        <div className="bg-white dark:bg-slate-900 p-8 rounded-2xl shadow-xl border border-red-100 dark:border-red-900/30 max-w-md w-full text-center">
-            <div className="w-16 h-16 bg-red-50 dark:bg-red-900/20 rounded-full flex items-center justify-center mx-auto mb-6">
-                <ExclamationTriangleIcon className="w-8 h-8 text-red-500" />
+        <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex flex-col items-center justify-center">
+            <div className="bg-white dark:bg-slate-900 p-8 rounded-2xl shadow-xl border border-red-100 dark:border-red-900/30 max-w-md w-full text-center">
+                <div className="w-16 h-16 bg-red-50 dark:bg-red-900/20 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <ExclamationTriangleIcon className="w-8 h-8 text-red-500" />
+                </div>
+                <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2">{t('videoAnalysis.analysisFailed')}</h3>
+                <p className="text-slate-500 dark:text-slate-400 mb-6">{error}</p>
+                <button
+                    onClick={onBack}
+                    className="w-full py-2.5 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-lg hover:opacity-90 transition-opacity font-medium"
+                >
+                    {t('videoAnalysis.returnToDashboard')}
+                </button>
             </div>
-            <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2">{t('videoAnalysis.analysisFailed')}</h3>
-            <p className="text-slate-500 dark:text-slate-400 mb-6">{error}</p>
-            <button
-                onClick={onBack}
-                className="w-full py-2.5 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-lg hover:opacity-90 transition-opacity font-medium"
-            >
-                {t('videoAnalysis.returnToDashboard')}
-            </button>
         </div>
-    </div>
     );
 };
 
