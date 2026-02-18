@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Headers } from '@nestjs/common';
 import { TokenPackageService } from './token-package.service';
 import { CreateTokenPackageDto } from './dto/create-token-package.dto';
 import { UpdateTokenPackageDto } from './dto/update-token-package.dto';
@@ -28,8 +28,17 @@ export class TokenPackageController {
 
   @Get('available')
   @Public()
-  findAvailable() {
-    return this.tokenPackageService.findAll();
+  async findAvailable(@Headers('accept-language') acceptLang?: string) {
+    const packages = await this.tokenPackageService.findAll();
+    const isEn = acceptLang?.startsWith('en');
+    return packages.map((pkg: any) => {
+      const json = typeof pkg.toJSON === 'function' ? pkg.toJSON() : { ...pkg };
+      if (isEn) {
+        if (json.nameEn) json.name = json.nameEn;
+        if (json.featuresEn?.length) json.features = json.featuresEn;
+      }
+      return json;
+    });
   }
 
   @Get(':id')

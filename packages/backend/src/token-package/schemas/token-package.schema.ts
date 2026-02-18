@@ -10,6 +10,9 @@ export class TokenPackage {
   name: string;
 
   @Prop()
+  nameEn?: string;
+
+  @Prop()
   description?: string;
 
   @Prop({ required: true, min: 1 })
@@ -20,6 +23,9 @@ export class TokenPackage {
 
   @Prop({ type: [String] })
   features: string[];
+
+  @Prop({ type: [String] })
+  featuresEn: string[];
 
   @Prop({ default: true })
   active: boolean;

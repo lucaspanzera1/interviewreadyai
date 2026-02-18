@@ -8,6 +8,8 @@ import {
   XMarkIcon,
   PencilSquareIcon,
   MagnifyingGlassIcon,
+  LanguageIcon,
+  ChevronDownIcon,
 } from '@heroicons/react/24/outline';
 
 const AdminTokenPackagesPage: React.FC = () => {
@@ -19,13 +21,16 @@ const AdminTokenPackagesPage: React.FC = () => {
   const { showToast } = useToast();
 
   const [roles, setRoles] = useState<Role[]>([]);
+  const [showEnFields, setShowEnFields] = useState(false);
 
   const [formData, setFormData] = useState({
     name: '',
+    nameEn: '',
     description: '',
     tokenAmount: 0,
     role: '',
     features: [] as string[],
+    featuresEn: [] as string[],
     validityDays: undefined as number | undefined,
     value: undefined as number | undefined,
   });
@@ -104,27 +109,34 @@ const AdminTokenPackagesPage: React.FC = () => {
   const resetForm = () => {
     setFormData({
       name: '',
+      nameEn: '',
       description: '',
       tokenAmount: 0,
       role: '',
       features: [],
+      featuresEn: [],
       validityDays: undefined,
       value: undefined,
     });
     setEditingPackage(null);
+    setShowEnFields(false);
   };
 
   const startEdit = (pkg: TokenPackage) => {
     setEditingPackage(pkg);
+    const hasEn = !!(pkg.nameEn || (pkg.featuresEn && pkg.featuresEn.length > 0));
     setFormData({
       name: pkg.name,
+      nameEn: pkg.nameEn || '',
       description: pkg.description || '',
       tokenAmount: pkg.tokenAmount,
       role: pkg.role.id,
       features: pkg.features || [],
+      featuresEn: pkg.featuresEn || [],
       validityDays: pkg.validityDays,
       value: pkg.value,
     });
+    setShowEnFields(hasEn);
     setIsModalOpen(true);
   };
 
@@ -433,6 +445,54 @@ const AdminTokenPackagesPage: React.FC = () => {
                   Dica: Pressione Enter para adicionar cada benefício em uma nova linha.
                 </p>
               </div>
+
+              {/* English Translation Toggle */}
+              <div className="md:col-span-2">
+                <button
+                  type="button"
+                  onClick={() => setShowEnFields(!showEnFields)}
+                  className="flex items-center gap-2 w-full px-4 py-3 rounded-xl border border-dashed border-slate-300 dark:border-slate-600 hover:border-primary-400 dark:hover:border-primary-500 hover:bg-primary-50/50 dark:hover:bg-primary-900/10 transition-all group"
+                >
+                  <LanguageIcon className="w-5 h-5 text-slate-400 group-hover:text-primary-500 transition-colors" />
+                  <span className="text-sm font-medium text-slate-600 dark:text-slate-300 group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">
+                    🇺🇸 Tradução para Inglês
+                  </span>
+                  <ChevronDownIcon className={`w-4 h-4 ml-auto text-slate-400 transition-transform duration-200 ${showEnFields ? 'rotate-180' : ''}`} />
+                </button>
+              </div>
+
+              {showEnFields && (
+                <>
+                  <div className="md:col-span-2">
+                    <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
+                      🇺🇸 Package Name (EN)
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.nameEn}
+                      onChange={(e) => setFormData(prev => ({ ...prev, nameEn: e.target.value }))}
+                      className="w-full px-4 py-2.5 border border-blue-200 dark:border-blue-800 rounded-xl bg-blue-50/50 dark:bg-blue-900/10 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 placeholder-slate-400"
+                      placeholder="e.g.: Starter, Professional, Enterprise"
+                    />
+                  </div>
+
+                  <div className="md:col-span-2">
+                    <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
+                      🇺🇸 Features (EN, one per line)
+                    </label>
+                    <textarea
+                      value={formData.featuresEn.join('\n')}
+                      onChange={(e) => setFormData(prev => ({ ...prev, featuresEn: e.target.value.split('\n').filter(f => f.trim()) }))}
+                      className="w-full px-4 py-2.5 border border-blue-200 dark:border-blue-800 rounded-xl bg-blue-50/50 dark:bg-blue-900/10 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 font-sans placeholder-slate-400"
+                      rows={4}
+                      placeholder="e.g.:&#10;Unlimited access&#10;24/7 Support&#10;Detailed reports"
+                    />
+                    <p className="text-[10px] text-slate-400 mt-1">
+                      Tip: These will be shown to users with English language preference.
+                    </p>
+                  </div>
+                </>
+              )}
             </div>
 
             <div className="flex gap-3 mt-8">

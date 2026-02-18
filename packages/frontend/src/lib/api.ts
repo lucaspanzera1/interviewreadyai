@@ -20,10 +20,12 @@ export interface Role {
 export interface TokenPackage {
   id: string;
   name: string;
+  nameEn?: string;
   description?: string;
   tokenAmount: number;
   role: Role;
   features: string[];
+  featuresEn?: string[];
   active: boolean;
   validityDays?: number;
   value?: number;
@@ -34,10 +36,12 @@ export interface TokenPackage {
 
 export interface CreateTokenPackage {
   name: string;
+  nameEn?: string;
   description?: string;
   tokenAmount: number;
   role: string;
   features: string[];
+  featuresEn?: string[];
   validityDays?: number;
   value?: number;
   packageType?: 'subscription' | 'token_boost' | 'test';
@@ -45,10 +49,12 @@ export interface CreateTokenPackage {
 
 export interface UpdateTokenPackage {
   name?: string;
+  nameEn?: string;
   description?: string;
   tokenAmount?: number;
   role?: string;
   features?: string[];
+  featuresEn?: string[];
   active?: boolean;
   validityDays?: number;
   packageType?: 'subscription' | 'token_boost' | 'test';
@@ -348,13 +354,17 @@ class ApiClient {
   }
 
   private setupInterceptors() {
-    // Request interceptor to add auth token
+    // Request interceptor to add auth token and language
     this.client.interceptors.request.use(
       (config) => {
         const token = localStorage.getItem('access_token');
         if (token) {
           config.headers.Authorization = `Bearer ${token}`;
         }
+
+        // Send current i18n language so backend can return localized content
+        const lang = localStorage.getItem('i18nextLng') || 'pt-BR';
+        config.headers['Accept-Language'] = lang;
 
         return config;
       },

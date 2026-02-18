@@ -6,6 +6,10 @@ export class CreateTokenPackageDto {
 
   @IsOptional()
   @IsString()
+  nameEn?: string;
+
+  @IsOptional()
+  @IsString()
   description?: string;
 
   @IsNumber()
@@ -19,6 +23,11 @@ export class CreateTokenPackageDto {
   @IsArray()
   @IsString({ each: true })
   features?: string[];
+
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  featuresEn?: string[];
 
   @IsOptional()
   @IsNumber()
