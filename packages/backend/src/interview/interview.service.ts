@@ -45,10 +45,10 @@ export class InterviewService {
     }
 
     try {
-      // Detectar o site da vaga e fazer scraping apropriado
-      const jobData = await this.scrapeJob(dto.jobUrl);
-
       const lang = (user.preferredLanguage as SupportedLanguage) || 'pt-BR';
+
+      // Detectar o site da vaga e fazer scraping apropriado
+      const jobData = await this.scrapeJob(dto.jobUrl, lang);
 
       // Gerar a simulação de entrevista baseada nos dados da vaga
       const interview = await this.generateInterviewFromJobData(jobData, dto, userId, lang);
@@ -72,13 +72,13 @@ export class InterviewService {
   /**
    * Detecta o site da vaga e chama o scraper apropriado
    */
-  private async scrapeJob(url: string): Promise<any> {
+  private async scrapeJob(url: string, lang: SupportedLanguage = 'pt-BR'): Promise<any> {
     if (url.includes('linkedin.com')) {
-      return this.scrapeLinkedInJob(url);
+      return this.scrapeLinkedInJob(url, lang);
     } else if (url.includes('gupy.io') || url.includes('gupy.com.br')) {
-      return this.scrapeGupyJob(url);
+      return this.scrapeGupyJob(url, lang);
     } else if (url.includes('infojobs.com') || url.includes('infojobs.net')) {
-      return this.scrapeInfojobsJob(url);
+      return this.scrapeInfojobsJob(url, lang);
     } else if (url.includes('glassdoor.com') || url.includes('glassdoor.com.br')) {
       return this.scrapeGlassdoorJob(url);
     } else if (url.includes('indeed.com') || url.includes('indeed.com.br')) {
@@ -91,7 +91,7 @@ export class InterviewService {
   /**
    * Faz scraping de uma vaga do LinkedIn (similar ao quiz)
    */
-  private async scrapeLinkedInJob(url: string): Promise<any> {
+  private async scrapeLinkedInJob(url: string, lang: SupportedLanguage = 'pt-BR'): Promise<any> {
     try {
       // Validar que é uma URL do LinkedIn
       if (!url.includes('linkedin.com/jobs/view') && !url.includes('linkedin.com/jobs/collections')) {
@@ -114,20 +114,20 @@ export class InterviewService {
       // Extrair informações da vaga
       const jobTitle = $('h1.top-card-layout__title, h2.top-card-layout__title, h1[data-test-id="job-title"]').first().text().trim() || 
                        $('h1').first().text().trim() ||
-                       t('quiz.jobTitleNotFound');
+                       t('quiz.jobTitleNotFound', lang);
       
       const companyName = $('.top-card-layout__card .topcard__org-name-link, .topcard__flavor--black-link, [data-test-id="company-name"]').first().text().trim() ||
                          $('.top-card-layout__card a[data-tracking-control-name="public_jobs_topcard-org-name"]').first().text().trim() ||
-                         t('quiz.companyNotFound');
+                         t('quiz.companyNotFound', lang);
       
       const location = $('.top-card-layout__card .topcard__flavor--bullet, .topcard__flavor, [data-test-id="job-location"]').first().text().trim() ||
-                      t('quiz.locationNotFound');
+                      t('quiz.locationNotFound', lang);
       
       // Tentar múltiplos seletores para descrição
       const description = $('.show-more-less-html__markup, .description__text, [data-test-id="job-description"]').text().trim() ||
                          $('div[class*="description"]').first().text().trim() ||
                          $('section[data-test-id="job-details"]').text().trim() ||
-                         t('quiz.descriptionNotAvailable');
+                         t('quiz.descriptionNotAvailable', lang);
 
 
       // Extrair requisitos e responsabilidades do texto da descrição
@@ -199,7 +199,7 @@ export class InterviewService {
   /**
    * Faz scraping de uma vaga do Gupy
    */
-  private async scrapeGupyJob(url: string): Promise<any> {
+  private async scrapeGupyJob(url: string, lang: SupportedLanguage = 'pt-BR'): Promise<any> {
     try {
       if (!url.includes('gupy.io') && !url.includes('gupy.com.br')) {
         throw new HttpException('Invalid Gupy job URL', HttpStatus.BAD_REQUEST);
@@ -218,19 +218,19 @@ export class InterviewService {
 
       const jobTitle = $('h1[data-testid="job-title"], .job-title, h1').first().text().trim() ||
                        $('h1').first().text().trim() ||
-                       t('quiz.jobTitleNotFound');
+                       t('quiz.jobTitleNotFound', lang);
 
       const companyName = $('[data-testid="company-name"], .company-name, .employer-name').first().text().trim() ||
                          $('.company-info a').first().text().trim() ||
-                         t('quiz.companyNotFound');
+                         t('quiz.companyNotFound', lang);
 
       const location = $('[data-testid="job-location"], .job-location, .location').first().text().trim() ||
                       $('.location-info').first().text().trim() ||
-                      t('quiz.locationNotFound');
+                      t('quiz.locationNotFound', lang);
 
       const description = $('[data-testid="job-description"], .job-description, .description').text().trim() ||
                          $('.job-details-content').text().trim() ||
-                         t('quiz.descriptionNotAvailable');
+                         t('quiz.descriptionNotAvailable', lang);
 
       const requirements: string[] = [];
       const responsibilities: string[] = [];
@@ -321,7 +321,7 @@ export class InterviewService {
   /**
    * Faz scraping de uma vaga do Infojobs
    */
-  private async scrapeInfojobsJob(url: string): Promise<any> {
+  private async scrapeInfojobsJob(url: string, lang: SupportedLanguage = 'pt-BR'): Promise<any> {
     try {
       if (!url.includes('infojobs.com') && !url.includes('infojobs.net')) {
         throw new HttpException('Invalid Infojobs job URL', HttpStatus.BAD_REQUEST);
@@ -340,19 +340,19 @@ export class InterviewService {
 
       const jobTitle = $('h1[data-testid="job-title"], .job-title, h1').first().text().trim() ||
                        $('h1').first().text().trim() ||
-                       t('quiz.jobTitleNotFound');
+                       t('quiz.jobTitleNotFound', lang);
 
       const companyName = $('[data-testid="company-name"], .company-name, .company').first().text().trim() ||
                          $('.company-info a').first().text().trim() ||
-                         t('quiz.companyNotFound');
+                         t('quiz.companyNotFound', lang);
 
       const location = $('[data-testid="job-location"], .job-location, .location').first().text().trim() ||
                       $('.location-info').first().text().trim() ||
-                      t('quiz.locationNotFound');
+                      t('quiz.locationNotFound', lang);
 
       const description = $('[data-testid="job-description"], .job-description, .description').text().trim() ||
                          $('.job-content').text().trim() ||
-                         t('quiz.descriptionNotAvailable');
+                         t('quiz.descriptionNotAvailable', lang);
 
       const requirements: string[] = [];
       const responsibilities: string[] = [];
@@ -697,7 +697,7 @@ export class InterviewService {
       const promptTemplate = await this.getInterviewPromptTemplate(lang);
 
       // Construir o prompt com os dados da vaga
-      const prompt = this.buildInterviewPrompt(promptTemplate, jobData, dto);
+      const prompt = this.buildInterviewPrompt(promptTemplate, jobData, dto, lang);
 
       // Chamar a API do Groq
       const response = await this.callGroqAPI(prompt, apiKey, lang);
@@ -771,8 +771,8 @@ export class InterviewService {
   private async callGroqAPI(prompt: string, apiKey: string, lang: SupportedLanguage = 'pt-BR'): Promise<string> {
     try {
       const systemContent = lang === 'en' ?
-        'You are an expert interview coach and HR professional. Generate realistic and relevant interview questions based on job requirements. Always respond with valid JSON format.' :
-        'Você é um coach de entrevistas especialista e profissional de RH. Gere perguntas de entrevista realistas e relevantes baseadas nos requisitos da vaga. Sempre responda com formato JSON válido.';
+        'You are an expert interview coach and HR professional. Generate realistic and relevant interview questions based on job requirements. Always respond with valid JSON format. ALL generated content (questions, scenarios, expected answers) MUST be written in English, regardless of the language of the input data.' :
+        'Você é um coach de entrevistas especialista e profissional de RH. Gere perguntas de entrevista realistas e relevantes baseadas nos requisitos da vaga. Sempre responda com formato JSON válido. TODO o conteúdo gerado (perguntas, cenários, respostas esperadas) DEVE ser escrito em português brasileiro, independente do idioma dos dados de entrada.';
       const response = await firstValueFrom(
         this.httpService.post(
           'https://api.groq.com/openai/v1/chat/completions',
@@ -1004,16 +1004,16 @@ gere uma simulação de entrevista realista com {{numberOfQuestions}} perguntas 
   /**
    * Constrói o prompt substituindo as variáveis
    */
-  private buildInterviewPrompt(template: string, jobData: any, dto: GenerateInterviewDto): string {
+  private buildInterviewPrompt(template: string, jobData: any, dto: GenerateInterviewDto, lang: SupportedLanguage = 'pt-BR'): string {
     return template
       .replace(/{{numberOfQuestions}}/g, (dto.numberOfQuestions || 4).toString())
-      .replace(/{{jobTitle}}/g, jobData.jobTitle || t('interview.notSpecified'))
-      .replace(/{{companyName}}/g, jobData.companyName || t('interview.notSpecifiedFem'))
-      .replace(/{{location}}/g, jobData.location || t('interview.notSpecifiedFem'))
-      .replace(/{{requirements}}/g, jobData.requirements?.join(', ') || t('interview.notSpecified'))
-      .replace(/{{skills}}/g, jobData.skills?.join(', ') || t('interview.notSpecified'))
-      .replace(/{{description}}/g, jobData.description || t('interview.notAvailable'))
-      .replace(/{{experienceLevel}}/g, dto.experienceLevel || t('interview.notSpecified'));
+      .replace(/{{jobTitle}}/g, jobData.jobTitle || t('interview.notSpecified', lang))
+      .replace(/{{companyName}}/g, jobData.companyName || t('interview.notSpecifiedFem', lang))
+      .replace(/{{location}}/g, jobData.location || t('interview.notSpecifiedFem', lang))
+      .replace(/{{requirements}}/g, jobData.requirements?.join(', ') || t('interview.notSpecified', lang))
+      .replace(/{{skills}}/g, jobData.skills?.join(', ') || t('interview.notSpecified', lang))
+      .replace(/{{description}}/g, jobData.description || t('interview.notAvailable', lang))
+      .replace(/{{experienceLevel}}/g, dto.experienceLevel || t('interview.notSpecified', lang));
   }
 
   /**
@@ -1294,6 +1294,18 @@ gere uma simulação de entrevista realista com {{numberOfQuestions}} perguntas 
     const { Types } = require('mongoose');
     const fs = require('fs');
     const path = require('path');
+
+    // Determine user's preferred language
+    let lang: SupportedLanguage = 'pt-BR';
+    try {
+      const userService = await this.getUserService();
+      const user = await userService.findById(userId);
+      if (user?.preferredLanguage) {
+        lang = user.preferredLanguage as SupportedLanguage;
+      }
+    } catch (e) {
+      // Ignore - use default language
+    }
     
     // Criar diretório de uploads se não existir
     const uploadDir = path.join(process.cwd(), 'public', 'uploads', 'videos');
@@ -1366,7 +1378,7 @@ gere uma simulação de entrevista realista com {{numberOfQuestions}} perguntas 
     return {
       attemptId: attempt._id.toString(),
       status: 'uploaded',
-      message: t('interview.videosUploaded', 'pt-BR', { count: videoPaths.length }),
+      message: t('interview.videosUploaded', lang, { count: videoPaths.length }),
       videosCount: videoPaths.length,
     };
   }
@@ -1375,22 +1387,22 @@ gere uma simulação de entrevista realista com {{numberOfQuestions}} perguntas 
    * Processa análise de vídeo com Google Gemini
    */
   private async processVideoAnalysis(attemptId: string, videoPaths: string[], interviewId: string, userId?: string) {
+    // Determine user's preferred language (before try block so it's available in catch)
+    let lang: SupportedLanguage = 'pt-BR';
+    if (userId) {
+      try {
+        const userService = await this.getUserService();
+        const user = await userService.findById(userId);
+        if (user?.preferredLanguage) {
+          lang = user.preferredLanguage as SupportedLanguage;
+        }
+      } catch (e) {
+        // Ignore - use default language
+      }
+    }
+
     try {
       console.log(`[VideoAnalysis] Starting analysis for attempt ${attemptId} with ${videoPaths.length} videos`);
-
-      // Determine user's preferred language
-      let lang: SupportedLanguage = 'pt-BR';
-      if (userId) {
-        try {
-          const userService = await this.getUserService();
-          const user = await userService.findById(userId);
-          if (user?.preferredLanguage) {
-            lang = user.preferredLanguage as SupportedLanguage;
-          }
-        } catch (e) {
-          // Ignore - use default language
-        }
-      }
       
       // Atualizar status para 'processing'
       await this.interviewAttemptModel.findByIdAndUpdate(attemptId, {
@@ -1436,7 +1448,7 @@ gere uma simulação de entrevista realista com {{numberOfQuestions}} perguntas 
       console.error(`[VideoAnalysis] Error stack:`, error.stack);
       
       // Usar análise de fallback e marcar como concluído (com limitações)
-      const fallbackAnalysis = this.createFallbackAnalysis();
+      const fallbackAnalysis = this.createFallbackAnalysis(lang);
       
       await this.interviewAttemptModel.findByIdAndUpdate(attemptId, {
         videoAnalysis: fallbackAnalysis,
@@ -1606,14 +1618,14 @@ gere uma simulação de entrevista realista com {{numberOfQuestions}} perguntas 
       }
       
       // Fallback analysis em caso de erro
-      return this.createFallbackAnalysis();
+      return this.createFallbackAnalysis(lang);
     }
   }
 
   /**
    * Cria análise de fallback em caso de erro
    */
-  private createFallbackAnalysis(): any {
+  private createFallbackAnalysis(lang: SupportedLanguage = 'pt-BR'): any {
     return {
       overall_score: 75,
       duration: 120, // 2 minutos
@@ -1622,15 +1634,15 @@ gere uma simulação de entrevista realista com {{numberOfQuestions}} perguntas 
           timestamp: 30,
           type: 'neutral',
           category: 'content',
-          message: 'Análise detalhada não disponível no momento',
+          message: lang === 'en' ? 'Detailed analysis not available at the moment' : 'Análise detalhada não disponível no momento',
           severity: 'low',
-          suggestion: 'Tente enviar o vídeo novamente mais tarde'
+          suggestion: lang === 'en' ? 'Try submitting the video again later' : 'Tente enviar o vídeo novamente mais tarde'
         }
       ],
       summary: {
-        strengths: [t('interview.simulationParticipation'), t('interview.recordingCompleted')],
-        improvements: [t('interview.analysisComingSoon')],
-        keyPoints: ['Vídeo recebido com sucesso', 'Sistema processando análise']
+        strengths: [t('interview.simulationParticipation', lang), t('interview.recordingCompleted', lang)],
+        improvements: [t('interview.analysisComingSoon', lang)],
+        keyPoints: lang === 'en' ? ['Video received successfully', 'System processing analysis'] : ['Vídeo recebido com sucesso', 'Sistema processando análise']
       },
       metrics: {
         speech_clarity: 75,

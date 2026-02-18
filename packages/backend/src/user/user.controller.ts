@@ -1,4 +1,4 @@
-import { Controller, Get, Put, Body, Param, UseGuards, Post, Delete, Query, UseInterceptors, UploadedFile, BadRequestException } from '@nestjs/common';
+import { Controller, Get, Put, Patch, Body, Param, UseGuards, Post, Delete, Query, UseInterceptors, UploadedFile, BadRequestException } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiParam, ApiQuery, ApiConsumes, ApiBody } from '@nestjs/swagger';
 import { UserService } from './user.service';
@@ -510,6 +510,7 @@ export class UserController {
       cellphone: userDoc.cellphone,
       taxid: this.maskTaxid(userDoc.taxid),
       headerImage: userDoc.headerImage,
+      preferredLanguage: userDoc.preferredLanguage || 'pt-BR',
     };
   }
 
@@ -578,9 +579,27 @@ export class UserController {
         linkedinUrl: updatedUser.linkedinUrl,
         githubUrl: updatedUser.githubUrl,
         headerImage: updatedUser.headerImage,
+        preferredLanguage: updatedUser.preferredLanguage || 'pt-BR',
       },
       message: t('user.profileUpdated', (user.preferredLanguage as SupportedLanguage) || 'pt-BR')
     };
+  }
+
+  /**
+   * Atualiza o idioma preferido do usuário
+   */
+  @Patch('me/language')
+  @ApiOperation({
+    summary: 'Update preferred language',
+    description: 'Updates the preferred language for the current user'
+  })
+  @ApiResponse({ status: 200, description: 'Language updated successfully' })
+  async updateLanguage(@CurrentUser() user: any, @Body() body: { preferredLanguage: string }): Promise<{ success: boolean; preferredLanguage: string }> {
+    const userId = this.getUserId(user);
+    const validLangs = ['pt-BR', 'en'];
+    const lang = validLangs.includes(body.preferredLanguage) ? body.preferredLanguage : 'pt-BR';
+    await this.userService.updateUser(userId, { preferredLanguage: lang });
+    return { success: true, preferredLanguage: lang };
   }
 
   /**

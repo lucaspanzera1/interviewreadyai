@@ -60,10 +60,10 @@ export class FlashcardService {
     try {
       console.log('Starting flashcard generation for user:', userId);
       
-      // Detectar o site da vaga e fazer scraping apropriado
-      const jobData = await this.scrapeJob(dto.jobUrl);
-
       const lang = (user.preferredLanguage as SupportedLanguage) || 'pt-BR';
+
+      // Detectar o site da vaga e fazer scraping apropriado
+      const jobData = await this.scrapeJob(dto.jobUrl, lang);
 
       // Gerar os flashcards baseados nos dados da vaga
       const flashcards = await this.generateFlashcardsFromJobData(jobData, dto, userId, lang);
@@ -88,13 +88,13 @@ export class FlashcardService {
   /**
    * Detecta o site da vaga e chama o scraper apropriado
    */
-  private async scrapeJob(url: string): Promise<any> {
+  private async scrapeJob(url: string, lang: SupportedLanguage = 'pt-BR'): Promise<any> {
     if (url.includes('linkedin.com')) {
-      return this.scrapeLinkedInJob(url);
+      return this.scrapeLinkedInJob(url, lang);
     } else if (url.includes('gupy.io') || url.includes('gupy.com.br')) {
-      return this.scrapeGupyJob(url);
+      return this.scrapeGupyJob(url, lang);
     } else if (url.includes('infojobs.com') || url.includes('infojobs.net')) {
-      return this.scrapeInfojobsJob(url);
+      return this.scrapeInfojobsJob(url, lang);
     } else if (url.includes('glassdoor.com') || url.includes('glassdoor.com.br')) {
       return this.scrapeGlassdoorJob(url);
     } else if (url.includes('indeed.com') || url.includes('indeed.com.br')) {
@@ -107,7 +107,7 @@ export class FlashcardService {
   /**
    * Faz scraping de uma vaga do LinkedIn (reutilizado do quiz.service.ts)
    */
-  private async scrapeLinkedInJob(url: string): Promise<any> {
+  private async scrapeLinkedInJob(url: string, lang: SupportedLanguage = 'pt-BR'): Promise<any> {
     try {
       // Validar que é uma URL do LinkedIn
       if (!url.includes('linkedin.com/jobs/view') && !url.includes('linkedin.com/jobs/collections')) {
@@ -132,20 +132,20 @@ export class FlashcardService {
       // Extrair informações da vaga
       const jobTitle = $('h1.top-card-layout__title, h2.top-card-layout__title, h1[data-test-id="job-title"]').first().text().trim() || 
                        $('h1').first().text().trim() ||
-                       t('quiz.jobTitleNotFound');
+                       t('quiz.jobTitleNotFound', lang);
       
       const companyName = $('.top-card-layout__card .topcard__org-name-link, .topcard__flavor--black-link, [data-test-id="company-name"]').first().text().trim() ||
                          $('.top-card-layout__card a[data-tracking-control-name="public_jobs_topcard-org-name"]').first().text().trim() ||
-                         t('quiz.companyNotFound');
+                         t('quiz.companyNotFound', lang);
       
       const location = $('.top-card-layout__card .topcard__flavor--bullet, .topcard__flavor, [data-test-id="job-location"]').first().text().trim() ||
-                      t('quiz.locationNotFound');
+                      t('quiz.locationNotFound', lang);
       
       // Tentar múltiplos seletores para descrição
       const description = $('.show-more-less-html__markup, .description__text, [data-test-id="job-description"]').text().trim() ||
                          $('div[class*="description"]').first().text().trim() ||
                          $('section[data-test-id="job-details"]').text().trim() ||
-                         t('quiz.descriptionNotAvailable');
+                         t('quiz.descriptionNotAvailable', lang);
 
       console.log('Job data extracted successfully');
 
@@ -169,7 +169,7 @@ export class FlashcardService {
   /**
    * Faz scraping de uma vaga do Gupy
    */
-  private async scrapeGupyJob(url: string): Promise<any> {
+  private async scrapeGupyJob(url: string, lang: SupportedLanguage = 'pt-BR'): Promise<any> {
     try {
       if (!url.includes('gupy.io') && !url.includes('gupy.com.br')) {
         throw new HttpException('Invalid Gupy job URL', HttpStatus.BAD_REQUEST);
@@ -190,19 +190,19 @@ export class FlashcardService {
 
       const jobTitle = $('h1[data-testid="job-title"], .job-title, h1').first().text().trim() ||
                        $('h1').first().text().trim() ||
-                       t('quiz.jobTitleNotFound');
+                       t('quiz.jobTitleNotFound', lang);
 
       const companyName = $('[data-testid="company-name"], .company-name, .employer-name').first().text().trim() ||
                          $('.company-info a').first().text().trim() ||
-                         t('quiz.companyNotFound');
+                         t('quiz.companyNotFound', lang);
 
       const location = $('[data-testid="job-location"], .job-location, .location').first().text().trim() ||
                       $('.location-info').first().text().trim() ||
-                      t('quiz.locationNotFound');
+                      t('quiz.locationNotFound', lang);
 
       const description = $('[data-testid="job-description"], .job-description, .description').text().trim() ||
                          $('.job-details-content').text().trim() ||
-                         t('quiz.descriptionNotAvailable');
+                         t('quiz.descriptionNotAvailable', lang);
 
       return {
         title: jobTitle,
@@ -223,7 +223,7 @@ export class FlashcardService {
   /**
    * Faz scraping de uma vaga do Infojobs
    */
-  private async scrapeInfojobsJob(url: string): Promise<any> {
+  private async scrapeInfojobsJob(url: string, lang: SupportedLanguage = 'pt-BR'): Promise<any> {
     try {
       if (!url.includes('infojobs.com') && !url.includes('infojobs.net')) {
         throw new HttpException('Invalid Infojobs job URL', HttpStatus.BAD_REQUEST);
@@ -244,19 +244,19 @@ export class FlashcardService {
 
       const jobTitle = $('h1[data-testid="job-title"], .job-title, h1').first().text().trim() ||
                        $('h1').first().text().trim() ||
-                       t('quiz.jobTitleNotFound');
+                       t('quiz.jobTitleNotFound', lang);
 
       const companyName = $('[data-testid="company-name"], .company-name, .company').first().text().trim() ||
                          $('.company-info a').first().text().trim() ||
-                         t('quiz.companyNotFound');
+                         t('quiz.companyNotFound', lang);
 
       const location = $('[data-testid="job-location"], .job-location, .location').first().text().trim() ||
                       $('.location-info').first().text().trim() ||
-                      t('quiz.locationNotFound');
+                      t('quiz.locationNotFound', lang);
 
       const description = $('[data-testid="job-description"], .job-description, .description').text().trim() ||
                          $('.job-content').text().trim() ||
-                         t('quiz.descriptionNotAvailable');
+                         t('quiz.descriptionNotAvailable', lang);
 
       return {
         title: jobTitle,
@@ -708,7 +708,8 @@ Your expertise includes:
 IMPORTANT: 
 1. Return ONLY valid JSON, no additional text before or after.
 2. Each flashcard must have a clear question and complete answer.
-3. Adapt the complexity level as requested (FACIL, MEDIO, DIFICIL).` :
+3. Adapt the complexity level as requested (FACIL, MEDIO, DIFICIL).
+4. ALL generated content (questions, answers) MUST be written in English, regardless of the language of the input data.` :
       `Você é um especialista em criar flashcards educacionais no estilo Anki para preparação técnica. Sua tarefa é criar flashcards baseados na descrição de uma vaga de emprego para ajudar candidatos a se prepararem para entrevistas e testes técnicos.
 
 Sua expertise inclui:
@@ -721,7 +722,8 @@ Sua expertise inclui:
 IMPORTANTE: 
 1. Retorne APENAS JSON válido, sem texto adicional antes ou depois.
 2. Cada flashcard deve ter uma pergunta clara e resposta completa.
-3. Adapte o nível de complexidade conforme solicitado (FACIL, MEDIO, DIFICIL).`;
+3. Adapte o nível de complexidade conforme solicitado (FACIL, MEDIO, DIFICIL).
+4. TODO o conteúdo gerado (perguntas, respostas) DEVE ser escrito em português brasileiro, independente do idioma dos dados de entrada.`;
 
     const payload = {
       model: 'openai/gpt-oss-120b',
@@ -915,21 +917,24 @@ IMPORTANTE:
       throw new NotFoundException('Flashcard not found');
     }
 
+    // Fetch user language preference
+    const userService = await this.getUserService();
+    const currentUser = await userService.findById(userId);
+    const lang = (currentUser?.preferredLanguage as SupportedLanguage) || 'pt-BR';
+
     if (!flashcard.isActive) {
-      throw new HttpException(t('flashcard.notAvailable'), HttpStatus.FORBIDDEN);
+      throw new HttpException(t('flashcard.notAvailable', lang), HttpStatus.FORBIDDEN);
     }
 
     // Verificar se o usuário é o criador do flashcard
     const isCreator = flashcard.createdBy.toString() === userId.toString();
-
-    const userService = await this.getUserService();
 
     if (!flashcard.isFree && !isCreator) {
       // Se não é gratuito E não é o criador, verificar se o usuário tem tokens suficientes
       const userTokens = await userService.getUserTokens(userId);
       if (userTokens < 1) {
         throw new HttpException(
-          t('flashcard.notEnoughTokens'),
+          t('flashcard.notEnoughTokens', lang),
           HttpStatus.FORBIDDEN
         );
       }
@@ -1426,13 +1431,19 @@ IMPORTANTE:
    */
   async getFlashcardStats(flashcardId: string, userId: string) {
     const { Types } = require('mongoose');
+
+    // Fetch user language preference
+    const userService = await this.getUserService();
+    const currentUser = await userService.findById(userId);
+    const lang = (currentUser?.preferredLanguage as SupportedLanguage) || 'pt-BR';
+
     const flashcard = await this.flashcardModel.findOne({
       _id: flashcardId,
       userId: new Types.ObjectId(userId)
     }).exec();
 
     if (!flashcard) {
-      throw new NotFoundException(t('flashcard.notFound'));
+      throw new NotFoundException(t('flashcard.notFound', lang));
     }
 
     // Estatísticas de estudo para este flashcard

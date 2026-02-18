@@ -277,6 +277,7 @@ export class UserService {
       lastLoginAt: user.lastLoginAt,
       hasCompletedOnboarding: user.hasCompletedOnboarding,
       isProfilePublic: user.isProfilePublic,
+      preferredLanguage: user.preferredLanguage || 'pt-BR',
     };
   }
 

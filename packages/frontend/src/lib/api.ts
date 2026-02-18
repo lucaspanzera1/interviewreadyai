@@ -82,6 +82,8 @@ export interface User {
   githubUrl?: string;
   // Configurações de privacidade
   isProfilePublic?: boolean;
+  // Language preference
+  preferredLanguage?: string;
   // Reward system fields
   totalFreeQuizzesCompleted?: number;
   lastTokenRewardAt?: string;
@@ -156,6 +158,7 @@ export interface UserProfile {
   cellphone?: string | null;
   taxid?: string | null;
   headerImage?: string;
+  preferredLanguage?: string;
 }
 
 export interface CompleteOnboardingData {
@@ -490,6 +493,11 @@ class ApiClient {
   async updateUserProfile(userData: Partial<User>): Promise<{ data: User; message?: string }> {
     const response = await this.client.put('/users/profile', userData);
     return response.data.message ? { data: response.data.data, message: response.data.message } : { data: response.data };
+  }
+
+  async updateLanguage(preferredLanguage: string): Promise<{ success: boolean; preferredLanguage: string }> {
+    const response = await this.client.patch('/users/me/language', { preferredLanguage });
+    return response.data;
   }
 
 

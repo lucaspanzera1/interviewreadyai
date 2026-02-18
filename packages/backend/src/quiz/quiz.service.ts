@@ -293,7 +293,8 @@ For technical questions:
 IMPORTANT:
 1. Return ONLY valid JSON, no additional text before or after.
 2. Ensure all questions are relevant to the specific job.
-3. Keep the difficulty level appropriate for the role.` :
+3. Keep the difficulty level appropriate for the role.
+4. ALL generated content (questions, options, answers, explanations) MUST be written in English, regardless of the language of the input data.` :
       `Você é um recrutador técnico sênior e engenheiro de software experiente com 15+ anos de experiência conduzindo entrevistas técnicas em empresas de tecnologia de ponta (FAANG, unicórnios e startups de alto crescimento).
 
 Sua expertise inclui:
@@ -312,7 +313,8 @@ Para questões técnicas:
 IMPORTANTE:
 1. Retorne APENAS JSON válido, sem texto adicional antes ou depois.
 2. Garanta que todas as perguntas sejam relevantes para a vaga específica.
-3. Mantenha o nível de dificuldade apropriado para o cargo.`) :
+3. Mantenha o nível de dificuldade apropriado para o cargo.
+4. TODO o conteúdo gerado (perguntas, opções, respostas, explicações) DEVE ser escrito em português brasileiro, independente do idioma dos dados de entrada.`) :
       (lang === 'en' ?
       `You are an expert in education and technology, specialized in creating high-quality quizzes about programming, software development and related technologies.
 
@@ -341,7 +343,8 @@ For code questions:
 IMPORTANT:
 1. Always format code properly using the specified markers.
 2. Return ONLY valid JSON, no additional text before or after.
-3. Do NOT include explanations, comments or text outside the JSON.` :
+3. Do NOT include explanations, comments or text outside the JSON.
+4. ALL generated content (questions, options, answers, explanations) MUST be written in English, regardless of the language of the input data.` :
       `Você é um especialista em educação e tecnologia, especializado em criar quizzes de alta qualidade sobre programação, desenvolvimento de software e tecnologias relacionadas.
 
 Sua expertise inclui:
@@ -369,7 +372,8 @@ Para questões sobre código:
 IMPORTANTE:
 1. Sempre formate código adequadamente usando as marcações especificadas.
 2. Retorne APENAS JSON válido, sem texto adicional antes ou depois.
-3. NÃO inclua explicações, comentários ou texto fora do JSON.`);
+3. NÃO inclua explicações, comentários ou texto fora do JSON.
+4. TODO o conteúdo gerado (perguntas, opções, respostas, explicações) DEVE ser escrito em português brasileiro, independente do idioma dos dados de entrada.`);
 
     const payload = {
       model: 'openai/gpt-oss-120b',
@@ -535,10 +539,12 @@ IMPORTANTE:
     if (quiz && quiz.isFree) {
       // Check limit before incrementing
       const userService = await this.getUserService();
+      const user = await userService.findById(userId);
+      const lang = (user?.preferredLanguage as SupportedLanguage) || 'pt-BR';
       const hasAccess = await userService.canDoFreeQuiz(userId);
       if (!hasAccess) {
         throw new HttpException(
-          t('quiz.dailyLimitReached'),
+          t('quiz.dailyLimitReached', lang),
           HttpStatus.FORBIDDEN
         );
       }
@@ -639,10 +645,12 @@ IMPORTANTE:
 
     // Verificar se o usuário ainda tem acesso aos quizzes gratuitos
     const userService = await this.getUserService();
+    const user = await userService.findById(userId);
+    const lang = (user?.preferredLanguage as SupportedLanguage) || 'pt-BR';
     const hasAccess = await userService.canDoFreeQuiz(userId);
     if (!hasAccess) {
       throw new HttpException(
-        t('quiz.dailyLimitReached'),
+        t('quiz.dailyLimitReached', lang),
         HttpStatus.FORBIDDEN
       );
     }
@@ -662,8 +670,13 @@ IMPORTANTE:
       throw new NotFoundException('Quiz not found');
     }
 
+    // Fetch user language preference
+    const userService2 = await this.getUserService();
+    const currentUser = await userService2.findById(userId);
+    const userLang = (currentUser?.preferredLanguage as SupportedLanguage) || 'pt-BR';
+
     if (!quiz.isActive) {
-      throw new HttpException(t('quiz.notAvailable'), HttpStatus.FORBIDDEN);
+      throw new HttpException(t('quiz.notAvailable', userLang), HttpStatus.FORBIDDEN);
     }
 
     // Verificar se o usuário é o criador do quiz
@@ -676,7 +689,7 @@ IMPORTANTE:
       const userTokens = await userService.getUserTokens(userId);
       if (userTokens < 1) {
         throw new HttpException(
-          t('quiz.notEnoughTokens'),
+          t('quiz.notEnoughTokens', userLang),
           HttpStatus.FORBIDDEN
         );
       }
@@ -688,7 +701,7 @@ IMPORTANTE:
       const hasAccess = await userService.canDoFreeQuiz(userId);
       if (!hasAccess) {
         throw new HttpException(
-          t('quiz.dailyLimitReached'),
+          t('quiz.dailyLimitReached', userLang),
           HttpStatus.FORBIDDEN
         );
       }
@@ -789,10 +802,10 @@ IMPORTANTE:
     }
 
     try {
-      // Detectar o site da vaga e fazer scraping apropriado
-      const jobData = await this.scrapeJob(dto.jobUrl);
-
       const lang = (user.preferredLanguage as SupportedLanguage) || 'pt-BR';
+
+      // Detectar o site da vaga e fazer scraping apropriado
+      const jobData = await this.scrapeJob(dto.jobUrl, lang);
 
       // Gerar o quiz baseado nos dados da vaga
       const quiz = await this.generateJobQuizFromData(jobData, userId, lang);
@@ -816,13 +829,13 @@ IMPORTANTE:
   /**
    * Detecta o site da vaga e chama o scraper apropriado
    */
-  private async scrapeJob(url: string): Promise<any> {
+  private async scrapeJob(url: string, lang: SupportedLanguage = 'pt-BR'): Promise<any> {
     if (url.includes('linkedin.com')) {
-      return this.scrapeLinkedInJob(url);
+      return this.scrapeLinkedInJob(url, lang);
     } else if (url.includes('gupy.io') || url.includes('gupy.com.br')) {
-      return this.scrapeGupyJob(url);
+      return this.scrapeGupyJob(url, lang);
     } else if (url.includes('infojobs.com') || url.includes('infojobs.net')) {
-      return this.scrapeInfojobsJob(url);
+      return this.scrapeInfojobsJob(url, lang);
     } else if (url.includes('glassdoor.com') || url.includes('glassdoor.com.br')) {
       return this.scrapeGlassdoorJob(url);
     } else if (url.includes('indeed.com') || url.includes('indeed.com.br')) {
@@ -835,7 +848,7 @@ IMPORTANTE:
   /**
    * Faz scraping de uma vaga do LinkedIn
    */
-  private async scrapeLinkedInJob(url: string): Promise<any> {
+  private async scrapeLinkedInJob(url: string, lang: SupportedLanguage = 'pt-BR'): Promise<any> {
     try {
       // Validar que é uma URL do LinkedIn
       if (!url.includes('linkedin.com/jobs/view') && !url.includes('linkedin.com/jobs/collections')) {
@@ -858,20 +871,20 @@ IMPORTANTE:
       // Extrair informações da vaga
       const jobTitle = $('h1.top-card-layout__title, h2.top-card-layout__title, h1[data-test-id="job-title"]').first().text().trim() ||
                        $('h1').first().text().trim() ||
-                       t('quiz.jobTitleNotFound');
+                       t('quiz.jobTitleNotFound', lang);
 
       const companyName = $('.top-card-layout__card .topcard__org-name-link, .topcard__flavor--black-link, [data-test-id="company-name"]').first().text().trim() ||
                          $('.top-card-layout__card a[data-tracking-control-name="public_jobs_topcard-org-name"]').first().text().trim() ||
-                         t('quiz.companyNotFound');
+                         t('quiz.companyNotFound', lang);
 
       const location = $('.top-card-layout__card .topcard__flavor--bullet, .topcard__flavor, [data-test-id="job-location"]').first().text().trim() ||
-                      t('quiz.locationNotFound');
+                      t('quiz.locationNotFound', lang);
 
       // Tentar múltiplos seletores para descrição
       const description = $('.show-more-less-html__markup, .description__text, [data-test-id="job-description"]').text().trim() ||
                          $('div[class*="description"]').first().text().trim() ||
                          $('section[data-test-id="job-details"]').text().trim() ||
-                         t('quiz.descriptionNotAvailable');
+                         t('quiz.descriptionNotAvailable', lang);
 
       // Extrair requisitos e responsabilidades do texto da descrição
       const requirements: string[] = [];
@@ -984,7 +997,7 @@ IMPORTANTE:
   /**
    * Faz scraping de uma vaga do Gupy
    */
-  private async scrapeGupyJob(url: string): Promise<any> {
+  private async scrapeGupyJob(url: string, lang: SupportedLanguage = 'pt-BR'): Promise<any> {
     try {
       // Validar que é uma URL do Gupy
       if (!url.includes('gupy.io') && !url.includes('gupy.com.br')) {
@@ -1004,7 +1017,7 @@ IMPORTANTE:
 
       // Extrair informações da vaga usando seletores melhorados baseados na análise da página
       const jobTitle = $('h1').first().text().trim() ||
-                       t('quiz.jobTitleNotFound');
+                       t('quiz.jobTitleNotFound', lang);
 
       // Para empresa, tentar múltiplas abordagens
       let companyName = '';
@@ -1020,7 +1033,7 @@ IMPORTANTE:
       if (!companyName) {
         companyName = $('[data-testid="company-name"], .company-name, .employer-name').first().text().trim() ||
                      $('.company-info a').first().text().trim() ||
-                     t('quiz.companyNotFound');
+                     t('quiz.companyNotFound', lang);
       }
 
       // Para localização, extrair do título se estiver entre parênteses
@@ -1034,7 +1047,7 @@ IMPORTANTE:
       if (!location) {
         location = $('[data-testid="job-location"], .job-location, .location').first().text().trim() ||
                   $('.location-info').first().text().trim() ||
-                  t('quiz.locationNotFound');
+                  t('quiz.locationNotFound', lang);
       }
 
       // Descrição da vaga - procurar pela seção "Descrição da vaga"
@@ -1060,7 +1073,7 @@ IMPORTANTE:
       if (!description) {
         description = $('[data-testid="job-description"], .job-description, .description').text().trim() ||
                      $('.job-details-content').text().trim() ||
-                     t('quiz.descriptionNotAvailable');
+                     t('quiz.descriptionNotAvailable', lang);
       }
 
       // Extrair requisitos e responsabilidades do texto da descrição
@@ -1168,7 +1181,7 @@ IMPORTANTE:
   /**
    * Faz scraping de uma vaga do Infojobs
    */
-  private async scrapeInfojobsJob(url: string): Promise<any> {
+  private async scrapeInfojobsJob(url: string, lang: SupportedLanguage = 'pt-BR'): Promise<any> {
     try {
       if (!url.includes('infojobs.com') && !url.includes('infojobs.net')) {
         throw new HttpException('Invalid Infojobs job URL', HttpStatus.BAD_REQUEST);
@@ -1187,19 +1200,19 @@ IMPORTANTE:
 
       const jobTitle = $('h1[data-testid="job-title"], .job-title, h1').first().text().trim() ||
                        $('h1').first().text().trim() ||
-                       t('quiz.jobTitleNotFound');
+                       t('quiz.jobTitleNotFound', lang);
 
       const companyName = $('[data-testid="company-name"], .company-name, .company').first().text().trim() ||
                          $('.company-info a').first().text().trim() ||
-                         t('quiz.companyNotFound');
+                         t('quiz.companyNotFound', lang);
 
       const location = $('[data-testid="job-location"], .job-location, .location').first().text().trim() ||
                       $('.location-info').first().text().trim() ||
-                      t('quiz.locationNotFound');
+                      t('quiz.locationNotFound', lang);
 
       const description = $('[data-testid="job-description"], .job-description, .description').text().trim() ||
                          $('.job-content').text().trim() ||
-                         t('quiz.descriptionNotAvailable');
+                         t('quiz.descriptionNotAvailable', lang);
 
       // Similar extraction logic as Gupy
       const requirements: string[] = [];
@@ -1617,10 +1630,14 @@ IMPORTANTE:
       const userObjectId = new Types.ObjectId(userId);
 
       const savedQuiz = await this.quizModel.create({
-        categoria: t('quiz.categoryJobPosting'),
+        categoria: t('quiz.categoryJobPosting', lang),
         titulo: `Quiz: ${jobData.jobTitle} - ${jobData.companyName}`,
-        descricao: `Quiz personalizado para a vaga de ${jobData.jobTitle} na empresa ${jobData.companyName}`,
-        tags: ['vaga', 'emprego', jobData.jobTitle.toLowerCase()],
+        descricao: lang === 'en'
+          ? `Custom quiz for the ${jobData.jobTitle} position at ${jobData.companyName}`
+          : `Quiz personalizado para a vaga de ${jobData.jobTitle} na empresa ${jobData.companyName}`,
+        tags: lang === 'en'
+          ? ['job', 'employment', jobData.jobTitle.toLowerCase()]
+          : ['vaga', 'emprego', jobData.jobTitle.toLowerCase()],
         quantidade_questoes: 10,
         nivel: 'MEDIO',
         questions: generatedQuiz.questions,

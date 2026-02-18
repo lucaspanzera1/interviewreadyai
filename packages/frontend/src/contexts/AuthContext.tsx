@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { apiClient, User } from '../lib/api';
 import { useToast } from './ToastContext';
+import i18n from '../i18n';
 
 interface AuthContextType {
   user: User | null;
@@ -36,6 +37,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         if (apiClient.isAuthenticated()) {
           const userData = await apiClient.getUserProfile();
           setUser(userData);
+          // Sync frontend language with user's stored preference
+          if (userData.preferredLanguage && userData.preferredLanguage !== i18n.language) {
+            await i18n.changeLanguage(userData.preferredLanguage);
+          }
         }
       } catch (error) {
         console.error('Failed to initialize auth:', error);
@@ -69,6 +74,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
       const userData = await apiClient.getUserProfile();
       setUser(userData);
+
+      // Sync frontend language with user's stored preference
+      if (userData.preferredLanguage && userData.preferredLanguage !== i18n.language) {
+        await i18n.changeLanguage(userData.preferredLanguage);
+      }
 
       // Check if user needs to complete onboarding
       if (!userData.hasCompletedOnboarding) {

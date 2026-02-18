@@ -53,7 +53,7 @@ const Sidebar: React.FC = () => {
     const { theme, resolvedTheme, toggleTheme, setTheme } = useTheme();
     const sidebarRef = useRef<HTMLDivElement>(null);
     const { isSearchOpen, closeSearch } = useSearchModal();
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
 
     // Theme Long Press Logic
     const [showThemeMenu, setShowThemeMenu] = useState(false);
@@ -196,7 +196,7 @@ const Sidebar: React.FC = () => {
                 <img src={logoSrc} alt="TreinaVaga" className="h-12 w-12 object-contain shrink-0" />
                 <div className={`overflow-hidden whitespace-nowrap transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] ${isCollapsed ? 'max-w-0 opacity-0' : 'max-w-[200px] opacity-100'}`}>
                     <span className="text-base font-bold bg-clip-text text-transparent bg-gradient-to-r from-slate-900 to-slate-600 dark:from-white dark:to-slate-300 tracking-tight pl-3 block">
-                        TreinaVaga<span className="text-primary-600 dark:text-primary-400">AI</span>
+                        {i18n.language === 'en' ? 'InterviewReady' : 'TreinaVaga'}<span className="text-primary-600 dark:text-primary-400">AI</span>
                     </span>
                 </div>
             </div>
@@ -489,8 +489,9 @@ const Sidebar: React.FC = () => {
 
                 {/* Language Switcher */}
                 <LanguageSwitcher
-                  variant="inline"
-                  className={isCollapsed ? 'justify-center' : ''}
+                    variant="inline"
+                    className={isCollapsed ? 'justify-center' : ''}
+                    isCollapsed={isCollapsed}
                 />
 
                 {/* Configurações - só para usuários logados */}

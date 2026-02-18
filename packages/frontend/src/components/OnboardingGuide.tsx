@@ -72,7 +72,7 @@ const stepConfigs = [
 
 const OnboardingGuide: React.FC<OnboardingGuideProps> = ({ isOpen, onClose }) => {
     const [currentStep, setCurrentStep] = useState(0);
-    const { t } = useTranslation('onboarding');
+    const { t, i18n } = useTranslation('onboarding');
 
     if (!isOpen) return null;
 
@@ -114,7 +114,7 @@ const OnboardingGuide: React.FC<OnboardingGuideProps> = ({ isOpen, onClose }) =>
 
                     <div className="relative z-10 bg-white/20 backdrop-blur-md p-4 rounded-2xl shadow-lg ring-1 ring-white/30 mb-2 transform transition-all duration-500 hover:scale-105">
                         {currentStep === 0 ? (
-                            <img src="/logo.png" alt="TreinaVaga" className="w-12 h-12 object-contain" />
+                            <img src="/logo.png" alt={i18n.language === 'en' ? "InterviewReady" : "TreinaVaga"} className="w-12 h-12 object-contain" />
                         ) : (
                             <stepData.icon className="w-10 h-10 text-white" />
                         )}
