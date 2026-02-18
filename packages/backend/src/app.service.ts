@@ -13,7 +13,7 @@ export class AppService {
   getHello(): object {
     return {
       message: 'Running...',
-      version: 'beta',
+      version: process.env.APP_VERSION || 'beta',
       environment: process.env.NODE_ENV || 'development',
       timestamp: new Date().toISOString(),
     };

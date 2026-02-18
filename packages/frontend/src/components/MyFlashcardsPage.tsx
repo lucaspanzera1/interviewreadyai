@@ -152,7 +152,7 @@ const MyFlashcardsPage: React.FC = () => {
                         <PlusCircleIcon className="w-5 h-5" />
                         <span className="hidden sm:inline">{t('myFlashcards.createNew')}</span>
                         <span className="sm:hidden">{t('myFlashcards.createShort')}</span>
-                        <span className="ml-1 text-[10px] bg-white/20 px-1.5 py-0.5 rounded font-bold tracking-wide">{t('myFlashcards.beta')}</span>
+                        <span className="ml-1 text-[10px] bg-white/20 px-1.5 py-0.5 rounded font-bold tracking-wide"></span>
                     </button>
                 </div>
             </header>
@@ -177,7 +177,7 @@ const MyFlashcardsPage: React.FC = () => {
                         >
                             <PlusCircleIcon className="w-5 h-5" />
                             {t('myFlashcards.createFirst')}
-                            <span className="ml-1 text-[10px] bg-white/20 px-1.5 py-0.5 rounded font-bold tracking-wide">{t('myFlashcards.beta')}</span>
+                            <span className="ml-1 text-[10px] bg-white/20 px-1.5 py-0.5 rounded font-bold tracking-wide"></span>
                         </button>
                     </div>
                 ) : (

@@ -30,7 +30,7 @@ const TokensPage: React.FC = () => {
 
   useEffect(() => {
     fetchPackages();
-  }, []);
+  }, [i18n.language]);
 
   const fetchPackages = async () => {
     try {
