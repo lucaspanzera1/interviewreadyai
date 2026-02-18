@@ -134,6 +134,12 @@
     "copyImageUrl": "Copy Image URL",
     "copiedMarkdown": "Markdown copied!",
     "copiedUrl": "Image URL copied!",
-    "preview": "Preview"
+    "preview": "Preview",
+    "theme": "Theme",
+    "themes": {
+      "light": "Light",
+      "dark": "Dark",
+      "dracula": "Dracula"
+    }
   }
 }

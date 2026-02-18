@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Listbox, ListboxButton, ListboxOption, ListboxOptions, Transition } from '@headlessui/react';
+import { Dialog, Listbox, ListboxButton, ListboxOption, ListboxOptions, Transition } from '@headlessui/react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import PageTitle from './PageTitle';
@@ -137,6 +137,8 @@ const ProfilePage: React.FC = () => {
   const [activityData, setActivityData] = useState<{ date: string; count: number }[]>([]);
   const [recentRewards, setRecentRewards] = useState<Reward[]>([]);
   const [badgeCopied, setBadgeCopied] = useState<'markdown' | 'url' | null>(null);
+  const [badgeTheme, setBadgeTheme] = useState('light');
+  const [isBadgeModalOpen, setIsBadgeModalOpen] = useState(false);
 
 
   useEffect(() => {
@@ -393,8 +395,8 @@ const ProfilePage: React.FC = () => {
     });
   };
 
-  const badgeBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8081';
-  const badgeUrl = user?.id ? `${badgeBaseUrl}/api/public/profile/${user.id}/badge` : '';
+  const badgeBaseUrl = (import.meta.env.VITE_API_BASE_URL || 'http://localhost:8081').replace(/\/$/, '');
+  const badgeUrl = user?.id ? `${badgeBaseUrl}/api/public/profile/${user.id}/badge?theme=${badgeTheme}` : '';
   const badgeMarkdown = badgeUrl ? `![TreinaVaga Stats](${badgeUrl})` : '';
 
   const handleCopyBadge = async (type: 'markdown' | 'url') => {
@@ -408,6 +410,14 @@ const ProfilePage: React.FC = () => {
       showToast('Failed to copy', 'error');
     }
   };
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setIsBadgeModalOpen(false);
+    };
+    if (isBadgeModalOpen) window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [isBadgeModalOpen]);
 
   const getImageUrl = (imagePath?: string) => {
     if (!imagePath) return '';
@@ -1246,90 +1256,203 @@ const ProfilePage: React.FC = () => {
               </div>
             </div>
 
-            {/* GITHUB BADGE */}
-            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg shadow-sm">
-              <div className="px-4 md:px-6 py-4 border-b border-slate-100 dark:border-slate-800">
-                <h2 className="text-base font-semibold text-slate-900 dark:text-white flex items-center gap-2">
-                  <GitHubIcon className="h-5 w-5 text-[#24292f] dark:text-white" />
-                  {t('badge.title')}
-                </h2>
-              </div>
-              <div className="p-4 md:p-6 space-y-4">
-                {user?.isProfilePublic ? (
-                  <>
-                    <p className="text-sm text-slate-600 dark:text-slate-400">
+            {/* GITHUB BADGE TRIGGER - Only for Tech or No Niche */}
+            {(!user?.niche || user.niche === 'tecnologia') && (
+              <>
+                <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg shadow-sm">
+                  <div className="px-4 md:px-6 py-4 border-b border-slate-100 dark:border-slate-800">
+                    <h2 className="text-base font-semibold text-slate-900 dark:text-white flex items-center gap-2">
+                      <GitHubIcon className="h-5 w-5 text-[#24292f] dark:text-white" />
+                      {t('badge.title')}
+                    </h2>
+                  </div>
+                  <div className="p-4 md:p-6">
+                    <p className="text-sm text-slate-600 dark:text-slate-400 mb-6">
                       {t('badge.description')}
                     </p>
 
-                    {/* Preview */}
-                    <div>
-                      <p className="text-xs font-medium text-slate-500 dark:text-slate-400 mb-2">{t('badge.preview')}</p>
-                      <div className="rounded-lg overflow-hidden border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 p-3 flex items-center justify-center">
-                        <img
-                          src={badgeUrl}
-                          alt="TreinaVaga Stats Badge"
-                          className="max-w-full"
-                        />
-                      </div>
-                    </div>
-
-                    {/* Markdown Code */}
-                    <div className="relative">
-                      <pre className="p-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg text-xs text-slate-700 dark:text-slate-300 font-mono overflow-x-auto select-all">
-                        {badgeMarkdown}
-                      </pre>
-                    </div>
-
-                    {/* Copy Buttons */}
-                    <div className="flex gap-2">
-                      <button
-                        onClick={() => handleCopyBadge('markdown')}
-                        className={`flex-1 flex items-center justify-center gap-2 px-3 py-2 text-sm font-medium rounded-lg transition-all ${
-                          badgeCopied === 'markdown'
-                            ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 border border-green-300 dark:border-green-700'
-                            : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:bg-slate-200 dark:hover:bg-slate-700'
-                        }`}
-                      >
-                        {badgeCopied === 'markdown' ? (
-                          <CheckIcon className="h-4 w-4" />
-                        ) : (
-                          <ClipboardDocumentIcon className="h-4 w-4" />
-                        )}
-                        {t('badge.copyMarkdown')}
-                      </button>
-                      <button
-                        onClick={() => handleCopyBadge('url')}
-                        className={`flex-1 flex items-center justify-center gap-2 px-3 py-2 text-sm font-medium rounded-lg transition-all ${
-                          badgeCopied === 'url'
-                            ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 border border-green-300 dark:border-green-700'
-                            : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:bg-slate-200 dark:hover:bg-slate-700'
-                        }`}
-                      >
-                        {badgeCopied === 'url' ? (
-                          <CheckIcon className="h-4 w-4" />
-                        ) : (
-                          <LinkIcon className="h-4 w-4" />
-                        )}
-                        {t('badge.copyImageUrl')}
-                      </button>
-                    </div>
-                  </>
-                ) : (
-                  <div className="text-center py-4 space-y-3">
-                    <p className="text-sm text-slate-500 dark:text-slate-400">
-                      {t('badge.profilePrivate')}
-                    </p>
                     <button
-                      onClick={() => navigate('/settings')}
-                      className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-primary-600 dark:text-primary-400 bg-primary-50 dark:bg-primary-900/20 border border-primary-200 dark:border-primary-800 rounded-lg hover:bg-primary-100 dark:hover:bg-primary-900/30 transition-all"
+                      onClick={() => setIsBadgeModalOpen(true)}
+                      className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-xl font-semibold hover:opacity-90 transition-all shadow-lg active:scale-95"
                     >
-                      <Cog6ToothIcon className="h-4 w-4" />
-                      {t('badge.goToSettings')}
+                      <SparklesIcon className="h-5 w-5" />
+                      <span>Gerar Badge</span>
                     </button>
                   </div>
-                )}
-              </div>
-            </div>
+                </div>
+
+                {/* BADGE MODAL */}
+                <Transition show={isBadgeModalOpen} as={React.Fragment}>
+                  <Dialog as="div" className="relative z-50" onClose={() => setIsBadgeModalOpen(false)}>
+                    <Transition.Child
+                      as={React.Fragment}
+                      enter="ease-out duration-300"
+                      enterFrom="opacity-0"
+                      enterTo="opacity-100"
+                      leave="ease-in duration-200"
+                      leaveFrom="opacity-100"
+                      leaveTo="opacity-0"
+                    >
+                      <div className="fixed inset-0 bg-black/60 backdrop-blur-sm" />
+                    </Transition.Child>
+
+                    <div className="fixed inset-0 overflow-y-auto">
+                      <div className="flex min-h-full items-center justify-center p-4 text-center">
+                        <Transition.Child
+                          as={React.Fragment}
+                          enter="ease-out duration-300"
+                          enterFrom="opacity-0 scale-95"
+                          enterTo="opacity-100 scale-100"
+                          leave="ease-in duration-200"
+                          leaveFrom="opacity-100 scale-100"
+                          leaveTo="opacity-0 scale-95"
+                        >
+                          <Dialog.Panel className="w-full max-w-3xl transform overflow-hidden rounded-2xl bg-white dark:bg-slate-900 p-6 text-left align-middle shadow-2xl transition-all border border-slate-200 dark:border-slate-800">
+                            <div className="flex items-center justify-between mb-8">
+                              <Dialog.Title as="h3" className="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-3">
+                                <GitHubIcon className="h-7 w-7 text-[#24292f] dark:text-white" />
+                                {t('badge.title')}
+                              </Dialog.Title>
+                              <button onClick={() => setIsBadgeModalOpen(false)} className="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors bg-slate-100 dark:bg-slate-800 rounded-lg">
+                                <XMarkIcon className="h-5 w-5" />
+                              </button>
+                            </div>
+
+                            {user?.isProfilePublic ? (
+                              <div className="space-y-8">
+                                {/* Theme Selector - Top Control */}
+                                <div className="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-xl border border-slate-200 dark:border-slate-700">
+                                  <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-3 uppercase tracking-wider">
+                                    {t('badge.theme')}
+                                  </label>
+                                  <div className="grid grid-cols-3 gap-3">
+                                    {['light', 'dark', 'dracula'].map((theme) => (
+                                      <button
+                                        key={theme}
+                                        onClick={() => setBadgeTheme(theme)}
+                                        className={`relative flex items-center justify-center gap-2 px-4 py-3 rounded-lg text-sm font-medium transition-all ${badgeTheme === theme
+                                          ? 'bg-white dark:bg-slate-700 text-primary-600 dark:text-primary-400 shadow-md ring-2 ring-primary-500 ring-offset-2 ring-offset-slate-50 dark:ring-offset-slate-900'
+                                          : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700'
+                                          }`}
+                                      >
+                                        <span className={`w-3 h-3 rounded-full ${theme === 'light' ? 'bg-slate-200' : theme === 'dark' ? 'bg-slate-900' : 'bg-[#282a36]'
+                                          }`} />
+                                        {t(`badge.themes.${theme}`)}
+                                      </button>
+                                    ))}
+                                  </div>
+                                </div>
+
+                                {/* Preview Area */}
+                                <div>
+                                  <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-3 uppercase tracking-wider">
+                                    {t('badge.preview')}
+                                  </label>
+                                  <div className="rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] bg-slate-100 dark:bg-slate-900 p-8 flex items-center justify-center min-h-[250px]">
+                                    <img
+                                      key={badgeUrl}
+                                      src={badgeUrl}
+                                      alt="TreinaVaga Stats Badge"
+                                      className="max-w-full h-auto shadow-2xl rounded-xl transform hover:scale-[1.02] transition-transform duration-500"
+                                    />
+                                  </div>
+                                </div>
+
+                                {/* Code & Actions */}
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                  <div className="md:col-span-2">
+                                    <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-2 uppercase tracking-wider">
+                                      Markdown
+                                    </label>
+                                    <div className="relative group">
+                                      <pre className="p-4 bg-slate-900 text-slate-300 rounded-xl text-xs font-mono overflow-x-auto border border-slate-800 leading-relaxed shadow-inner scrollbar-hide">
+                                        {badgeMarkdown}
+                                      </pre>
+                                      <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                        <button
+                                          onClick={() => handleCopyBadge('markdown')}
+                                          className="p-1.5 bg-white/10 hover:bg-white/20 text-white rounded-lg transition-colors"
+                                          title={t('badge.copyMarkdown')}
+                                        >
+                                          {badgeCopied === 'markdown' ? <CheckIcon className="h-4 w-4 text-green-400" /> : <ClipboardDocumentIcon className="h-4 w-4" />}
+                                        </button>
+                                      </div>
+                                    </div>
+                                  </div>
+
+                                  <div className="flex flex-col gap-3 justify-end">
+                                    <button
+                                      onClick={() => handleCopyBadge('markdown')}
+                                      className={`flex items-center justify-center gap-2 px-4 py-3 text-sm font-bold rounded-xl transition-all ${badgeCopied === 'markdown'
+                                        ? 'bg-green-600 text-white shadow-lg shadow-green-600/20'
+                                        : 'bg-slate-900 dark:bg-white text-white dark:text-slate-900 hover:opacity-90 shadow-lg'
+                                        }`}
+                                    >
+                                      {badgeCopied === 'markdown' ? (
+                                        <>
+                                          <CheckIcon className="h-5 w-5" />
+                                          {t('badge.copiedMarkdown')}
+                                        </>
+                                      ) : (
+                                        <>
+                                          <ClipboardDocumentIcon className="h-5 w-5" />
+                                          {t('badge.copyMarkdown')}
+                                        </>
+                                      )}
+                                    </button>
+                                    <button
+                                      onClick={() => handleCopyBadge('url')}
+                                      className={`flex items-center justify-center gap-2 px-4 py-3 text-sm font-bold rounded-xl transition-all ${badgeCopied === 'url'
+                                        ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 border border-green-300 dark:border-green-700'
+                                        : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700'
+                                        }`}
+                                    >
+                                      {badgeCopied === 'url' ? (
+                                        <>
+                                          <CheckIcon className="h-5 w-5" />
+                                          Copiado!
+                                        </>
+                                      ) : (
+                                        <>
+                                          <LinkIcon className="h-5 w-5" />
+                                          {t('badge.copyImageUrl')}
+                                        </>
+                                      )}
+                                    </button>
+                                  </div>
+                                </div>
+                              </div>
+                            ) : (
+                              <div className="text-center py-12 space-y-6">
+                                <div className="w-16 h-16 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-4">
+                                  <GitHubIcon className="h-8 w-8 text-slate-400" />
+                                </div>
+                                <div className="max-w-md mx-auto">
+                                  <h4 className="text-lg font-bold text-slate-900 dark:text-white mb-2">Perfil Privado</h4>
+                                  <p className="text-slate-500 dark:text-slate-400 mb-6">
+                                    {t('badge.profilePrivate')}
+                                  </p>
+                                  <button
+                                    onClick={() => {
+                                      navigate('/settings');
+                                      setIsBadgeModalOpen(false);
+                                    }}
+                                    className="inline-flex items-center gap-2 px-6 py-3 text-sm font-bold text-white bg-primary-600 rounded-xl hover:bg-primary-500 transition-all shadow-lg shadow-primary-600/20"
+                                  >
+                                    <Cog6ToothIcon className="h-5 w-5" />
+                                    {t('badge.goToSettings')}
+                                  </button>
+                                </div>
+                              </div>
+                            )}
+                          </Dialog.Panel>
+                        </Transition.Child>
+                      </div>
+                    </div>
+                  </Dialog>
+                </Transition>
+              </>
+            )}
 
             {/* SOCIAL CONNECTIONS */}
             <SocialConnectionsComponent />
@@ -1337,10 +1460,10 @@ const ProfilePage: React.FC = () => {
             {/* Logout Button */}
             {/* ... previous code ... */}
             {/* Account Actions */}
-            <div className="space-y-3">
+            <div className="space-y-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-4 shadow-sm">
               <button
                 onClick={() => navigate('/settings')}
-                className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 hover:border-slate-300 dark:hover:border-slate-700 rounded-lg transition-all text-sm font-medium shadow-sm"
+                className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-all text-sm font-medium"
               >
                 <Cog6ToothIcon className="h-4 w-4" />
                 {t('settings')}
@@ -1348,7 +1471,7 @@ const ProfilePage: React.FC = () => {
 
               <button
                 onClick={handleLogout}
-                className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-white dark:bg-slate-900 border border-red-200 dark:border-red-900/50 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/10 hover:border-red-300 dark:hover:border-red-800 rounded-lg transition-all text-sm font-medium shadow-sm"
+                className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-900/30 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/20 rounded-lg transition-all text-sm font-medium"
               >
                 <ArrowRightOnRectangleIcon className="h-4 w-4" />
                 {t('logout')}
