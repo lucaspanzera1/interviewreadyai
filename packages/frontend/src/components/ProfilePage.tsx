@@ -137,6 +137,7 @@ const ProfilePage: React.FC = () => {
   const [activityData, setActivityData] = useState<{ date: string; count: number }[]>([]);
   const [recentRewards, setRecentRewards] = useState<Reward[]>([]);
   const [badgeCopied, setBadgeCopied] = useState<'markdown' | 'url' | null>(null);
+  const [badgeTheme, setBadgeTheme] = useState('light');
 
 
   useEffect(() => {
@@ -393,8 +394,8 @@ const ProfilePage: React.FC = () => {
     });
   };
 
-  const badgeBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8081';
-  const badgeUrl = user?.id ? `${badgeBaseUrl}/api/public/profile/${user.id}/badge` : '';
+  const badgeBaseUrl = (import.meta.env.VITE_API_BASE_URL || 'http://localhost:8081').replace(/\/$/, '');
+  const badgeUrl = user?.id ? `${badgeBaseUrl}/api/public/profile/${user.id}/badge?theme=${badgeTheme}` : '';
   const badgeMarkdown = badgeUrl ? `![TreinaVaga Stats](${badgeUrl})` : '';
 
   const handleCopyBadge = async (type: 'markdown' | 'url') => {
@@ -1261,14 +1262,68 @@ const ProfilePage: React.FC = () => {
                       {t('badge.description')}
                     </p>
 
+                    {/* Theme Selector */}
+                    <div className="flex flex-col sm:flex-row gap-4">
+                      <div className="flex-1">
+                        <label className="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-2">
+                          {t('badge.theme')}
+                        </label>
+                        <Listbox value={badgeTheme} onChange={setBadgeTheme}>
+                          <div className="relative">
+                            <ListboxButton className="relative w-full cursor-default rounded-lg bg-white dark:bg-slate-800 py-2 pl-3 pr-10 text-left text-sm border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500 shadow-sm transition-all h-10">
+                              <span className="block truncate text-slate-700 dark:text-slate-300">
+                                {t(`badge.themes.${badgeTheme}`)}
+                              </span>
+                              <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
+                                <ChevronUpDownIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
+                              </span>
+                            </ListboxButton>
+                            <Transition
+                              as={React.Fragment}
+                              leave="transition ease-in duration-100"
+                              leaveFrom="opacity-100"
+                              leaveTo="opacity-0"
+                            >
+                              <ListboxOptions className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white dark:bg-slate-800 py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm border border-slate-100 dark:border-slate-700">
+                                {['light', 'dark', 'dracula'].map((theme) => (
+                                  <ListboxOption
+                                    key={theme}
+                                    value={theme}
+                                    className={({ active }) =>
+                                      `relative cursor-pointer select-none py-2 pl-3 pr-9 transition-colors ${active ? 'bg-primary-50 dark:bg-primary-900/30 text-primary-900 dark:text-primary-100' : 'text-slate-900 dark:text-slate-100'
+                                      }`
+                                    }
+                                  >
+                                    {({ selected }) => (
+                                      <>
+                                        <span className={`block truncate ${selected ? 'font-medium' : 'font-normal'}`}>
+                                          {t(`badge.themes.${theme}`)}
+                                        </span>
+                                        {selected ? (
+                                          <span className="absolute inset-y-0 right-0 flex items-center pr-4 text-primary-600 dark:text-primary-400">
+                                            <CheckIcon className="h-4 w-4" aria-hidden="true" />
+                                          </span>
+                                        ) : null}
+                                      </>
+                                    )}
+                                  </ListboxOption>
+                                ))}
+                              </ListboxOptions>
+                            </Transition>
+                          </div>
+                        </Listbox>
+                      </div>
+                    </div>
+
                     {/* Preview */}
                     <div>
                       <p className="text-xs font-medium text-slate-500 dark:text-slate-400 mb-2">{t('badge.preview')}</p>
                       <div className="rounded-lg overflow-hidden border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 p-3 flex items-center justify-center">
                         <img
+                          key={badgeUrl}
                           src={badgeUrl}
                           alt="TreinaVaga Stats Badge"
-                          className="max-w-full"
+                          className="max-w-full h-auto shadow-sm rounded-lg"
                         />
                       </div>
                     </div>
@@ -1284,11 +1339,10 @@ const ProfilePage: React.FC = () => {
                     <div className="flex gap-2">
                       <button
                         onClick={() => handleCopyBadge('markdown')}
-                        className={`flex-1 flex items-center justify-center gap-2 px-3 py-2 text-sm font-medium rounded-lg transition-all ${
-                          badgeCopied === 'markdown'
-                            ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 border border-green-300 dark:border-green-700'
-                            : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:bg-slate-200 dark:hover:bg-slate-700'
-                        }`}
+                        className={`flex-1 flex items-center justify-center gap-2 px-3 py-2 text-sm font-medium rounded-lg transition-all ${badgeCopied === 'markdown'
+                          ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 border border-green-300 dark:border-green-700'
+                          : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:bg-slate-200 dark:hover:bg-slate-700'
+                          }`}
                       >
                         {badgeCopied === 'markdown' ? (
                           <CheckIcon className="h-4 w-4" />
@@ -1299,11 +1353,10 @@ const ProfilePage: React.FC = () => {
                       </button>
                       <button
                         onClick={() => handleCopyBadge('url')}
-                        className={`flex-1 flex items-center justify-center gap-2 px-3 py-2 text-sm font-medium rounded-lg transition-all ${
-                          badgeCopied === 'url'
-                            ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 border border-green-300 dark:border-green-700'
-                            : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:bg-slate-200 dark:hover:bg-slate-700'
-                        }`}
+                        className={`flex-1 flex items-center justify-center gap-2 px-3 py-2 text-sm font-medium rounded-lg transition-all ${badgeCopied === 'url'
+                          ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 border border-green-300 dark:border-green-700'
+                          : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:bg-slate-200 dark:hover:bg-slate-700'
+                          }`}
                       >
                         {badgeCopied === 'url' ? (
                           <CheckIcon className="h-4 w-4" />
