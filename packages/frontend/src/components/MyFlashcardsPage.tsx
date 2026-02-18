@@ -257,7 +257,7 @@ const MyFlashcardsPage: React.FC = () => {
                                                         <span className="text-xs">{t('myFlashcards.time')}</span>
                                                     </div>
                                                     <div className="text-sm font-semibold text-slate-900 dark:text-white">
-                                                        {Math.floor(studyStats[flashcard._id].totalStudyTime / 60)}min
+                                                        {studyStats[flashcard._id].totalStudyTime}min
                                                     </div>
                                                 </div>
                                                 <div>

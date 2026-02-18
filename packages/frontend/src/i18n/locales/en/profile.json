@@ -124,5 +124,16 @@
     "noActivities": "This user doesn't have any registered activities yet.",
     "noFollowers": "No followers yet",
     "notFollowing": "Not following anyone"
+  },
+  "badge": {
+    "title": "GitHub Readme Badge",
+    "description": "Add your TreinaVaga stats badge to your GitHub README.",
+    "profilePrivate": "Your profile is private. Enable public profile in Settings to use the badge.",
+    "goToSettings": "Go to Settings",
+    "copyMarkdown": "Copy Markdown",
+    "copyImageUrl": "Copy Image URL",
+    "copiedMarkdown": "Markdown copied!",
+    "copiedUrl": "Image URL copied!",
+    "preview": "Preview"
   }
 }

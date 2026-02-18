@@ -17,6 +17,7 @@ import { EmailModule } from './common/email.module';
 import { PlansModule } from './plans/plans.module';
 import { InterviewModule } from './interview/interview.module';
 import { UploadsModule } from './uploads/uploads.module';
+import { PublicProfileModule } from './public-profile/public-profile.module';
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
 
 /**
@@ -50,6 +51,7 @@ import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
     PlansModule,
     InterviewModule,
     UploadsModule,
+    PublicProfileModule,
   ],
   controllers: [AppController],
   providers: [

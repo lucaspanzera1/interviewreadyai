@@ -26,7 +26,9 @@ import {
   ShoppingBagIcon,
   ClockIcon,
   ChevronUpDownIcon,
-  SparklesIcon
+  SparklesIcon,
+  ClipboardDocumentIcon,
+  LinkIcon
 } from '@heroicons/react/24/outline';
 import { getNicheIcon } from '../utils/nicheIcons';
 import ActivityHeatmap from './ActivityHeatmap';
@@ -134,6 +136,7 @@ const ProfilePage: React.FC = () => {
 
   const [activityData, setActivityData] = useState<{ date: string; count: number }[]>([]);
   const [recentRewards, setRecentRewards] = useState<Reward[]>([]);
+  const [badgeCopied, setBadgeCopied] = useState<'markdown' | 'url' | null>(null);
 
 
   useEffect(() => {
@@ -390,6 +393,22 @@ const ProfilePage: React.FC = () => {
     });
   };
 
+  const badgeBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8081';
+  const badgeUrl = user?.id ? `${badgeBaseUrl}/api/public/profile/${user.id}/badge` : '';
+  const badgeMarkdown = badgeUrl ? `![TreinaVaga Stats](${badgeUrl})` : '';
+
+  const handleCopyBadge = async (type: 'markdown' | 'url') => {
+    const text = type === 'markdown' ? badgeMarkdown : badgeUrl;
+    try {
+      await navigator.clipboard.writeText(text);
+      setBadgeCopied(type);
+      showToast(t(type === 'markdown' ? 'badge.copiedMarkdown' : 'badge.copiedUrl'), 'success');
+      setTimeout(() => setBadgeCopied(null), 2000);
+    } catch {
+      showToast('Failed to copy', 'error');
+    }
+  };
+
   const getImageUrl = (imagePath?: string) => {
     if (!imagePath) return '';
     const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8081';
@@ -502,7 +521,7 @@ const ProfilePage: React.FC = () => {
           </div>
 
           {/* Overlapping Profile Info */}
-          <div className="absolute -bottom-16 md:-bottom-24 left-0 w-full px-6 md:px-10 flex flex-col md:flex-row items-end gap-6 z-10 pointer-events-none">
+          <div className="absolute -bottom-16 md:-bottom-24 left-0 w-full px-6 md:px-10 flex flex-col md:flex-row items-center md:items-end gap-6 z-10 pointer-events-none">
             <div className="relative shrink-0 pointer-events-auto group/avatar">
               {user?.picture ? (
                 <img
@@ -543,14 +562,14 @@ const ProfilePage: React.FC = () => {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8 items-start">
 
           {/* Left Column Group */}
-          <div className="lg:col-span-2 space-y-6 sticky top-6">
+          <div className="lg:col-span-2 space-y-6 lg:sticky lg:top-6">
 
             {/* 1. PERSONAL INFO CARD */}
             <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg shadow-sm">
-              <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
+              <div className="px-4 md:px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
                 <h2 className="text-base font-semibold text-slate-900 dark:text-white">{t('personalInfo')}</h2>
                 {!isEditingPersonal ? (
                   <button
@@ -582,7 +601,7 @@ const ProfilePage: React.FC = () => {
                 )}
               </div>
 
-              <div className="p-6">
+              <div className="p-4 md:p-6">
                 <div className="mb-6">
                   <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                     {t('email')}
@@ -718,7 +737,7 @@ const ProfilePage: React.FC = () => {
 
             {/* 1.5. PAYMENT DATA CARD */}
             <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg shadow-sm">
-              <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
+              <div className="px-4 md:px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
                 <h2 className="text-base font-semibold text-slate-900 dark:text-white">{t('paymentData')}</h2>
                 {!isEditingPayment ? (
                   <button
@@ -756,7 +775,7 @@ const ProfilePage: React.FC = () => {
                 )}
               </div>
 
-              <div className="p-6">
+              <div className="p-4 md:p-6">
                 <div className="max-w-md space-y-6">
                   {/* Cellphone */}
                   <div>
@@ -845,7 +864,7 @@ const ProfilePage: React.FC = () => {
 
             {/* 2. PROFESSIONAL DATA CARD */}
             <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg shadow-sm">
-              <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
+              <div className="px-4 md:px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
                 <h2 className="text-base font-semibold text-slate-900 dark:text-white">{t('professionalData')}</h2>
                 {!isEditingProfessional ? (
                   <button
@@ -876,7 +895,7 @@ const ProfilePage: React.FC = () => {
                   </div>
                 )}
               </div>
-              <div className="p-6">
+              <div className="p-4 md:p-6">
                 <div className="space-y-6">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {/* Area/Niche */}
@@ -1030,12 +1049,12 @@ const ProfilePage: React.FC = () => {
           </div>
 
           {/* Right Column Group (Account Details, etc) */}
-          <div className="lg:col-span-1 space-y-6 sticky top-6">
+          <div className="lg:col-span-1 space-y-6 lg:sticky lg:top-6">
             <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg shadow-sm">
-              <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-800">
+              <div className="px-4 md:px-6 py-4 border-b border-slate-100 dark:border-slate-800">
                 <h2 className="text-base font-semibold text-slate-900 dark:text-white">{t('accountDetails')}</h2>
               </div>
-              <div className="p-6 space-y-5">
+              <div className="p-4 md:p-6 space-y-5">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <CalendarIcon className="h-4 w-4 text-slate-400 dark:text-slate-500" />
@@ -1074,7 +1093,7 @@ const ProfilePage: React.FC = () => {
                 )}
               </div>
 
-              <div className="px-6 pb-6">
+              <div className="px-4 md:px-6 pb-6">
                 <div className="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-100 dark:border-slate-700">
                   <div className="flex items-center gap-3">
                     <div className="p-2 bg-amber-100 dark:bg-amber-900/30 rounded-lg text-amber-600 dark:text-amber-400">
@@ -1093,10 +1112,10 @@ const ProfilePage: React.FC = () => {
 
             {/* Activity & Achievements Card */}
             <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg shadow-sm">
-              <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-800">
+              <div className="px-4 md:px-6 py-4 border-b border-slate-100 dark:border-slate-800">
                 <h2 className="text-base font-semibold text-slate-900 dark:text-white">{t('activitiesAchievements')}</h2>
               </div>
-              <div className="p-6 space-y-4">
+              <div className="p-4 md:p-6 space-y-4">
                 <button
                   onClick={() => navigate('/profile/quiz-history')}
                   className="w-full flex items-center justify-between p-4 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border border-blue-200 dark:border-blue-800 rounded-xl hover:shadow-md transition-all group"
@@ -1113,7 +1132,7 @@ const ProfilePage: React.FC = () => {
                   <ArrowRightOnRectangleIcon className="h-5 w-5 text-slate-400 dark:text-slate-500 group-hover:text-slate-600 dark:group-hover:text-slate-300 transition-colors" />
                 </button>
 
-                <div className="py-4">
+                <div className="py-4 overflow-x-auto">
                   <ActivityHeatmap
                     data={activityData}
                     totalActivities={activityData.reduce((acc, curr) => acc + curr.count, 0)}
@@ -1224,6 +1243,91 @@ const ProfilePage: React.FC = () => {
                     </div>
                   </div>
                 </div>
+              </div>
+            </div>
+
+            {/* GITHUB BADGE */}
+            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg shadow-sm">
+              <div className="px-4 md:px-6 py-4 border-b border-slate-100 dark:border-slate-800">
+                <h2 className="text-base font-semibold text-slate-900 dark:text-white flex items-center gap-2">
+                  <GitHubIcon className="h-5 w-5 text-[#24292f] dark:text-white" />
+                  {t('badge.title')}
+                </h2>
+              </div>
+              <div className="p-4 md:p-6 space-y-4">
+                {user?.isProfilePublic ? (
+                  <>
+                    <p className="text-sm text-slate-600 dark:text-slate-400">
+                      {t('badge.description')}
+                    </p>
+
+                    {/* Preview */}
+                    <div>
+                      <p className="text-xs font-medium text-slate-500 dark:text-slate-400 mb-2">{t('badge.preview')}</p>
+                      <div className="rounded-lg overflow-hidden border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 p-3 flex items-center justify-center">
+                        <img
+                          src={badgeUrl}
+                          alt="TreinaVaga Stats Badge"
+                          className="max-w-full"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Markdown Code */}
+                    <div className="relative">
+                      <pre className="p-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg text-xs text-slate-700 dark:text-slate-300 font-mono overflow-x-auto select-all">
+                        {badgeMarkdown}
+                      </pre>
+                    </div>
+
+                    {/* Copy Buttons */}
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => handleCopyBadge('markdown')}
+                        className={`flex-1 flex items-center justify-center gap-2 px-3 py-2 text-sm font-medium rounded-lg transition-all ${
+                          badgeCopied === 'markdown'
+                            ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 border border-green-300 dark:border-green-700'
+                            : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:bg-slate-200 dark:hover:bg-slate-700'
+                        }`}
+                      >
+                        {badgeCopied === 'markdown' ? (
+                          <CheckIcon className="h-4 w-4" />
+                        ) : (
+                          <ClipboardDocumentIcon className="h-4 w-4" />
+                        )}
+                        {t('badge.copyMarkdown')}
+                      </button>
+                      <button
+                        onClick={() => handleCopyBadge('url')}
+                        className={`flex-1 flex items-center justify-center gap-2 px-3 py-2 text-sm font-medium rounded-lg transition-all ${
+                          badgeCopied === 'url'
+                            ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 border border-green-300 dark:border-green-700'
+                            : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:bg-slate-200 dark:hover:bg-slate-700'
+                        }`}
+                      >
+                        {badgeCopied === 'url' ? (
+                          <CheckIcon className="h-4 w-4" />
+                        ) : (
+                          <LinkIcon className="h-4 w-4" />
+                        )}
+                        {t('badge.copyImageUrl')}
+                      </button>
+                    </div>
+                  </>
+                ) : (
+                  <div className="text-center py-4 space-y-3">
+                    <p className="text-sm text-slate-500 dark:text-slate-400">
+                      {t('badge.profilePrivate')}
+                    </p>
+                    <button
+                      onClick={() => navigate('/settings')}
+                      className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-primary-600 dark:text-primary-400 bg-primary-50 dark:bg-primary-900/20 border border-primary-200 dark:border-primary-800 rounded-lg hover:bg-primary-100 dark:hover:bg-primary-900/30 transition-all"
+                    >
+                      <Cog6ToothIcon className="h-4 w-4" />
+                      {t('badge.goToSettings')}
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
 

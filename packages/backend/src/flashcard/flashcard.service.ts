@@ -994,13 +994,33 @@ IMPORTANTE:
     userId: string,
     studySession: StudySessionDto
   ) {
-    const studyProgress = await this.flashcardStudyModel.findOne({
+    let studyProgress = await this.flashcardStudyModel.findOne({
       flashcardId: flashcardId,
       userId: userId
     });
 
     if (!studyProgress) {
-      throw new NotFoundException('Study progress not found');
+      // Auto-create study progress if it doesn't exist yet
+      const flashcard = await this.flashcardModel.findById(flashcardId);
+      if (!flashcard) {
+        throw new NotFoundException('Flashcard not found');
+      }
+
+      const cardProgress = flashcard.cards.map((_, index) => ({
+        cardIndex: index,
+        difficulty: CardDifficulty.NORMAL,
+        timesStudied: 0,
+        interval: 1,
+        easeFactor: 2.5,
+        repetitions: 0,
+        history: []
+      }));
+
+      studyProgress = await this.flashcardStudyModel.create({
+        flashcardId: flashcardId,
+        userId: userId,
+        cardProgress: cardProgress
+      });
     }
 
     const now = new Date();
@@ -1061,6 +1081,10 @@ IMPORTANTE:
 
     // Calcular streak (sequência)
     studyProgress.streak = this.calculateStreak(studyProgress.lastStudySession, studyProgress.streak);
+
+    // Marcar cardProgress como modificado para que o Mongoose persista as alterações
+    // (necessário porque cardProgress é definido como [Object] / Mixed, sem change tracking automático)
+    studyProgress.markModified('cardProgress');
 
     await studyProgress.save();
 
@@ -1149,7 +1173,22 @@ IMPORTANTE:
       .populate('flashcardId', 'titulo categoria nivel quantidade_cards');
 
     if (!studyProgress) {
-      throw new NotFoundException('Study progress not found');
+      // Return default progress for flashcards not yet studied
+      const flashcard = await this.flashcardModel.findById(flashcardId);
+      if (!flashcard) {
+        throw new NotFoundException('Flashcard not found');
+      }
+
+      return {
+        flashcardId: flashcard._id,
+        userId,
+        cardProgress: [],
+        totalStudyTime: 0,
+        totalReviews: 0,
+        lastStudySession: null,
+        streak: 0,
+        cardsDueForReview: 0,
+      };
     }
 
     const cardsDueForReview = studyProgress.cardProgress.filter(
@@ -1318,8 +1357,9 @@ IMPORTANTE:
    */
   async getUserStats(userId: string) {
     // Total de flashcards criados pelo usuário
+    const { Types } = require('mongoose');
     const totalFlashcardsCreated = await this.flashcardModel
-      .countDocuments({ userId })
+      .countDocuments({ createdBy: new Types.ObjectId(userId) })
       .exec();
 
     // Estatísticas de estudos
@@ -1337,10 +1377,9 @@ IMPORTANTE:
       : 0;
 
     // Estatísticas por dificuldade
-    const { Types } = require('mongoose');
     const flashcardsByDifficulty = await this.flashcardModel
       .aggregate([
-        { $match: { userId: new Types.ObjectId(userId) } },
+        { $match: { createdBy: new Types.ObjectId(userId) } },
         { $group: { _id: '$nivel', count: { $sum: 1 } } }
       ])
       .exec();
@@ -1370,6 +1409,7 @@ IMPORTANTE:
     return {
       totalFlashcardsCreated,
       totalStudySessions,
+      totalSessions: totalStudySessions, // alias used by user.service.ts getGeneralStats
       totalReviews,
       totalStudyTime,
       averageCardsPerSession: Math.round(averageCardsPerSession),
@@ -1439,7 +1479,7 @@ IMPORTANTE:
 
     const flashcard = await this.flashcardModel.findOne({
       _id: flashcardId,
-      userId: new Types.ObjectId(userId)
+      createdBy: new Types.ObjectId(userId)
     }).exec();
 
     if (!flashcard) {
@@ -1497,12 +1537,33 @@ IMPORTANTE:
     });
 
     if (!studyProgress) {
-      throw new NotFoundException('Study progress not found');
+      // Return default history for cards not yet studied
+      return {
+        cardIndex,
+        history: [],
+        currentStats: {
+          timesStudied: 0,
+          interval: 1,
+          easeFactor: 2.5,
+          repetitions: 0,
+          nextReviewAt: null
+        }
+      };
     }
 
     const cardProgress = studyProgress.cardProgress.find(cp => cp.cardIndex === cardIndex);
     if (!cardProgress) {
-      throw new NotFoundException('Card progress not found');
+      return {
+        cardIndex,
+        history: [],
+        currentStats: {
+          timesStudied: 0,
+          interval: 1,
+          easeFactor: 2.5,
+          repetitions: 0,
+          nextReviewAt: null
+        }
+      };
     }
 
     return {
