@@ -1,0 +1,248 @@
+{
+  "users": {
+    "title": "Gestão de Usuários",
+    "totalUsers": "Total de Usuários",
+    "totalUsersDesc": "Cadastrados na plataforma",
+    "students": "Alunos / Clientes",
+    "studentsDesc": "Usuários padrão",
+    "administrators": "Administradores",
+    "administratorsDesc": "Permissão total",
+    "subtitle": "Gerencie e monitore os membros da plataforma",
+    "searchPlaceholder": "Buscar por nome ou email...",
+    "loading": "Carregando usuários...",
+    "tableHeaders": {
+      "user": "Usuário",
+      "status": "Status",
+      "onboarding": "Onboarding",
+      "lastAccess": "Último Acesso",
+      "registration": "Cadastro",
+      "actions": "Ações"
+    },
+    "noUsers": "Nenhum usuário encontrado.",
+    "never": "Nunca",
+    "complete": "Completo",
+    "pending": "Pendente",
+    "showingResults": "Mostrando {{showing}} de {{total}} resultados",
+    "loadingMore": "Carregando mais...",
+    "errorLoading": "Erro ao buscar usuários."
+  },
+  "quizzes": {
+    "title": "Gerenciar Quizzes",
+    "subtitle": "Administre todos os quizzes disponíveis na plataforma",
+    "createQuiz": "Criar Quiz",
+    "searchPlaceholder": "Buscar por título, categoria ou criador...",
+    "filterAll": "Todos os Status",
+    "filterActive": "Ativos",
+    "filterInactive": "Inativos",
+    "tableHeaders": {
+      "quizDetails": "Quiz Detalhes",
+      "creator": "Criador",
+      "analytics": "Analytics",
+      "status": "Status",
+      "actions": "Ações"
+    },
+    "questions": "questões",
+    "accesses": "Acessos",
+    "completed": "Concluídos",
+    "average": "Média",
+    "active": "Ativo",
+    "inactive": "Inativo",
+    "noQuizzes": "Nenhum quiz encontrado",
+    "adjustFilters": "Tente ajustar os filtros de busca.",
+    "wizard": {
+      "title": "Criar Novo Quiz",
+      "stepOf": "Passo {{current}} de {{total}}",
+      "step1": {
+        "quizTitle": "Título do Quiz",
+        "titlePlaceholder": "Ex: Fundamentos do React 2024",
+        "category": "Categoria",
+        "categoryPlaceholder": "Ex: Frontend, Backend, DevOps",
+        "description": "Descrição",
+        "descriptionPlaceholder": "Descreva o objetivo e o conteúdo deste quiz..."
+      },
+      "step2": {
+        "difficultyLevel": "Nível de Dificuldade",
+        "questionCount": "Número de Questões",
+        "additionalContext": "Contexto Adicional (IA)",
+        "optional": "Opcional",
+        "contextPlaceholder": "Cole aqui um texto, artigo ou documentação para a IA usar como base..."
+      },
+      "step3": {
+        "relatedTags": "Tags Relacionadas",
+        "tagPlaceholder": "Digite uma tag e pressione Enter",
+        "addButton": "Adicionar",
+        "noTags": "Nenhuma tag adicionada ainda",
+        "readyToGenerate": "Pronto para gerar!",
+        "readyDesc": "A IA irá analisar seus dados e o contexto fornecido para gerar {{count}} questões de nível {{level}}. Isso pode levar alguns segundos."
+      },
+      "back": "Voltar",
+      "next": "Próximo",
+      "generating": "Gerando Quiz...",
+      "generateButton": "Gerar Quiz com IA"
+    }
+  },
+  "quizStats": {
+    "notFound": "Estatísticas não encontradas",
+    "backToQuizzes": "Voltar para Quizzes",
+    "viewQuestions": "Ver Questões",
+    "totalAccess": "Total de Acessos",
+    "attempts": "Tentativas",
+    "averageScore": "Média de Acertos",
+    "questions": "Questões",
+    "completionRate": "taxa de conclusão",
+    "lastAttempts": "Últimas Tentativas",
+    "tableHeaders": {
+      "user": "Usuário",
+      "performance": "Desempenho",
+      "time": "Tempo",
+      "date": "Data"
+    },
+    "noAttempts": "Nenhuma tentativa registrada ainda.",
+    "engagementSummary": "Resumo de Engajamento",
+    "successfulCompletions": "Conclusões com Sucesso",
+    "dropoutRate": "Taxa de Abandono",
+    "tags": "Tags"
+  },
+  "quizDetails": {
+    "title": "Detalhes do Quiz",
+    "notFound": "Detalhes não encontrados",
+    "backToQuizzes": "Voltar para Quizzes",
+    "viewStats": "Ver Estatísticas Gerais",
+    "questionOf": "Questão {{current}} de {{total}}",
+    "hitRate": "Taxa de Acerto",
+    "answers": "Respostas ({{count}})",
+    "noAnswers": "Nenhuma resposta registrada para esta questão ainda.",
+    "correct": "Correto:"
+  },
+  "roles": {
+    "title": "Gerenciar Cargos",
+    "subtitle": "Administre os cargos e níveis de acesso disponíveis no sistema",
+    "count": "cargos",
+    "newRole": "Novo Cargo",
+    "searchPlaceholder": "Buscar por nome ou descrição...",
+    "tableHeaders": {
+      "role": "Cargo",
+      "description": "Descrição",
+      "identificationColor": "Cor de Identificação",
+      "actions": "Ações"
+    },
+    "noRoles": "Nenhum cargo encontrado",
+    "noRolesDesc": "Tente ajustar sua busca ou crie um novo cargo.",
+    "editRole": "Editar Cargo",
+    "createRole": "Criar Novo Cargo",
+    "roleName": "Nome do Cargo *",
+    "roleDescription": "Descrição",
+    "highlightColor": "Cor de Destaque",
+    "saveChanges": "Salvar Alterações",
+    "createButton": "Criar Cargo",
+    "confirmDeactivate": "Tem certeza que deseja desativar este cargo?"
+  },
+  "tokenPackages": {
+    "title": "Pacotes de Tokens",
+    "subtitle": "Gerencie os pacotes de tokens e benefícios associados",
+    "count": "pacotes",
+    "newPackage": "Novo Pacote",
+    "searchPlaceholder": "Buscar por nome ou descrição...",
+    "tableHeaders": {
+      "package": "Pacote",
+      "tokens": "Tokens",
+      "value": "Valor",
+      "assignedRole": "Cargo Atribuído",
+      "benefits": "Benefícios",
+      "actions": "Ações"
+    },
+    "noDescription": "Sem descrição",
+    "noPackages": "Nenhum pacote encontrado",
+    "editPackage": "Editar Pacote",
+    "createPackage": "Criar Novo Pacote",
+    "packageName": "Nome do Pacote *",
+    "description": "Descrição",
+    "tokenAmount": "Quantidade de Tokens *",
+    "validity": "Validade (dias)",
+    "validityHint": "Vazio = Vitalício",
+    "validityPlaceholder": "Deixe vazio para vitalício",
+    "price": "Valor (R$)",
+    "pricePlaceholder": "Valor em reais (opcional)",
+    "associatedRole": "Cargo Associado *",
+    "selectRole": "Selecione um cargo",
+    "benefits": "Benefícios (um por linha)",
+    "saveChanges": "Salvar Alterações",
+    "createButton": "Criar Pacote"
+  },
+  "userDetails": {
+    "errorLoading": "Erro ao buscar detalhes do usuário.",
+    "tabs": {
+      "profile": "Perfil",
+      "tokensBalance": "Tokens & Saldo",
+      "createdQuizzes": "Quizzes Criados",
+      "flashcards": "Flashcards",
+      "interviews": "Entrevistas"
+    },
+    "loading": "Carregando informações...",
+    "professional": "Profissional",
+    "personalContact": "Pessoal & Contato",
+    "careerTime": "Tempo de Carreira",
+    "niche": "Nicho",
+    "location": "Localização",
+    "phone": "Celular",
+    "cpfCnpj": "CPF/CNPJ",
+    "notProvided": "Não informado",
+    "techStack": "Stack Técnico",
+    "about": "Sobre",
+    "administration": "Administração",
+    "currentRole": "Cargo Atual",
+    "roleLabels": {
+      "admin": "Administrador",
+      "pro": "Pro / Premium",
+      "user": "Aluno"
+    },
+    "saving": "Salvando...",
+    "addTokens": {
+      "title": "Adicionar Tokens",
+      "description": "Adicionar tokens manualmente à conta de {{name}}",
+      "amount": "Quantidade de Tokens",
+      "amountPlaceholder": "Ex: 10",
+      "reason": "Motivo (opcional)",
+      "reasonPlaceholder": "Ou digite um motivo personalizado...",
+      "reasons": {
+        "welcome": "Bônus de Boas-vindas",
+        "refund": "Reembolso de Token",
+        "contest": "Premiação de Concurso",
+        "adminAdjust": "Ajuste Administrativo",
+        "internalTest": "Teste Interno",
+        "courtesy": "Cortesia"
+      },
+      "addButton": "Adicionar"
+    },
+    "tokenStats": {
+      "currentBalance": "Saldo Atual",
+      "totalEarned": "Total Ganho",
+      "totalSpent": "Total Gasto",
+      "available": "Tokens disponíveis",
+      "accumulated": "Acumulado",
+      "consumed": "Consumido"
+    },
+    "usageStats": "Estatísticas de Uso",
+    "freeQuizzesCompleted": "Quizzes Gratuitos Completos",
+    "dailyQuota": "Cota Diária (Gratuito)",
+    "lastReward": "Última Recompensa",
+    "recentMovements": "Últimas Movimentações",
+    "noMovements": "Nenhuma movimentação registrada.",
+    "noQuizzes": "Este usuário ainda não criou nenhum quiz.",
+    "noFlashcards": "Este usuário ainda não criou nenhum flashcard.",
+    "noInterviews": "Este usuário ainda não criou nenhuma entrevista.",
+    "quizStats": {
+      "accesses": "Acessos",
+      "attempts": "Tentativas",
+      "completions": "Conclusões",
+      "average": "Média"
+    },
+    "flashcardStats": {
+      "sessions": "Sessões",
+      "cardsStudied": "Cards Estudados",
+      "averageTime": "Tempo Médio"
+    },
+    "free": "Gratuito",
+    "premium": "Premium"
+  }
+}

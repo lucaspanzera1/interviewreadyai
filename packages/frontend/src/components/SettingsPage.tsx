@@ -14,13 +14,16 @@ import {
     ClockIcon,
     EyeIcon,
     EyeSlashIcon,
-    FireIcon
+    FireIcon,
+    LanguageIcon
 } from '@heroicons/react/24/outline';
+import { useTranslation } from 'react-i18next';
 
 const SettingsPage: React.FC = () => {
     const { theme, setTheme } = useTheme();
     const { user, refreshUser } = useAuth();
     const { showToast } = useToast();
+    const { t, i18n } = useTranslation('settings');
 
     // Notification states (mock)
     const [emailNotifications, setEmailNotifications] = useState(true);
@@ -58,12 +61,12 @@ const SettingsPage: React.FC = () => {
             setIsProfilePublic(checked);
             await refreshUser(); // Refresh user data to update context
             showToast(
-                `Perfil ${checked ? 'público' : 'privado'} configurado com sucesso!`,
+                t('privacyUpdatedSuccess', { visibility: checked ? t('public') : t('private') }),
                 'success'
             );
         } catch (error) {
             console.error('Erro ao atualizar configurações de privacidade:', error);
-            showToast('Erro ao atualizar configurações de privacidade', 'error');
+            showToast(t('privacyUpdateError'), 'error');
         } finally {
             setIsUpdatingPrivacy(false);
         }
@@ -74,18 +77,18 @@ const SettingsPage: React.FC = () => {
     };
 
     const handlePasswordReset = () => {
-        showToast('Email de redefinição de senha enviado!', 'success');
+        showToast(t('passwordResetSent'), 'success');
     };
 
     const handleDeleteAccount = () => {
-        if (confirm('Tem certeza que deseja excluir sua conta? Esta ação não pode ser desfeita.')) {
-            showToast('Funcionalidade indisponível no momento.', 'error');
+        if (confirm(t('deleteAccountConfirm'))) {
+            showToast(t('featureUnavailable'), 'error');
         }
     };
 
     return (
         <>
-            <PageTitle title="Configurações - TreinaVagaAI" />
+            <PageTitle title={t('pageTitle')} />
 
             <div className="max-w-3xl mx-auto space-y-8">
 
@@ -94,10 +97,10 @@ const SettingsPage: React.FC = () => {
                     <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-800">
                         <h2 className="text-base font-semibold text-slate-900 dark:text-white flex items-center gap-2">
                             <SunIcon className="w-5 h-5 text-amber-500" />
-                            Aparência
+                            {t('appearance')}
                         </h2>
                         <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
-                            Personalize como o TreinaVagaAI aparece para você.
+                            {t('appearanceDesc')}
                         </p>
                     </div>
                     <div className="p-6">
@@ -105,7 +108,7 @@ const SettingsPage: React.FC = () => {
                             {[
                                 {
                                     id: 'light',
-                                    label: 'Claro',
+                                    label: t('themeLight'),
                                     icon: SunIcon,
                                     activeBorder: 'border-primary-500',
                                     activeRing: 'ring-primary-500/20',
@@ -120,7 +123,7 @@ const SettingsPage: React.FC = () => {
                                 },
                                 {
                                     id: 'dark',
-                                    label: 'Escuro',
+                                    label: t('themeDark'),
                                     icon: MoonIcon,
                                     activeBorder: 'border-primary-500',
                                     activeRing: 'ring-primary-500/20',
@@ -135,7 +138,7 @@ const SettingsPage: React.FC = () => {
                                 },
                                 {
                                     id: 'dark-orange',
-                                    label: 'Laranja Dark',
+                                    label: t('themeDarkOrange'),
                                     icon: FireIcon,
                                     activeBorder: 'border-orange-500',
                                     activeRing: 'ring-orange-500/20',
@@ -152,7 +155,7 @@ const SettingsPage: React.FC = () => {
                                 },
                                 {
                                     id: 'light-orange',
-                                    label: 'Laranja Light',
+                                    label: t('themeLightOrange'),
                                     icon: SunIcon,
                                     activeBorder: 'border-orange-500',
                                     activeRing: 'ring-orange-500/20',
@@ -169,7 +172,7 @@ const SettingsPage: React.FC = () => {
                                 },
                                 {
                                     id: 'system',
-                                    label: 'Sistema',
+                                    label: t('themeSystem'),
                                     icon: ComputerDesktopIcon,
                                     activeBorder: 'border-slate-500',
                                     activeRing: 'ring-slate-500/20',
@@ -214,8 +217,8 @@ const SettingsPage: React.FC = () => {
                                     <div className="p-3">
                                         <div className="flex items-center gap-2">
                                             <option.icon className={`w-4 h-4 transition-colors ${theme === option.id
-                                                    ? option.id.includes('orange') ? 'text-orange-500' : 'text-primary-500'
-                                                    : 'text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-300'
+                                                ? option.id.includes('orange') ? 'text-orange-500' : 'text-primary-500'
+                                                : 'text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-300'
                                                 }`} />
                                             <span className={`text-sm font-medium transition-colors ${theme === option.id ? option.activeText : 'text-slate-600 dark:text-slate-400 group-hover:text-slate-900 dark:group-hover:text-slate-200'
                                                 }`}>
@@ -229,22 +232,99 @@ const SettingsPage: React.FC = () => {
                     </div>
                 </div>
 
+                {/* Language Settings */}
+                <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg shadow-sm">
+                    <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-800">
+                        <h2 className="text-base font-semibold text-slate-900 dark:text-white flex items-center gap-2">
+                            <LanguageIcon className="w-5 h-5 text-indigo-500" />
+                            {t('language')}
+                        </h2>
+                        <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
+                            {t('languageDesc')}
+                        </p>
+                    </div>
+                    <div className="p-6">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            {[
+                                { code: 'pt-BR', label: 'Português', region: 'Brasil', flag: '🇧🇷' },
+                                { code: 'en', label: 'English', region: 'United States', flag: '🇺🇸' },
+                            ].map((lang) => (
+                                <button
+                                    key={lang.code}
+                                    onClick={async () => {
+                                        if (i18n.language !== lang.code) {
+                                            await i18n.changeLanguage(lang.code);
+                                            if (user) {
+                                                try {
+                                                    await apiClient.updateLanguage(lang.code);
+                                                } catch (e) {
+                                                    console.error('Failed to persist language:', e);
+                                                }
+                                            }
+                                        }
+                                    }}
+                                    className={`
+                                        group relative flex items-center justify-between p-4 rounded-xl border-2 transition-all duration-300
+                                        ${i18n.language === lang.code
+                                            ? 'border-indigo-500 bg-indigo-50/50 dark:bg-indigo-900/10 shadow-sm ring-1 ring-indigo-500/20'
+                                            : 'border-slate-200 dark:border-slate-800 hover:border-indigo-200 dark:hover:border-indigo-800 hover:bg-slate-50 dark:hover:bg-slate-800/50'
+                                        }
+                                    `}
+                                >
+                                    <div className="flex items-center gap-4">
+                                        <div className="relative">
+                                            <span className="text-4xl drop-shadow-sm filter grayscale-0 transition-transform group-hover:scale-110 duration-300 block">
+                                                {lang.flag}
+                                            </span>
+                                            {i18n.language === lang.code && (
+                                                <div className="absolute -bottom-1 -right-1 w-2.5 h-2.5 bg-indigo-500 rounded-full border-2 border-white dark:border-slate-900 animate-bounce" />
+                                            )}
+                                        </div>
+                                        <div className="text-left">
+                                            <p className={`font-semibold transition-colors ${i18n.language === lang.code ? 'text-indigo-700 dark:text-indigo-300' : 'text-slate-700 dark:text-slate-300'}`}>
+                                                {lang.label}
+                                            </p>
+                                            <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">
+                                                {lang.region}
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    <div className={`
+                                        w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all duration-300
+                                        ${i18n.language === lang.code
+                                            ? 'border-indigo-500 bg-indigo-500 text-white scale-100'
+                                            : 'border-slate-300 dark:border-slate-600 group-hover:border-indigo-300 dark:group-hover:border-indigo-700'
+                                        }
+                                    `}>
+                                        {i18n.language === lang.code && (
+                                            <svg className="w-3.5 h-3.5 animate-in zoom-in duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                                                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                                            </svg>
+                                        )}
+                                    </div>
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+
                 {/* Notification Settings */}
                 <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg shadow-sm">
                     <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-800">
                         <h2 className="text-base font-semibold text-slate-900 dark:text-white flex items-center gap-2">
                             <BellIcon className="w-5 h-5 text-blue-500" />
-                            Notificações
+                            {t('notifications')}
                         </h2>
                         <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
-                            Gerencie como entramos em contato com você.
+                            {t('notificationsDesc')}
                         </p>
                     </div>
                     <div className="p-6 space-y-4">
                         <div className="flex items-center justify-between">
                             <div>
-                                <label className="text-sm font-medium text-slate-900 dark:text-white">Alertas de e-mail</label>
-                                <p className="text-xs text-slate-500 dark:text-slate-400">Receba notificações sobre seus quizzes e resultados.</p>
+                                <label className="text-sm font-medium text-slate-900 dark:text-white">{t('emailAlerts')}</label>
+                                <p className="text-xs text-slate-500 dark:text-slate-400">{t('emailAlertsDesc')}</p>
                             </div>
                             <label className="relative inline-flex items-center cursor-pointer">
                                 <input type="checkbox" checked={emailNotifications} onChange={(e) => setEmailNotifications(e.target.checked)} className="sr-only peer" />
@@ -253,8 +333,8 @@ const SettingsPage: React.FC = () => {
                         </div>
                         <div className="flex items-center justify-between pt-4 border-t border-slate-100 dark:border-slate-800">
                             <div>
-                                <label className="text-sm font-medium text-slate-900 dark:text-white">Emails de Marketing</label>
-                                <p className="text-xs text-slate-500 dark:text-slate-400">Receba novidades, ofertas e dicas sobre a plataforma.</p>
+                                <label className="text-sm font-medium text-slate-900 dark:text-white">{t('marketingEmails')}</label>
+                                <p className="text-xs text-slate-500 dark:text-slate-400">{t('marketingEmailsDesc')}</p>
                             </div>
                             <label className="relative inline-flex items-center cursor-pointer">
                                 <input type="checkbox" checked={marketingEmails} onChange={(e) => setMarketingEmails(e.target.checked)} className="sr-only peer" />
@@ -265,8 +345,8 @@ const SettingsPage: React.FC = () => {
 
                         <div className="flex items-center justify-between pt-4 border-t border-slate-100 dark:border-slate-800">
                             <div>
-                                <label className="text-sm font-medium text-slate-900 dark:text-white">Alertas de Segurança</label>
-                                <p className="text-xs text-slate-500 dark:text-slate-400">Seja notificado sobre acessos importantes em sua conta.</p>
+                                <label className="text-sm font-medium text-slate-900 dark:text-white">{t('securityAlerts')}</label>
+                                <p className="text-xs text-slate-500 dark:text-slate-400">{t('securityAlertsDesc')}</p>
                             </div>
                             <label className="relative inline-flex items-center cursor-pointer">
                                 <input type="checkbox" checked={securityAlerts} onChange={(e) => setSecurityAlerts(e.target.checked)} className="sr-only peer" />
@@ -281,10 +361,10 @@ const SettingsPage: React.FC = () => {
                     <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-800">
                         <h2 className="text-base font-semibold text-slate-900 dark:text-white flex items-center gap-2">
                             <EyeIcon className="w-5 h-5 text-green-500" />
-                            Privacidade do Perfil
+                            {t('profilePrivacy')}
                         </h2>
                         <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
-                            Controle quem pode ver seu perfil e informações.
+                            {t('profilePrivacyDesc')}
                         </p>
                     </div>
                     <div className="p-6">
@@ -296,12 +376,12 @@ const SettingsPage: React.FC = () => {
                                     ) : (
                                         <EyeSlashIcon className="w-4 h-4 text-red-500" />
                                     )}
-                                    Perfil Público
+                                    {t('publicProfile')}
                                 </label>
                                 <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
                                     {isProfilePublic
-                                        ? 'Seu perfil pode ser encontrado e visualizado por outros usuários.'
-                                        : 'Seu perfil está privado e não pode ser encontrado por outros usuários.'
+                                        ? t('profilePublicDesc')
+                                        : t('profilePrivateDesc')
                                     }
                                 </p>
                             </div>
@@ -320,7 +400,7 @@ const SettingsPage: React.FC = () => {
                         {!isProfilePublic && (
                             <div className="mt-4 p-3 bg-yellow-50 dark:bg-yellow-900/10 border border-yellow-200 dark:border-yellow-800 rounded-lg">
                                 <p className="text-sm text-yellow-800 dark:text-yellow-300">
-                                    ⚠️ Com o perfil privado, você não aparecerá nas buscas e outros usuários não poderão seguir você ou ver suas estatísticas.
+                                    {t('privateProfileWarning')}
                                 </p>
                             </div>
                         )}
@@ -332,17 +412,17 @@ const SettingsPage: React.FC = () => {
                     <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-800">
                         <h2 className="text-base font-semibold text-slate-900 dark:text-white flex items-center gap-2">
                             <ClockIcon className="w-5 h-5 text-purple-500" />
-                            Preferências de Quiz
+                            {t('quizPreferences')}
                         </h2>
                         <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
-                            Personalize sua experiência durante a resolução de questões.
+                            {t('quizPreferencesDesc')}
                         </p>
                     </div>
                     <div className="p-6">
                         <div className="flex items-center justify-between">
                             <div>
-                                <label className="text-sm font-medium text-slate-900 dark:text-white">Cronômetro em tempo real</label>
-                                <p className="text-xs text-slate-500 dark:text-slate-400">Exibir o tempo decorrido no canto da tela durante o quiz.</p>
+                                <label className="text-sm font-medium text-slate-900 dark:text-white">{t('realtimeTimer')}</label>
+                                <p className="text-xs text-slate-500 dark:text-slate-400">{t('realtimeTimerDesc')}</p>
                             </div>
                             <label className="relative inline-flex items-center cursor-pointer">
                                 <input
@@ -362,38 +442,38 @@ const SettingsPage: React.FC = () => {
                     <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-800">
                         <h2 className="text-base font-semibold text-slate-900 dark:text-white flex items-center gap-2">
                             <ShieldCheckIcon className="w-5 h-5 text-emerald-500" />
-                            Segurança & Conta
+                            {t('securityAccount')}
                         </h2>
                         <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
-                            Gerencie sua senha e acesso à conta.
+                            {t('securityAccountDesc')}
                         </p>
                     </div>
                     <div className="p-6">
                         <div className="flex items-center justify-between">
                             <div>
-                                <p className="text-sm font-medium text-slate-900 dark:text-white">Email cadastrado</p>
+                                <p className="text-sm font-medium text-slate-900 dark:text-white">{t('registeredEmail')}</p>
                                 <p className="text-sm text-slate-500 dark:text-slate-400">{user?.email}</p>
                             </div>
                             <button
                                 disabled
                                 onClick={handlePasswordReset}
-                                title="Funcionalidade indisponível no momento"
+                                title={t('featureUnavailable')}
                                 className="text-sm font-medium text-slate-400 dark:text-slate-600 cursor-not-allowed"
                             >
-                                Redefinir senha
+                                {t('resetPassword')}
                             </button>
                         </div>
 
                         <div className="mt-8 pt-6 border-t border-slate-100 dark:border-slate-800">
-                            <h3 className="text-sm font-medium text-red-600 dark:text-red-400 mb-4">Zona de Perigo</h3>
+                            <h3 className="text-sm font-medium text-red-600 dark:text-red-400 mb-4">{t('dangerZone')}</h3>
                             <button
                                 disabled
                                 onClick={handleDeleteAccount}
-                                title="Funcionalidade indisponível no momento"
+                                title={t('featureUnavailable')}
                                 className="flex items-center gap-2 px-4 py-2 text-sm text-slate-400 dark:text-slate-600 border border-slate-200 dark:border-slate-800 rounded-lg cursor-not-allowed"
                             >
                                 <TrashIcon className="w-4 h-4" />
-                                Excluir Conta
+                                {t('deleteAccount')}
                             </button>
                         </div>
                     </div>

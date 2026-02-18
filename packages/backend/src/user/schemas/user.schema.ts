@@ -80,6 +80,10 @@ export class User {
   @Prop()
   githubUrl?: string;
 
+  // Idioma preferido do usuário
+  @Prop({ type: String, default: 'pt-BR' })
+  preferredLanguage: string; // 'pt-BR' | 'en'
+
   // Configurações de privacidade
   @Prop({ default: true })
   isProfilePublic: boolean;

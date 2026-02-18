@@ -17,6 +17,7 @@ import {
 } from '@heroicons/react/24/outline';
 import { apiClient, Interview } from '../lib/api';
 import { useToast } from '../contexts/ToastContext';
+import { useTranslation } from 'react-i18next';
 
 interface InterviewAttempt {
     _id: string;
@@ -47,6 +48,7 @@ const GeneratedInterviewPage: React.FC = () => {
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
     const { showToast } = useToast();
+    const { t } = useTranslation('interview');
     const [interview, setInterview] = useState<Interview | null>(null);
     const [latestAttempt, setLatestAttempt] = useState<InterviewAttempt | null>(null);
     const [loading, setLoading] = useState(true);
@@ -72,7 +74,7 @@ const GeneratedInterviewPage: React.FC = () => {
             }
         } catch (error) {
             console.error('Error loading interview:', error);
-            showToast('Erro ao carregar simulação de entrevista', 'error');
+            showToast(t('detail.errorLoading'), 'error');
             navigate('/my-interviews');
         } finally {
             setLoading(false);
@@ -88,14 +90,14 @@ const GeneratedInterviewPage: React.FC = () => {
             const fullInterview = await apiClient.getInterviewForPlaying(interview._id);
 
             if (!fullInterview || !fullInterview.questions || fullInterview.questions.length === 0) {
-                showToast('Esta simulação não está disponível ou não tem perguntas.', 'error');
+                showToast(t('detail.simulationNotAvailable'), 'error');
                 return;
             }
 
             localStorage.setItem('generatedInterview', JSON.stringify(fullInterview));
             localStorage.setItem('currentInterviewId', fullInterview._id);
 
-            showToast(`Simulação ${mode === 'video' ? 'de vídeo' : 'de texto'} iniciada! Boa sorte! 🎯`, 'success');
+            showToast(mode === 'video' ? t('detail.simulationStartedVideo') : t('detail.simulationStartedText'), 'success');
 
             // Redirecionar baseado no modo escolhido
             if (mode === 'video') {
@@ -105,7 +107,7 @@ const GeneratedInterviewPage: React.FC = () => {
             }
         } catch (error: any) {
             console.error('Erro ao iniciar simulação:', error);
-            const message = error.response?.data?.message || 'Erro ao iniciar a simulação.';
+            const message = error.response?.data?.message || t('detail.errorStarting');
             showToast(message, 'error');
         } finally {
             setStarting(false);
@@ -123,13 +125,13 @@ const GeneratedInterviewPage: React.FC = () => {
     };
 
     const getQuestionTypeLabel = (type: string) => {
-        const labels = {
-            'technical': 'Técnica',
-            'behavioral': 'Comportamental',
-            'situational': 'Situacional',
-            'company_specific': 'Empresa'
+        const labels: Record<string, string> = {
+            'technical': t('play.questionType.technical'),
+            'behavioral': t('play.questionType.behavioral'),
+            'situational': t('play.questionType.situational'),
+            'company_specific': t('play.questionType.company_specific')
         };
-        return labels[type as keyof typeof labels] || type;
+        return labels[type] || type;
     };
 
     const getStatusColor = (status: string) => {
@@ -152,7 +154,7 @@ const GeneratedInterviewPage: React.FC = () => {
             <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-900">
                 <div className="flex flex-col items-center gap-4">
                     <div className="w-12 h-12 border-4 border-primary-200 border-t-primary-600 rounded-full animate-spin"></div>
-                    <p className="text-slate-500 animate-pulse">Preparando sua entrevista...</p>
+                    <p className="text-slate-500 animate-pulse">{t('detail.preparing')}</p>
                 </div>
             </div>
         );
@@ -166,14 +168,14 @@ const GeneratedInterviewPage: React.FC = () => {
                         <CheckCircleIcon className="w-8 h-8 text-slate-400" />
                     </div>
                     <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">
-                        Simulação não encontrada
+                        {t('detail.notFound')}
                     </h2>
-                    <p className="text-slate-500 mb-6">Não conseguimos encontrar os dados desta simulação. Ela pode ter sido removida.</p>
+                    <p className="text-slate-500 mb-6">{t('detail.notFoundDesc')}</p>
                     <button
                         onClick={() => navigate('/my-interviews')}
                         className="px-6 py-3 bg-primary-600 hover:bg-primary-700 text-white rounded-xl font-medium transition-all hover:-translate-y-1 shadow-lg shadow-primary-600/20"
                     >
-                        Voltar para Minhas Simulações
+                        {t('detail.backToSimulations')}
                     </button>
                 </div>
             </div>
@@ -196,7 +198,7 @@ const GeneratedInterviewPage: React.FC = () => {
                         className="flex items-center gap-2 text-slate-400 hover:text-white transition-colors mb-6 group"
                     >
                         <ArrowLeftIcon className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
-                        <span>Voltar para listagem</span>
+                        <span>{ t('detail.backToList')}</span>
                     </button>
 
                     <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
@@ -225,17 +227,17 @@ const GeneratedInterviewPage: React.FC = () => {
                         <div className="flex gap-4 md:gap-8 bg-white/5 backdrop-blur-md rounded-2xl p-4 border border-white/10">
                             <div className="text-center px-2">
                                 <div className="text-2xl font-bold text-white mb-1">{interview.numberOfQuestions}</div>
-                                <div className="text-xs text-slate-400 uppercase tracking-wider">Perguntas</div>
+                                <div className="text-xs text-slate-400 uppercase tracking-wider">{t('detail.questions')}</div>
                             </div>
                             <div className="w-px bg-white/10"></div>
                             <div className="text-center px-2">
                                 <div className="text-2xl font-bold text-white mb-1">{interview.estimatedDuration}'</div>
-                                <div className="text-xs text-slate-400 uppercase tracking-wider">Minutos</div>
+                                <div className="text-xs text-slate-400 uppercase tracking-wider">{t('detail.minutes')}</div>
                             </div>
                             <div className="w-px bg-white/10"></div>
                             <div className="text-center px-2">
                                 <div className="text-2xl font-bold text-white mb-1">{interview.totalAttempts}</div>
-                                <div className="text-xs text-slate-400 uppercase tracking-wider">Tentativas</div>
+                                <div className="text-xs text-slate-400 uppercase tracking-wider">{t('detail.attempts')}</div>
                             </div>
                         </div>
                     </div>
@@ -258,46 +260,46 @@ const GeneratedInterviewPage: React.FC = () => {
                                     <div>
                                         <h3 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
                                             <SparklesIcon className="w-5 h-5 text-amber-500" />
-                                            Último Feedback de Vídeo
+                                            {t('detail.lastVideoFeedback')}
                                         </h3>
                                         <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
-                                            Realizado {new Date(latestAttempt.createdAt).toLocaleDateString()} · {new Date(latestAttempt.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                            {t('detail.performed')} {new Date(latestAttempt.createdAt).toLocaleDateString()} · {new Date(latestAttempt.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                         </p>
                                     </div>
                                     <button
                                         onClick={() => navigate(`/interview-analysis/${latestAttempt._id}`)}
                                         className="text-sm font-medium text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 hover:underline flex items-center gap-1 transition-colors"
                                     >
-                                        Ver análise detalhada
+                                        {t('detail.viewDetailedAnalysis')}
                                         <ArrowLeftIcon className="w-4 h-4 rotate-180" />
                                     </button>
                                 </div>
 
                                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6 relative z-10">
                                     <div className="bg-slate-50 dark:bg-slate-900/50 rounded-2xl p-4 border border-slate-100 dark:border-slate-700 hover:border-slate-200 dark:hover:border-slate-600 transition-colors">
-                                        <div className="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">Score Geral</div>
+                                        <div className="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">{t('detail.overallScore')}</div>
                                         <div className={`text-3xl font-bold ${getScoreColor(latestAttempt.preparednessScore || 0)}`}>
                                             {latestAttempt.preparednessScore || 0}<span className="text-base font-normal text-slate-400">/100</span>
                                         </div>
                                     </div>
                                     <div className="bg-slate-50 dark:bg-slate-900/50 rounded-2xl p-4 border border-slate-100 dark:border-slate-700 hover:border-slate-200 dark:hover:border-slate-600 transition-colors">
-                                        <div className="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">Pontos Fortes</div>
+                                        <div className="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">{t('detail.strengths')}</div>
                                         <div className="text-emerald-600 dark:text-emerald-400 font-semibold flex items-center gap-2">
                                             <CheckCircleIcon className="w-5 h-5" />
-                                            {latestAttempt.videoAnalysis.summary.strengths.length} identificados
+                                            {latestAttempt.videoAnalysis.summary.strengths.length} {t('detail.identified')}
                                         </div>
                                     </div>
                                     <div className="bg-slate-50 dark:bg-slate-900/50 rounded-2xl p-4 border border-slate-100 dark:border-slate-700 hover:border-slate-200 dark:hover:border-slate-600 transition-colors">
-                                        <div className="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">Melhorias</div>
+                                        <div className="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">{t('detail.improvements')}</div>
                                         <div className="text-amber-600 dark:text-amber-400 font-semibold flex items-center gap-2">
                                             <ArrowPathIcon className="w-5 h-5" />
-                                            {latestAttempt.videoAnalysis.summary.improvements.length} sugestões
+                                            {latestAttempt.videoAnalysis.summary.improvements.length} {t('detail.suggestions')}
                                         </div>
                                     </div>
                                 </div>
 
                                 <div className="space-y-3 relative z-10">
-                                    <h4 className="text-sm font-semibold text-slate-700 dark:text-slate-300">Resumo Rápido</h4>
+                                    <h4 className="text-sm font-semibold text-slate-700 dark:text-slate-300">{t('detail.quickSummary')}</h4>
                                     <div className="space-y-2">
                                         {latestAttempt.videoAnalysis.summary.strengths.slice(0, 1).map((point, i) => (
                                             <div key={`s-${i}`} className="flex gap-3 text-sm text-slate-600 dark:text-slate-400">
@@ -325,15 +327,15 @@ const GeneratedInterviewPage: React.FC = () => {
                                         <div className="absolute inset-0 w-12 h-12 rounded-full border-4 border-blue-500 border-t-transparent animate-spin"></div>
                                     </div>
                                     <div>
-                                        <h3 className="text-lg font-bold text-slate-900 dark:text-white">Processando sua última entrevista...</h3>
-                                        <p className="text-sm text-slate-500 dark:text-slate-400">Nossa IA está analisando seu vídeo para gerar feedback detalhado.</p>
+                                        <h3 className="text-lg font-bold text-slate-900 dark:text-white">{t('detail.processingLastInterview')}</h3>
+                                        <p className="text-sm text-slate-500 dark:text-slate-400">{t('detail.aiAnalyzingVideo')}</p>
                                     </div>
                                     <div className="ml-auto">
                                         <button
                                             onClick={() => navigate(`/interview-analysis/${latestAttempt._id}`)}
                                             className="px-4 py-2 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-lg text-sm font-medium hover:bg-blue-100 dark:hover:bg-blue-900/50 transition-colors"
                                         >
-                                            Acompanhar
+                                            {t('detail.track')}
                                         </button>
                                     </div>
                                 </div>
@@ -351,7 +353,7 @@ const GeneratedInterviewPage: React.FC = () => {
                                 <span className="p-2 bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 rounded-lg">
                                     <LightBulbIcon className="w-6 h-6" />
                                 </span>
-                                Dicas de Preparação
+                                {t('detail.preparationTips')}
                             </h3>
 
                             <div className="space-y-4 relative z-10">
@@ -366,7 +368,7 @@ const GeneratedInterviewPage: React.FC = () => {
                                     </div>
                                 ))}
                                 {(!interview.preparationTips || interview.preparationTips.length === 0) && (
-                                    <p className="text-slate-500 italic">Nenhuma dica específica disponível.</p>
+                                    <p className="text-slate-500 italic">{t('detail.noTipsAvailable')}</p>
                                 )}
                             </div>
                         </div>
@@ -377,7 +379,7 @@ const GeneratedInterviewPage: React.FC = () => {
                                 <span className="p-2 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-lg">
                                     <TagIcon className="w-6 h-6" />
                                 </span>
-                                Requisitos e Habilidades
+                                {t('detail.requirementsAndSkills')}
                             </h3>
                             <div className="flex flex-wrap gap-2">
                                 {interview.jobRequirements && interview.jobRequirements.map((req, index) => (
@@ -386,23 +388,23 @@ const GeneratedInterviewPage: React.FC = () => {
                                     </span>
                                 ))}
                                 {(!interview.jobRequirements || interview.jobRequirements.length === 0) && (
-                                    <p className="text-slate-500 italic">Sem requisitos listados.</p>
+                                    <p className="text-slate-500 italic">{t('detail.noRequirements')}</p>
                                 )}
                             </div>
                         </div>
 
                         {/* Questions Preview */}
                         <div>
-                            <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-4 ml-2">Preview das Perguntas</h3>
+                            <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-4 ml-2">{t('detail.questionsPreview')}</h3>
                             <div className="space-y-4">
                                 {interview.questions.slice(0, 3).map((question, index) => (
                                     <div key={question.id} className="bg-white dark:bg-slate-800 rounded-2xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-md transition-shadow">
                                         <div className="flex justify-between items-start gap-4 mb-3">
                                             <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">
-                                                Pergunta {index + 1}
+                                                {t('detail.questionNumber', { number: index + 1 })}
                                             </span>
                                             <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${question.type ? getQuestionTypeColor(question.type) : 'bg-slate-100 text-slate-600'}`}>
-                                                {question.type ? getQuestionTypeLabel(question.type) : 'Geral'}
+                                                {question.type ? getQuestionTypeLabel(question.type) : t('detail.general')}
                                             </span>
                                         </div>
                                         <p className="text-lg font-medium text-slate-800 dark:text-slate-200">
@@ -413,7 +415,7 @@ const GeneratedInterviewPage: React.FC = () => {
                                 {interview.questions.length > 3 && (
                                     <div className="text-center py-4">
                                         <p className="text-slate-500 dark:text-slate-400 text-sm font-medium">
-                                            E mais {interview.questions.length - 3} perguntas esperando por você...
+                                            {t('detail.moreQuestionsWaiting', { count: interview.questions.length - 3 })}
                                         </p>
                                     </div>
                                 )}
@@ -434,9 +436,9 @@ const GeneratedInterviewPage: React.FC = () => {
 
                                     <div className="relative z-10">
                                         <div className="flex items-center justify-between mb-6">
-                                            <h3 className="font-bold text-lg">Último Resultado</h3>
+                                            <h3 className="font-bold text-lg">{t('detail.lastResult')}</h3>
                                             <span className={`px-2 py-0.5 rounded text-xs font-semibold border ${getStatusColor(latestAttempt.analysisStatus)}`}>
-                                                Concluído
+                                                {t('detail.completed')}
                                             </span>
                                         </div>
 
@@ -463,7 +465,7 @@ const GeneratedInterviewPage: React.FC = () => {
                                                 </div>
                                             </div>
                                             <p className="text-sm text-slate-300 text-center max-w-[200px]">
-                                                {latestAttempt.preparednessScore >= 80 ? 'Excelente trabalho! Você está pronto.' : 'Bom começo! Vamos praticar mais.'}
+                                                {latestAttempt.preparednessScore >= 80 ? t('detail.excellentWork') : t('detail.goodStart')}
                                             </p>
                                         </div>
 
@@ -473,7 +475,7 @@ const GeneratedInterviewPage: React.FC = () => {
                                                 className="w-full py-3 bg-white text-slate-900 rounded-xl font-bold hover:bg-slate-100 transition-colors shadow-lg shadow-white/10 flex items-center justify-center gap-2"
                                             >
                                                 <ChartBarIcon className="w-5 h-5" />
-                                                Ver Análise Completa
+                                                {t('detail.viewFullAnalysis')}
                                             </button>
 
                                             <button
@@ -481,7 +483,7 @@ const GeneratedInterviewPage: React.FC = () => {
                                                 className="w-full py-3 bg-white/10 text-white rounded-xl font-bold hover:bg-white/20 transition-colors border border-white/10 flex items-center justify-center gap-2"
                                             >
                                                 <ArrowPathIcon className="w-5 h-5" />
-                                                Tentar Novamente
+                                                {t('detail.tryAgain')}
                                             </button>
                                         </div>
                                     </div>
@@ -494,10 +496,10 @@ const GeneratedInterviewPage: React.FC = () => {
                                             <SparklesIcon className="w-8 h-8" />
                                         </div>
                                         <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">
-                                            Pronto para praticar?
+                                            {t('detail.readyToPractice')}
                                         </h3>
                                         <p className="text-slate-600 dark:text-slate-400 text-sm">
-                                            Escolha o modo de simulação ideal para você.
+                                            {t('detail.chooseMode')}
                                         </p>
                                     </div>
 
@@ -511,8 +513,8 @@ const GeneratedInterviewPage: React.FC = () => {
                                                 <VideoCameraIcon className="w-6 h-6" />
                                             </div>
                                             <div className="ml-4 text-left">
-                                                <div className="font-bold text-slate-900 dark:text-white">Modo Vídeo</div>
-                                                <div className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Recomendado para melhor feedback</div>
+                                                <div className="font-bold text-slate-900 dark:text-white">{t('detail.videoMode')}</div>
+                                                <div className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">{t('detail.videoModeDesc')}</div>
                                             </div>
                                             {starting && <div className="absolute inset-0 bg-white/50 dark:bg-slate-900/50 flex items-center justify-center rounded-xl"><div className="animate-spin w-6 h-6 border-2 border-red-600 rounded-full border-t-transparent" /></div>}
                                         </button>
@@ -526,8 +528,8 @@ const GeneratedInterviewPage: React.FC = () => {
                                                 <DocumentTextIcon className="w-6 h-6" />
                                             </div>
                                             <div className="ml-4 text-left">
-                                                <div className="font-bold text-slate-900 dark:text-white">Modo Texto</div>
-                                                <div className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Responda via chat</div>
+                                                <div className="font-bold text-slate-900 dark:text-white">{t('detail.textMode')}</div>
+                                                <div className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">{t('detail.textModeDesc')}</div>
                                             </div>
                                             {starting && <div className="absolute inset-0 bg-white/50 dark:bg-slate-900/50 flex items-center justify-center rounded-xl"><div className="animate-spin w-6 h-6 border-2 border-primary-600 rounded-full border-t-transparent" /></div>}
                                         </button>
@@ -545,7 +547,7 @@ const GeneratedInterviewPage: React.FC = () => {
                                         <div className="p-2 bg-slate-100 dark:bg-slate-700 rounded-lg text-slate-500 group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">
                                             <ClockIcon className="w-5 h-5" />
                                         </div>
-                                        <span className="font-medium text-sm">Histórico de Tentativas</span>
+                                        <span className="font-medium text-sm">{t('detail.attemptHistory')}</span>
                                     </div>
                                     <ArrowLeftIcon className="w-4 h-4 rotate-180 text-slate-400" />
                                 </button>
@@ -553,7 +555,7 @@ const GeneratedInterviewPage: React.FC = () => {
 
                             <div className="text-center">
                                 <p className="text-xs text-slate-400">
-                                    Ao iniciar, o tempo começará a contar.
+                                    {t('detail.timeStartWarning')}
                                 </p>
                             </div>
 

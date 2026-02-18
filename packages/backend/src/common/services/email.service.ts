@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { MailerService } from '@nestjs-modules/mailer';
+import { t, SupportedLanguage } from '../i18n';
 
 @Injectable()
 export class EmailService {
@@ -8,12 +9,12 @@ export class EmailService {
   /**
    * Envia email de boas-vindas para novo usuário
    */
-  async sendWelcomeEmail(email: string, name: string): Promise<void> {
+  async sendWelcomeEmail(email: string, name: string, lang: SupportedLanguage = 'pt-BR'): Promise<void> {
     try {
       await this.mailerService.sendMail({
         to: email,
-        subject: 'Bem-vindo ao TreinaVagaAI! 🚀',
-        template: 'welcome',
+        subject: t('email.welcomeSubject', lang),
+        template: lang === 'en' ? 'welcome-en' : 'welcome',
         context: {
           name: name,
           email: email,
@@ -35,13 +36,14 @@ export class EmailService {
     name: string,
     amount: number,
     reason: string,
-    newBalance: number
+    newBalance: number,
+    lang: SupportedLanguage = 'pt-BR'
   ): Promise<void> {
     try {
       await this.mailerService.sendMail({
         to: email,
-        subject: 'Tokens Adicionados à sua Conta - TreinaVagaAI 🎉',
-        template: 'token-added',
+        subject: t('email.tokenAddedSubject', lang),
+        template: lang === 'en' ? 'token-added-en' : 'token-added',
         context: {
           name: name,
           amount: amount,
@@ -68,13 +70,14 @@ export class EmailService {
     tokensAdded: number,
     newTokenBalance: number,
     newRole?: string,
-    roleExpiresAt?: string
+    roleExpiresAt?: string,
+    lang: SupportedLanguage = 'pt-BR'
   ): Promise<void> {
     try {
       await this.mailerService.sendMail({
         to: email,
-        subject: 'Plano Resgatado com Sucesso - TreinaVagaAI 🎉',
-        template: 'plan-redeemed',
+        subject: t('email.planRedeemedSubject', lang),
+        template: lang === 'en' ? 'plan-redeemed-en' : 'plan-redeemed',
         context: {
           name: name,
           planName: planName,

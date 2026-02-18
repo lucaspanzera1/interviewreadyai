@@ -12,6 +12,7 @@ import {
 import { CheckCircleIcon as CheckCircleSolid } from '@heroicons/react/24/solid';
 import { apiClient } from '../lib/api';
 import { toast } from 'react-toastify';
+import { useTranslation } from 'react-i18next';
 
 interface Question {
     question: string;
@@ -41,6 +42,7 @@ interface QuizAttempt {
 
 const UserQuizAttemptDetailsPage: React.FC = () => {
     const navigate = useNavigate();
+    const { t } = useTranslation('quiz');
     const { attemptId } = useParams<{ attemptId: string }>();
     const [attempt, setAttempt] = useState<QuizAttempt | null>(null);
     const [loading, setLoading] = useState(true);
@@ -58,7 +60,7 @@ const UserQuizAttemptDetailsPage: React.FC = () => {
             const attemptData = await apiClient.getUserAttemptDetails(attemptId!);
             setAttempt(attemptData);
         } catch (error) {
-            toast.error('Erro ao carregar detalhes da tentativa');
+            toast.error(t('history.errorLoadingDetails'));
             console.error(error);
             navigate('/profile/quiz-history');
         } finally {
@@ -101,7 +103,7 @@ const UserQuizAttemptDetailsPage: React.FC = () => {
             <div className="text-center py-12">
                 <AcademicCapIcon className="mx-auto h-12 w-12 text-slate-400" />
                 <h3 className="mt-2 text-sm font-medium text-slate-900 dark:text-white">
-                    Tentativa não encontrada
+                    {t('history.attemptNotFound')}
                 </h3>
             </div>
         );
@@ -120,7 +122,7 @@ const UserQuizAttemptDetailsPage: React.FC = () => {
                 >
                     <ArrowLeftIcon className="w-5 h-5" />
                 </button>
-                <PageTitle title={`Detalhes da Tentativa`} />
+                <PageTitle title={t('history.attemptDetails')} />
             </div>
 
             {/* Attempt Summary */}
@@ -133,9 +135,9 @@ const UserQuizAttemptDetailsPage: React.FC = () => {
                         <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-slate-500 dark:text-slate-400">
                             <span>{attempt.quizId.categoria}</span>
                             <span>•</span>
-                            <span>{attempt.quizId.nivel === 'INICIANTE' ? 'Iniciante' :
-                                attempt.quizId.nivel === 'MEDIO' ? 'Médio' :
-                                    attempt.quizId.nivel === 'DIFÍCIL' ? 'Difícil' : 'Expert'}</span>
+                            <span>{attempt.quizId.nivel === 'INICIANTE' ? t('difficulty.beginner') :
+                                attempt.quizId.nivel === 'MEDIO' ? t('difficulty.medium') :
+                                    attempt.quizId.nivel === 'DIFÍCIL' ? t('difficulty.hard') : t('difficulty.expert')}</span>
                             <span>•</span>
                             <div className="flex items-center gap-1">
                                 <CalendarIcon className="w-4 h-4" />
@@ -154,7 +156,7 @@ const UserQuizAttemptDetailsPage: React.FC = () => {
                             {attempt.percentage.toFixed(1)}%
                         </div>
                         <div className="text-sm text-slate-500 dark:text-slate-400">
-                            {attempt.score}/{attempt.totalQuestions} questões
+                            {t('history.questionsCount', { score: attempt.score, total: attempt.totalQuestions })}
                         </div>
                     </div>
                 </div>
@@ -163,7 +165,7 @@ const UserQuizAttemptDetailsPage: React.FC = () => {
                 <div className="border-t border-slate-200 dark:border-slate-700 pt-6">
                     <div className="flex items-center justify-between mb-4">
                         <h3 className="text-lg font-semibold text-slate-900 dark:text-white">
-                            Questões ({selectedQuestionIndex + 1} de {attempt.quizId.questions.length})
+                            {t('history.questionsOf', { current: selectedQuestionIndex + 1, total: attempt.quizId.questions.length })}
                         </h3>
                         <div className="flex gap-2">
                             <button
@@ -171,14 +173,14 @@ const UserQuizAttemptDetailsPage: React.FC = () => {
                                 disabled={selectedQuestionIndex === 0}
                                 className="px-3 py-1 text-sm bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded hover:bg-slate-200 dark:hover:bg-slate-700 disabled:opacity-50"
                             >
-                                Anterior
+                                {t('pagination.previous')}
                             </button>
                             <button
                                 onClick={() => setSelectedQuestionIndex(prev => Math.min(attempt.quizId.questions.length - 1, prev + 1))}
                                 disabled={selectedQuestionIndex === attempt.quizId.questions.length - 1}
                                 className="px-3 py-1 text-sm bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded hover:bg-slate-200 dark:hover:bg-slate-700 disabled:opacity-50"
                             >
-                                Próxima
+                                {t('pagination.next')}
                             </button>
                         </div>
                     </div>
@@ -215,7 +217,7 @@ const UserQuizAttemptDetailsPage: React.FC = () => {
                                                         ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
                                                         : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
                                                     }`}>
-                                                    Sua resposta
+                                                    {t('history.yourAnswer')}
                                                 </span>
                                             )}
                                             {optionIndex === currentQuestion.correct_answer && (
@@ -242,19 +244,19 @@ const UserQuizAttemptDetailsPage: React.FC = () => {
                                         ? 'text-green-800 dark:text-green-200'
                                         : 'text-red-800 dark:text-red-200'
                                     }`}>
-                                    {isCorrect ? 'Resposta Correta!' : 'Resposta Incorreta'}
+                                    {isCorrect ? t('history.correctAnswer') : t('history.incorrectAnswer')}
                                 </span>
                             </div>
 
                             {!isCorrect && (
                                 <div className="text-sm text-slate-600 dark:text-slate-400 mb-2">
-                                    <strong>Correta:</strong> {String.fromCharCode(65 + currentQuestion.correct_answer)}. {currentQuestion.options[currentQuestion.correct_answer]}
+                                    <strong>{t('history.correctLabel')}</strong> {String.fromCharCode(65 + currentQuestion.correct_answer)}. {currentQuestion.options[currentQuestion.correct_answer]}
                                 </div>
                             )}
 
                             {currentQuestion.explanation && (
                                 <div className="text-sm text-slate-600 dark:text-slate-400">
-                                    <strong>Explicação:</strong> {currentQuestion.explanation}
+                                    <strong>{t('generated.explanation')}</strong> {currentQuestion.explanation}
                                 </div>
                             )}
                         </div>

@@ -41,6 +41,11 @@ export class ProfileDto {
   @IsOptional()
   @IsString()
   headerImage?: string;
+
+  @IsOptional()
+  @IsString()
+  @IsIn(['pt-BR', 'en'])
+  preferredLanguage?: string;
 }
 
 export class CompleteOnboardingDto extends ProfileDto {

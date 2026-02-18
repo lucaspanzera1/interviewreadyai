@@ -17,31 +17,10 @@ import { toast } from 'react-toastify';
 import Loading from './Loading';
 import ActivityHeatmap from './ActivityHeatmap';
 import { getNicheIcon } from '../utils/nicheIcons';
-
-const CAREER_TIME_LABELS: Record<string, string> = {
-  '0-1': 'Menos de 1 ano',
-  '1-3': '1-3 anos',
-  '3-5': '3-5 anos',
-  '5-10': '5-10 anos',
-  '10+': 'Mais de 10 anos'
-};
-
-const NICHE_LABELS: Record<string, string> = {
-  'tecnologia': 'Tecnologia',
-  'educacao': 'Educação',
-  'recursos_humanos': 'Recursos Humanos',
-  'financeiro': 'Financeiro',
-  'saude': 'Saúde',
-  'vendas': 'Vendas',
-  'marketing': 'Marketing',
-  'juridico': 'Jurídico',
-  'engenharia': 'Engenharia',
-  'design': 'Design',
-  'produto': 'Produto',
-  'outro': 'Outro'
-};
+import { useTranslation } from 'react-i18next';
 
 const PublicProfilePage: React.FC = () => {
+  const { t } = useTranslation('social');
   const { userId } = useParams<{ userId: string }>();
   const navigate = useNavigate();
   const { user: currentUser } = useAuth();
@@ -71,7 +50,7 @@ const PublicProfilePage: React.FC = () => {
       setConnections(connectionsData);
     } catch (error) {
       console.error('Erro ao carregar perfil:', error);
-      toast.error('Erro ao carregar perfil');
+      toast.error(t('profile.errorLoadingProfile'));
       navigate('/search');
     } finally {
       setLoading(false);
@@ -84,10 +63,10 @@ const PublicProfilePage: React.FC = () => {
     try {
       if (profile.isFollowing) {
         await socialApi.unfollowUser(profile.id);
-        toast.success(`Deixou de seguir ${profile.name}`);
+        toast.success(t('profile.unfollowedToast', { name: profile.name }));
       } else {
         await socialApi.followUser(profile.id);
-        toast.success(`Agora você segue ${profile.name}`);
+        toast.success(t('profile.followedToast', { name: profile.name }));
       }
 
       // Atualizar profile local
@@ -100,7 +79,7 @@ const PublicProfilePage: React.FC = () => {
       });
     } catch (error) {
       console.error('Erro ao seguir/deixar de seguir:', error);
-      toast.error('Erro ao atualizar seguimento');
+      toast.error(t('profile.errorUpdatingFollow'));
     }
   };
 
@@ -115,7 +94,7 @@ const PublicProfilePage: React.FC = () => {
   };
 
   if (loading) {
-    return <Loading fullScreen text="Carregando perfil..." />;
+    return <Loading fullScreen text={t('profile.loadingProfile')} />;
   }
 
   if (!profile) {
@@ -125,13 +104,13 @@ const PublicProfilePage: React.FC = () => {
           <div className="w-16 h-16 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
             <UserMinus className="text-red-500" size={32} />
           </div>
-          <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-2">Perfil não encontrado</h2>
-          <p className="text-slate-500 dark:text-slate-400 mb-6">Não conseguimos encontrar o perfil que você está procurando.</p>
+          <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-2">{t('profile.profileNotFound')}</h2>
+          <p className="text-slate-500 dark:text-slate-400 mb-6">{t('profile.profileNotFoundDesc')}</p>
           <button
             onClick={() => navigate('/search')}
             className="btn btn-primary w-full"
           >
-            Voltar para busca
+            {t('profile.backToSearch')}
           </button>
         </div>
       </div>
@@ -174,7 +153,7 @@ const PublicProfilePage: React.FC = () => {
                 className="w-32 h-32 md:w-40 md:h-40 rounded-2xl border-4 border-white dark:border-slate-800 shadow-xl object-cover bg-white dark:bg-slate-900"
               />
               {profile.isFollowing && (
-                <div className="absolute -bottom-2 -right-2 bg-green-500 p-1.5 rounded-full border-4 border-white dark:border-slate-800 shadow-sm" title="Seguindo">
+                <div className="absolute -bottom-2 -right-2 bg-green-500 p-1.5 rounded-full border-4 border-white dark:border-slate-800 shadow-sm" title={t('profile.following')}>
                   <UserPlus size={20} className="text-white" />
                 </div>
               )}
@@ -188,7 +167,7 @@ const PublicProfilePage: React.FC = () => {
                 {profile.niche && (
                   <div className="flex items-center gap-1.5">
                     {getNicheIcon(profile.niche, "w-4 h-4 text-primary-500")}
-                    <span>{NICHE_LABELS[profile.niche] || profile.niche}</span>
+                    <span>{t(`niches.${profile.niche}`) || profile.niche}</span>
                   </div>
                 )}
                 {profile.location && (
@@ -200,7 +179,7 @@ const PublicProfilePage: React.FC = () => {
                 {profile.careerTime && (
                   <div className="flex items-center gap-1.5">
                     <Clock size={16} className="text-slate-400" />
-                    <span>{CAREER_TIME_LABELS[profile.careerTime] || profile.careerTime}</span>
+                    <span>{t(`careerTime.${profile.careerTime}`) || profile.careerTime}</span>
                   </div>
                 )}
               </div>
@@ -218,12 +197,12 @@ const PublicProfilePage: React.FC = () => {
                   {profile.isFollowing ? (
                     <>
                       <UserMinus size={18} />
-                      Deixar de seguir
+                      {t('profile.unfollow')}
                     </>
                   ) : (
                     <>
                       <UserPlus size={18} />
-                      Seguir
+                      {t('profile.follow')}
                     </>
                   )}
                 </button>
@@ -235,7 +214,7 @@ const PublicProfilePage: React.FC = () => {
             <div className="flex-1 space-y-4">
               {profile.bio && (
                 <div>
-                  <h3 className="text-sm font-semibold text-slate-900 dark:text-white mb-2">Sobre</h3>
+                  <h3 className="text-sm font-semibold text-slate-900 dark:text-white mb-2">{t('profile.about')}</h3>
                   <p className="text-slate-600 dark:text-slate-300 text-sm leading-relaxed">
                     {profile.bio}
                   </p>
@@ -244,7 +223,7 @@ const PublicProfilePage: React.FC = () => {
 
               {profile.niche === 'tecnologia' && profile.techStack && profile.techStack.length > 0 && (
                 <div>
-                  <h3 className="text-sm font-semibold text-slate-900 dark:text-white mb-2">Tech Stack</h3>
+                  <h3 className="text-sm font-semibold text-slate-900 dark:text-white mb-2">{t('profile.techStack')}</h3>
                   <div className="flex flex-wrap gap-2">
                     {profile.techStack.map((tech, index) => (
                       <span
@@ -290,13 +269,13 @@ const PublicProfilePage: React.FC = () => {
                   <div className="text-xl font-bold text-slate-900 dark:text-white">
                     {connections?.followersCount || 0}
                   </div>
-                  <div className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Seguidores</div>
+                  <div className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">{t('profile.followers')}</div>
                 </div>
                 <div className="bg-slate-50 dark:bg-slate-700/30 rounded-xl p-3 text-center border border-slate-100 dark:border-slate-700/50">
                   <div className="text-xl font-bold text-slate-900 dark:text-white">
                     {connections?.followingCount || 0}
                   </div>
-                  <div className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Seguindo</div>
+                  <div className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">{t('profile.followingLabel')}</div>
                 </div>
               </div>
             </div>
@@ -309,7 +288,7 @@ const PublicProfilePage: React.FC = () => {
         <div className="lg:col-span-3 grid grid-cols-2 md:grid-cols-4 gap-4">
           <div className="card p-4 flex items-center justify-between hover:scale-[1.02] transition-transform">
             <div>
-              <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">Quizzes Completos</p>
+              <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">{t('profile.quizzesCompleted')}</p>
               <p className="text-2xl font-bold text-slate-900 dark:text-white mt-1">{profile.quizStats.totalCompleted}</p>
             </div>
             <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-xl text-blue-600 dark:text-blue-400">
@@ -318,7 +297,7 @@ const PublicProfilePage: React.FC = () => {
           </div>
           <div className="card p-4 flex items-center justify-between hover:scale-[1.02] transition-transform">
             <div>
-              <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">Média Geral</p>
+              <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">{t('profile.overallAverage')}</p>
               <p className="text-2xl font-bold text-slate-900 dark:text-white mt-1">{profile.quizStats.averageScore}%</p>
             </div>
             <div className="p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-xl text-yellow-600 dark:text-yellow-400">
@@ -327,7 +306,7 @@ const PublicProfilePage: React.FC = () => {
           </div>
           <div className="card p-4 flex items-center justify-between hover:scale-[1.02] transition-transform">
             <div>
-              <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">Melhor Score</p>
+              <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">{t('profile.bestScore')}</p>
               <p className="text-2xl font-bold text-green-600 dark:text-green-400 mt-1">{profile.quizStats.bestScore}%</p>
             </div>
             <div className="p-3 bg-green-50 dark:bg-green-900/20 rounded-xl text-green-600 dark:text-green-400">
@@ -336,7 +315,7 @@ const PublicProfilePage: React.FC = () => {
           </div>
           <div className="card p-4 flex items-center justify-between hover:scale-[1.02] transition-transform">
             <div>
-              <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">Tempo Total</p>
+              <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">{t('profile.totalTime')}</p>
               <p className="text-lg font-bold text-purple-600 dark:text-purple-400 mt-1">{formatTime(profile.quizStats.totalTimeSpent)}</p>
             </div>
             <div className="p-3 bg-purple-50 dark:bg-purple-900/20 rounded-xl text-purple-600 dark:text-purple-400">
@@ -351,9 +330,9 @@ const PublicProfilePage: React.FC = () => {
             <div className="border-b border-slate-100 dark:border-slate-700 px-6">
               <nav className="flex gap-6">
                 {[
-                  { id: 'profile', label: 'Visão Geral' },
-                  { id: 'followers', label: 'Seguidores' },
-                  { id: 'following', label: 'Seguindo' }
+                  { id: 'profile', label: t('profile.overview') },
+                  { id: 'followers', label: t('profile.followers') },
+                  { id: 'following', label: t('profile.followingLabel') }
                 ].map((tab) => (
                   <button
                     key={tab.id}
@@ -377,7 +356,7 @@ const PublicProfilePage: React.FC = () => {
                 <div className="py-6">
                   {profile.activityData && profile.activityData.length > 0 ? (
                     <div className="space-y-6">
-                      <h3 className="text-lg font-medium text-slate-900 dark:text-white px-4">Atividade Recente</h3>
+                      <h3 className="text-lg font-medium text-slate-900 dark:text-white px-4">{t('profile.recentActivity')}</h3>
                       <div className="px-4 pb-4">
                         <ActivityHeatmap
                           data={profile.activityData}
@@ -390,9 +369,9 @@ const PublicProfilePage: React.FC = () => {
                       <div className="w-16 h-16 bg-slate-50 dark:bg-slate-800 rounded-full flex items-center justify-center mb-4">
                         <Target size={32} className="text-slate-300" />
                       </div>
-                      <h3 className="text-lg font-medium text-slate-900 dark:text-white">Atividade Recente</h3>
+                      <h3 className="text-lg font-medium text-slate-900 dark:text-white">{t('profile.recentActivity')}</h3>
                       <p className="text-slate-500 dark:text-slate-400 max-w-sm mt-2">
-                        Este usuário ainda não tem atividades registradas.
+                        {t('profile.noActivity')}
                       </p>
                     </div>
                   )}
@@ -402,14 +381,14 @@ const PublicProfilePage: React.FC = () => {
               {activeTab === 'followers' && (
                 <UserList
                   users={connections?.followers || []}
-                  emptyMessage="Nenhum seguidor ainda"
+                  emptyMessage={t('profile.noFollowersYet')}
                 />
               )}
 
               {activeTab === 'following' && (
                 <UserList
                   users={connections?.following || []}
-                  emptyMessage="Não está seguindo ninguém"
+                  emptyMessage={t('profile.notFollowingAnyone')}
                 />
               )}
             </div>

@@ -1,0 +1,38 @@
+{
+  "description": "AI-powered technical interview preparation platform",
+  "platformDescription": "The platform uses AI to read job requirements and generate a preparation Quiz to make sure you don't freeze when talking to the recruiter.",
+  "product": {
+    "title": "Product",
+    "website": "Website",
+    "plans": "Plans",
+    "features": "Features",
+    "roadmap": "Roadmap",
+    "quizzes": "Quizzes",
+    "interviews": "Interviews",
+    "flashcards": "Flashcards",
+    "community": "Community"
+  },
+  "navigation": {
+    "title": "Navigation",
+    "home": "Home",
+    "myQuizzes": "My Quizzes",
+    "create": "Create",
+    "explore": "Explore",
+    "evolution": "Progress",
+    "tokens": "Tokens",
+    "about": "About",
+    "pricing": "Pricing",
+    "contact": "Contact"
+  },
+  "legal": {
+    "title": "Legal",
+    "terms": "Terms of Use",
+    "privacy": "Privacy Policy",
+    "faq": "FAQ"
+  },
+  "brandName": "Interview",
+  "brandHighlight": "Ready",
+  "copyright": "© {{year}} InterviewReady Inc.",
+  "poweredBy": "Powered By",
+  "madeWith": "Made with ❤️ for devs"
+}

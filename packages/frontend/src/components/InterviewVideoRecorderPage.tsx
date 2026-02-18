@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import PageTitle from './PageTitle';
 import {
     VideoCameraIcon,
@@ -57,6 +58,7 @@ const VideoTimer: React.FC<{ startTime: number, maxDuration?: number, isRecordin
 };
 
 const InterviewVideoRecorderPage: React.FC = () => {
+    const { t } = useTranslation('interview');
     const navigate = useNavigate();
     const { showToast } = useToast();
     const videoRef = useRef<HTMLVideoElement>(null);
@@ -101,7 +103,7 @@ const InterviewVideoRecorderPage: React.FC = () => {
             setInterview(parsedData);
             setRecordings(new Array(parsedData.questions.length).fill(null));
         } else {
-            showToast('Nenhuma simulação encontrada. Redirecionando...', 'error');
+            showToast(t('videoRecorder.noSimulationFound'), 'error');
             navigate('/my-interviews');
         }
 
@@ -137,7 +139,7 @@ const InterviewVideoRecorderPage: React.FC = () => {
             setHasPermission(true);
         } catch (error) {
             console.error('Erro ao acessar câmera/microfone:', error);
-            showToast('Permissão de câmera/microfone necessária para gravar vídeos', 'error');
+            showToast(t('videoRecorder.cameraPermissionToast'), 'error');
             setHasPermission(false);
         }
     };
@@ -191,7 +193,7 @@ const InterviewVideoRecorderPage: React.FC = () => {
 
         } catch (error) {
             console.error('Erro ao iniciar gravação:', error);
-            showToast('Erro ao iniciar gravação', 'error');
+            showToast(t('videoRecorder.errorStarting'), 'error');
         }
     }, [videoState.stream, recordings, currentQuestion, showToast]);
 
@@ -250,7 +252,7 @@ const InterviewVideoRecorderPage: React.FC = () => {
     const finishInterview = () => {
         const hasRecordings = recordings.some(rec => rec !== null);
         if (!hasRecordings) {
-            showToast('Grave pelo menos uma resposta antes de finalizar', 'error');
+            showToast(t('videoRecorder.recordAtLeastOne'), 'error');
             return;
         }
         setShowResults(true);
@@ -263,7 +265,7 @@ const InterviewVideoRecorderPage: React.FC = () => {
         try {
             const validRecordings = recordings.filter(rec => rec !== null);
             if (validRecordings.length === 0) {
-                showToast('Nenhuma gravação encontrada', 'error');
+                showToast(t('videoRecorder.noRecordingFound'), 'error');
                 return;
             }
 
@@ -283,13 +285,13 @@ const InterviewVideoRecorderPage: React.FC = () => {
             const attemptResult = await apiClient.uploadVideoAttempt(interviewId, formData);
 
             if (attemptResult.attemptId) {
-                showToast('Simulação enviada! Análise será processada.', 'success');
+                showToast(t('videoRecorder.submissionSuccess'), 'success');
                 localStorage.setItem('currentAttemptId', attemptResult.attemptId);
                 navigate(`/interview-analysis/${attemptResult.attemptId}`);
             }
         } catch (error) {
             console.error('Erro ao submeter simulação:', error);
-            showToast('Erro ao enviar simulação. Tente novamente.', 'error');
+            showToast(t('videoRecorder.submissionError'), 'error');
         } finally {
             setIsSubmitting(false);
         }
@@ -310,7 +312,7 @@ const InterviewVideoRecorderPage: React.FC = () => {
     if (showResults) {
         return (
             <div className="min-h-screen bg-slate-900 flex items-center justify-center p-4">
-                <PageTitle title="Resultados da Simulação" />
+                <PageTitle title={t('videoRecorder.resultsTitle')} />
 
                 <div className="max-w-xl w-full bg-slate-800 rounded-3xl shadow-2xl p-8 border border-slate-700 animate-fade-in-up">
                     <div className="text-center mb-8">
@@ -318,15 +320,15 @@ const InterviewVideoRecorderPage: React.FC = () => {
                             <CheckIcon className="w-10 h-10 text-green-400" />
                         </div>
                         <h1 className="text-3xl font-bold text-white mb-2">
-                            Gravação Concluída!
+                            {t('videoRecorder.recordingComplete')}
                         </h1>
                         <p className="text-slate-400">
-                            Você gravou {recordings.filter(r => r).length} de {interview.questions.length} vídeo-respostas.
+                            {t('videoRecorder.recordedCount', { recorded: recordings.filter(r => r).length, total: interview.questions.length })}
                         </p>
                     </div>
 
                     <div className="mb-8 p-6 bg-slate-900/50 rounded-2xl border border-slate-700/50">
-                        <h3 className="text-sm font-semibold text-slate-300 uppercase tracking-wide mb-4 text-center">Como foi a experiência?</h3>
+                        <h3 className="text-sm font-semibold text-slate-300 uppercase tracking-wide mb-4 text-center">{t('videoRecorder.howWasExperience')}</h3>
                         <div className="flex justify-center gap-3 mb-2">
                             {[1, 2, 3, 4, 5].map(rating => (
                                 <button
@@ -346,7 +348,7 @@ const InterviewVideoRecorderPage: React.FC = () => {
                             <textarea
                                 value={feedback}
                                 onChange={(e) => setFeedback(e.target.value)}
-                                placeholder="Algum comentário sobre a simulação? (Opcional)"
+                                placeholder={t('videoRecorder.feedbackPlaceholder')}
                                 className="w-full bg-slate-800 border border-slate-700 rounded-xl p-4 text-slate-300 placeholder-slate-500 focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none resize-none h-24 text-sm"
                             />
                         </div>
@@ -361,17 +363,17 @@ const InterviewVideoRecorderPage: React.FC = () => {
                             {isSubmitting ? (
                                 <span className="flex items-center justify-center gap-2">
                                     <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                                    Enviando Vídeos...
+                                    {t('videoRecorder.uploadingVideos')}
                                 </span>
                             ) : (
-                                'Enviar para Análise de IA'
+                                t('videoRecorder.sendForAnalysis')
                             )}
                         </button>
                         <button
                             onClick={() => setShowResults(false)}
                             className="w-full py-4 bg-transparent hover:bg-slate-700 text-slate-400 hover:text-white font-semibold rounded-xl transition-colors"
                         >
-                            Voltar e revisar
+                            {t('videoRecorder.backAndReview')}
                         </button>
                     </div>
                 </div>
@@ -381,7 +383,7 @@ const InterviewVideoRecorderPage: React.FC = () => {
 
     return (
         <div className="h-screen bg-slate-950 text-white overflow-hidden flex flex-col">
-            <PageTitle title={`Gravação - ${interview.jobTitle}`} />
+            <PageTitle title={t('videoRecorder.recordingTitle', { jobTitle: interview.jobTitle })} />
 
             {/* Top Bar */}
             <header className="absolute top-0 left-0 right-0 z-20 p-6 flex justify-between items-start pointer-events-none">
@@ -405,13 +407,13 @@ const InterviewVideoRecorderPage: React.FC = () => {
                 {!hasPermission ? (
                     <div className="text-center p-8 bg-slate-900 rounded-3xl border border-slate-800">
                         <VideoCameraIcon className="w-16 h-16 text-slate-500 mx-auto mb-4" />
-                        <h3 className="text-xl font-bold mb-2">Acesso à Câmera Necessário</h3>
-                        <p className="text-slate-400 mb-6">Por favor, permita o acesso à câmera e microfone para continuar.</p>
+                        <h3 className="text-xl font-bold mb-2">{t('videoRecorder.cameraAccessTitle')}</h3>
+                        <p className="text-slate-400 mb-6">{t('videoRecorder.cameraAccessDesc')}</p>
                         <button
                             onClick={requestPermissions}
                             className="px-6 py-3 bg-primary-600 hover:bg-primary-500 rounded-xl font-medium transition-colors"
                         >
-                            Permitir Acesso
+                            {t('videoRecorder.allowAccess')}
                         </button>
                     </div>
                 ) : (
@@ -438,7 +440,7 @@ const InterviewVideoRecorderPage: React.FC = () => {
                             <div className="max-w-4xl mx-auto bg-black/60 backdrop-blur-md border border-white/10 p-6 rounded-3xl shadow-2xl pointer-events-auto">
                                 <div className="flex justify-between items-start gap-4 mb-2">
                                     <span className="text-xs font-bold uppercase tracking-wider text-primary-400">
-                                        Pergunta {currentQuestion + 1} de {interview.questions.length}
+                                        {t('videoRecorder.questionOf', { current: currentQuestion + 1, total: interview.questions.length })}
                                     </span>
                                     <button
                                         onClick={() => setShowTips(!showTips)}
@@ -478,7 +480,7 @@ const InterviewVideoRecorderPage: React.FC = () => {
                             className="p-3 text-red-400 hover:text-red-300 hover:bg-red-900/20 rounded-xl transition-all flex items-center gap-2 text-sm font-medium"
                         >
                             <TrashIcon className="w-5 h-5" />
-                            <span className="hidden sm:inline">Descartar</span>
+                            <span className="hidden sm:inline">{t('videoRecorder.discard')}</span>
                         </button>
                     )}
                 </div>
@@ -492,7 +494,7 @@ const InterviewVideoRecorderPage: React.FC = () => {
                         >
                             {currentRecording ? (
                                 <div className="text-white font-bold text-xs uppercase text-center">
-                                    <span className="block text-[10px] text-slate-400">Regravar</span>
+                                    <span className="block text-[10px] text-slate-400">{t('videoRecorder.reRecord')}</span>
                                     <VideoCameraIcon className="w-6 h-6 mx-auto mt-0.5" />
                                 </div>
                             ) : (
@@ -520,14 +522,14 @@ const InterviewVideoRecorderPage: React.FC = () => {
                             onClick={finishInterview}
                             className="px-6 py-3 bg-green-600 hover:bg-green-500 text-white font-bold rounded-xl shadow-lg shadow-green-900/20 transition-all hover:translate-y-[-2px] active:translate-y-0"
                         >
-                            Finalizar
+                            {t('videoRecorder.finish')}
                         </button>
                     ) : (
                         <button
                             onClick={nextQuestion}
                             className="px-6 py-3 bg-primary-600 hover:bg-primary-500 text-white font-bold rounded-xl shadow-lg shadow-primary-900/20 transition-all hover:translate-y-[-2px] active:translate-y-0 flex items-center gap-2"
                         >
-                            Próxima
+                            {t('videoRecorder.next')}
                             <ArrowRightIcon className="w-4 h-4" />
                         </button>
                     )}

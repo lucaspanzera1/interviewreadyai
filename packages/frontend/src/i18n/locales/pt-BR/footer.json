@@ -1,0 +1,38 @@
+{
+  "description": "Plataforma de preparação para entrevistas técnicas com IA",
+  "platformDescription": "A plataforma utiliza IA para ler os requisitos da vaga e gerar um Quiz de preparação para garantir que você não \"trave\" na hora do papo com o recrutador.",
+  "product": {
+    "title": "Produto",
+    "website": "Website",
+    "plans": "Planos",
+    "features": "Funcionalidades",
+    "roadmap": "Roadmap",
+    "quizzes": "Quizzes",
+    "interviews": "Entrevistas",
+    "flashcards": "Flashcards",
+    "community": "Comunidade"
+  },
+  "navigation": {
+    "title": "Navegação",
+    "home": "Início",
+    "myQuizzes": "Meus Quizzes",
+    "create": "Criar",
+    "explore": "Explorar",
+    "evolution": "Evolução",
+    "tokens": "Tokens",
+    "about": "Sobre",
+    "pricing": "Preços",
+    "contact": "Contato"
+  },
+  "legal": {
+    "title": "Legal",
+    "terms": "Termos de Uso",
+    "privacy": "Política de Privacidade",
+    "faq": "FAQ"
+  },
+  "brandName": "TreinaVaga",
+  "brandHighlight": "AI",
+  "copyright": "© {{year}} TreinaVagaAI Inc.",
+  "poweredBy": "Powered By",
+  "madeWith": "Feito com ❤️ para devs"
+}

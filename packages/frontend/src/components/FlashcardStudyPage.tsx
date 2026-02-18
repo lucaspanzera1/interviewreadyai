@@ -14,6 +14,7 @@ import {
 } from '@heroicons/react/24/outline';
 import { apiClient } from '../lib/api';
 import { useToast } from '../contexts/ToastContext';
+import { useTranslation } from 'react-i18next';
 
 interface FlashcardItem {
     question: string;
@@ -39,6 +40,7 @@ const FlashcardStudyPage: React.FC = () => {
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
     const { showToast } = useToast();
+    const { t } = useTranslation('flashcard');
 
     // State
     const [flashcard, setFlashcard] = useState<Flashcard | null>(null);
@@ -115,7 +117,7 @@ const FlashcardStudyPage: React.FC = () => {
             setFlashcard(flashcardResponse.flashcard);
         } catch (error: any) {
             console.error('Error loading flashcard:', error);
-            const message = error.response?.data?.message || 'Erro ao carregar flashcard.';
+            const message = error.response?.data?.message || t('study.errorLoading');
             showToast(message, 'error');
             navigate('/my-flashcards');
         } finally {
@@ -163,14 +165,14 @@ const FlashcardStudyPage: React.FC = () => {
             });
 
             showToast(
-                `Sessão de estudo concluída! Você estudou ${session.length} cards em ${Math.floor(totalSessionTime / 60)}min.`,
+                t('study.sessionComplete', { cards: session.length, time: Math.floor(totalSessionTime / 60) }),
                 'success'
             );
 
             navigate('/my-flashcards');
         } catch (error: any) {
             console.error('Error recording study session:', error);
-            showToast('Erro ao salvar progresso do estudo.', 'error');
+            showToast(t('study.errorSavingProgress'), 'error');
         }
     };
 
@@ -207,13 +209,13 @@ const FlashcardStudyPage: React.FC = () => {
             <div className="flex flex-col items-center justify-center h-[100dvh] bg-slate-50 dark:bg-slate-900 p-4">
                 <ExclamationTriangleIcon className="w-24 h-24 text-slate-400 mb-4" />
                 <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">
-                    Flashcard não encontrado
+                    {t('study.notFound')}
                 </h2>
                 <button
                     onClick={() => navigate('/my-flashcards')}
                     className="px-6 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg transition-colors"
                 >
-                    Voltar aos Meus Flashcards
+                    {t('study.backToMyFlashcards')}
                 </button>
             </div>
         );
@@ -253,7 +255,7 @@ const FlashcardStudyPage: React.FC = () => {
                 }
             `}</style>
 
-            <PageTitle title={`Estudando: ${flashcard.titulo} - TreinaVagaAI`} />
+            <PageTitle title={t('study.pageTitle', { title: flashcard.titulo })} />
 
             {/* Header Compacto */}
             <header className="shrink-0 z-20 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 px-4 py-3 safe-top">
@@ -261,14 +263,14 @@ const FlashcardStudyPage: React.FC = () => {
                     <button
                         onClick={() => navigate('/my-flashcards')}
                         className="p-2 -ml-2 rounded-full text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-                        aria-label="Voltar"
+                        aria-label={t('study.back')}
                     >
                         <ArrowLeftIcon className="w-5 h-5" />
                     </button>
 
                     <div className="flex-1 max-w-xs mx-auto">
                         <div className="flex justify-between text-xs font-medium text-slate-500 dark:text-slate-400 mb-1.5 px-1">
-                            <span>Progresso</span>
+                            <span>{t('study.progress')}</span>
                             <span>{currentCardIndex + 1} / {flashcard.cards.length}</span>
                         </div>
                         <div className="h-2 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
@@ -307,7 +309,7 @@ const FlashcardStudyPage: React.FC = () => {
                         <div className="absolute inset-0 backface-hidden w-full h-full bg-white dark:bg-slate-800 rounded-3xl shadow-xl border border-slate-200 dark:border-slate-700 flex flex-col overflow-hidden">
                             <div className="flex-1 p-6 sm:p-10 flex flex-col items-center justify-center text-center overflow-y-auto custom-scrollbar">
                                 <span className="inline-block px-3 py-1 mb-6 rounded-full bg-primary-50 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400 text-xs font-bold tracking-wider uppercase shrink-0">
-                                    Pergunta
+                                    {t('study.question')}
                                 </span>
                                 <h3 className="text-xl sm:text-2xl md:text-3xl font-medium text-slate-800 dark:text-slate-100 leading-relaxed max-w-2xl">
                                     {currentCard.question}
@@ -316,7 +318,7 @@ const FlashcardStudyPage: React.FC = () => {
                             <div className="p-4 bg-slate-50 dark:bg-slate-800/50 border-t border-slate-100 dark:border-slate-700/50 text-center shrink-0">
                                 <span className="text-xs font-medium text-slate-400 animate-pulse flex items-center justify-center gap-2">
                                     <ArrowPathIcon className="w-3.5 h-3.5" />
-                                    Toque para virar
+                                    {t('study.tapToFlip')}
                                 </span>
                             </div>
                         </div>
@@ -326,7 +328,7 @@ const FlashcardStudyPage: React.FC = () => {
                             <div className="flex-1 p-6 sm:p-10 flex flex-col text-center overflow-y-auto custom-scrollbar">
                                 <div className="flex items-center justify-center mb-6 shrink-0">
                                     <span className="inline-block px-3 py-1 rounded-full bg-green-50 dark:bg-green-900/30 text-green-600 dark:text-green-400 text-xs font-bold tracking-wider uppercase">
-                                        Resposta
+                                        {t('study.answer')}
                                     </span>
                                 </div>
 
@@ -339,7 +341,7 @@ const FlashcardStudyPage: React.FC = () => {
                                         <div className="flex gap-3">
                                             <LightBulbIcon className="w-5 h-5 text-amber-500 shrink-0 mt-0.5" />
                                             <div>
-                                                <p className="text-xs font-bold text-amber-700 dark:text-amber-500 uppercase mb-1">Explicação</p>
+                                                <p className="text-xs font-bold text-amber-700 dark:text-amber-500 uppercase mb-1">{t('study.explanation')}</p>
                                                 <p className="text-sm text-slate-700 dark:text-slate-300 leading-relaxed">
                                                     {currentCard.explanation}
                                                 </p>
@@ -367,7 +369,7 @@ const FlashcardStudyPage: React.FC = () => {
                             <div className="mb-1 text-red-500 dark:text-red-400">
                                 <HandThumbDownIcon className="w-6 h-6" />
                             </div>
-                            <span className="text-sm font-bold text-red-700 dark:text-red-400">Difícil</span>
+                            <span className="text-sm font-bold text-red-700 dark:text-red-400">{t('study.hard')}</span>
                         </button>
 
                         <button
@@ -380,7 +382,7 @@ const FlashcardStudyPage: React.FC = () => {
                             <div className="mb-1 text-amber-500 dark:text-amber-400">
                                 <ClockIcon className="w-6 h-6" />
                             </div>
-                            <span className="text-sm font-bold text-amber-700 dark:text-amber-400">Normal</span>
+                            <span className="text-sm font-bold text-amber-700 dark:text-amber-400">{t('study.normal')}</span>
                         </button>
 
                         <button
@@ -393,7 +395,7 @@ const FlashcardStudyPage: React.FC = () => {
                             <div className="mb-1 text-green-500 dark:text-green-400">
                                 <HandThumbUpIcon className="w-6 h-6" />
                             </div>
-                            <span className="text-sm font-bold text-green-700 dark:text-green-400">Fácil</span>
+                            <span className="text-sm font-bold text-green-700 dark:text-green-400">{t('study.easy')}</span>
                         </button>
                     </div>
                 </div>
@@ -406,19 +408,19 @@ const FlashcardStudyPage: React.FC = () => {
                         <div className="p-5 border-b border-slate-100 dark:border-slate-700">
                             <h2 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
                                 <InformationCircleIcon className="w-5 h-5 text-primary-600" />
-                                Sistema SRS
+                                {t('study.srsSystem')}
                             </h2>
                         </div>
                         <div className="p-5 space-y-4 text-sm text-slate-600 dark:text-slate-300">
-                            <p>O <strong>Sistema de Repetição Espaçada</strong> agenda revisões baseadas no seu desempenho:</p>
+                            <p>{t('study.srsExplanation')}</p>
                             <div className="space-y-3 bg-slate-50 dark:bg-slate-900/50 p-4 rounded-xl">
                                 <div className="flex items-center gap-3">
                                     <div className="w-8 h-8 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center text-red-600 shrink-0">
                                         <HandThumbDownIcon className="w-4 h-4" />
                                     </div>
                                     <div>
-                                        <div className="font-bold text-slate-900 dark:text-white">Difícil</div>
-                                        <div className="text-xs">Repetir em breve {`(< 1min)`}</div>
+                                        <div className="font-bold text-slate-900 dark:text-white">{t('study.hard')}</div>
+                                        <div className="text-xs">{t('study.repeatSoon')} {`(< 1min)`}</div>
                                     </div>
                                 </div>
                                 <div className="flex items-center gap-3">
@@ -426,8 +428,8 @@ const FlashcardStudyPage: React.FC = () => {
                                         <ClockIcon className="w-4 h-4" />
                                     </div>
                                     <div>
-                                        <div className="font-bold text-slate-900 dark:text-white">Normal</div>
-                                        <div className="text-xs">Repetir amanhã</div>
+                                        <div className="font-bold text-slate-900 dark:text-white">{t('study.normal')}</div>
+                                        <div className="text-xs">{t('study.repeatTomorrow')}</div>
                                     </div>
                                 </div>
                                 <div className="flex items-center gap-3">
@@ -435,8 +437,8 @@ const FlashcardStudyPage: React.FC = () => {
                                         <HandThumbUpIcon className="w-4 h-4" />
                                     </div>
                                     <div>
-                                        <div className="font-bold text-slate-900 dark:text-white">Fácil</div>
-                                        <div className="text-xs">Repetir em 3+ dias</div>
+                                        <div className="font-bold text-slate-900 dark:text-white">{t('study.easy')}</div>
+                                        <div className="text-xs">{t('study.repeatIn3Days')}</div>
                                     </div>
                                 </div>
                             </div>
@@ -446,7 +448,7 @@ const FlashcardStudyPage: React.FC = () => {
                                 onClick={() => setShowInfoModal(false)}
                                 className="w-full py-3 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-xl font-bold text-sm"
                             >
-                                Entendi
+                                {t('study.understood')}
                             </button>
                         </div>
                     </div>

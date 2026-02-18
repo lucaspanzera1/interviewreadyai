@@ -1,0 +1,88 @@
+{
+  "pageTitle": "Início - TreinaVagaAI",
+  "greeting": "Olá,",
+  "guestLabel": "Visitante",
+  "guestSubtitle": "Experimente um pouco do que oferecemos.",
+  "userSubtitle": "Vamos evoluir sua carreira hoje?",
+  "loginButton": "Efetuar Login",
+  "tokens": "Tokens",
+  "stats": {
+    "questionsCompleted": "Questões Feitas",
+    "hitRate": "Taxa de Acerto",
+    "streak": "Sequência",
+    "streakDays": "{{count}} dias",
+    "level": "Nível",
+    "levelSenior": "Sênior",
+    "activities": "Atividades",
+    "freeQuizzes": "Quizzes Gratuitos",
+    "flashcardSessions": "Sessões Flashcard"
+  },
+  "quickActions": {
+    "title": "Ações Rápidas",
+    "guestTitle": "Comece Agora",
+    "createFreeAccount": "Criar Conta Grátis",
+    "createFreeAccountDesc": "Comece agora e salve seu progresso",
+    "freeQuiz": "Quiz Gratuito",
+    "freeQuizDesc": "Teste seus conhecimentos",
+    "premiumPlans": "Ver Planos Premium",
+    "premiumPlansDesc": "Desbloqueie todo o potencial",
+    "newQuiz": "Novo Simulado",
+    "newQuizDesc": "Gerar quiz personalizado",
+    "interviewSim": "Simulação Entrevista",
+    "interviewSimDesc": "Pratique para entrevistas",
+    "continue": "Continuar",
+    "continueDesc": "Retomar último quiz",
+    "evolution": "Evolução",
+    "evolutionDesc": "Acompanhe seu progresso",
+    "ranking": "Ranking",
+    "rankingDesc": "Em breve"
+  },
+  "tip": {
+    "guestLabel": "Dica de Carreira",
+    "userLabel": "Dica Pro",
+    "guestText": "Recrutadores gastam em média 6 segundos por currículo. Seus resultados nos simulados geram um portfólio verificável que chama a atenção.",
+    "userText": "Revise seus erros nos simulados anteriores. Usuários que revisam erros têm 40% mais chances de aprovação."
+  },
+  "suggested": {
+    "guestTitle": "Experimente (Gratuito)",
+    "userTitle": "Recomendados para Você",
+    "viewAll": "Ver todos",
+    "loadingSuggestions": "Carregando sugestões..."
+  },
+  "recentActivities": "Atividades Recentes",
+  "fullHistory": "Histórico completo",
+  "questions": "questões",
+  "guestHero": {
+    "badge": "Para todas as carreiras",
+    "titleWhite": "Conquiste sua vaga em ",
+    "titleGradient": "qualquer área",
+    "description": "Tech, Saúde, Vendas, Direito, Engenharia... O TreinaVaga usa IA para criar simulados personalizados para sua realidade, qualquer que seja ela.",
+    "startNow": "Começar Agora",
+    "watchDemo": "Ver Demonstração",
+    "joinProfessionals": "Junte-se a profissionais de todas as áreas"
+  },
+  "guestFeatures": {
+    "title": "O que você encontrará aqui",
+    "aiQuizzes": "Simulados com IA",
+    "aiQuizzesDesc": "Gere quizzes personalizados baseados na descrição da vaga em segundos. Prepare-se para o que realmente importa.",
+    "interviewSim": "Simulação de Entrevista",
+    "interviewSimDesc": "Pratique com uma IA que simula recrutadores reais. Receba feedback instantâneo sobre suas respostas.",
+    "flashcardsSRS": "Flashcards SRS",
+    "flashcardsSRSDesc": "Memorização de longo prazo com repetição espaçada. Nunca mais esqueça conceitos importantes."
+  },
+  "lockedPanel": {
+    "title": "Painel de Evolução",
+    "description": "Acesse gráficos detalhados, histórico de erros e receba insights para acelerar sua aprovação.",
+    "createFreeAccount": "Criar Conta Grátis"
+  },
+  "guestCard": {
+    "preparedCandidate": "Candidato Preparado",
+    "readyForChallenge": "Pronto para o desafio",
+    "ready100": "100% Pronto",
+    "startQuiz": "Iniciar Simulado",
+    "approved": "Aprovado!"
+  },
+  "help": "Ajuda",
+  "quizUnavailable": "Quiz indisponível no momento",
+  "errorStartingQuiz": "Erro ao iniciar quiz"
+}

@@ -1,64 +1,34 @@
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { ArrowLeftIcon, LockClosedIcon, FingerPrintIcon, CircleStackIcon, ShareIcon, ShieldCheckIcon, UserIcon, EyeIcon } from '@heroicons/react/24/outline';
 import PageTitle from './PageTitle';
 
 const PrivacyPolicyPage: React.FC = () => {
     const navigate = useNavigate();
+    const { t } = useTranslation('privacy');
 
     useEffect(() => {
         window.scrollTo(0, 0);
     }, []);
 
-    const sections = [
-        {
-            icon: EyeIcon,
-            title: "1. Introdução",
-            content: "A sua privacidade é extremamente importante para nós. Esta Política de Privacidade detalha de forma transparente como a TreinaVagaAI coleta, armazena, protege e utiliza suas informações pessoais ao utilizar nossa plataforma.",
-            fullWidth: true
-        },
-        {
-            icon: FingerPrintIcon,
-            title: "2. Coleta de Informações",
-            content: "Para proporcionar a melhor experiência, podemos coletar os seguintes tipos de informações:",
-            list: [
-                "Informações Pessoais: Nome completo, email e foto (via login social).",
-                "Dados de Uso: Estatísticas de quizzes, progresso e interações.",
-                "Dados Técnicos: Endereço IP, dispositivo e navegador."
-            ]
-        },
-        {
-            icon: CircleStackIcon,
-            title: "3. Uso das Informações",
-            content: "Utilizamos seus dados estritamente para:",
-            list: [
-                "Operar e manter os serviços da plataforma.",
-                "Personalizar recomendações de estudo baseadas no desempenho.",
-                "Análises estatísticas para aprimoramento da IA.",
-                "Envio de comunicados importantes e suporte."
-            ]
-        },
-        {
-            icon: ShareIcon,
-            title: "4. Compartilhamento",
-            content: "Não vendemos suas informações pessoais. O compartilhamento ocorre apenas com prestadores de serviços essenciais (como infraestrutura de nuvem) que possuem obrigações contratuais de confidencialidade."
-        },
-        {
-            icon: ShieldCheckIcon,
-            title: "5. Segurança de Dados",
-            content: "Adotamos rigorosas medidas de segurança técnicas e administrativas, incluindo criptografia e controles de acesso, para proteger seus dados contra acesso não autorizado, perda ou alteração."
-        },
-        {
-            icon: UserIcon,
-            title: "6. Seus Direitos",
-            content: "Você possui total controle sobre seus dados. A qualquer momento, você pode solicitar o acesso, correção ou exclusão de suas informações pessoais através das configurações da conta ou suporte."
-        },
-        {
-            icon: LockClosedIcon,
-            title: "7. Cookies",
-            content: "Utilizamos cookies para melhorar a navegação, lembrar preferências e analisar tráfego. Você pode gerenciar as preferências diretamente em seu navegador."
-        },
+    const sectionConfigs = [
+        { key: 'introduction', icon: EyeIcon, fullWidth: true },
+        { key: 'informationCollection', icon: FingerPrintIcon, hasList: true },
+        { key: 'useOfInformation', icon: CircleStackIcon, hasList: true },
+        { key: 'sharing', icon: ShareIcon },
+        { key: 'dataSecurity', icon: ShieldCheckIcon },
+        { key: 'yourRights', icon: UserIcon },
+        { key: 'cookies', icon: LockClosedIcon },
     ];
+
+    const sections = sectionConfigs.map(({ key, icon, fullWidth, hasList }) => ({
+        icon,
+        title: t(`sections.${key}.title`),
+        content: t(`sections.${key}.content`),
+        fullWidth,
+        ...(hasList ? { list: t(`sections.${key}.list`, { returnObjects: true }) as string[] } : {}),
+    }));
 
     return (
         <>

@@ -1,0 +1,248 @@
+{
+  "users": {
+    "title": "User Management",
+    "totalUsers": "Total Users",
+    "totalUsersDesc": "Registered on the platform",
+    "students": "Students / Clients",
+    "studentsDesc": "Standard users",
+    "administrators": "Administrators",
+    "administratorsDesc": "Full permission",
+    "subtitle": "Manage and monitor platform members",
+    "searchPlaceholder": "Search by name or email...",
+    "loading": "Loading users...",
+    "tableHeaders": {
+      "user": "User",
+      "status": "Status",
+      "onboarding": "Onboarding",
+      "lastAccess": "Last Access",
+      "registration": "Registration",
+      "actions": "Actions"
+    },
+    "noUsers": "No users found.",
+    "never": "Never",
+    "complete": "Complete",
+    "pending": "Pending",
+    "showingResults": "Showing {{showing}} of {{total}} results",
+    "loadingMore": "Loading more...",
+    "errorLoading": "Error loading users."
+  },
+  "quizzes": {
+    "title": "Manage Quizzes",
+    "subtitle": "Administer all quizzes available on the platform",
+    "createQuiz": "Create Quiz",
+    "searchPlaceholder": "Search by title, category or creator...",
+    "filterAll": "All Status",
+    "filterActive": "Active",
+    "filterInactive": "Inactive",
+    "tableHeaders": {
+      "quizDetails": "Quiz Details",
+      "creator": "Creator",
+      "analytics": "Analytics",
+      "status": "Status",
+      "actions": "Actions"
+    },
+    "questions": "questions",
+    "accesses": "Views",
+    "completed": "Completed",
+    "average": "Average",
+    "active": "Active",
+    "inactive": "Inactive",
+    "noQuizzes": "No quizzes found",
+    "adjustFilters": "Try adjusting the search filters.",
+    "wizard": {
+      "title": "Create New Quiz",
+      "stepOf": "Step {{current}} of {{total}}",
+      "step1": {
+        "quizTitle": "Quiz Title",
+        "titlePlaceholder": "E.g.: React Fundamentals 2024",
+        "category": "Category",
+        "categoryPlaceholder": "E.g.: Frontend, Backend, DevOps",
+        "description": "Description",
+        "descriptionPlaceholder": "Describe the objective and content of this quiz..."
+      },
+      "step2": {
+        "difficultyLevel": "Difficulty Level",
+        "questionCount": "Number of Questions",
+        "additionalContext": "Additional Context (AI)",
+        "optional": "Optional",
+        "contextPlaceholder": "Paste text, articles or documentation for the AI to use as a base..."
+      },
+      "step3": {
+        "relatedTags": "Related Tags",
+        "tagPlaceholder": "Type a tag and press Enter",
+        "addButton": "Add",
+        "noTags": "No tags added yet",
+        "readyToGenerate": "Ready to generate!",
+        "readyDesc": "The AI will analyze your data and the provided context to generate {{count}} questions at {{level}} level. This may take a few seconds."
+      },
+      "back": "Back",
+      "next": "Next",
+      "generating": "Generating Quiz...",
+      "generateButton": "Generate Quiz with AI"
+    }
+  },
+  "quizStats": {
+    "notFound": "Statistics not found",
+    "backToQuizzes": "Back to Quizzes",
+    "viewQuestions": "View Questions",
+    "totalAccess": "Total Views",
+    "attempts": "Attempts",
+    "averageScore": "Average Score",
+    "questions": "Questions",
+    "completionRate": "completion rate",
+    "lastAttempts": "Latest Attempts",
+    "tableHeaders": {
+      "user": "User",
+      "performance": "Performance",
+      "time": "Time",
+      "date": "Date"
+    },
+    "noAttempts": "No attempts recorded yet.",
+    "engagementSummary": "Engagement Summary",
+    "successfulCompletions": "Successful Completions",
+    "dropoutRate": "Dropout Rate",
+    "tags": "Tags"
+  },
+  "quizDetails": {
+    "title": "Quiz Details",
+    "notFound": "Details not found",
+    "backToQuizzes": "Back to Quizzes",
+    "viewStats": "View General Statistics",
+    "questionOf": "Question {{current}} of {{total}}",
+    "hitRate": "Hit Rate",
+    "answers": "Answers ({{count}})",
+    "noAnswers": "No answers recorded for this question yet.",
+    "correct": "Correct:"
+  },
+  "roles": {
+    "title": "Manage Roles",
+    "subtitle": "Administer roles and access levels available in the system",
+    "count": "roles",
+    "newRole": "New Role",
+    "searchPlaceholder": "Search by name or description...",
+    "tableHeaders": {
+      "role": "Role",
+      "description": "Description",
+      "identificationColor": "Identification Color",
+      "actions": "Actions"
+    },
+    "noRoles": "No roles found",
+    "noRolesDesc": "Try adjusting your search or create a new role.",
+    "editRole": "Edit Role",
+    "createRole": "Create New Role",
+    "roleName": "Role Name *",
+    "roleDescription": "Description",
+    "highlightColor": "Highlight Color",
+    "saveChanges": "Save Changes",
+    "createButton": "Create Role",
+    "confirmDeactivate": "Are you sure you want to deactivate this role?"
+  },
+  "tokenPackages": {
+    "title": "Token Packages",
+    "subtitle": "Manage token packages and associated benefits",
+    "count": "packages",
+    "newPackage": "New Package",
+    "searchPlaceholder": "Search by name or description...",
+    "tableHeaders": {
+      "package": "Package",
+      "tokens": "Tokens",
+      "value": "Price",
+      "assignedRole": "Assigned Role",
+      "benefits": "Benefits",
+      "actions": "Actions"
+    },
+    "noDescription": "No description",
+    "noPackages": "No packages found",
+    "editPackage": "Edit Package",
+    "createPackage": "Create New Package",
+    "packageName": "Package Name *",
+    "description": "Description",
+    "tokenAmount": "Token Amount *",
+    "validity": "Validity (days)",
+    "validityHint": "Empty = Lifetime",
+    "validityPlaceholder": "Leave empty for lifetime",
+    "price": "Price ($)",
+    "pricePlaceholder": "Price (optional)",
+    "associatedRole": "Associated Role *",
+    "selectRole": "Select a role",
+    "benefits": "Benefits (one per line)",
+    "saveChanges": "Save Changes",
+    "createButton": "Create Package"
+  },
+  "userDetails": {
+    "errorLoading": "Error loading user details.",
+    "tabs": {
+      "profile": "Profile",
+      "tokensBalance": "Tokens & Balance",
+      "createdQuizzes": "Created Quizzes",
+      "flashcards": "Flashcards",
+      "interviews": "Interviews"
+    },
+    "loading": "Loading information...",
+    "professional": "Professional",
+    "personalContact": "Personal & Contact",
+    "careerTime": "Career Time",
+    "niche": "Niche",
+    "location": "Location",
+    "phone": "Phone",
+    "cpfCnpj": "ID/Tax Number",
+    "notProvided": "Not provided",
+    "techStack": "Tech Stack",
+    "about": "About",
+    "administration": "Administration",
+    "currentRole": "Current Role",
+    "roleLabels": {
+      "admin": "Administrator",
+      "pro": "Pro / Premium",
+      "user": "Student"
+    },
+    "saving": "Saving...",
+    "addTokens": {
+      "title": "Add Tokens",
+      "description": "Manually add tokens to {{name}}'s account",
+      "amount": "Token Amount",
+      "amountPlaceholder": "E.g.: 10",
+      "reason": "Reason (optional)",
+      "reasonPlaceholder": "Or type a custom reason...",
+      "reasons": {
+        "welcome": "Welcome Bonus",
+        "refund": "Token Refund",
+        "contest": "Contest Prize",
+        "adminAdjust": "Administrative Adjustment",
+        "internalTest": "Internal Test",
+        "courtesy": "Courtesy"
+      },
+      "addButton": "Add"
+    },
+    "tokenStats": {
+      "currentBalance": "Current Balance",
+      "totalEarned": "Total Earned",
+      "totalSpent": "Total Spent",
+      "available": "Available tokens",
+      "accumulated": "Accumulated",
+      "consumed": "Consumed"
+    },
+    "usageStats": "Usage Statistics",
+    "freeQuizzesCompleted": "Free Quizzes Completed",
+    "dailyQuota": "Daily Quota (Free)",
+    "lastReward": "Last Reward",
+    "recentMovements": "Recent Movements",
+    "noMovements": "No movements recorded.",
+    "noQuizzes": "This user hasn't created any quizzes yet.",
+    "noFlashcards": "This user hasn't created any flashcards yet.",
+    "noInterviews": "This user hasn't created any interviews yet.",
+    "quizStats": {
+      "accesses": "Views",
+      "attempts": "Attempts",
+      "completions": "Completions",
+      "average": "Average"
+    },
+    "flashcardStats": {
+      "sessions": "Sessions",
+      "cardsStudied": "Cards Studied",
+      "averageTime": "Average Time"
+    },
+    "free": "Free",
+    "premium": "Premium"
+  }
+}

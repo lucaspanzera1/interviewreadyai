@@ -30,4 +30,9 @@ export class UpdateUserDto {
   @IsOptional()
   @IsEnum(UserRole)
   role?: UserRole;
+
+  @ApiProperty({ description: 'Preferred language', enum: ['pt-BR', 'en'], required: false })
+  @IsOptional()
+  @IsString()
+  preferredLanguage?: string;
 }

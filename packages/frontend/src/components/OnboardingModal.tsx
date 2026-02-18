@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { apiClient, CompleteOnboardingData } from '../lib/api';
 import { useToast } from '../contexts/ToastContext';
 import { XMarkIcon } from '@heroicons/react/24/outline';
@@ -10,26 +11,26 @@ interface OnboardingModalProps {
 }
 
 const NICHOS = [
-  { value: 'tecnologia', label: 'Tecnologia' },
-  { value: 'educacao', label: 'Educação' },
-  { value: 'recursos_humanos', label: 'Recursos Humanos' },
-  { value: 'financeiro', label: 'Financeiro' },
-  { value: 'saude', label: 'Saúde' },
-  { value: 'vendas', label: 'Vendas' },
-  { value: 'marketing', label: 'Marketing' },
-  { value: 'juridico', label: 'Jurídico' },
-  { value: 'engenharia', label: 'Engenharia' },
-  { value: 'design', label: 'Design' },
-  { value: 'produto', label: 'Produto' },
-  { value: 'outro', label: 'Outro' },
+  { value: 'tecnologia' },
+  { value: 'educacao' },
+  { value: 'recursos_humanos' },
+  { value: 'financeiro' },
+  { value: 'saude' },
+  { value: 'vendas' },
+  { value: 'marketing' },
+  { value: 'juridico' },
+  { value: 'engenharia' },
+  { value: 'design' },
+  { value: 'produto' },
+  { value: 'outro' },
 ];
 
 const CAREER_TIMES = [
-  { value: '0-1', label: '0-1 ano' },
-  { value: '1-3', label: '1-3 anos' },
-  { value: '3-5', label: '3-5 anos' },
-  { value: '5-10', label: '5-10 anos' },
-  { value: '10+', label: '10+ anos' },
+  { value: '0-1' },
+  { value: '1-3' },
+  { value: '3-5' },
+  { value: '5-10' },
+  { value: '10+' },
 ];
 
 const TECH_STACK_OPTIONS = [
@@ -42,6 +43,7 @@ const TECH_STACK_OPTIONS = [
 
 const OnboardingModal = ({ isOpen, onComplete }: OnboardingModalProps) => {
   const { showToast } = useToast();
+  const { t } = useTranslation('onboarding');
   const [currentStep, setCurrentStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState<CompleteOnboardingData>({
@@ -91,10 +93,10 @@ const OnboardingModal = ({ isOpen, onComplete }: OnboardingModalProps) => {
     setLoading(true);
     try {
       const result = await apiClient.completeOnboarding(formData);
-      showToast(result.message || 'Perfil profissional criado com sucesso!', 'success');
+      showToast(result.message || t('modal.profileCreatedSuccess'), 'success');
       onComplete();
     } catch (error) {
-      showToast('Erro ao salvar perfil', 'error');
+      showToast(t('modal.errorSaving'), 'error');
     } finally {
       setLoading(false);
     }
@@ -138,16 +140,16 @@ const OnboardingModal = ({ isOpen, onComplete }: OnboardingModalProps) => {
         <div className="px-8 pt-8 pb-4 flex items-center justify-between">
           <div>
             <h2 className="text-2xl font-bold text-slate-900 dark:text-white">
-              {currentStep === 1 && "Qual seu foco? 🎯"}
-              {currentStep === 2 && "Tempo de jornada ⏳"}
-              {currentStep === 3 && "Suas ferramentas 🛠️"}
-              {currentStep === 4 && "Toque final ✨"}
+              {currentStep === 1 && t('modal.stepFocusTitle')}
+              {currentStep === 2 && t('modal.stepCareerTimeTitle')}
+              {currentStep === 3 && t('modal.stepToolsTitle')}
+              {currentStep === 4 && t('modal.stepFinalTitle')}
             </h2>
             <p className="text-slate-500 dark:text-slate-400 mt-1">
-              {currentStep === 1 && "Selecione sua área de atuação principal."}
-              {currentStep === 2 && "Para sugerirmos vagas no seu nível."}
-              {currentStep === 3 && "O que você domina ou está aprendendo."}
-              {currentStep === 4 && "Onde te encontrar?"}
+              {currentStep === 1 && t('modal.stepFocusDesc')}
+              {currentStep === 2 && t('modal.stepCareerTimeDesc')}
+              {currentStep === 3 && t('modal.stepToolsDesc')}
+              {currentStep === 4 && t('modal.stepFinalWhereDesc')}
             </p>
           </div>
           <button
@@ -166,7 +168,7 @@ const OnboardingModal = ({ isOpen, onComplete }: OnboardingModalProps) => {
             {currentStep === 1 && (
               <div className="space-y-4">
                 <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-4">
-                  Selecione sua área de atuação principal
+                  {t('modal.selectMainArea')}
                 </label>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
                   {NICHOS.map((area) => {
@@ -183,7 +185,7 @@ const OnboardingModal = ({ isOpen, onComplete }: OnboardingModalProps) => {
                       >
                         {getNicheIcon(area.value, isSelected ? "w-8 h-8 text-primary-600 mb-2" : "w-8 h-8 text-slate-400 mb-2")}
                         <span className={`font-semibold text-sm ${isSelected ? 'text-primary-700 dark:text-primary-300' : 'text-slate-700 dark:text-slate-200'}`}>
-                          {area.label}
+                          {t(`modal.nicheOptions.${area.value}`)}
                         </span>
                       </button>
                     );
@@ -195,7 +197,7 @@ const OnboardingModal = ({ isOpen, onComplete }: OnboardingModalProps) => {
             {currentStep === 2 && (
               <div className="space-y-4">
                 <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-4">
-                  {isTech ? 'Tempo de experiência na área tech' : 'Tempo de experiência profissional'}
+                  {isTech ? t('modal.techExperience') : t('modal.professionalExperience')}
                 </label>
                 <div className="grid grid-cols-1 gap-3">
                   {CAREER_TIMES.map((option) => {
@@ -219,7 +221,7 @@ const OnboardingModal = ({ isOpen, onComplete }: OnboardingModalProps) => {
                           {isSelected && <div className="w-2 h-2 bg-white rounded-full" />}
                         </div>
                         <span className={`font-medium ${isSelected ? 'text-primary-900 dark:text-primary-100' : 'text-slate-700 dark:text-slate-200'}`}>
-                          {option.label}
+                          {t(`modal.careerTimeOptions.${option.value}`)}
                         </span>
                       </button>
                     );
@@ -231,7 +233,7 @@ const OnboardingModal = ({ isOpen, onComplete }: OnboardingModalProps) => {
             {currentStep === 3 && (
               <div className="space-y-4">
                 <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-4">
-                  Selecione as tecnologias que você utiliza
+                  {t('modal.selectTechnologies')}
                 </label>
                 <div className="flex flex-wrap gap-2 max-h-[400px] overflow-y-auto content-start">
                   {TECH_STACK_OPTIONS.map((tech) => {
@@ -258,13 +260,13 @@ const OnboardingModal = ({ isOpen, onComplete }: OnboardingModalProps) => {
               <div className="space-y-5">
                 <div>
                   <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
-                    Onde você está?
+                    {t('modal.whereAreYou')}
                   </label>
                   <input
                     type="text"
                     value={formData.location || ''}
                     onChange={(e) => setFormData(prev => ({ ...prev, location: e.target.value }))}
-                    placeholder="Ex: São Paulo, SP"
+                    placeholder={t('modal.locationPlaceholder')}
                     className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 dark:text-white transition-all"
                   />
                 </div>
@@ -300,12 +302,12 @@ const OnboardingModal = ({ isOpen, onComplete }: OnboardingModalProps) => {
 
                 <div>
                   <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
-                    Bio curta
+                    {t('modal.shortBio')}
                   </label>
                   <textarea
                     value={formData.bio || ''}
                     onChange={(e) => setFormData(prev => ({ ...prev, bio: e.target.value }))}
-                    placeholder="Resuma sua jornada profissional..."
+                    placeholder={t('modal.bioPlaceholder')}
                     rows={3}
                     className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 dark:text-white transition-all resize-none"
                   />
@@ -321,7 +323,7 @@ const OnboardingModal = ({ isOpen, onComplete }: OnboardingModalProps) => {
             onClick={handleSkip}
             className="text-sm font-medium text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition-colors"
           >
-            Pular configuração
+            {t('modal.skipSetup')}
           </button>
 
           <div className="flex gap-3">
@@ -330,7 +332,7 @@ const OnboardingModal = ({ isOpen, onComplete }: OnboardingModalProps) => {
                 onClick={handlePrevious}
                 className="px-6 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 font-medium hover:bg-slate-50 dark:hover:bg-slate-800 transition-all"
               >
-                Voltar
+                {t('modal.back')}
               </button>
             )}
 
@@ -344,7 +346,7 @@ const OnboardingModal = ({ isOpen, onComplete }: OnboardingModalProps) => {
                 }
                 className="px-6 py-2.5 bg-primary-600 hover:bg-primary-500 text-white rounded-xl font-medium shadow-lg shadow-primary-600/20 disabled:opacity-50 disabled:cursor-not-allowed transition-all active:scale-95"
               >
-                Continuar
+                {t('modal.continue')}
               </button>
             ) : (
               <button
@@ -352,7 +354,7 @@ const OnboardingModal = ({ isOpen, onComplete }: OnboardingModalProps) => {
                 disabled={loading}
                 className="px-8 py-2.5 bg-green-600 hover:bg-green-500 text-white rounded-xl font-medium shadow-lg shadow-green-600/20 disabled:opacity-50 transition-all active:scale-95 flex items-center gap-2"
               >
-                {loading ? 'Salvando...' : 'Concluir Perfil'}
+                {loading ? t('modal.saving') : t('modal.completeProfile')}
               </button>
             )}
           </div>

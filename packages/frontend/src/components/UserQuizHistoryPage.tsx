@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import PageTitle from './PageTitle';
 import { apiClient } from '../lib/api';
 import Loading from './Loading';
+import { useTranslation } from 'react-i18next';
 import {
     ArrowLeftIcon,
     ClockIcon,
@@ -42,6 +43,7 @@ interface UserAttemptsResponse {
 
 const UserQuizHistoryPage: React.FC = () => {
     const navigate = useNavigate();
+    const { t } = useTranslation('quiz');
     const [attempts, setAttempts] = useState<QuizAttempt[]>([]);
     const [loading, setLoading] = useState(true);
     const [currentPage, setCurrentPage] = useState(1);
@@ -120,7 +122,7 @@ const UserQuizHistoryPage: React.FC = () => {
 
     return (
         <div className="max-w-4xl mx-auto space-y-8 sm:space-y-12 py-6 sm:py-8 pb-32 sm:pb-8">
-            <PageTitle title="Evolução - TreinaVagaAI" />
+            <PageTitle title={t('history.pageTitle')} />
 
             {/* Sticky Header */}
             <header className="sticky top-0 z-20 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 -mx-4 -mt-4 lg:-mx-8 lg:-mt-8 px-4 lg:px-8 py-4 mb-8 transition-all duration-300">
@@ -133,13 +135,13 @@ const UserQuizHistoryPage: React.FC = () => {
                             <ArrowLeftIcon className="w-5 h-5" />
                         </button>
                         <div>
-                            <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white tracking-tight">Evolução</h1>
-                            <p className="text-slate-500 dark:text-slate-400 font-medium text-sm">Seu histórico de aprendizado e performance.</p>
+                            <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white tracking-tight">{t('history.evolution')}</h1>
+                            <p className="text-slate-500 dark:text-slate-400 font-medium text-sm">{t('history.subtitle')}</p>
                         </div>
                     </div>
 
                     <div className="flex items-center gap-3 bg-primary-50 dark:bg-primary-900/10 px-4 py-2 rounded-xl border border-primary-100 dark:border-primary-800/30 w-full md:w-auto justify-between md:justify-start">
-                        <span className="text-xs font-bold text-primary-600 dark:text-primary-400 uppercase tracking-wider">Média Geral</span>
+                        <span className="text-xs font-bold text-primary-600 dark:text-primary-400 uppercase tracking-wider">{t('history.overallAverage')}</span>
                         <div className="flex items-center gap-2">
                             <ChartBarIcon className="w-5 h-5 text-primary-500" />
                             <span className="text-2xl font-black text-slate-900 dark:text-white leading-none">
@@ -154,28 +156,28 @@ const UserQuizHistoryPage: React.FC = () => {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 px-4">
                 {[
                     {
-                        title: "Quizzes",
+                        title: t('history.quizzes'),
                         value: stats.totalAttempts,
                         icon: AcademicCapIcon,
                         color: "text-blue-500",
                         bg: "bg-blue-50 dark:bg-blue-900/20"
                     },
                     {
-                        title: "Melhor Score",
+                        title: t('history.bestScore'),
                         value: `${stats.bestScore.toFixed(0)}%`,
                         icon: TrophyIcon,
                         color: "text-amber-500",
                         bg: "bg-amber-50 dark:bg-amber-900/20"
                     },
                     {
-                        title: "Tempo Total",
+                        title: t('history.totalTime'),
                         value: formatTime(stats.totalTime),
                         icon: ClockIcon,
                         color: "text-purple-500",
                         bg: "bg-purple-50 dark:bg-purple-900/20"
                     },
                     {
-                        title: "Sequência",
+                        title: t('history.streak'),
                         value: "N/A",
                         icon: CalendarIcon,
                         color: "text-green-500",
@@ -198,9 +200,9 @@ const UserQuizHistoryPage: React.FC = () => {
             {/* Content Section */}
             <div className="space-y-6 px-4">
                 <div className="flex items-center justify-between">
-                    <h2 className="text-xl font-bold text-slate-900 dark:text-white">Histórico Recente</h2>
+                    <h2 className="text-xl font-bold text-slate-900 dark:text-white">{t('history.recentHistory')}</h2>
                     <span className="text-xs font-medium text-slate-400 bg-slate-100 dark:bg-slate-800 px-3 py-1 rounded-full">
-                        {stats.totalAttempts} atividades
+                        {t('history.activities', { count: stats.totalAttempts })}
                     </span>
                 </div>
 
@@ -210,16 +212,16 @@ const UserQuizHistoryPage: React.FC = () => {
                             <AcademicCapIcon className="h-10 w-10 text-slate-400" />
                         </div>
                         <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2">
-                            Nenhuma atividade encontrada
+                            {t('history.noActivityFound')}
                         </h3>
                         <p className="text-slate-500 dark:text-slate-400 mb-8 max-w-sm mx-auto text-sm">
-                            Você ainda não realizou nenhum quiz. Comece agora para ver sua evolução!
+                            {t('history.noActivityDescription')}
                         </p>
                         <button
                             onClick={() => navigate('/free-quizzes')}
                             className="px-6 py-3 bg-primary-600 text-white rounded-xl hover:bg-primary-700 transition-all font-bold text-sm shadow-lg shadow-primary-600/20"
                         >
-                            Explorar Quizzes
+                            {t('history.exploreQuizzes')}
                         </button>
                     </div>
                 ) : (
@@ -287,7 +289,7 @@ const UserQuizHistoryPage: React.FC = () => {
                                             </div>
                                             <div className="flex items-center gap-1.5">
                                                 <AcademicCapIcon className="h-4 w-4 text-slate-400" />
-                                                {attempt.score}/{attempt.totalQuestions} acertos
+                                                {attempt.score}/{attempt.totalQuestions} {t('history.correctCount')}
                                             </div>
                                         </div>
                                     </div>
@@ -310,7 +312,7 @@ const UserQuizHistoryPage: React.FC = () => {
                             disabled={currentPage === 1}
                             className="p-2 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-500 disabled:opacity-30 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
                         >
-                            <span className="sr-only">Anterior</span>
+                            <span className="sr-only">{t('pagination.previous')}</span>
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5">
                                 <path fillRule="evenodd" d="M12.79 5.23a.75.75 0 01-.02 1.06L8.832 10l3.938 3.71a.75.75 0 11-1.04 1.08l-4.5-4.25a.75.75 0 010-1.08l4.5-4.25a.75.75 0 011.06.02z" clipRule="evenodd" />
                             </svg>
@@ -318,7 +320,7 @@ const UserQuizHistoryPage: React.FC = () => {
 
                         <div className="flex items-center gap-1">
                             <span className="text-sm font-bold text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-800 px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-700">
-                                Página {currentPage} de {totalPages}
+                                {t('pagination.pageOf', { current: currentPage, total: totalPages })}
                             </span>
                         </div>
 
@@ -327,7 +329,7 @@ const UserQuizHistoryPage: React.FC = () => {
                             disabled={currentPage === totalPages}
                             className="p-2 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-500 disabled:opacity-30 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
                         >
-                            <span className="sr-only">Próxima</span>
+                            <span className="sr-only">{t('pagination.next')}</span>
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5">
                                 <path fillRule="evenodd" d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z" clipRule="evenodd" />
                             </svg>

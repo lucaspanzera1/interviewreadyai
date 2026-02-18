@@ -1,0 +1,18 @@
+{
+  "activities": "{{count}} atividades",
+  "activitiesSingular": "{{count}} atividade",
+  "noActivities": "Sem atividades",
+  "days": {
+    "mon": "Seg",
+    "tue": "Ter",
+    "wed": "Qua",
+    "thu": "Qui",
+    "fri": "Sex",
+    "sat": "Sáb",
+    "sun": "Dom"
+  },
+  "less": "Menos",
+  "more": "Mais",
+  "title": "Atividade",
+  "lastMonths": "Últimos {{count}} meses"
+}

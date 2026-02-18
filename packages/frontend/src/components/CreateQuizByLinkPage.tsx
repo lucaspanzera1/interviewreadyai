@@ -5,6 +5,7 @@ import { SparklesIcon, LinkIcon, AcademicCapIcon, PlusIcon, XMarkIcon, ChevronLe
 import { apiClient, QuizLevel } from '../lib/api';
 import { useAuth } from '../contexts/AuthContext';
 import { useToast } from '../contexts/ToastContext';
+import { useTranslation } from 'react-i18next';
 
 
 const CreateQuizByLinkPage: React.FC = () => {
@@ -15,6 +16,7 @@ const CreateQuizByLinkPage: React.FC = () => {
     const navigate = useNavigate();
     const { user, refreshUser } = useAuth();
     const { showToast } = useToast();
+    const { t } = useTranslation('quiz');
 
     // Job quiz states
     const [jobLink, setJobLink] = useState('');
@@ -72,12 +74,12 @@ const CreateQuizByLinkPage: React.FC = () => {
             const isValidUrl = supportedSites.some(site => jobLink.includes(site));
 
             if (!isValidUrl) {
-                throw new Error('Por favor, insira um link válido de vaga de um dos sites suportados: LinkedIn, Gupy, Infojobs, Glassdoor ou Indeed');
+                throw new Error(t('createByLink.invalidLink'));
             }
 
             // Verificar se o usuário tem tokens
             if (!user?.tokens || user.tokens < 1) {
-                throw new Error('Você não tem tokens suficientes. Você precisa de pelo menos 1 token para gerar um quiz.');
+                throw new Error(t('createByLink.notEnoughTokens'));
             }
 
             // Gerar o quiz
@@ -87,7 +89,7 @@ const CreateQuizByLinkPage: React.FC = () => {
             await refreshUser();
 
             // Mostrar mensagem de sucesso
-            showToast('Quiz gerado com sucesso! 1 token foi deduzido.', 'success');
+            showToast(t('createByLink.successGenerated'), 'success');
 
             // Redirecionar para página de Meus Quizzes
             setTimeout(() => {
@@ -95,7 +97,7 @@ const CreateQuizByLinkPage: React.FC = () => {
             }, 500);
         } catch (err: any) {
             console.error('Error generating quiz:', err);
-            const errorMessage = err.response?.data?.message || err.message || 'Erro ao gerar quiz. Tente novamente.';
+            const errorMessage = err.response?.data?.message || err.message || t('createByLink.errorGenerating');
             setError(errorMessage);
         } finally {
             setIsLoading(false);
@@ -109,7 +111,7 @@ const CreateQuizByLinkPage: React.FC = () => {
         try {
             // Verificar se o usuário tem tokens
             if (!user?.tokens || user.tokens < 1) {
-                throw new Error('Você não tem tokens suficientes. Você precisa de pelo menos 1 token para gerar um quiz.');
+                throw new Error(t('createByLink.notEnoughTokens'));
             }
 
             // Gerar quiz por tema
@@ -119,7 +121,7 @@ const CreateQuizByLinkPage: React.FC = () => {
             await refreshUser();
 
             // Mostrar mensagem de sucesso
-            showToast('Quiz criado com sucesso! 1 token foi deduzido.', 'success');
+            showToast(t('createByLink.successGenerated'), 'success');
 
             // Fechar modal
             setIsModalOpen(false);
@@ -142,7 +144,7 @@ const CreateQuizByLinkPage: React.FC = () => {
             }, 500);
         } catch (err: any) {
             console.error('Error generating quiz:', err);
-            const errorMessage = err.response?.data?.message || err.message || 'Erro ao criar quiz. Tente novamente.';
+            const errorMessage = err.response?.data?.message || err.message || t('createByLink.errorGenerating');
             setError(errorMessage);
         } finally {
             setIsLoading(false);
@@ -167,10 +169,17 @@ const CreateQuizByLinkPage: React.FC = () => {
     };
 
     const steps = [
-        { id: 1, name: 'Básico', icon: AcademicCapIcon },
-        { id: 2, name: 'Configuração', icon: SparklesIcon },
-        { id: 3, name: 'Revisão', icon: SparklesIcon },
+        { id: 1, name: t('createByLink.stepBasic'), icon: AcademicCapIcon },
+        { id: 2, name: t('createByLink.stepConfig'), icon: SparklesIcon },
+        { id: 3, name: t('createByLink.stepReview'), icon: SparklesIcon },
     ];
+
+    const levelLabels: Record<string, string> = {
+        [QuizLevel.INICIANTE]: t('createByLink.easy'),
+        [QuizLevel.MEDIO]: t('createByLink.medium'),
+        [QuizLevel.DIFICIL]: t('createByLink.hard'),
+        [QuizLevel.EXPERT]: t('createByLink.expert'),
+    };
 
     const canProceed = () => {
         if (currentStep === 1) {
@@ -196,14 +205,14 @@ const CreateQuizByLinkPage: React.FC = () => {
 
     return (
         <div className="flex flex-col min-h-full transition-colors duration-300">
-            <PageTitle title="Criar Quiz com IA - TreinaVagaAI" />
+            <PageTitle title={`${t('createByLink.title')} - TreinaVagaAI`} />
             <header className="sticky top-0 z-20 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 -mx-4 -mt-4 lg:-mx-8 lg:-mt-8 px-4 lg:px-8 py-4 mb-8">
                 <div className="max-w-4xl mx-auto">
                     <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 dark:text-white">
-                        Criar Quiz com IA
+                        {t('createByLink.title')}
                     </h1>
                     <p className="mt-1 text-sm sm:text-base text-slate-600 dark:text-slate-400">
-                        Crie um simulado personalizado por vaga de emprego ou por tema customizado.
+                        {t('createByLink.subtitle')}
                     </p>
                 </div>
             </header>
@@ -215,7 +224,7 @@ const CreateQuizByLinkPage: React.FC = () => {
                     <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl border border-slate-200 dark:border-slate-700 p-6 relative overflow-hidden group">
                         <div className="relative z-10">
                             <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-4 text-center">
-                                Escolha como criar seu quiz
+                                {t('createByLink.chooseHow')}
                             </h2>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 {/* Job Quiz Option */}
@@ -227,9 +236,9 @@ const CreateQuizByLinkPage: React.FC = () => {
                                     onClick={() => setQuizType('job')}
                                 >
                                     <LinkIcon className={`h-12 w-12 mb-4 transition-colors ${quizType === 'job' ? 'text-primary-600 dark:text-primary-400' : 'text-slate-400'}`} />
-                                    <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-2">Por Vaga de Emprego</h3>
+                                    <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-2">{t('createByLink.tabJobLink')}</h3>
                                     <p className="text-sm text-slate-600 dark:text-slate-400 text-center leading-relaxed">
-                                        Cole o link de uma vaga e receba um quiz personalizado baseado nos requisitos.
+                                        {t('createByLink.jobQuizDesc')}
                                     </p>
                                     {quizType === 'job' && (
                                         <div className="absolute top-3 right-3 text-primary-600 animate-in zoom-in duration-300">
@@ -247,9 +256,9 @@ const CreateQuizByLinkPage: React.FC = () => {
                                     onClick={() => setQuizType('theme')}
                                 >
                                     <AcademicCapIcon className={`h-12 w-12 mb-4 transition-colors ${quizType === 'theme' ? 'text-primary-600 dark:text-primary-400' : 'text-slate-400'}`} />
-                                    <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-2">Por Tema Personalizado</h3>
+                                    <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-2">{t('createByLink.tabCustom')}</h3>
                                     <p className="text-sm text-slate-600 dark:text-slate-400 text-center leading-relaxed">
-                                        Defina o tema, nível de dificuldade e quantidade de questões do seu quiz.
+                                        {t('createByLink.themeQuizDesc')}
                                     </p>
                                     {quizType === 'theme' && (
                                         <div className="absolute top-3 right-3 text-primary-600 animate-in zoom-in duration-300">
@@ -283,10 +292,10 @@ const CreateQuizByLinkPage: React.FC = () => {
                                             </div>
                                             <div className="flex-1">
                                                 <h3 className="text-lg font-bold text-blue-900 dark:text-blue-100">
-                                                    Custa 1 Token
+                                                    {t('createByLink.costs1Token')}
                                                 </h3>
                                                 <p className="text-blue-700 dark:text-blue-300 mt-1 leading-relaxed">
-                                                    Você tem <span className="font-bold bg-blue-100 dark:bg-blue-800 px-1.5 py-0.5 rounded text-blue-800 dark:text-blue-200">{user?.tokens || 0} tokens</span> disponíveis.
+                                                    {t('createByLink.tokensAvailable', { count: user?.tokens || 0 })}
                                                 </p>
                                             </div>
                                         </div>
@@ -301,7 +310,7 @@ const CreateQuizByLinkPage: React.FC = () => {
                                                 </div>
                                                 <div className="flex-1">
                                                     <h3 className="text-lg font-bold text-red-800 dark:text-red-200">
-                                                        Erro
+                                                        {t('createByLink.errorLabel')}
                                                     </h3>
                                                     <p className="text-red-700 dark:text-red-300 mt-1">
                                                         {error}
@@ -314,14 +323,14 @@ const CreateQuizByLinkPage: React.FC = () => {
                                         <div className="space-y-4 mb-8">
                                             <div className="flex items-center justify-between">
                                                 <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">
-                                                    Plataforma Detectada
+                                                    {t('createByLink.platform')}
                                                 </label>
                                                 {jobLink && (
                                                     <span className="text-xs bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 px-2 py-1 rounded-full font-medium flex items-center gap-1">
                                                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" className="w-3 h-3">
                                                             <path fillRule="evenodd" d="M12.416 3.376a.75.75 0 0 1 .208 1.04l-5 7.5a.75.75 0 0 1-1.154.114l-3-3a.75.75 0 0 1 1.06-1.06l2.353 2.353 4.493-6.74a.75.75 0 0 1 1.04-.207Z" clipRule="evenodd" />
                                                         </svg>
-                                                        Auto-detectado
+                                                        {t('createByLink.linkDetected')}
                                                     </span>
                                                 )}
                                             </div>
@@ -360,7 +369,7 @@ const CreateQuizByLinkPage: React.FC = () => {
 
                                         <div className="space-y-2">
                                             <label htmlFor="job-link" className="block text-sm font-medium text-slate-700 dark:text-slate-300">
-                                                Link da Vaga
+                                                {t('createByLink.jobLinkLabel')}
                                             </label>
                                             <div className="relative rounded-xl shadow-sm">
                                                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
@@ -382,7 +391,7 @@ const CreateQuizByLinkPage: React.FC = () => {
                                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" className="w-4 h-4 mt-0.5 shrink-0">
                                                     <path fillRule="evenodd" d="M15 8A7 7 0 1 1 1 8a7 7 0 0 1 14 0ZM9 5a1 1 0 1 1-2 0 1 1 0 0 1 2 0ZM6.75 8a.75.75 0 0 0 0 1.5h.75v1.75a.75.75 0 0 0 1.5 0v-2.5A.75.75 0 0 0 8.25 8h-1.5Z" clipRule="evenodd" />
                                                 </svg>
-                                                <span>Cole o link da vaga e a plataforma será detectada automaticamente</span>
+                                                <span>{t('createByLink.pasteJobLink')}</span>
                                             </p>
                                         </div>
 
@@ -400,12 +409,12 @@ const CreateQuizByLinkPage: React.FC = () => {
                                                         <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                                                         <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                                                     </svg>
-                                                    Analisando Vaga...
+                                                    {t('createByLink.generating')}
                                                 </>
                                             ) : (
                                                 <>
                                                     <SparklesIcon className="h-6 w-6" />
-                                                    Gerar Quiz com IA
+                                                    {t('createByLink.generateButton')}
                                                 </>
                                             )}
                                         </button>
@@ -429,10 +438,10 @@ const CreateQuizByLinkPage: React.FC = () => {
                                     </div>
                                     <div className="flex-1">
                                         <h3 className="text-lg font-bold text-blue-900 dark:text-blue-100">
-                                            Custa 1 Token
+                                            {t('createByLink.costs1Token')}
                                         </h3>
                                         <p className="text-blue-700 dark:text-blue-300 mt-1 leading-relaxed">
-                                            Você tem <span className="font-bold bg-blue-100 dark:bg-blue-800 px-1.5 py-0.5 rounded text-blue-800 dark:text-blue-200">{user?.tokens || 0} tokens</span> disponíveis.
+                                            {t('createByLink.tokensAvailable', { count: user?.tokens || 0 })}
                                         </p>
                                     </div>
                                 </div>
@@ -447,7 +456,7 @@ const CreateQuizByLinkPage: React.FC = () => {
                                         </div>
                                         <div className="flex-1">
                                             <h3 className="text-lg font-bold text-red-800 dark:text-red-200">
-                                                Erro
+                                                {t('createByLink.errorLabel')}
                                             </h3>
                                             <p className="text-red-700 dark:text-red-300 mt-1">
                                                 {error}
@@ -457,10 +466,10 @@ const CreateQuizByLinkPage: React.FC = () => {
                                 )}
 
                                 <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-4">
-                                    Crie Seu Quiz Personalizado
+                                    {t('createByLink.createYourCustomQuiz')}
                                 </h2>
                                 <p className="text-slate-600 dark:text-slate-400 mb-8">
-                                    Defina o tema, nível de dificuldade e contexto do seu quiz personalizado.
+                                    {t('createByLink.customQuizDescription')}
                                 </p>
 
                                 <button
@@ -472,7 +481,7 @@ const CreateQuizByLinkPage: React.FC = () => {
                                         }`}
                                 >
                                     <SparklesIcon className="h-6 w-6" />
-                                    Criar Quiz Personalizado
+                                    {t('createByLink.createCustomQuiz')}
                                 </button>
                             </div>
                         </div>
@@ -486,8 +495,8 @@ const CreateQuizByLinkPage: React.FC = () => {
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                                 </svg>
                             </div>
-                            <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-2">Instantâneo</h3>
-                            <p className="text-slate-600 dark:text-slate-400 leading-relaxed">Cole o link e receba um quiz personalizado em segundos, focado nas habilidades exigidas.</p>
+                            <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-2">{t('createByLink.featureInstant')}</h3>
+                            <p className="text-slate-600 dark:text-slate-400 leading-relaxed">{t('createByLink.featureInstantDesc')}</p>
                         </div>
 
                         <div className="p-6 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
@@ -496,8 +505,8 @@ const CreateQuizByLinkPage: React.FC = () => {
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                                 </svg>
                             </div>
-                            <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-2">Relevante</h3>
-                            <p className="text-slate-600 dark:text-slate-400 leading-relaxed">Perguntas geradas baseadas exatamente no que a vaga pede, aumentando suas chances.</p>
+                            <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-2">{t('createByLink.featureRelevant')}</h3>
+                            <p className="text-slate-600 dark:text-slate-400 leading-relaxed">{t('createByLink.featureRelevantDesc')}</p>
                         </div>
 
                         <div className="p-6 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
@@ -506,8 +515,8 @@ const CreateQuizByLinkPage: React.FC = () => {
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
                                 </svg>
                             </div>
-                            <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-2">Evolução</h3>
-                            <p className="text-slate-600 dark:text-slate-400 leading-relaxed">Acompanhe seu desempenho e identifique pontos de melhoria antes da entrevista real.</p>
+                            <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-2">{t('createByLink.featureEvolution')}</h3>
+                            <p className="text-slate-600 dark:text-slate-400 leading-relaxed">{t('createByLink.featureEvolutionDesc')}</p>
                         </div>
                     </div>
                 </div>
@@ -515,7 +524,7 @@ const CreateQuizByLinkPage: React.FC = () => {
                 {/* Support Badge */}
                 <div className="mt-12 mb-8 p-4 bg-blue-50 dark:bg-blue-900/10 rounded-xl border border-blue-100 dark:border-blue-800/30 text-center">
                     <p className="text-sm text-slate-600 dark:text-slate-400 flex items-center justify-center gap-2 flex-wrap">
-                        <span>Não gostou do quiz gerado?</span>
+                        <span>{t('createByLink.didntLikeQuiz')}</span>
                         <a
                             href="https://wa.me/5531997313160"
                             target="_blank"
@@ -525,7 +534,7 @@ const CreateQuizByLinkPage: React.FC = () => {
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4">
                                 <path fillRule="evenodd" d="M1.5 4.5a3 3 0 013-3h1.372c.86 0 1.61.586 1.819 1.42l1.105 4.423a1.875 1.875 0 01-.694 1.955l-1.293.97c-.135.101-.164.249-.126.352a11.285 11.285 0 006.697 6.697c.103.038.25.009.352-.126l.97-1.293a1.875 1.875 0 011.955-.694l4.423 1.105c.834.209 1.42.959 1.42 1.82V19.5a3 3 0 01-3 3h-2.25C8.552 22.5 1.5 15.448 1.5 5.25V4.5z" clipRule="evenodd" />
                             </svg>
-                            Fale conosco no WhatsApp
+                            {t('createByLink.contactWhatsApp')}
                         </a>
                     </p>
                 </div>
@@ -540,10 +549,10 @@ const CreateQuizByLinkPage: React.FC = () => {
                             <div>
                                 <h2 className="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
                                     <SparklesIcon className="w-6 h-6 text-primary-500" />
-                                    Criar Quiz Personalizado
+                                    {t('createByLink.createCustomQuiz')}
                                 </h2>
                                 <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
-                                    Passo {currentStep} de {steps.length}
+                                    {t('createByLink.stepOf', { current: currentStep, total: steps.length })}
                                 </p>
                             </div>
                             <button
@@ -595,41 +604,41 @@ const CreateQuizByLinkPage: React.FC = () => {
                                     <div className="space-y-6 animate-in slide-in-from-right-8 duration-300 fade-in">
                                         <div>
                                             <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                                                Título do Quiz <span className="text-red-500">*</span>
+                                                {t('createByLink.customTitle')} <span className="text-red-500">*</span>
                                             </label>
                                             <input
                                                 type="text"
                                                 value={formData.titulo}
                                                 onChange={(e) => setFormData(prev => ({ ...prev, titulo: e.target.value }))}
                                                 className="w-full px-4 py-3.5 border border-slate-300 dark:border-slate-600 rounded-xl bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all placeholder:text-slate-400"
-                                                placeholder="Ex: Marketing Digital, Anatomia Humana, História da Arte..."
+                                                placeholder={t('createByLink.customTitlePlaceholder')}
                                                 autoFocus
                                             />
                                         </div>
 
                                         <div>
                                             <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                                                Categoria <span className="text-red-500">*</span>
+                                                {t('createByLink.customCategory')} <span className="text-red-500">*</span>
                                             </label>
                                             <input
                                                 type="text"
                                                 value={formData.categoria}
                                                 onChange={(e) => setFormData(prev => ({ ...prev, categoria: e.target.value }))}
                                                 className="w-full px-4 py-3.5 border border-slate-300 dark:border-slate-600 rounded-xl bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all placeholder:text-slate-400"
-                                                placeholder="Ex: Negócios, Saúde, Artes, Tecnologia..."
+                                                placeholder={t('createByLink.customCategoryPlaceholder')}
                                             />
                                         </div>
 
                                         <div>
                                             <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                                                Descrição <span className="text-red-500">*</span>
+                                                {t('createByLink.customDescription')} <span className="text-red-500">*</span>
                                             </label>
                                             <textarea
                                                 value={formData.descricao}
                                                 onChange={(e) => setFormData(prev => ({ ...prev, descricao: e.target.value }))}
                                                 className="w-full px-4 py-3.5 border border-slate-300 dark:border-slate-600 rounded-xl bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all placeholder:text-slate-400"
                                                 rows={4}
-                                                placeholder="Descreva o objetivo e os principais tópicos que serão abordados neste quiz..."
+                                                placeholder={t('createByLink.customDescriptionPlaceholder')}
                                             />
                                         </div>
                                     </div>
@@ -639,7 +648,7 @@ const CreateQuizByLinkPage: React.FC = () => {
                                     <div className="space-y-8 animate-in slide-in-from-right-8 duration-300 fade-in">
                                         <div className="space-y-4">
                                             <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">
-                                                Nível de Dificuldade
+                                                {t('createByLink.difficultyLabel')}
                                             </label>
                                             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                                                 {Object.values(QuizLevel).map((level) => (
@@ -652,7 +661,7 @@ const CreateQuizByLinkPage: React.FC = () => {
                                                             : 'border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:border-slate-300 dark:hover:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-800'
                                                             }`}
                                                     >
-                                                        {level}
+                                                        {levelLabels[level] || level}
                                                     </button>
                                                 ))}
                                             </div>
@@ -661,7 +670,7 @@ const CreateQuizByLinkPage: React.FC = () => {
                                         <div>
                                             <div className="flex items-center justify-between mb-2">
                                                 <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">
-                                                    Quantidade de Questões
+                                                    {t('createByLink.questionCount')}
                                                 </label>
                                                 <span className="text-lg font-bold text-primary-600 dark:text-primary-400 bg-primary-50 dark:bg-primary-900/30 px-3 py-1 rounded-lg">
                                                     {formData.quantidade_questoes}
@@ -679,15 +688,15 @@ const CreateQuizByLinkPage: React.FC = () => {
                                                 />
                                             </div>
                                             <div className="flex justify-between text-xs text-slate-400 mt-2 font-medium">
-                                                <span>1 questão</span>
-                                                <span>20 questões</span>
+                                                <span>{t('createByLink.questionMin', { count: 1 })}</span>
+                                                <span>{t('createByLink.questionMax', { count: 20 })}</span>
                                             </div>
                                         </div>
 
                                         <div>
                                             <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                                                Contexto Adicional (IA)
-                                                <span className="text-xs text-slate-500 dark:text-slate-400 font-normal ml-2 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-full">Opcional</span>
+                                                {t('createByLink.customContext')}
+                                                <span className="text-xs text-slate-500 dark:text-slate-400 font-normal ml-2 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-full">{t('createByLink.customContextOptional')}</span>
                                             </label>
                                             <div className="relative group">
                                                 <div className="absolute -inset-0.5 bg-gradient-to-r from-primary-500 to-indigo-500 rounded-xl opacity-0 group-focus-within:opacity-20 transition duration-300 pointer-events-none"></div>
@@ -696,7 +705,7 @@ const CreateQuizByLinkPage: React.FC = () => {
                                                     onChange={(e) => setFormData(prev => ({ ...prev, contexto: e.target.value }))}
                                                     className="relative w-full px-4 py-3.5 border border-slate-300 dark:border-slate-600 rounded-xl bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all placeholder:text-slate-400"
                                                     rows={4}
-                                                    placeholder="Cole aqui um texto, artigo ou documentação para a IA usar como base..."
+                                                    placeholder={t('createByLink.customContextPlaceholder')}
                                                 />
                                                 <SparklesIcon className="absolute right-3 top-3 w-5 h-5 text-primary-400 animate-pulse pointer-events-none" />
                                             </div>
@@ -708,7 +717,7 @@ const CreateQuizByLinkPage: React.FC = () => {
                                     <div className="space-y-6 animate-in slide-in-from-right-8 duration-300 fade-in">
                                         <div>
                                             <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                                                Tags Relacionadas
+                                                {t('createByLink.tags')}
                                             </label>
                                             <div className="flex gap-2 mb-3">
                                                 <input
@@ -717,7 +726,7 @@ const CreateQuizByLinkPage: React.FC = () => {
                                                     onChange={(e) => setTagInput(e.target.value)}
                                                     onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addTag())}
                                                     className="flex-1 px-4 py-3 border border-slate-300 dark:border-slate-600 rounded-xl bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all text-sm placeholder:text-slate-400"
-                                                    placeholder="Digite uma tag e pressione Enter"
+                                                    placeholder={t('createByLink.tagPlaceholder')}
                                                 />
                                                 <button
                                                     type="button"
@@ -725,7 +734,7 @@ const CreateQuizByLinkPage: React.FC = () => {
                                                     className="px-6 py-3 bg-primary-600 text-white rounded-xl hover:bg-primary-700 transition-colors flex items-center gap-2 text-sm font-bold shadow-lg shadow-primary-600/20"
                                                 >
                                                     <PlusIcon className="w-5 h-5" />
-                                                    Adicionar
+                                                    {t('createByLink.addTag')}
                                                 </button>
                                             </div>
 
@@ -753,8 +762,8 @@ const CreateQuizByLinkPage: React.FC = () => {
                                                         <span className="bg-slate-100 dark:bg-slate-800 p-3 rounded-full mb-2">
                                                             <SparklesIcon className="w-6 h-6" />
                                                         </span>
-                                                        <p className="text-sm font-medium">Nenhuma tag adicionada</p>
-                                                        <p className="text-xs mt-1">Tags ajudam a categorizar seu quiz</p>
+                                                        <p className="text-sm font-medium">{t('createByLink.noTagsAdded')}</p>
+                                                        <p className="text-xs mt-1">{t('createByLink.tagsHelp')}</p>
                                                     </div>
                                                 )}
                                             </div>
@@ -766,10 +775,10 @@ const CreateQuizByLinkPage: React.FC = () => {
                                             </div>
                                             <div>
                                                 <h3 className="font-bold text-blue-900 dark:text-blue-100 mb-1">
-                                                    Pronto para gerar!
+                                                    {t('createByLink.readyToGenerate')}
                                                 </h3>
                                                 <p className="text-sm text-blue-700 dark:text-blue-300 leading-relaxed">
-                                                    Sua configuração está completa. A IA irá analisar suas preferências e criar um desafio único para você.
+                                                    {t('createByLink.readyToGenerateDesc')}
                                                 </p>
                                             </div>
                                         </div>
@@ -787,7 +796,7 @@ const CreateQuizByLinkPage: React.FC = () => {
                                     }`}
                             >
                                 <ChevronLeftIcon className="w-4 h-4" />
-                                Voltar
+                                {t('createByLink.back')}
                             </button>
 
                             {currentStep < steps.length ? (
@@ -796,7 +805,7 @@ const CreateQuizByLinkPage: React.FC = () => {
                                     disabled={!canProceed() || isLoading}
                                     className="px-8 py-3 bg-primary-600 text-white rounded-xl hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center gap-2 shadow-lg shadow-primary-600/20 font-bold hover:translate-x-1"
                                 >
-                                    Próximo
+                                    {t('createByLink.next')}
                                     <ChevronRightIcon className="w-4 h-4" />
                                 </button>
                             ) : (
@@ -808,12 +817,12 @@ const CreateQuizByLinkPage: React.FC = () => {
                                     {isLoading ? (
                                         <>
                                             <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent" />
-                                            Gerando...
+                                            {t('createByLink.generating')}
                                         </>
                                     ) : (
                                         <>
                                             <SparklesIcon className="w-5 h-5" />
-                                            Gerar Quiz
+                                            {t('createByLink.generateButton')}
                                         </>
                                     )}
                                 </button>

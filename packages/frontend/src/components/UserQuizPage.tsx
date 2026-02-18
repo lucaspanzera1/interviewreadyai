@@ -5,6 +5,7 @@ import FormattedText from './FormattedText';
 import { CheckCircleIcon, XCircleIcon, ArrowLeftIcon, ArrowPathIcon } from '@heroicons/react/24/outline';
 import { QuizQuestion, apiClient } from '../lib/api';
 import { useToast } from '../contexts/ToastContext';
+import { useTranslation, Trans } from 'react-i18next';
 
 const QuizTimer: React.FC<{ startTime: number }> = ({ startTime }) => {
   const [elapsed, setElapsed] = useState(0);
@@ -33,6 +34,7 @@ const QuizTimer: React.FC<{ startTime: number }> = ({ startTime }) => {
 const UserQuizPage: React.FC = () => {
   const navigate = useNavigate();
   const { showToast } = useToast();
+  const { t } = useTranslation('quiz');
   const [quiz, setQuiz] = useState<{
     questions: (QuizQuestion & { originalIndex?: number })[];
     titulo?: string;
@@ -169,7 +171,7 @@ const UserQuizPage: React.FC = () => {
       setStartTime(Date.now());
     } catch (error) {
       console.error('Erro ao reiniciar quiz:', error);
-      showToast('Erro ao reiniciar quiz. Tente novamente.', 'error');
+      showToast(t('generated.errorRestarting'), 'error');
     }
   };
 
@@ -185,7 +187,7 @@ const UserQuizPage: React.FC = () => {
             >
               <ArrowLeftIcon className="w-5 h-5" />
             </button>
-            <PageTitle title="Resultado do Quiz" />
+            <PageTitle title={t('generated.resultTitle')} />
           </div>
 
           <div className="bg-white dark:bg-slate-800 rounded-3xl p-8 md:p-12 shadow-lifted border border-slate-100 dark:border-slate-700 text-center relative overflow-hidden">
@@ -205,12 +207,12 @@ const UserQuizPage: React.FC = () => {
               </div>
 
               <h2 className="text-3xl font-bold text-slate-900 dark:text-white mb-3">
-                {percentage >= 80 ? 'Excelente Performance!' :
-                  percentage >= 60 ? 'Bom Trabalho!' :
-                    'Continue Praticando!'}
+                {percentage >= 80 ? t('generated.excellentPerformance') :
+                  percentage >= 60 ? t('generated.goodWork') :
+                    t('generated.keepPracticing')}
               </h2>
               <p className="text-slate-600 dark:text-slate-400 text-lg mb-8 max-w-md mx-auto">
-                Você acertou <strong className="text-slate-900 dark:text-white">{score}</strong> de <strong className="text-slate-900 dark:text-white">{quiz.questions.length}</strong> questões.
+                <Trans i18nKey="generated.scoreDescription" t={t} values={{ correct: score, total: quiz.questions.length }} components={{ strong: <strong className="text-slate-900 dark:text-white" /> }} />
               </p>
 
               <div className="flex flex-col sm:flex-row gap-4 justify-center max-w-lg mx-auto">
@@ -219,13 +221,13 @@ const UserQuizPage: React.FC = () => {
                   className="flex-1 px-8 py-4 bg-white dark:bg-slate-700 text-slate-900 dark:text-white border border-slate-200 dark:border-slate-600 rounded-xl font-bold hover:bg-slate-50 dark:hover:bg-slate-600 transition-all flex items-center justify-center gap-2 hover:scale-105"
                 >
                   <ArrowPathIcon className="w-5 h-5" />
-                  Refazer Quiz
+                  {t('generated.retakeQuiz')}
                 </button>
                 <button
                   onClick={() => navigate('/my-quizzes')}
                   className="flex-1 px-8 py-4 bg-primary-600 text-white rounded-xl font-bold hover:bg-primary-700 transition-all flex items-center justify-center gap-2 hover:scale-105 shadow-lg shadow-primary-600/20"
                 >
-                  Meus Quizzes
+                  {t('myQuizzes.title')}
                   <ArrowLeftIcon className="w-5 h-5 rotate-180" />
                 </button>
               </div>
@@ -233,7 +235,7 @@ const UserQuizPage: React.FC = () => {
           </div>
 
           <div className="space-y-6">
-            <h3 className="text-xl font-bold text-slate-900 dark:text-white px-2">Revisão das Questões</h3>
+            <h3 className="text-xl font-bold text-slate-900 dark:text-white px-2">{t('generated.reviewTitle')}</h3>
             {quiz.questions.map((question, index) => (
               <div key={index} className="bg-white dark:bg-slate-800 rounded-2xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm animate-slide-up" style={{ animationDelay: `${index * 0.1}s` }}>
                 <div className="flex items-start gap-4">
@@ -271,7 +273,7 @@ const UserQuizPage: React.FC = () => {
                     </div>
                     {question.explanation && (
                       <div className="mt-4 p-4 bg-indigo-50 dark:bg-indigo-900/20 rounded-xl text-sm text-indigo-800 dark:text-indigo-300 border border-indigo-100 dark:border-indigo-800/50">
-                        <strong className="block mb-1 font-semibold">Explicação:</strong>
+                        <strong className="block mb-1 font-semibold">{t('generated.explanation')}</strong>
                         <FormattedText text={question.explanation} />
                       </div>
                     )}
@@ -314,7 +316,7 @@ const UserQuizPage: React.FC = () => {
                 </div>
               )}
               <div className="text-sm font-bold text-slate-700 dark:text-slate-300 bg-white/50 dark:bg-slate-800/50 px-3 py-1 rounded-full border border-slate-200 dark:border-slate-700 backdrop-blur-sm">
-                Questão {currentQuestion + 1} <span className="text-slate-400 mx-1">/</span> {quiz.questions.length}
+                {t('generated.questionOf', { current: currentQuestion + 1, total: quiz.questions.length })}
               </div>
             </div>
 
@@ -391,7 +393,7 @@ const UserQuizPage: React.FC = () => {
                   `}
                 >
                   <ArrowLeftIcon className="w-4 h-4" />
-                  Anterior
+                  {t('generated.previous')}
                 </button>
 
                 <button
@@ -404,7 +406,7 @@ const UserQuizPage: React.FC = () => {
                       : 'bg-primary-600 hover:bg-primary-700 text-white shadow-primary-600/30 hover:scale-[1.02] hover:shadow-primary-600/40 active:scale-[0.98]'}
                   `}
                 >
-                  {currentQuestion === quiz.questions.length - 1 ? 'Finalizar Quiz' : 'Próxima Questão'}
+                  {currentQuestion === quiz.questions.length - 1 ? t('generated.finishQuiz') : t('generated.nextQuestion')}
                   <ArrowLeftIcon className="w-4 h-4 rotate-180" />
                 </button>
               </div>

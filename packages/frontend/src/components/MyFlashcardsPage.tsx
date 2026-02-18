@@ -4,6 +4,7 @@ import { PlusCircleIcon, SparklesIcon, AcademicCapIcon, ClockIcon, ChartBarIcon,
 import { useNavigate } from 'react-router-dom';
 import { apiClient } from '../lib/api';
 import { useToast } from '../contexts/ToastContext';
+import { useTranslation } from 'react-i18next';
 
 interface Flashcard {
     _id: string;
@@ -30,6 +31,7 @@ interface StudyStats {
 const MyFlashcardsPage: React.FC = () => {
     const navigate = useNavigate();
     const { showToast } = useToast();
+    const { t } = useTranslation('flashcard');
     const [flashcards, setFlashcards] = useState<Flashcard[]>([]);
     const [loading, setLoading] = useState(true);
     const [page, setPage] = useState(1);
@@ -94,10 +96,10 @@ const MyFlashcardsPage: React.FC = () => {
         setStartingFlashcard(flashcard._id);
         try {
             navigate(`/flashcard/study/${flashcard._id}`);
-            showToast('Iniciando sessão de estudo! 📚', 'success');
+            showToast(t('myFlashcards.startingSession'), 'success');
         } catch (error: any) {
             console.error('Erro ao iniciar estudo:', error);
-            const message = error.response?.data?.message || 'Erro ao iniciar o estudo.';
+            const message = error.response?.data?.message || t('myFlashcards.errorStartingStudy');
             showToast(message, 'error');
         } finally {
             setStartingFlashcard(null);
@@ -120,11 +122,11 @@ const MyFlashcardsPage: React.FC = () => {
     const formatLevel = (nivel: string) => {
         switch (nivel) {
             case 'FACIL':
-                return 'Fácil';
+                return t('create.easy');
             case 'MEDIO':
-                return 'Médio';
+                return t('create.medium');
             case 'DIFICIL':
-                return 'Difícil';
+                return t('create.hard');
             default:
                 return nivel;
         }
@@ -132,15 +134,15 @@ const MyFlashcardsPage: React.FC = () => {
 
     return (
         <div className="flex flex-col min-h-full transition-colors duration-300">
-            <PageTitle title="Meus Flashcards - TreinaVagaAI" />
+            <PageTitle title={t('myFlashcards.pageTitle')} />
             <header className="sticky top-0 z-20 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 -mx-4 -mt-4 lg:-mx-8 lg:-mt-8 px-4 lg:px-8 py-4 mb-8">
                 <div className="max-w-4xl mx-auto flex justify-between items-center gap-4">
                     <div>
                         <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 dark:text-white">
-                            Meus Flashcards
+                            {t('myFlashcards.title')}
                         </h1>
                         <p className="mt-1 text-sm sm:text-base text-slate-500 dark:text-slate-400">
-                            Gerencie e estude os flashcards que você criou.
+                            {t('myFlashcards.subtitle')}
                         </p>
                     </div>
                     <button
@@ -148,9 +150,9 @@ const MyFlashcardsPage: React.FC = () => {
                         className="flex items-center gap-2 px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg font-medium transition-colors shadow-sm shrink-0"
                     >
                         <PlusCircleIcon className="w-5 h-5" />
-                        <span className="hidden sm:inline">Criar Novos Flashcards</span>
-                        <span className="sm:hidden">Criar</span>
-                        <span className="ml-1 text-[10px] bg-white/20 px-1.5 py-0.5 rounded font-bold tracking-wide">BETA</span>
+                        <span className="hidden sm:inline">{t('myFlashcards.createNew')}</span>
+                        <span className="sm:hidden">{t('myFlashcards.createShort')}</span>
+                        <span className="ml-1 text-[10px] bg-white/20 px-1.5 py-0.5 rounded font-bold tracking-wide">{t('myFlashcards.beta')}</span>
                     </button>
                 </div>
             </header>
@@ -164,18 +166,18 @@ const MyFlashcardsPage: React.FC = () => {
                     <div className="text-center py-20">
                         <SparklesIcon className="mx-auto h-24 w-24 text-slate-400 dark:text-slate-600 mb-6" />
                         <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-2">
-                            Nenhum flashcard criado ainda
+                            {t('myFlashcards.emptyState')}
                         </h3>
                         <p className="text-slate-600 dark:text-slate-400 mb-6 max-w-md mx-auto">
-                            Crie seus primeiros flashcards baseados em vagas de emprego para começar a estudar de forma inteligente.
+                            {t('myFlashcards.emptyStateDesc')}
                         </p>
                         <button
                             onClick={() => navigate('/create-flashcard')}
                             className="inline-flex items-center gap-2 px-6 py-3 bg-primary-600 hover:bg-primary-700 text-white rounded-lg font-medium transition-colors shadow-sm"
                         >
                             <PlusCircleIcon className="w-5 h-5" />
-                            Criar Primeiro Flashcard
-                            <span className="ml-1 text-[10px] bg-white/20 px-1.5 py-0.5 rounded font-bold tracking-wide">BETA</span>
+                            {t('myFlashcards.createFirst')}
+                            <span className="ml-1 text-[10px] bg-white/20 px-1.5 py-0.5 rounded font-bold tracking-wide">{t('myFlashcards.beta')}</span>
                         </button>
                     </div>
                 ) : (
@@ -243,7 +245,7 @@ const MyFlashcardsPage: React.FC = () => {
                                                 <div>
                                                     <div className="flex items-center justify-center gap-1 text-slate-600 dark:text-slate-400 mb-1">
                                                         <AcademicCapIcon className="w-3 h-3" />
-                                                        <span className="text-xs">Estudados</span>
+                                                        <span className="text-xs">{t('myFlashcards.studied')}</span>
                                                     </div>
                                                     <div className="text-sm font-semibold text-slate-900 dark:text-white">
                                                         {studyStats[flashcard._id].cardsStudied}/{flashcard.quantidade_cards}
@@ -252,7 +254,7 @@ const MyFlashcardsPage: React.FC = () => {
                                                 <div>
                                                     <div className="flex items-center justify-center gap-1 text-slate-600 dark:text-slate-400 mb-1">
                                                         <ClockIcon className="w-3 h-3" />
-                                                        <span className="text-xs">Tempo</span>
+                                                        <span className="text-xs">{t('myFlashcards.time')}</span>
                                                     </div>
                                                     <div className="text-sm font-semibold text-slate-900 dark:text-white">
                                                         {Math.floor(studyStats[flashcard._id].totalStudyTime / 60)}min
@@ -261,7 +263,7 @@ const MyFlashcardsPage: React.FC = () => {
                                                 <div>
                                                     <div className="flex items-center justify-center gap-1 text-slate-600 dark:text-slate-400 mb-1">
                                                         <ChartBarIcon className="w-3 h-3" />
-                                                        <span className="text-xs">Revisões</span>
+                                                        <span className="text-xs">{t('myFlashcards.reviews')}</span>
                                                     </div>
                                                     <div className="text-sm font-semibold text-slate-900 dark:text-white">
                                                         {studyStats[flashcard._id].totalReviews}
@@ -271,7 +273,7 @@ const MyFlashcardsPage: React.FC = () => {
                                             {studyStats[flashcard._id].lastStudySession && (
                                                 <div className="mt-2 pt-2 border-t border-slate-200 dark:border-slate-600">
                                                     <div className="text-xs text-slate-500 dark:text-slate-400 text-center">
-                                                        Último estudo: {new Date(studyStats[flashcard._id].lastStudySession!).toLocaleDateString('pt-BR')}
+                                                        {t('myFlashcards.lastStudy')} {new Date(studyStats[flashcard._id].lastStudySession!).toLocaleDateString('pt-BR')}
                                                     </div>
                                                 </div>
                                             )}
@@ -280,7 +282,7 @@ const MyFlashcardsPage: React.FC = () => {
 
                                     <div className="flex items-center justify-between">
                                         <p className="text-xs text-slate-500 dark:text-slate-400">
-                                            Criado em {new Date(flashcard.createdAt).toLocaleDateString('pt-BR')}
+                                            {t('myFlashcards.createdAt')} {new Date(flashcard.createdAt).toLocaleDateString('pt-BR')}
                                         </p>
 
                                         <button
@@ -291,12 +293,12 @@ const MyFlashcardsPage: React.FC = () => {
                                             {startingFlashcard === flashcard._id ? (
                                                 <>
                                                     <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                                                    Carregando...
+                                                    {t('myFlashcards.loading')}
                                                 </>
                                             ) : (
                                                 <>
                                                     <AcademicCapIcon className="w-4 h-4" />
-                                                    Estudar
+                                                    {t('myFlashcards.studyButton')}
                                                 </>
                                             )}
                                         </button>
@@ -333,7 +335,7 @@ const MyFlashcardsPage: React.FC = () => {
                             className="flex items-center gap-2 px-4 py-2 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 rounded-full text-sm font-medium hover:bg-blue-100 dark:hover:bg-blue-900/40 transition-colors shadow-sm"
                         >
                             <QuestionMarkCircleIcon className="w-5 h-5" />
-                            <span>Dúvidas sobre Flashcards?</span>
+                            <span>{t('myFlashcards.faqTitle')}</span>
                         </button>
                     ) : (
                         <div className="relative w-full p-4 sm:p-6 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-700 flex flex-col sm:flex-row gap-4 animate-fade-in-up">
@@ -348,11 +350,10 @@ const MyFlashcardsPage: React.FC = () => {
                             </div>
                             <div className="flex-1 pr-8">
                                 <h4 className="font-bold text-slate-900 dark:text-white mb-2">
-                                    Como funcionam os Flashcards?
+                                    {t('myFlashcards.faqHow')}
                                 </h4>
                                 <p className="text-sm text-slate-600 dark:text-slate-400 mb-4 leading-relaxed">
-                                    Utilizamos o método de <strong>Repetição Espaçada (SRS)</strong>. O sistema calcula automaticamente o melhor momento para você revisar cada card, otimizando sua memorização com o menor esforço possível.
-                                    Estude um pouco todo dia para melhores resultados!
+                                    {t('myFlashcards.faqSRS')}
                                 </p>
                                 <a
                                     href="https://wa.me/5531997313160"
@@ -360,7 +361,7 @@ const MyFlashcardsPage: React.FC = () => {
                                     rel="noopener noreferrer"
                                     className="text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 text-sm font-semibold hover:underline inline-flex items-center gap-2"
                                 >
-                                    Precisa de ajuda? Fale com nosso suporte
+                                    {t('myFlashcards.faqSupport')}
                                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-3 h-3">
                                         <path fillRule="evenodd" d="M16.28 11.47a.75.75 0 010 1.06l-7.5 7.5a.75.75 0 01-1.06-1.06L14.69 12 7.72 5.03a.75.75 0 011.06-1.06l7.5 7.5z" clipRule="evenodd" />
                                     </svg>

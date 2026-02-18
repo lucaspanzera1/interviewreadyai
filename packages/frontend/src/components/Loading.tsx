@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 
 interface LoadingProps {
   size?: 'sm' | 'md' | 'lg';
@@ -11,9 +12,11 @@ interface LoadingProps {
  */
 const Loading: React.FC<LoadingProps> = ({
   size = 'md',
-  text = 'Carregando...',
+  text,
   fullScreen = false
 }) => {
+  const { t } = useTranslation('common');
+  const displayText = text || t('common.loading');
   const sizeClasses = {
     sm: 'h-4 w-4',
     md: 'h-8 w-8',
@@ -38,7 +41,7 @@ const Loading: React.FC<LoadingProps> = ({
             <Spinner />
           </div>
           <p className={`text-slate-600 dark:text-slate-400 font-medium ${textSizeClasses[size]}`}>
-            {text}
+            {displayText}
           </p>
         </div>
       </div>
@@ -52,7 +55,7 @@ const Loading: React.FC<LoadingProps> = ({
           <Spinner />
         </div>
         <p className={`text-slate-600 dark:text-slate-400 font-medium ${textSizeClasses[size]}`}>
-          {text}
+          {displayText}
         </p>
       </div>
     </div>

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Listbox, ListboxButton, ListboxOption, ListboxOptions, Transition } from '@headlessui/react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import PageTitle from './PageTitle';
 import { useAuth } from '../contexts/AuthContext';
 import { useToast } from '../contexts/ToastContext';
@@ -91,6 +92,7 @@ const ProfilePage: React.FC = () => {
   const { user, updateProfile, logout } = useAuth();
   const { showToast } = useToast();
   const navigate = useNavigate();
+  const { t, i18n } = useTranslation('profile');
 
   // Estados de edição separados para cada seção
   const [isEditingPersonal, setIsEditingPersonal] = useState(false);
@@ -238,7 +240,7 @@ const ProfilePage: React.FC = () => {
       await updateProfile(dataToUpdate);
       setIsEditingPersonal(false);
     } catch {
-      showToast('Erro ao atualizar informações pessoais', 'error');
+      showToast(t('errorUpdatingPersonal'), 'error');
     } finally {
       setIsLoadingPersonal(false);
     }
@@ -260,7 +262,7 @@ const ProfilePage: React.FC = () => {
       await updateProfile(dataToUpdate);
       setIsEditingPayment(false);
     } catch {
-      showToast('Erro ao atualizar dados de pagamento', 'error');
+      showToast(t('errorUpdatingPayment'), 'error');
     } finally {
       setIsLoadingPayment(false);
     }
@@ -283,7 +285,7 @@ const ProfilePage: React.FC = () => {
       await updateProfile(dataToUpdate);
       setIsEditingProfessional(false);
     } catch {
-      showToast('Erro ao atualizar perfil profissional', 'error');
+      showToast(t('errorUpdatingProfessional'), 'error');
     } finally {
       setIsLoadingProfessional(false);
     }
@@ -304,7 +306,7 @@ const ProfilePage: React.FC = () => {
       setHeaderImageFile(null);
       setHeaderImagePreview(null);
     } catch {
-      showToast('Erro ao atualizar imagem do header', 'error');
+      showToast(t('errorUpdatingHeader'), 'error');
     } finally {
       setIsLoadingHeader(false);
     }
@@ -321,12 +323,12 @@ const ProfilePage: React.FC = () => {
     if (file) {
       // Validate file type
       if (!file.type.startsWith('image/')) {
-        showToast('Por favor, selecione um arquivo de imagem válido', 'error');
+        showToast(t('invalidImageFile'), 'error');
         return;
       }
       // Validate file size (max 5MB)
       if (file.size > 5 * 1024 * 1024) {
-        showToast('A imagem deve ter no máximo 5MB', 'error');
+        showToast(t('imageMaxSize'), 'error');
         return;
       }
 
@@ -374,13 +376,14 @@ const ProfilePage: React.FC = () => {
       await logout();
       navigate('/login');
     } catch {
-      showToast('Erro ao sair', 'error');
+      showToast(t('errorLoggingOut'), 'error');
     }
   };
 
   const formatDate = (dateString?: string) => {
     if (!dateString) return 'N/A';
-    return new Date(dateString).toLocaleDateString('pt-BR', {
+    const locale = i18n.language === 'en' ? 'en-US' : 'pt-BR';
+    return new Date(dateString).toLocaleDateString(locale, {
       day: '2-digit',
       month: 'long',
       year: 'numeric',
@@ -396,33 +399,33 @@ const ProfilePage: React.FC = () => {
   };
 
   const careerTimeOptions = [
-    { value: '0-1', label: '0-1 ano' },
-    { value: '1-3', label: '1-3 anos' },
-    { value: '3-5', label: '3-5 anos' },
-    { value: '5-10', label: '5-10 anos' },
-    { value: '10+', label: '10+ anos' },
+    { value: '0-1', label: t('careerTime.less1year') },
+    { value: '1-3', label: t('careerTime.1to3years') },
+    { value: '3-5', label: t('careerTime.3to5years') },
+    { value: '5-10', label: t('careerTime.5to10years') },
+    { value: '10+', label: t('careerTime.10plus') },
   ];
 
   const nicheOptions = [
-    { value: 'tecnologia', label: 'Tecnologia' },
-    { value: 'educacao', label: 'Educação' },
-    { value: 'recursos_humanos', label: 'Recursos Humanos' },
-    { value: 'financeiro', label: 'Financeiro' },
-    { value: 'saude', label: 'Saúde' },
-    { value: 'vendas', label: 'Vendas' },
-    { value: 'marketing', label: 'Marketing' },
-    { value: 'juridico', label: 'Jurídico' },
-    { value: 'engenharia', label: 'Engenharia' },
-    { value: 'design', label: 'Design' },
-    { value: 'produto', label: 'Produto' },
-    { value: 'outro', label: 'Outro' },
+    { value: 'tecnologia', label: t('niche.tecnologia') },
+    { value: 'educacao', label: t('niche.educacao') },
+    { value: 'recursos_humanos', label: t('niche.rh') },
+    { value: 'financeiro', label: t('niche.financeiro') },
+    { value: 'saude', label: t('niche.saude') },
+    { value: 'vendas', label: t('niche.vendas') },
+    { value: 'marketing', label: t('niche.marketing') },
+    { value: 'juridico', label: t('niche.juridico') },
+    { value: 'engenharia', label: t('niche.engenharia') },
+    { value: 'design', label: t('niche.design') },
+    { value: 'produto', label: t('niche.produto') },
+    { value: 'outro', label: t('niche.outro') },
   ];
 
   const isTechNiche = (isEditingProfessional ? formData.niche : user?.niche) === 'tecnologia';
 
   return (
     <>
-      <PageTitle title="Perfil - TreinaVagaAI" />
+      <PageTitle title={t('pageTitle')} />
 
       <div className="space-y-8 pb-32">
         {/* Hero Section with Header & Avatar */}
@@ -459,12 +462,12 @@ const ProfilePage: React.FC = () => {
                   className="flex items-center text-sm font-medium text-white bg-black/20 hover:bg-black/40 backdrop-blur-md px-4 py-2 rounded-full transition-all border border-white/10"
                 >
                   <PencilIcon className="h-4 w-4 mr-2" />
-                  Editar Capa
+                  {t('editCover')}
                 </button>
               ) : (
                 <div className="flex flex-col items-end gap-2 animate-in fade-in slide-in-from-top-2 duration-200">
                   <div className="px-3 py-1.5 bg-black/60 backdrop-blur-md rounded-lg border border-white/10 text-xs font-medium text-white shadow-lg">
-                    Recomendado: 1500x500px
+                    {t('recommended')}
                   </div>
                   <div className="flex gap-2 p-1.5 bg-black/40 backdrop-blur-md rounded-xl border border-white/10">
                     <label className="cursor-pointer flex items-center justify-center px-4 py-2 text-sm font-medium text-white bg-white/10 hover:bg-white/20 rounded-lg transition-colors">
@@ -474,13 +477,13 @@ const ProfilePage: React.FC = () => {
                         onChange={handleHeaderFileChange}
                         className="hidden"
                       />
-                      Escolher
+                      {t('choose')}
                     </label>
                     <button
                       onClick={handleSaveHeader}
                       className="flex items-center justify-center w-10 h-10 text-white bg-green-600 hover:bg-green-500 rounded-lg transition-colors shadow-lg shadow-green-600/20"
                       disabled={isLoadingHeader}
-                      title="Salvar"
+                      title={t('save')}
                     >
                       <CheckIcon className="h-5 w-5" />
                     </button>
@@ -488,7 +491,7 @@ const ProfilePage: React.FC = () => {
                       onClick={handleCancelHeader}
                       className="flex items-center justify-center w-10 h-10 text-white bg-red-600 hover:bg-red-500 rounded-lg transition-colors"
                       disabled={isLoadingHeader}
-                      title="Cancelar"
+                      title={t('cancel')}
                     >
                       <XMarkIcon className="h-5 w-5" />
                     </button>
@@ -548,14 +551,14 @@ const ProfilePage: React.FC = () => {
             {/* 1. PERSONAL INFO CARD */}
             <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg shadow-sm">
               <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
-                <h2 className="text-base font-semibold text-slate-900 dark:text-white">Informações Pessoais</h2>
+                <h2 className="text-base font-semibold text-slate-900 dark:text-white">{t('personalInfo')}</h2>
                 {!isEditingPersonal ? (
                   <button
                     onClick={() => setIsEditingPersonal(true)}
                     className="flex items-center text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors"
                   >
                     <PencilIcon className="h-4 w-4 mr-1.5 opacity-70" />
-                    Editar
+                    {t('edit')}
                   </button>
                 ) : (
                   <div className="flex gap-3">
@@ -565,7 +568,7 @@ const ProfilePage: React.FC = () => {
                       disabled={isLoadingPersonal}
                     >
                       <XMarkIcon className="h-4 w-4 mr-1" />
-                      Cancelar
+                      {t('cancel')}
                     </button>
                     <button
                       onClick={handleSavePersonal}
@@ -573,7 +576,7 @@ const ProfilePage: React.FC = () => {
                       disabled={isLoadingPersonal}
                     >
                       <CheckIcon className="h-4 w-4 mr-1.5" />
-                      {isLoadingPersonal ? 'Salvando...' : 'Salvar'}
+                      {isLoadingPersonal ? t('savingProfile') : t('save')}
                     </button>
                   </div>
                 )}
@@ -582,7 +585,7 @@ const ProfilePage: React.FC = () => {
               <div className="p-6">
                 <div className="mb-6">
                   <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                    Email
+                    {t('email')}
                   </label>
                   <div className="flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 rounded-md">
                     <span className="text-slate-700 dark:text-slate-200 font-medium text-sm">{user?.email}</span>
@@ -593,7 +596,7 @@ const ProfilePage: React.FC = () => {
                   {/* Name */}
                   <div>
                     <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                      Nome Completo
+                      {t('fullName')}
                     </label>
                     {isEditingPersonal ? (
                       <input
@@ -614,7 +617,7 @@ const ProfilePage: React.FC = () => {
                   {/* Bio */}
                   <div>
                     <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                      Biografia
+                      {t('biography')}
                     </label>
                     {isEditingPersonal ? (
                       <textarea
@@ -628,7 +631,7 @@ const ProfilePage: React.FC = () => {
                       <div className="flex items-start gap-3 p-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 rounded-md">
                         <DocumentTextIcon className="h-5 w-5 text-slate-400 dark:text-slate-500 mt-0.5" />
                         <span className="text-slate-700 dark:text-slate-200 font-medium text-sm">
-                          {user?.bio || 'Não informado'}
+                          {user?.bio || t('notInformed')}
                         </span>
                       </div>
                     )}
@@ -637,7 +640,7 @@ const ProfilePage: React.FC = () => {
                   {/* Location */}
                   <div>
                     <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                      Localização
+                      {t('location')}
                     </label>
                     {isEditingPersonal ? (
                       <input
@@ -651,7 +654,7 @@ const ProfilePage: React.FC = () => {
                       <div className="flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 rounded-md">
                         <MapPinIcon className="h-5 w-5 text-slate-400 dark:text-slate-500" />
                         <span className="text-slate-700 dark:text-slate-200 font-medium text-sm">
-                          {user?.location || 'Não informado'}
+                          {user?.location || t('notInformed')}
                         </span>
                       </div>
                     )}
@@ -661,7 +664,7 @@ const ProfilePage: React.FC = () => {
                   <div className={`grid grid-cols-1 ${user?.niche === 'tecnologia' ? 'md:grid-cols-2' : ''} gap-4`}>
                     <div>
                       <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                        LinkedIn
+                        {t('linkedin')}
                       </label>
                       {isEditingPersonal ? (
                         <input
@@ -685,7 +688,7 @@ const ProfilePage: React.FC = () => {
                     {user?.niche === 'tecnologia' && (
                       <div>
                         <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                          GitHub
+                          {t('github')}
                         </label>
                         {isEditingPersonal ? (
                           <input
@@ -716,7 +719,7 @@ const ProfilePage: React.FC = () => {
             {/* 1.5. PAYMENT DATA CARD */}
             <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg shadow-sm">
               <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
-                <h2 className="text-base font-semibold text-slate-900 dark:text-white">Dados de Pagamento</h2>
+                <h2 className="text-base font-semibold text-slate-900 dark:text-white">{t('paymentData')}</h2>
                 {!isEditingPayment ? (
                   <button
                     onClick={() => {
@@ -729,7 +732,7 @@ const ProfilePage: React.FC = () => {
                     className="flex items-center text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors"
                   >
                     <PencilIcon className="h-4 w-4 mr-1.5 opacity-70" />
-                    Editar
+                    {t('edit')}
                   </button>
                 ) : (
                   <div className="flex gap-3">
@@ -739,7 +742,7 @@ const ProfilePage: React.FC = () => {
                       disabled={isLoadingPayment}
                     >
                       <XMarkIcon className="h-4 w-4 mr-1" />
-                      Cancelar
+                      {t('cancel')}
                     </button>
                     <button
                       onClick={handleSavePayment}
@@ -747,7 +750,7 @@ const ProfilePage: React.FC = () => {
                       disabled={isLoadingPayment}
                     >
                       <CheckIcon className="h-4 w-4 mr-1.5" />
-                      {isLoadingPayment ? 'Salvando...' : 'Salvar'}
+                      {isLoadingPayment ? t('savingProfile') : t('save')}
                     </button>
                   </div>
                 )}
@@ -758,7 +761,7 @@ const ProfilePage: React.FC = () => {
                   {/* Cellphone */}
                   <div>
                     <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                      Telefone <span className="text-red-500">*</span>
+                      {t('phone')} <span className="text-red-500">*</span>
                     </label>
                     {isEditingPayment ? (
                       <input
@@ -777,19 +780,19 @@ const ProfilePage: React.FC = () => {
                           </svg>
                         </div>
                         <span className="text-slate-700 dark:text-slate-200 font-medium text-sm">
-                          {user?.cellphone ? maskPhone(user.cellphone) : 'Não informado'}
+                          {user?.cellphone ? maskPhone(user.cellphone) : t('notInformed')}
                         </span>
                       </div>
                     )}
                     <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                      Necessário para pagamentos via PIX
+                      {t('requiredForPix')}
                     </p>
                   </div>
 
                   {/* Tax ID (CPF) */}
                   <div>
                     <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                      CPF <span className="text-red-500">*</span>
+                      {t('cpf')} <span className="text-red-500">*</span>
                     </label>
                     {isEditingPayment ? (
                       <input
@@ -808,12 +811,12 @@ const ProfilePage: React.FC = () => {
                           </svg>
                         </div>
                         <span className="text-slate-700 dark:text-slate-200 font-medium text-sm">
-                          {user?.taxid ? maskCPF(user.taxid) : 'Não informado'}
+                          {user?.taxid ? maskCPF(user.taxid) : t('notInformed')}
                         </span>
                       </div>
                     )}
                     <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                      Necessário para pagamentos via PIX
+                      {t('requiredForPix')}
                     </p>
                   </div>
 
@@ -825,12 +828,12 @@ const ProfilePage: React.FC = () => {
                       </div>
                       <div>
                         <p className="text-sm font-semibold text-green-800 dark:text-green-200">
-                          {user?.cellphone && user?.taxid ? 'Pronto para pagamentos' : 'Complete seus dados'}
+                          {user?.cellphone && user?.taxid ? t('readyForPayments') : t('completeYourData')}
                         </p>
                         <p className="text-xs text-green-700 dark:text-green-300">
                           {user?.cellphone && user?.taxid
-                            ? 'Você pode adquirir planos pagos via PIX'
-                            : 'Adicione telefone e CPF para desbloquear pagamentos'
+                            ? t('canPurchasePlans')
+                            : t('addPhoneAndCpf')
                           }
                         </p>
                       </div>
@@ -843,14 +846,14 @@ const ProfilePage: React.FC = () => {
             {/* 2. PROFESSIONAL DATA CARD */}
             <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg shadow-sm">
               <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
-                <h2 className="text-base font-semibold text-slate-900 dark:text-white">Dados Profissionais</h2>
+                <h2 className="text-base font-semibold text-slate-900 dark:text-white">{t('professionalData')}</h2>
                 {!isEditingProfessional ? (
                   <button
                     onClick={() => setIsEditingProfessional(true)}
                     className="flex items-center text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors"
                   >
                     <PencilIcon className="h-4 w-4 mr-1.5 opacity-70" />
-                    Editar
+                    {t('edit')}
                   </button>
                 ) : (
                   <div className="flex gap-3">
@@ -860,7 +863,7 @@ const ProfilePage: React.FC = () => {
                       disabled={isLoadingProfessional}
                     >
                       <XMarkIcon className="h-4 w-4 mr-1" />
-                      Cancelar
+                      {t('cancel')}
                     </button>
                     <button
                       onClick={handleSaveProfessional}
@@ -868,7 +871,7 @@ const ProfilePage: React.FC = () => {
                       disabled={isLoadingProfessional}
                     >
                       <CheckIcon className="h-4 w-4 mr-1.5" />
-                      {isLoadingProfessional ? 'Salvando...' : 'Salvar'}
+                      {isLoadingProfessional ? t('savingProfile') : t('save')}
                     </button>
                   </div>
                 )}
@@ -879,7 +882,7 @@ const ProfilePage: React.FC = () => {
                     {/* Area/Niche */}
                     <div>
                       <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                        Área de Atuação
+                        {t('areaOfExpertise')}
                       </label>
                       {isEditingProfessional ? (
                         <div className="relative">
@@ -893,7 +896,7 @@ const ProfilePage: React.FC = () => {
                                       <span>{nicheOptions.find(opt => opt.value === formData.niche)?.label}</span>
                                     </>
                                   ) : (
-                                    <span className="text-slate-400">Selecione...</span>
+                                    <span className="text-slate-400">{t('select')}</span>
                                   )}
                                 </span>
                                 <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
@@ -942,7 +945,7 @@ const ProfilePage: React.FC = () => {
                         <div className="flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 rounded-md">
                           {user?.niche ? getNicheIcon(user.niche, "h-5 w-5 text-slate-400 dark:text-slate-500") : <BriefcaseIcon className="h-5 w-5 text-slate-400 dark:text-slate-500" />}
                           <span className="text-slate-700 dark:text-slate-200 font-medium text-sm">
-                            {nicheOptions.find(opt => opt.value === user?.niche)?.label || user?.niche || 'Não informado'}
+                            {nicheOptions.find(opt => opt.value === user?.niche)?.label || user?.niche || t('notInformed')}
                           </span>
                         </div>
                       )}
@@ -951,7 +954,7 @@ const ProfilePage: React.FC = () => {
                     {/* Career Time */}
                     <div>
                       <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                        {isTechNiche ? 'Experiência na área tech' : 'Experiência profissional'}
+                        {isTechNiche ? t('techExperience') : t('professionalExperience')}
                       </label>
                       {isEditingProfessional ? (
                         <select
@@ -960,7 +963,7 @@ const ProfilePage: React.FC = () => {
                           onChange={handleInputChange}
                           className="block w-full px-4 py-2 text-sm bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:border-primary-500 dark:text-white"
                         >
-                          <option value="">Selecione...</option>
+                          <option value="">{t('select')}</option>
                           {careerTimeOptions.map((option) => (
                             <option key={option.value} value={option.value}>
                               {option.label}
@@ -971,7 +974,7 @@ const ProfilePage: React.FC = () => {
                         <div className="flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 rounded-md">
                           <ClockIcon className="h-5 w-5 text-slate-400 dark:text-slate-500" />
                           <span className="text-slate-700 dark:text-slate-200 font-medium text-sm">
-                            {careerTimeOptions.find(opt => opt.value === user?.careerTime)?.label || user?.careerTime || 'Não informado'}
+                            {careerTimeOptions.find(opt => opt.value === user?.careerTime)?.label || user?.careerTime || t('notInformed')}
                           </span>
                         </div>
                       )}
@@ -982,7 +985,7 @@ const ProfilePage: React.FC = () => {
                   {isTechNiche && (
                     <div>
                       <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                        Tech Stack
+                        {t('techStack')}
                       </label>
                       {isEditingProfessional ? (
                         <div className="flex flex-wrap gap-2 p-4 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl max-h-60 overflow-y-auto">
@@ -1014,7 +1017,7 @@ const ProfilePage: React.FC = () => {
                               </span>
                             ))
                           ) : (
-                            <span className="text-slate-500 text-sm italic">Nenhuma tecnologia selecionada</span>
+                            <span className="text-slate-500 text-sm italic">{t('noTechSelected')}</span>
                           )}
                         </div>
                       )}
@@ -1030,13 +1033,13 @@ const ProfilePage: React.FC = () => {
           <div className="lg:col-span-1 space-y-6 sticky top-6">
             <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg shadow-sm">
               <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-800">
-                <h2 className="text-base font-semibold text-slate-900 dark:text-white">Detalhes da Conta</h2>
+                <h2 className="text-base font-semibold text-slate-900 dark:text-white">{t('accountDetails')}</h2>
               </div>
               <div className="p-6 space-y-5">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <CalendarIcon className="h-4 w-4 text-slate-400 dark:text-slate-500" />
-                    <span className="text-sm font-medium text-slate-500 dark:text-slate-400">Membro desde</span>
+                    <span className="text-sm font-medium text-slate-500 dark:text-slate-400">{t('memberSince')}</span>
                   </div>
                   <span className="text-sm font-medium text-slate-900 dark:text-white">
                     {formatDate(user?.createdAt)}
@@ -1046,7 +1049,7 @@ const ProfilePage: React.FC = () => {
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <ShieldCheckIcon className="h-4 w-4 text-slate-400 dark:text-slate-500" />
-                    <span className="text-sm font-medium text-slate-500 dark:text-slate-400">Plano</span>
+                    <span className="text-sm font-medium text-slate-500 dark:text-slate-400">{t('plan')}</span>
                   </div>
                   <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium border ${user?.role === 'admin'
                     ? 'bg-primary-50 dark:bg-primary-900/20 border-primary-100 dark:border-primary-800 text-primary-700 dark:text-primary-300'
@@ -1054,7 +1057,7 @@ const ProfilePage: React.FC = () => {
                       ? 'bg-emerald-50 dark:bg-emerald-900/20 border-emerald-100 dark:border-emerald-800 text-emerald-700 dark:text-emerald-300'
                       : 'bg-blue-50 dark:bg-blue-900/20 border-blue-100 dark:border-blue-800 text-blue-700 dark:text-blue-300'
                     }`}>
-                    {user?.role === 'admin' ? 'Administrador' : user?.role === 'client' ? 'Gratuito' : user?.role || 'Usuário'}
+                    {user?.role === 'admin' ? t('administrator') : user?.role === 'client' ? t('free') : user?.role || t('userRole')}
                   </span>
                 </div>
 
@@ -1062,7 +1065,7 @@ const ProfilePage: React.FC = () => {
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <CalendarIcon className="h-4 w-4 text-slate-400 dark:text-slate-500" />
-                      <span className="text-sm font-medium text-slate-500 dark:text-slate-400">Plano expira em</span>
+                      <span className="text-sm font-medium text-slate-500 dark:text-slate-400">{t('planExpiresAt')}</span>
                     </div>
                     <span className="text-sm font-medium text-slate-900 dark:text-white">
                       {formatDate(user.roleExpiresAt)}
@@ -1078,7 +1081,7 @@ const ProfilePage: React.FC = () => {
                       <TicketIcon className="h-5 w-5" />
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Tokens</p>
+                      <p className="text-sm font-medium text-slate-500 dark:text-slate-400">{t('tokens')}</p>
                     </div>
                   </div>
                   <span className="text-xl font-bold text-slate-900 dark:text-white">
@@ -1091,7 +1094,7 @@ const ProfilePage: React.FC = () => {
             {/* Activity & Achievements Card */}
             <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg shadow-sm">
               <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-800">
-                <h2 className="text-base font-semibold text-slate-900 dark:text-white">Atividades & Conquistas</h2>
+                <h2 className="text-base font-semibold text-slate-900 dark:text-white">{t('activitiesAchievements')}</h2>
               </div>
               <div className="p-6 space-y-4">
                 <button
@@ -1103,8 +1106,8 @@ const ProfilePage: React.FC = () => {
                       <ChartBarIcon className="h-5 w-5" />
                     </div>
                     <div className="text-left">
-                      <p className="font-semibold text-slate-900 dark:text-white">Histórico de Quizzes</p>
-                      <p className="text-sm text-slate-500 dark:text-slate-400">Veja seu progresso e pontuações</p>
+                      <p className="font-semibold text-slate-900 dark:text-white">{t('quizHistory')}</p>
+                      <p className="text-sm text-slate-500 dark:text-slate-400">{t('quizHistoryDesc')}</p>
                     </div>
                   </div>
                   <ArrowRightOnRectangleIcon className="h-5 w-5 text-slate-400 dark:text-slate-500 group-hover:text-slate-600 dark:group-hover:text-slate-300 transition-colors" />
@@ -1122,22 +1125,22 @@ const ProfilePage: React.FC = () => {
                 <div className="grid grid-cols-2 gap-4 pt-2">
                   <div className="text-center p-3 bg-slate-50 dark:bg-slate-800/50 rounded-lg border border-slate-100 dark:border-slate-700">
                     <DocumentTextIcon className="h-6 w-6 text-indigo-500 mx-auto mb-2" />
-                    <p className="text-xs text-slate-500 dark:text-slate-400">Atividades</p>
+                    <p className="text-xs text-slate-500 dark:text-slate-400">{t('activities')}</p>
                     <p className="text-lg font-bold text-slate-900 dark:text-white">{stats.totalAttempts}</p>
                   </div>
                   <div className="text-center p-3 bg-slate-50 dark:bg-slate-800/50 rounded-lg border border-slate-100 dark:border-slate-700">
                     <ShieldCheckIcon className="h-6 w-6 text-green-500 mx-auto mb-2" />
-                    <p className="text-xs text-slate-500 dark:text-slate-400">Média Geral</p>
+                    <p className="text-xs text-slate-500 dark:text-slate-400">{t('generalAverage')}</p>
                     <p className="text-lg font-bold text-slate-900 dark:text-white">{(stats.averageScore * 10).toFixed(0)}%</p>
                   </div>
                   <div className="text-center p-3 bg-slate-50 dark:bg-slate-800/50 rounded-lg border border-slate-100 dark:border-slate-700">
                     <SparklesIcon className="h-6 w-6 text-amber-500 mx-auto mb-2" />
-                    <p className="text-xs text-slate-500 dark:text-slate-400">Quizzes Gratuitos</p>
+                    <p className="text-xs text-slate-500 dark:text-slate-400">{t('freeQuizzes')}</p>
                     <p className="text-lg font-bold text-slate-900 dark:text-white">{stats.totalFreeQuizzesCompleted}</p>
                   </div>
                   <div className="text-center p-3 bg-slate-50 dark:bg-slate-800/50 rounded-lg border border-slate-100 dark:border-slate-700">
                     <DocumentTextIcon className="h-6 w-6 text-primary-500 mx-auto mb-2" />
-                    <p className="text-xs text-slate-500 dark:text-slate-400">Sessões Flashcard</p>
+                    <p className="text-xs text-slate-500 dark:text-slate-400">{t('flashcardSessions')}</p>
                     <p className="text-lg font-bold text-slate-900 dark:text-white">{stats.flashcardSessions}</p>
                   </div>
                 </div>
@@ -1146,13 +1149,13 @@ const ProfilePage: React.FC = () => {
                 <div className="pt-4 border-t border-slate-100 dark:border-slate-700">
                   <h3 className="text-sm font-semibold text-slate-900 dark:text-white mb-3 flex items-center gap-2">
                     <TicketIcon className="h-4 w-4 text-amber-500" />
-                    Recompensas
+                    {t('rewards')}
                   </h3>
 
                   {/* Progress to next reward */}
                   <div className="mb-4">
                     <div className="flex items-center justify-between text-sm mb-2">
-                      <span className="text-slate-600 dark:text-slate-400">Quizzes gratuitos feitos</span>
+                      <span className="text-slate-600 dark:text-slate-400">{t('freeQuizzesCompleted')}</span>
                       <span className="font-medium text-slate-900 dark:text-white">
                         {stats.totalFreeQuizzesCompleted}
                       </span>
@@ -1164,7 +1167,7 @@ const ProfilePage: React.FC = () => {
                       ></div>
                     </div>
                     <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
-                      <span>Próximo token em {5 - (stats.totalFreeQuizzesCompleted % 5)} quizzes</span>
+                      <span>{t('nextTokenIn', { count: 5 - (stats.totalFreeQuizzesCompleted % 5) })}</span>
                       <span>{stats.totalFreeQuizzesCompleted % 5}/5</span>
                     </div>
                   </div>
@@ -1172,12 +1175,12 @@ const ProfilePage: React.FC = () => {
                   {/* Reward History */}
                   <div>
                     <div className="flex items-center justify-between mb-2">
-                      <h4 className="text-xs font-medium text-slate-700 dark:text-slate-300">Histórico de Recompensas</h4>
+                      <h4 className="text-xs font-medium text-slate-700 dark:text-slate-300">{t('rewardHistory')}</h4>
                       <button
                         onClick={() => navigate('/profile/reward-history')}
                         className="text-xs text-primary-600 dark:text-primary-400 hover:underline"
                       >
-                        Ver completo
+                        {t('viewAll')}
                       </button>
                     </div>
                     <div className="space-y-2 max-h-32 overflow-y-auto">
@@ -1201,21 +1204,21 @@ const ProfilePage: React.FC = () => {
                                   <GiftIcon className="h-4 w-4 text-green-600 dark:text-green-400" />
                                 )}
                                 <span className="text-sm font-medium text-slate-900 dark:text-white">
-                                  {reward.type === 'token' ? `${reward.amount > 0 ? '+' : ''}${reward.amount} Tokens` :
-                                    reward.type === 'badge' ? 'Nova Conquista' :
-                                      isPackage ? (reward.reason.includes(':') ? reward.reason.split(':')[1] : 'Pacote') :
-                                        isRole ? 'Plano Ativado' : 'Recompensa'}
+                                  {reward.type === 'token' ? `${reward.amount > 0 ? '+' : ''}${reward.amount} ${t('tokens')}` :
+                                    reward.type === 'badge' ? t('newAchievement') :
+                                      isPackage ? (reward.reason.includes(':') ? reward.reason.split(':')[1] : t('package')) :
+                                        isRole ? t('planActivated') : t('reward')}
                                 </span>
                               </div>
                               <span className="text-xs text-slate-500 dark:text-slate-400">
-                                {new Date(reward.createdAt).toLocaleDateString('pt-BR')}
+                                {new Date(reward.createdAt).toLocaleDateString(i18n.language === 'en' ? 'en-US' : 'pt-BR')}
                               </span>
                             </div>
                           );
                         })
                       ) : (
                         <div className="text-center py-4 text-slate-500 dark:text-slate-400 text-sm">
-                          Nenhuma recompensa recebida ainda
+                          {t('noRewardsYet')}
                         </div>
                       )}
                     </div>
@@ -1236,7 +1239,7 @@ const ProfilePage: React.FC = () => {
                 className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 hover:border-slate-300 dark:hover:border-slate-700 rounded-lg transition-all text-sm font-medium shadow-sm"
               >
                 <Cog6ToothIcon className="h-4 w-4" />
-                Configurações
+                {t('settings')}
               </button>
 
               <button
@@ -1244,7 +1247,7 @@ const ProfilePage: React.FC = () => {
                 className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-white dark:bg-slate-900 border border-red-200 dark:border-red-900/50 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/10 hover:border-red-300 dark:hover:border-red-800 rounded-lg transition-all text-sm font-medium shadow-sm"
               >
                 <ArrowRightOnRectangleIcon className="h-4 w-4" />
-                Sair da Conta
+                {t('logout')}
               </button>
             </div>
           </div>

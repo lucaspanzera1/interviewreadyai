@@ -7,6 +7,7 @@ import { useAuth } from '../contexts/AuthContext';
 
 import Loading from './Loading';
 import PaymentLoadingModal from './PaymentLoadingModal';
+import { useTranslation, Trans } from 'react-i18next';
 import {
   TicketIcon,
   SparklesIcon,
@@ -18,6 +19,7 @@ const TokensPage: React.FC = () => {
   const { showToast } = useToast();
   const { user, refreshUser, isLoading } = useAuth();
   const navigate = useNavigate();
+  const { t, i18n } = useTranslation('tokens');
 
   const [packages, setPackages] = useState<TokenPackage[]>([]);
   const [loadingPackages, setLoadingPackages] = useState(false);
@@ -49,7 +51,7 @@ const TokensPage: React.FC = () => {
       showToast(result.message, 'success');
       await refreshUser();
     } catch (error: any) {
-      const errorMessage = error?.response?.data?.message || 'Erro ao resgatar pacote';
+      const errorMessage = error?.response?.data?.message || t('errors.redeemError');
       showToast(errorMessage, 'error');
     } finally {
       setRedeeming(null);
@@ -59,7 +61,7 @@ const TokensPage: React.FC = () => {
   const handlePayForPackage = async (packageId: string) => {
     // Verificar se o usuário tem os dados necessários para pagamento
     if (!user?.cellphone || !user?.taxid) {
-      showToast('Complete seu telefone e CPF no perfil para fazer pagamentos', 'error');
+      showToast(t('errors.completePhoneCPF'), 'error');
       navigate('/profile');
       return;
     }
@@ -72,7 +74,7 @@ const TokensPage: React.FC = () => {
 
       if (!result.checkoutUrl) {
         console.error('❌ Checkout URL está vazia!');
-        showToast('Erro: URL de checkout não recebida', 'error');
+        showToast(t('errors.checkoutURLError'), 'error');
         setShowPaymentLoading(false);
         setPaying(null);
         return;
@@ -91,7 +93,7 @@ const TokensPage: React.FC = () => {
       }
     } catch (error: any) {
       console.error('❌ Erro completo no pagamento:', error);
-      const errorMessage = error?.response?.data?.message || 'Erro ao iniciar pagamento';
+      const errorMessage = error?.response?.data?.message || t('errors.paymentError');
       console.error('📝 Mensagem de erro:', errorMessage);
       showToast(errorMessage, 'error');
       setShowPaymentLoading(false);
@@ -108,7 +110,7 @@ const TokensPage: React.FC = () => {
 
   return (
     <div className="max-w-4xl mx-auto space-y-12 sm:space-y-16 py-6 sm:py-8 pb-32 sm:pb-8">
-      <PageTitle title="Créditos - TreinaVagaAI" />
+      <PageTitle title={t('pageTitle')} />
 
       {/* Payment Loading Modal */}
       <PaymentLoadingModal isOpen={showPaymentLoading} />
@@ -116,12 +118,12 @@ const TokensPage: React.FC = () => {
       <header className="sticky top-0 z-20 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 -mx-4 -mt-4 lg:-mx-8 lg:-mt-8 px-4 lg:px-8 py-4 mb-8 transition-all duration-300">
         <div className="max-w-4xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
           <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white tracking-tight">Créditos</h1>
-            <p className="text-slate-500 dark:text-slate-400 font-medium text-sm">Gerencie seu saldo e desbloqueie recursos.</p>
+            <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white tracking-tight">{t('title')}</h1>
+            <p className="text-slate-500 dark:text-slate-400 font-medium text-sm">{t('subtitle')}</p>
           </div>
 
           <div className="flex items-center gap-3 bg-amber-50 dark:bg-amber-900/20 px-4 py-2 rounded-xl border border-amber-100 dark:border-amber-800/50">
-            <span className="text-xs font-bold text-amber-600 dark:text-amber-400 uppercase tracking-wider">Saldo</span>
+            <span className="text-xs font-bold text-amber-600 dark:text-amber-400 uppercase tracking-wider">{t('balance')}</span>
             <div className="flex items-center gap-2">
               <span className="text-2xl font-black text-slate-900 dark:text-white leading-none">
                 {user?.tokens || 0}
@@ -135,9 +137,9 @@ const TokensPage: React.FC = () => {
       {/* Simplified Info Grid */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 px-4">
         {[
-          { title: "Simulados Gratuitos", desc: "Liberados diariamente" },
-          { title: "Alta Performance", desc: "Bônus por desempenho" },
-          { title: "Sequência Diária", desc: "Retorne e ganhe mais" }
+          { title: t('infoGrid.freeQuizzes'), desc: t('infoGrid.freeQuizzesDesc') },
+          { title: t('infoGrid.highPerformance'), desc: t('infoGrid.highPerformanceDesc') },
+          { title: t('infoGrid.dailyStreak'), desc: t('infoGrid.dailyStreakDesc') }
         ].map((item, i) => (
           <div key={i} className="bg-slate-50/50 dark:bg-slate-800/30 p-5 rounded-2xl border border-slate-100 dark:border-slate-800">
             <h3 className="text-sm font-bold text-slate-900 dark:text-white mb-1">{item.title}</h3>
@@ -160,16 +162,16 @@ const TokensPage: React.FC = () => {
 
             <div className="relative flex-1">
               <h4 className="text-base font-bold text-amber-900 dark:text-amber-100 mb-1">
-                Complete seu perfil para pagamentos
+                {t('completeProfile.title')}
               </h4>
               <p className="text-sm text-amber-800 dark:text-amber-200/80 font-medium leading-relaxed mb-3">
-                Para adquirir planos pagos, você precisa informar seu telefone e CPF.
+                {t('completeProfile.description')}
               </p>
               <button
                 onClick={() => navigate('/profile')}
                 className="inline-flex items-center px-4 py-2 bg-amber-600 text-white text-sm font-medium rounded-lg hover:bg-amber-700 transition-colors"
               >
-                Completar Perfil
+                {t('completeProfile.button')}
               </button>
             </div>
           </div>
@@ -184,10 +186,12 @@ const TokensPage: React.FC = () => {
 
           <div className="relative">
             <h4 className="text-base font-bold text-amber-900 dark:text-amber-100 mb-1">
-              Turbine seus estudos
+              {t('boostStudies')}
             </h4>
             <p className="text-sm text-amber-800 dark:text-amber-200/80 font-medium leading-relaxed">
-              Você pode comprar tokens direto nesta página ou ganhar <strong className="text-amber-700 dark:text-amber-300">gratuitamente</strong> ao completar 5 quizzes.
+              <Trans i18nKey="boostStudiesDesc" t={t}
+                components={{ strong: <strong className="text-amber-700 dark:text-amber-300" /> }}
+              />
             </p>
           </div>
         </div>
@@ -195,7 +199,7 @@ const TokensPage: React.FC = () => {
 
       {/* Packages Section */}
       <div className="space-y-8 px-4">
-        <h2 className="text-xl font-bold text-slate-900 dark:text-white">Pacotes Sugeridos</h2>
+        <h2 className="text-xl font-bold text-slate-900 dark:text-white">{t('suggestedPackages')}</h2>
 
         {loadingPackages ? (
           <div className="flex justify-center py-12"><Loading /></div>
@@ -208,10 +212,10 @@ const TokensPage: React.FC = () => {
             </div>
             <div>
               <h3 className="text-lg font-bold text-amber-800 dark:text-amber-200">
-                Em Desenvolvimento
+                {t('inDevelopment')}
               </h3>
               <p className="text-amber-700 dark:text-amber-300 mt-1">
-                Estamos na versão beta, essa feature vai ser liberada no lançamento da 1.0.0.
+                {t('betaMessage')}
               </p>
             </div>
           </div>
@@ -244,7 +248,7 @@ const TokensPage: React.FC = () => {
                         <span className="text-5xl font-black text-slate-900 dark:text-white tracking-tighter">
                           {pkg.tokenAmount}
                         </span>
-                        <span className="text-slate-400 font-bold text-sm">Tokens</span>
+                        <span className="text-slate-400 font-bold text-sm">{t('tokensLabel')}</span>
                       </div>
 
                       {pkg.value && (
@@ -252,7 +256,7 @@ const TokensPage: React.FC = () => {
                           <span className="text-2xl font-bold text-green-600 dark:text-green-400">
                             R$ {pkg.value.toFixed(2)}
                           </span>
-                          <span className="text-xs text-slate-500 font-medium">por mês</span>
+                          <span className="text-xs text-slate-500 font-medium">{t('perMonth')}</span>
                         </div>
                       )}
 
@@ -264,7 +268,7 @@ const TokensPage: React.FC = () => {
                         ))}
                         {pkg.validityDays && (
                           <li className="text-xs text-slate-500 font-medium flex gap-2">
-                            <span className="text-blue-500">/</span> {pkg.validityDays} dias
+                            <span className="text-blue-500">/</span> {t('days', { count: pkg.validityDays })}
                           </li>
                         )}
                       </ul>
@@ -285,12 +289,12 @@ const TokensPage: React.FC = () => {
                               : 'bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white hover:bg-slate-200 dark:hover:bg-slate-750'
                         }`}
                     >
-                      {(pkg.value ? paying === pkg.id : redeeming === pkg.id) ? '...' : hasActivePlan ? 'Ativo' : pkg.value ? 'Comprar Agora' : 'Começar Agora'}
+                      {(pkg.value ? paying === pkg.id : redeeming === pkg.id) ? '...' : hasActivePlan ? t('active') : pkg.value ? t('buyNow') : t('startNow')}
                     </button>
                   </div>
                   {hasActivePlan && user?.roleExpiresAt && (
                     <p className="text-[10px] text-center text-slate-400 mt-3 font-medium">
-                      Expira em {new Date(user.roleExpiresAt).toLocaleDateString('pt-BR')}
+                      {t('expiresIn', { date: new Date(user.roleExpiresAt).toLocaleDateString(i18n.language) })}
                     </p>
                   )}
                 </div>
@@ -308,7 +312,7 @@ const TokensPage: React.FC = () => {
             className="flex items-center gap-2 px-4 py-2 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 rounded-full text-sm font-medium hover:bg-blue-100 dark:hover:bg-blue-900/40 transition-colors shadow-sm"
           >
             <QuestionMarkCircleIcon className="w-5 h-5" />
-            <span>Dúvidas sobre os Créditos/Tokens?</span>
+            <span>{t('faq.title')}</span>
           </button>
         ) : (
           <div className="relative w-full p-4 sm:p-6 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-700 flex flex-col sm:flex-row gap-4 animate-fade-in-up">
@@ -323,11 +327,10 @@ const TokensPage: React.FC = () => {
             </div>
             <div className="flex-1 pr-8">
               <h4 className="font-bold text-slate-900 dark:text-white mb-2">
-                Como funcionam os Créditos?
+                {t('faq.howItWorks')}
               </h4>
               <p className="text-sm text-slate-600 dark:text-slate-400 mb-4 leading-relaxed">
-                Os créditos (tokens) são usados para gerar conteúdos personalizados pela IA, como quizzes de vagas específicas, flashcards e simulações de entrevista.
-                Você ganha tokens gratuitos diariamente e ao completar desafios, ou pode adquirir pacotes para uso intensivo.
+                {t('faq.explanation')}
               </p>
               <a
                 href="https://wa.me/5531997313160"
@@ -335,7 +338,7 @@ const TokensPage: React.FC = () => {
                 rel="noopener noreferrer"
                 className="text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 text-sm font-semibold hover:underline inline-flex items-center gap-2"
               >
-                Precisa de ajuda com pagamentos? Fale com o suporte
+                {t('faq.supportLink')}
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-3 h-3">
                   <path fillRule="evenodd" d="M16.28 11.47a.75.75 0 010 1.06l-7.5 7.5a.75.75 0 01-1.06-1.06L14.69 12 7.72 5.03a.75.75 0 011.06-1.06l7.5 7.5z" clipRule="evenodd" />
                 </svg>

@@ -5,6 +5,7 @@ import { firstValueFrom } from 'rxjs';
 import { TokenPackageService } from '../token-package/token-package.service';
 import { User } from '../user/schemas/user.schema';
 import { UserService } from '../user/user.service';
+import { t, SupportedLanguage } from '../common/i18n';
 
 @Injectable()
 export class PlansService {
@@ -43,7 +44,7 @@ export class PlansService {
     // Buscar o plano
     const plan = await this.tokenPackageService.findOne(planId);
     if (!plan || !plan.active || !plan.value) {
-      throw new NotFoundException('Plano não encontrado ou não disponível para compra');
+      throw new NotFoundException(t('plan.notFoundOrUnavailable'));
     }
 
     // Garantir que o plano tenha externalId
@@ -53,7 +54,7 @@ export class PlansService {
 
     const abacatepayToken = this.configService.get<string>('ABACATEPAY_TOKEN');
     if (!abacatepayToken) {
-      throw new BadRequestException('Configuração de pagamento não disponível');
+      throw new BadRequestException(t('plan.paymentConfigUnavailable'));
     }
 
     // Preparar payload para AbacatePay
@@ -101,7 +102,7 @@ export class PlansService {
       };
     } catch (error) {
       console.error('Erro ao criar cobrança na AbacatePay:', error.response?.data || error.message);
-      throw new BadRequestException('Erro ao processar pagamento. Tente novamente.');
+      throw new BadRequestException(t('plan.paymentError'));
     }
   }
 

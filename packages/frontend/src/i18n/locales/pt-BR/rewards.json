@@ -1,0 +1,66 @@
+{
+  "pageTitle": "Histórico - TreinaVagaAI",
+  "myJourney": "Minha Jornada",
+  "history": "Histórico",
+  "subtitle": "Seu progresso e conquistas acumuladas.",
+  "title": "Histórico de Recompensas",
+  "totalEarned": "Ganhos Totais",
+  "totalSpent": "Gastos",
+  "currentBalance": "Saldo Atual",
+  "totalEarnedCard": "Total Ganho",
+  "totalSpentCard": "Total Gasto",
+  "timeline": "Linha do Tempo",
+  "weeklyGoal": "Meta Semanal",
+  "weeklyGoalDesc": "Continue completando simulados para desbloquear mais bônus.",
+  "nextBonusProgress": "{{current}}/5 para o próximo bônus",
+  "events": "{{count}} Eventos",
+  "emptyState": "Sem registros ainda",
+  "emptyStateDesc": "Seus ganhos aparecerão aqui assim que completar simulados.",
+  "startNow": "COMEÇAR AGORA",
+  "tokensLabel": "tokens",
+  "rewardLabels": {
+    "quiz_completion": "Quiz Completado",
+    "quiz_perfect_score": "Quiz Nota Máxima",
+    "daily_bonus": "Bônus Diário",
+    "streak_bonus": "Bônus de Sequência",
+    "profile_completed": "Perfil Completado",
+    "first_quiz": "Primeiro Quiz",
+    "first_interview": "Primeira Entrevista",
+    "first_flashcard": "Primeiro Flashcard",
+    "referral": "Indicação",
+    "token_purchase": "Compra de Tokens",
+    "plan_redeemed": "Plano Resgatado",
+    "quiz_generation": "Geração de Quiz",
+    "interview_generation": "Geração de Entrevista",
+    "flashcard_generation": "Geração de Flashcard",
+    "video_analysis": "Análise de Vídeo"
+  },
+  "rewardTitles": {
+    "tokenAmount_one": "{{sign}}{{amount}} Token",
+    "tokenAmount_other": "{{sign}}{{amount}} Tokens",
+    "newAchievement": "Nova Conquista",
+    "planActivated": "Plano Ativado",
+    "packageAcquired": "Pacote Adquirido",
+    "reward": "Recompensa"
+  },
+  "descriptions": {
+    "accountUpgrade": "Upgrade de conta + {{amount}} tokens",
+    "quiz_completion": "Completou quizzes gratuitos",
+    "quiz_generation": "Geração de quiz personalizado",
+    "flashcard_generation": "Geração de flashcards",
+    "interview_generation": "Geração de simulação de entrevista",
+    "quiz_play": "Jogou quiz de outro usuário",
+    "referral": "Indicação de amigo",
+    "achievement": "Conquista desbloqueada",
+    "package_redemption": "Resgate de pacote promocional",
+    "token_added": "Tokens adicionados",
+    "token_spent": "Tokens gastos"
+  },
+  "errors": {
+    "loadHistory": "Erro ao carregar histórico de recompensas"
+  },
+  "types": {
+    "earned": "Recebido",
+    "spent": "Gasto"
+  }
+}

@@ -4,6 +4,7 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { User } from '../user/schemas/user.schema';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { UserService } from '../user/user.service';
+import { t, SupportedLanguage } from '../common/i18n';
 
 @Controller('plans')
 @UseGuards(JwtAuthGuard)
@@ -19,7 +20,7 @@ export class PlansController {
     @CurrentUser() user: User,
   ) {
     if (!user.cellphone || !user.taxid) {
-      throw new BadRequestException('CPF e telefone são obrigatórios para realizar pagamentos');
+      throw new BadRequestException(t('plan.cpfPhoneRequired'));
     }
 
     // Tentar criar cliente na AbacatePay se não existir
@@ -31,11 +32,11 @@ export class PlansController {
           await this.userService.updateUser((user as any)._id.toString(), { abacatepayCustomerId: customerId });
           user.abacatepayCustomerId = customerId;
         } else {
-          throw new BadRequestException('Cliente não cadastrado na AbacatePay. Atualize seu perfil primeiro.');
+          throw new BadRequestException(t('plan.customerNotRegistered'));
         }
       } catch (error) {
         console.error('Erro ao criar cliente na AbacatePay durante pagamento:', error);
-        throw new BadRequestException('Cliente não cadastrado na AbacatePay. Atualize seu perfil primeiro.');
+        throw new BadRequestException(t('plan.customerNotRegistered'));
       }
     }
 

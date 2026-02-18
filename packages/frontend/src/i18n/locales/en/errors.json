@@ -1,0 +1,27 @@
+{
+  "boundary": {
+    "title": "Oops! Something went wrong",
+    "description": "An unexpected error occurred. Please try again.",
+    "detailedDescription": "An unexpected error occurred in the application. Our team has been notified and is working to resolve the issue.",
+    "errorDetailsLabel": "Error Details (Development):",
+    "tryAgain": "Try Again",
+    "reloadPage": "Reload Page",
+    "backHome": "Back to Home",
+    "supportMessage": "If the problem persists, contact support:"
+  },
+  "notFound": {
+    "title": "Page not found",
+    "description": "The page you are looking for does not exist or has been moved.",
+    "backHome": "Back to Home"
+  },
+  "network": {
+    "offline": "You are offline. Check your connection.",
+    "timeout": "The request took too long. Please try again.",
+    "serverError": "Server error. Please try again later."
+  },
+  "generic": {
+    "somethingWrong": "Something went wrong",
+    "tryAgain": "Try again",
+    "contactSupport": "If the problem persists, please contact support."
+  }
+}

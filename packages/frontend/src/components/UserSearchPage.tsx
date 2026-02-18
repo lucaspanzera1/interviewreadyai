@@ -5,16 +5,17 @@ import { socialApi, PublicUser, SearchUsersParams } from '../lib/socialApi';
 import { useAuth } from '../contexts/AuthContext';
 import { toast } from 'react-toastify';
 import { getNicheIcon } from '../utils/nicheIcons';
+import { useTranslation } from 'react-i18next';
 
 const NICHOS = [
-  { value: 'tecnologia', label: 'Tecnologia' },
-  { value: 'educacao', label: 'Educação' },
-  { value: 'recursos_humanos', label: 'Recursos Humanos' },
-  { value: 'financeiro', label: 'Financeiro' },
-  { value: 'saude', label: 'Saúde' },
-  { value: 'vendas', label: 'Vendas' },
-  { value: 'marketing', label: 'Marketing' },
-  { value: 'outro', label: 'Outro' }
+  'tecnologia',
+  'educacao',
+  'recursos_humanos',
+  'financeiro',
+  'saude',
+  'vendas',
+  'marketing',
+  'outro'
 ];
 
 // Hook de Debounce
@@ -32,6 +33,7 @@ function useDebounce<T>(value: T, delay: number): T {
 }
 
 const UserSearchPage: React.FC = () => {
+  const { t } = useTranslation('social');
   const { user: currentUser } = useAuth();
   const [users, setUsers] = useState<PublicUser[]>([]);
   const [loading, setLoading] = useState(false);
@@ -77,7 +79,7 @@ const UserSearchPage: React.FC = () => {
       setPagination(prev => ({ ...prev, total: response.total, page }));
     } catch (error) {
       console.error('Erro ao buscar usuários:', error);
-      toast.error('Não foi possível carregar os estudantes.');
+      toast.error(t('search.errorLoading'));
     } finally {
       setLoading(false);
     }
@@ -139,15 +141,15 @@ const UserSearchPage: React.FC = () => {
     try {
       if (user.isFollowing) {
         await socialApi.unfollowUser(user.id);
-        toast.info(`Você deixou de seguir ${user.name.split(' ')[0]}`);
+        toast.info(t('search.unfollowedToast', { name: user.name.split(' ')[0] }));
       } else {
         await socialApi.followUser(user.id);
-        toast.success(`Você agora segue ${user.name.split(' ')[0]}`);
+        toast.success(t('search.followedToast', { name: user.name.split(' ')[0] }));
       }
     } catch (error) {
       // Revert on error
       setUsers(originalUsers);
-      toast.error('Erro ao atualizar. Tente novamente.');
+      toast.error(t('search.errorUpdating'));
     }
   };
 
@@ -160,10 +162,10 @@ const UserSearchPage: React.FC = () => {
             <div>
               <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white tracking-tight flex items-center gap-2">
                 <Sparkles className="text-yellow-500" size={24} />
-                Explorar Comunidade
+                {t('search.title')}
               </h1>
               <p className="text-slate-500 dark:text-slate-400 font-medium text-sm mt-1">
-                Conecte-se com {pagination.total > 0 ? pagination.total : 'outros'} estudantes incríveis
+                {pagination.total > 0 ? t('search.subtitle', { count: pagination.total }) : t('search.subtitleNoCount')}
               </p>
             </div>
 
@@ -173,7 +175,7 @@ const UserSearchPage: React.FC = () => {
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-500 transition-colors" size={18} />
                 <input
                   type="text"
-                  placeholder="Buscar por nome..."
+                  placeholder={t('search.searchPlaceholder')}
                   className="w-full bg-slate-100 dark:bg-slate-900 border border-transparent focus:border-indigo-500 focus:bg-white dark:focus:bg-slate-800 text-slate-900 dark:text-white rounded-xl py-2.5 pl-10 pr-4 transition-all outline-none"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
@@ -190,7 +192,7 @@ const UserSearchPage: React.FC = () => {
                   ? 'bg-indigo-50 border-indigo-200 text-indigo-600 dark:bg-indigo-900/20 dark:border-indigo-800 dark:text-indigo-400'
                   : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700'
                   }`}
-                title="Filtros"
+                title={t('search.filters')}
               >
                 <Filter size={20} />
               </button>
@@ -207,19 +209,19 @@ const UserSearchPage: React.FC = () => {
                   : 'bg-white text-slate-600 border-slate-200 hover:border-slate-300 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700'
                   }`}
               >
-                Todos
+                {t('search.filterAll')}
               </button>
               {NICHOS.map((niche) => (
                 <button
-                  key={niche.value}
-                  onClick={() => setSelectedNiche(selectedNiche === niche.value ? '' : niche.value)}
-                  className={`whitespace-nowrap px-4 py-1.5 rounded-full text-sm font-medium transition-colors border flex items-center gap-2 ${selectedNiche === niche.value
+                  key={niche}
+                  onClick={() => setSelectedNiche(selectedNiche === niche ? '' : niche)}
+                  className={`whitespace-nowrap px-4 py-1.5 rounded-full text-sm font-medium transition-colors border flex items-center gap-2 ${selectedNiche === niche
                     ? 'bg-indigo-100 text-indigo-700 border-indigo-200 dark:bg-indigo-900/40 dark:text-indigo-300 dark:border-indigo-700'
                     : 'bg-white text-slate-600 border-slate-200 hover:border-slate-300 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700'
                     }`}
                 >
-                  {getNicheIcon(niche.value, "w-4 h-4")}
-                  {niche.label}
+                  {getNicheIcon(niche, "w-4 h-4")}
+                  {t(`niches.${niche}`)}
                 </button>
               ))}
             </div>
@@ -244,16 +246,16 @@ const UserSearchPage: React.FC = () => {
                   <User size={48} className="text-slate-400" />
                 </div>
                 <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2">
-                  Nenhum estudante encontrado
+                  {t('search.noResults')}
                 </h3>
                 <p className="text-slate-500 dark:text-slate-400 max-w-md mx-auto mb-8">
-                  Não encontramos ninguém com os critérios atuais. Tente buscar por outro nome ou limpar os filtros.
+                  {t('search.noResultsDesc')}
                 </p>
                 <button
                   onClick={clearFilters}
                   className="px-6 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium transition-colors shadow-lg shadow-indigo-500/20"
                 >
-                  Limpar Filtros
+                  {t('search.clearFilters')}
                 </button>
               </div>
             ) : (
@@ -319,6 +321,7 @@ const UserCard: React.FC<{
 }> = ({ user, currentUserId, onToggleFollow }) => {
   const isOwnProfile = currentUserId === user.id;
   const navigate = useNavigate();
+  const { t } = useTranslation('social');
 
   return (
     <div
@@ -336,7 +339,7 @@ const UserCard: React.FC<{
             className="w-16 h-16 rounded-2xl object-cover shadow-sm ring-4 ring-white dark:ring-slate-800 group-hover:scale-105 transition-transform duration-300"
           />
           {user.isFollowing && (
-            <div className="absolute -bottom-1 -right-1 bg-green-500 text-white p-1 rounded-full border-2 border-white dark:border-slate-800 shadow-sm" title="Você segue este estudante">
+            <div className="absolute -bottom-1 -right-1 bg-green-500 text-white p-1 rounded-full border-2 border-white dark:border-slate-800 shadow-sm" title={t('search.youFollowThisStudent')}>
               <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
             </div>
           )}
@@ -375,12 +378,12 @@ const UserCard: React.FC<{
           {user.niche ? (
             <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-md bg-slate-100 dark:bg-slate-700/50 text-xs font-medium text-slate-600 dark:text-slate-300">
               {getNicheIcon(user.niche, "w-3 h-3 text-slate-500")}
-              <span className="capitalize">{user.niche.replace('_', ' ')}</span>
+              <span>{t(`niches.${user.niche}`)}</span>
             </span>
           ) : (
             <span className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-slate-50 dark:bg-slate-800/50 text-xs text-slate-400">
               <Briefcase size={10} />
-              <span>Sem nicho</span>
+              <span>{t('search.noNiche')}</span>
             </span>
           )}
           {user.location && (
@@ -394,7 +397,7 @@ const UserCard: React.FC<{
 
       <div className="z-10 flex-grow mb-6">
         <p className="text-sm text-slate-600 dark:text-slate-400 line-clamp-2 min-h-[40px] leading-relaxed">
-          {user.bio || <span className="italic opacity-50">Sem descrição disponível para este perfil.</span>}
+          {user.bio || <span className="italic opacity-50">{t('search.noDescription')}</span>}
         </p>
       </div>
 
@@ -405,7 +408,7 @@ const UserCard: React.FC<{
               {user.quizStats.totalCompleted}
             </div>
             <div className="text-[10px] uppercase font-bold tracking-wider text-slate-500 dark:text-slate-400">
-              Quizzes
+              {t('search.quizzes')}
             </div>
           </div>
           <div className="bg-slate-50 dark:bg-slate-700/30 rounded-xl p-2.5 text-center border border-slate-100 dark:border-slate-700">
@@ -416,7 +419,7 @@ const UserCard: React.FC<{
               {user.quizStats.averageScore}%
             </div>
             <div className="text-[10px] uppercase font-bold tracking-wider text-slate-500 dark:text-slate-400">
-              Média
+              {t('search.average')}
             </div>
           </div>
         </div>
@@ -435,12 +438,12 @@ const UserCard: React.FC<{
             {user.isFollowing ? (
               <>
                 <UserMinus size={16} />
-                <span>Deixar de Seguir</span>
+                <span>{t('search.unfollow')}</span>
               </>
             ) : (
               <>
                 <UserPlus size={16} />
-                <span>Seguir</span>
+                <span>{t('search.follow')}</span>
               </>
             )}
           </button>

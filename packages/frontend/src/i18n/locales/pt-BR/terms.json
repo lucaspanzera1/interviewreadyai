@@ -1,0 +1,48 @@
+{
+  "pageTitle": "Termos de Uso - TreinaVagaAI",
+  "title": "Termos de Uso",
+  "subtitle": "Regras e diretrizes para o uso da plataforma TreinaVagaAI.",
+  "updatedAt": "Atualizado em {{date}}",
+  "back": "Voltar",
+  "allRightsReserved": "© {{year}} TreinaVagaAI. Todos os direitos reservados.",
+  "sections": {
+    "acceptance": {
+      "title": "1. Aceitação dos Termos",
+      "content": "Ao acessar e usar a plataforma TreinaVagaAI, você concorda em cumprir e ficar vinculado a estes Termos de Uso. Se você não concordar com qualquer parte destes termos, você não deve usar nossos serviços. O uso contínuo da plataforma confirma sua aceitação destes termos e quaisquer alterações futuras."
+    },
+    "serviceDescription": {
+      "title": "2. Descrição do Serviço",
+      "content": "O TreinaVagaAI é uma plataforma avançada de educação e treinamento profissional que utiliza inteligência artificial para gerar quizzes, simulados e feedback personalizado, visando preparar usuários para processos seletivos e evolução de carreira."
+    },
+    "userAccount": {
+      "title": "3. Conta do Usuário",
+      "content": "Para acessar recursos exclusivos, a criação de uma conta é obrigatória. Você é o único responsável pela segurança e confidencialidade de suas credenciais de acesso, bem como por todas as atividades que ocorrem sob sua conta. Notifique-nos imediatamente sobre qualquer uso não autorizado."
+    },
+    "acceptableUse": {
+      "title": "4. Uso Aceitável",
+      "content": "Você se compromete a utilizar a plataforma de maneira ética e legal. É estritamente proibido:",
+      "list": [
+        "Tentar violar ou contornar a segurança do sistema ou rede.",
+        "Utilizar bots, scrapers ou scripts automatizados para coletar dados.",
+        "Praticar qualquer ato de assédio, abuso ou discriminação.",
+        "Publicar conteúdo que viole direitos de propriedade intelectual."
+      ]
+    },
+    "intellectualProperty": {
+      "title": "5. Propriedade Intelectual",
+      "content": "Todo o conteúdo, design, código, gráficos e funcionalidades da TreinaVagaAI são de propriedade exclusiva da plataforma e seus licenciadores, protegidos por leis de direitos autorais e propriedade intelectual. O uso não autorizado é proibido."
+    },
+    "disclaimer": {
+      "title": "6. Isenção de Garantias",
+      "content": "O serviço é fornecido 'no estado em que se encontra', sem garantias de qualquer tipo, expressas ou implícitas. Não garantimos que o serviço será ininterrupto, livre de erros ou totalmente seguro. O uso é de sua inteira responsabilidade."
+    },
+    "changes": {
+      "title": "7. Alterações nos Termos",
+      "content": "Reservamo-nos o direito de revisar e modificar estes termos a qualquer momento, sem aviso prévio. Recomendamos que você revise esta página periodicamente para estar ciente de quaisquer alterações."
+    },
+    "contact": {
+      "title": "8. Contato",
+      "content": "Em caso de dúvidas sobre estes Termos de Uso, entre em contato conosco através dos canais de suporte disponíveis na plataforma ou pelo nosso email de atendimento."
+    }
+  }
+}

@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation, Trans } from 'react-i18next';
 import PageTitle from './PageTitle';
 import {
     AcademicCapIcon,
@@ -14,13 +15,6 @@ import { StarIcon as StarIconSolid } from '@heroicons/react/24/solid';
 import { apiClient } from '../lib/api';
 import { useAuth } from '../contexts/AuthContext';
 import { useToast } from '../contexts/ToastContext';
-
-const DISPLAY_DIFFICULTY: Record<string, string> = {
-    'INICIANTE': 'Iniciante',
-    'MEDIO': 'Intermediário',
-    'DIFÍCIL': 'Avançado',
-    'EXPERT': 'Expert'
-};
 
 const NICHOS = [
     { value: 'tecnologia', label: 'Tecnologia' },
@@ -41,6 +35,7 @@ const FreeQuizzesPage: React.FC = () => {
     const navigate = useNavigate();
     const { user, refreshUser } = useAuth();
     const { showToast } = useToast();
+    const { t } = useTranslation('quiz');
     const [categories, setCategories] = useState<{ value: string, label: string }[]>([]);
     const [difficulties, setDifficulties] = useState<string[]>([]);
     const [selectedCategoryValue, setSelectedCategoryValue] = useState('Todas');
@@ -67,7 +62,7 @@ const FreeQuizzesPage: React.FC = () => {
         } else if (diffMinutes > 0) {
             return `${diffMinutes}min`;
         } else {
-            return 'menos de 1min';
+            return t('freeQuizzes.lessThan1Min');
         }
     };
 
@@ -147,7 +142,7 @@ const FreeQuizzesPage: React.FC = () => {
             const rewardCheck = await apiClient.checkRecentReward();
 
             if (rewardCheck.hasRecentReward && lastRewardShown !== rewardCheck.rewardTime?.toString()) {
-                showToast('🎉 Parabéns! Você ganhou 1 token por completar 5 quizzes gratuitos!', 'success');
+                showToast(t('freeQuizzes.rewardEarned'), 'success');
                 localStorage.setItem('lastRewardShown', rewardCheck.rewardTime?.toString() || '');
                 await refreshUser();
             }
@@ -180,12 +175,12 @@ const FreeQuizzesPage: React.FC = () => {
             console.error('Erro ao carregar quizzes:', error);
             const statusCode = error.response?.status || error.statusCode || error.status;
             if (statusCode === 403) {
-                const message = error.response?.data?.message || 'Acesso negado.';
+                const message = error.response?.data?.message || t('freeQuizzes.accessDenied');
                 showToast(message, 'error');
             } else if (statusCode === 429) {
-                showToast('Muitas requisições! Aguarde um momento.', 'error');
+                showToast(t('freeQuizzes.tooManyRequests'), 'error');
             } else {
-                showToast('Não foi possível carregar os quizzes.', 'error');
+                showToast(t('freeQuizzes.errorLoadingQuizzes'), 'error');
             }
         } finally {
             setLoading(false);
@@ -196,7 +191,7 @@ const FreeQuizzesPage: React.FC = () => {
         setStartingQuiz(quiz._id);
         try {
             if (!user) {
-                showToast('Faça login para jogar os quizzes gratuitos! 🚀', 'info');
+                showToast(t('freeQuizzes.loginRequired'), 'info');
                 navigate('/login');
                 return;
             }
@@ -205,18 +200,18 @@ const FreeQuizzesPage: React.FC = () => {
             const fullQuiz = await apiClient.getQuizForPlaying(quiz._id);
 
             if (!fullQuiz || !fullQuiz.questions || fullQuiz.questions.length === 0) {
-                showToast('Este quiz não está disponível ou não tem questões.', 'error');
+                showToast(t('freeQuizzes.quizNotAvailable'), 'error');
                 return;
             }
 
             localStorage.setItem('generatedQuiz', JSON.stringify(fullQuiz));
             localStorage.setItem('currentQuizId', fullQuiz._id);
 
-            showToast('Quiz iniciado! Boa sorte! 🎯', 'success');
+            showToast(t('freeQuizzes.quizStarted'), 'success');
             navigate('/quiz/generated');
         } catch (error: any) {
             console.error('Erro ao iniciar quiz público:', error);
-            const message = error.response?.data?.message || 'Erro ao iniciar o quiz.';
+            const message = error.response?.data?.message || t('freeQuizzes.errorStarting');
             showToast(message, 'error');
         } finally {
             setStartingQuiz(null);
@@ -226,31 +221,31 @@ const FreeQuizzesPage: React.FC = () => {
     return (
         <div className="max-w-6xl mx-auto space-y-8">
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
-                <PageTitle title="Quizzes Gratuitos - TreinaVagaAI" />
+                <PageTitle title={t('freeQuizzes.pageTitle')} />
                 <div className="flex flex-col items-end gap-2">
                     <p className="text-sm text-slate-500 dark:text-slate-400 hidden md:block">
-                        Pratique sem gastar tokens. <br />
-                        Ganhe 1 token a cada 5 quizzes gratuitos completados!
+                        {t('freeQuizzes.subtitle')} <br />
+                        {t('freeQuizzes.earnTokensDesc')}
                         <br />
                         {freeQuizLimit ? (
                             <span className="text-xs font-medium">
                                 {freeQuizLimit.remaining > 0 ? (
                                     <span className="text-green-600 dark:text-green-400">
-                                        Você pode fazer mais {freeQuizLimit.remaining} quiz{freeQuizLimit.remaining !== 1 ? 'zes' : ''} gratuito{freeQuizLimit.remaining !== 1 ? 's' : ''} hoje.
+                                        {t('freeQuizzes.remainingQuizzes', { count: freeQuizLimit.remaining })}
                                     </span>
                                 ) : (
                                     <span className="text-red-600 dark:text-red-400">
-                                        Limite diário de 3 quizzes atingido.
+                                        {t('freeQuizzes.dailyLimitReached')}
                                         {freeQuizLimit.resetTime && (
                                             <span className="block text-xs mt-1 text-slate-500 dark:text-slate-400">
-                                                Reseta em {formatResetTime(freeQuizLimit.resetTime)}.
+                                                {t('freeQuizzes.resetsIn', { time: formatResetTime(freeQuizLimit.resetTime) })}
                                             </span>
                                         )}
                                     </span>
                                 )}
                             </span>
                         ) : (
-                            <span className="text-xs text-amber-600 dark:text-amber-400 font-medium">Ganhe 1 token a cada 5 quizzes.</span>
+                            <span className="text-xs text-amber-600 dark:text-amber-400 font-medium">{t('freeQuizzes.earnTokenShort')}</span>
                         )}
                     </p>
                 </div>
@@ -266,9 +261,9 @@ const FreeQuizzesPage: React.FC = () => {
                         <div className="space-y-2 flex-1">
                             <div className="flex items-center gap-2 text-violet-100 text-sm font-semibold uppercase tracking-wider">
                                 <BoltIcon className="w-4 h-4 text-yellow-300" />
-                                <span>Destaque da Semana</span>
+                                <span>{t('freeQuizzes.weekHighlight')}</span>
                                 <span className="bg-white/20 px-2 py-0.5 rounded text-xs">
-                                    {highlightQuiz.totalAttempts} tentativas
+                                    {highlightQuiz.totalAttempts} {t('freeQuizzes.attempts')}
                                 </span>
                             </div>
                             <h2 className="text-3xl font-bold text-white mb-2">{highlightQuiz.titulo}</h2>
@@ -280,7 +275,7 @@ const FreeQuizzesPage: React.FC = () => {
                                     {highlightQuiz.categoria}
                                 </span>
                                 <span className="text-xs bg-white/10 px-2 py-1 rounded text-violet-100">
-                                    {highlightQuiz.quantidade_questoes} Questões
+                                    {highlightQuiz.quantidade_questoes} {t('freeQuizzes.questionsLabel')}
                                 </span>
                             </div>
                         </div>
@@ -293,7 +288,7 @@ const FreeQuizzesPage: React.FC = () => {
                             ) : (
                                 <PlayCircleIcon className="w-5 h-5" />
                             )}
-                            Aceitar Desafio
+                            {t('freeQuizzes.acceptChallenge')}
                         </button>
                     </div>
                 </div>
@@ -309,7 +304,7 @@ const FreeQuizzesPage: React.FC = () => {
                     </div>
                     <input
                         type="text"
-                        placeholder="Buscar quiz..."
+                        placeholder={t('freeQuizzes.searchPlaceholder')}
                         value={searchQuery}
                         onChange={(e) => {
                             setSearchQuery(e.target.value);
@@ -322,7 +317,7 @@ const FreeQuizzesPage: React.FC = () => {
                 <div className="flex gap-2 w-full md:w-auto overflow-x-auto pb-2 md:pb-0">
                     <div className="flex items-center gap-2 border-r border-slate-200 dark:border-slate-700 pr-4 mr-2">
                         <FunnelIcon className="w-4 h-4 text-slate-400" />
-                        <span className="text-sm font-medium text-slate-600 dark:text-slate-300">Filtros:</span>
+                        <span className="text-sm font-medium text-slate-600 dark:text-slate-300">{t('freeQuizzes.filters')}</span>
                     </div>
 
                     <select
@@ -333,7 +328,7 @@ const FreeQuizzesPage: React.FC = () => {
                         }}
                         className="text-sm border-slate-200 dark:border-slate-700 rounded-lg bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-200"
                     >
-                        {categories.map(cat => <option key={cat.value} value={cat.value}>{cat.label}</option>)}
+                        {categories.map(cat => <option key={cat.value} value={cat.value}>{cat.value === 'Todas' ? t('freeQuizzes.all') : t(`freeQuizzes.niches.${cat.value}`)}</option>)}
                     </select>
 
                     <select
@@ -346,7 +341,7 @@ const FreeQuizzesPage: React.FC = () => {
                     >
                         {difficulties.map(diff => (
                             <option key={diff} value={diff}>
-                                {diff === 'Todas' ? 'Todas' : (DISPLAY_DIFFICULTY[diff] || diff)}
+                                {diff === 'Todas' ? t('freeQuizzes.all') : t(`freeQuizzes.difficulties.${diff}`, diff)}
                             </option>
                         ))}
                     </select>
@@ -414,11 +409,11 @@ const FreeQuizzesPage: React.FC = () => {
                                         <span className={`w-2 h-2 rounded-full ${quiz.nivel === 'INICIANTE' ? 'bg-green-500' :
                                             quiz.nivel === 'MEDIO' ? 'bg-amber-500' : 'bg-red-500'
                                             }`}></span>
-                                        {DISPLAY_DIFFICULTY[quiz.nivel] || quiz.nivel}
+                                        {t(`freeQuizzes.difficulties.${quiz.nivel}`, quiz.nivel) as string}
                                     </div>
                                 </div>
                                 <div className="flex items-center gap-1 text-xs font-bold text-primary-600 dark:text-primary-400 opacity-0 group-hover:opacity-100 transition-all transform translate-x-2 group-hover:translate-x-0">
-                                    {startingQuiz === quiz._id ? 'Carregando...' : 'Começar'}
+                                    {startingQuiz === quiz._id ? t('freeQuizzes.loadingMore') : t('freeQuizzes.begin')}
                                     <PlayCircleIcon className="w-4 h-4" />
                                 </div>
                             </div>
@@ -436,13 +431,13 @@ const FreeQuizzesPage: React.FC = () => {
             {!loading && publicQuizzes.length === 0 && (
                 <div className="text-center py-20 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-dashed border-slate-200 dark:border-slate-700">
                     <AcademicCapIcon className="w-8 h-8 text-slate-300 dark:text-slate-600 mx-auto mb-4" />
-                    <h3 className="text-lg font-medium text-slate-900 dark:text-white">Nenhum quiz encontrado</h3>
-                    <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">Tente ajustar os filtros ou sua busca.</p>
+                    <h3 className="text-lg font-medium text-slate-900 dark:text-white">{t('freeQuizzes.noQuizzesFound')}</h3>
+                    <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">{t('freeQuizzes.adjustFilters')}</p>
                     <button
                         onClick={() => { setSearchQuery(''); setSelectedCategoryValue('Todas'); setSelectedDifficulty('Todas'); }}
                         className="mt-4 text-primary-600 font-medium text-sm hover:underline"
                     >
-                        Limpar filtros
+                        {t('freeQuizzes.clearFilters')}
                     </button>
                 </div>
             )}
@@ -455,7 +450,7 @@ const FreeQuizzesPage: React.FC = () => {
                         className="flex items-center gap-2 px-4 py-2 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 rounded-full text-sm font-medium hover:bg-blue-100 dark:hover:bg-blue-900/40 transition-colors shadow-sm"
                     >
                         <QuestionMarkCircleIcon className="w-5 h-5" />
-                        <span>Dúvidas sobre os Quizzes Gratuitos?</span>
+                        <span>{t('freeQuizzes.helpQuestion')}</span>
                     </button>
                 ) : (
                     <div className="relative w-full p-4 sm:p-6 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-700 flex flex-col sm:flex-row gap-4 animate-fade-in-up">
@@ -470,12 +465,10 @@ const FreeQuizzesPage: React.FC = () => {
                         </div>
                         <div className="flex-1 pr-8">
                             <h4 className="font-bold text-slate-900 dark:text-white mb-2">
-                                Quizzes Gratuitos vs. Personalizados
+                                {t('freeQuizzes.helpTitle')}
                             </h4>
                             <p className="text-sm text-slate-600 dark:text-slate-400 mb-4 leading-relaxed">
-                                Os quizzes desta página são gratuitos, criados pela comunidade e não consomem seus tokens!
-                                Eles são ótimos para aquecimento. Para treinar para uma vaga específica (ex: "Desenvolvedor React no Nubank"),
-                                use a ferramenta de <strong>Criar Quiz</strong> com a descrição da vaga.
+                                <Trans i18nKey="freeQuizzes.helpText" ns="quiz" components={{ strong: <strong /> }} />
                             </p>
                             <a
                                 href="https://wa.me/5531997313160"
@@ -483,7 +476,7 @@ const FreeQuizzesPage: React.FC = () => {
                                 rel="noopener noreferrer"
                                 className="text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 text-sm font-semibold hover:underline inline-flex items-center gap-2"
                             >
-                                Sugestões ou problemas? Fale conosco
+                                {t('freeQuizzes.contactUs')}
                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-3 h-3">
                                     <path fillRule="evenodd" d="M16.28 11.47a.75.75 0 010 1.06l-7.5 7.5a.75.75 0 01-1.06-1.06L14.69 12 7.72 5.03a.75.75 0 011.06-1.06l7.5 7.5z" clipRule="evenodd" />
                                 </svg>

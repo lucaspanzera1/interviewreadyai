@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
+import { t, SupportedLanguage } from '../common/i18n';
 import { User, UserDocument } from './schemas/user.schema';
 import { UserFollow, UserFollowDocument } from './schemas/user-follow.schema';
 import { QuizAttempt, QuizAttemptDocument } from '../quiz/schemas/quiz-attempt.schema';
@@ -83,14 +84,14 @@ export class UserSocialService {
   /**
    * Buscar perfil público de um usuário
    */
-  async getPublicProfile(userId: string, currentUserId: string): Promise<PublicUserDto> {
+  async getPublicProfile(userId: string, currentUserId: string, lang: SupportedLanguage = 'pt-BR'): Promise<PublicUserDto> {
     const user = await this.userModel
       .findOne({ _id: userId, active: true, isProfilePublic: true })
       .select('name email picture bio location careerTime niche techStack linkedinUrl githubUrl headerImage')
       .lean();
 
     if (!user) {
-      throw new NotFoundException('Usuário não encontrado ou perfil privado');
+      throw new NotFoundException(t('social.notFoundOrPrivate', lang));
     }
 
     return this.buildPublicUserDto(user, currentUserId);
@@ -99,15 +100,15 @@ export class UserSocialService {
   /**
    * Seguir um usuário
    */
-  async followUser(followerId: string, followingId: string): Promise<void> {
+  async followUser(followerId: string, followingId: string, lang: SupportedLanguage = 'pt-BR'): Promise<void> {
     if (followerId === followingId) {
-      throw new BadRequestException('Você não pode seguir a si mesmo');
+      throw new BadRequestException(t('social.cannotFollowSelf', lang));
     }
 
     // Verificar se o usuário a ser seguido existe e tem perfil público
     const userExists = await this.userModel.exists({ _id: followingId, active: true, isProfilePublic: true });
     if (!userExists) {
-      throw new NotFoundException('Usuário não encontrado ou perfil privado');
+      throw new NotFoundException(t('social.notFoundOrPrivate', lang));
     }
 
     // Verificar se já está seguindo
@@ -118,7 +119,7 @@ export class UserSocialService {
     });
 
     if (existingFollow) {
-      throw new BadRequestException('Você já está seguindo este usuário');
+      throw new BadRequestException(t('social.alreadyFollowing', lang));
     }
 
     // Criar ou reativar relacionamento
@@ -132,7 +133,7 @@ export class UserSocialService {
   /**
    * Deixar de seguir um usuário
    */
-  async unfollowUser(followerId: string, followingId: string): Promise<void> {
+  async unfollowUser(followerId: string, followingId: string, lang: SupportedLanguage = 'pt-BR'): Promise<void> {
     const follow = await this.userFollowModel.findOne({
       followerId,
       followingId,
@@ -140,7 +141,7 @@ export class UserSocialService {
     });
 
     if (!follow) {
-      throw new NotFoundException('Você não está seguindo este usuário');
+      throw new NotFoundException(t('social.notFollowing', lang));
     }
 
     follow.active = false;

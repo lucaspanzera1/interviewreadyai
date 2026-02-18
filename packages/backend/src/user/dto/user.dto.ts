@@ -60,4 +60,8 @@ export class UserDto {
   @IsOptional()
   isProfilePublic?: boolean;
 
+  @ApiProperty({ description: 'Preferred language', enum: ['pt-BR', 'en'], required: false })
+  @IsOptional()
+  preferredLanguage?: string;
+
 }
