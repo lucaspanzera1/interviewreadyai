@@ -92,7 +92,7 @@ const ProfilePage: React.FC = () => {
   const { user, updateProfile, logout } = useAuth();
   const { showToast } = useToast();
   const navigate = useNavigate();
-  const { t } = useTranslation('profile');
+  const { t, i18n } = useTranslation('profile');
 
   // Estados de edição separados para cada seção
   const [isEditingPersonal, setIsEditingPersonal] = useState(false);
@@ -382,7 +382,8 @@ const ProfilePage: React.FC = () => {
 
   const formatDate = (dateString?: string) => {
     if (!dateString) return 'N/A';
-    return new Date(dateString).toLocaleDateString('pt-BR', {
+    const locale = i18n.language === 'en' ? 'en-US' : 'pt-BR';
+    return new Date(dateString).toLocaleDateString(locale, {
       day: '2-digit',
       month: 'long',
       year: 'numeric',
@@ -1210,7 +1211,7 @@ const ProfilePage: React.FC = () => {
                                 </span>
                               </div>
                               <span className="text-xs text-slate-500 dark:text-slate-400">
-                                {new Date(reward.createdAt).toLocaleDateString('pt-BR')}
+                                {new Date(reward.createdAt).toLocaleDateString(i18n.language === 'en' ? 'en-US' : 'pt-BR')}
                               </span>
                             </div>
                           );

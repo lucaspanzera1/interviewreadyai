@@ -19,7 +19,8 @@
     "interviewSimulation": "Interview Simulation",
     "mySimulations": "My Simulations",
     "createFlashcards": "Create Flashcards",
-    "myFlashcards": "My Flashcards"
+    "myFlashcards": "My Flashcards",
+    "languageDisclaimer": "Content is generated in the user's pre-defined language and is not translated."
   },
   "admin": {
     "title": "Admin",

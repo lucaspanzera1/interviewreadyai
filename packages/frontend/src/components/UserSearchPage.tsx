@@ -378,7 +378,7 @@ const UserCard: React.FC<{
           {user.niche ? (
             <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-md bg-slate-100 dark:bg-slate-700/50 text-xs font-medium text-slate-600 dark:text-slate-300">
               {getNicheIcon(user.niche, "w-3 h-3 text-slate-500")}
-              <span className="capitalize">{user.niche.replace('_', ' ')}</span>
+              <span>{t(`niches.${user.niche}`)}</span>
             </span>
           ) : (
             <span className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-slate-50 dark:bg-slate-800/50 text-xs text-slate-400">

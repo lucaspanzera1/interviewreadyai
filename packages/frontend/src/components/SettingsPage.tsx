@@ -14,7 +14,8 @@ import {
     ClockIcon,
     EyeIcon,
     EyeSlashIcon,
-    FireIcon
+    FireIcon,
+    LanguageIcon
 } from '@heroicons/react/24/outline';
 import { useTranslation } from 'react-i18next';
 
@@ -22,7 +23,7 @@ const SettingsPage: React.FC = () => {
     const { theme, setTheme } = useTheme();
     const { user, refreshUser } = useAuth();
     const { showToast } = useToast();
-    const { t } = useTranslation('settings');
+    const { t, i18n } = useTranslation('settings');
 
     // Notification states (mock)
     const [emailNotifications, setEmailNotifications] = useState(true);
@@ -216,14 +217,91 @@ const SettingsPage: React.FC = () => {
                                     <div className="p-3">
                                         <div className="flex items-center gap-2">
                                             <option.icon className={`w-4 h-4 transition-colors ${theme === option.id
-                                                    ? option.id.includes('orange') ? 'text-orange-500' : 'text-primary-500'
-                                                    : 'text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-300'
+                                                ? option.id.includes('orange') ? 'text-orange-500' : 'text-primary-500'
+                                                : 'text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-300'
                                                 }`} />
                                             <span className={`text-sm font-medium transition-colors ${theme === option.id ? option.activeText : 'text-slate-600 dark:text-slate-400 group-hover:text-slate-900 dark:group-hover:text-slate-200'
                                                 }`}>
                                                 {option.label}
                                             </span>
                                         </div>
+                                    </div>
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+
+                {/* Language Settings */}
+                <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg shadow-sm">
+                    <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-800">
+                        <h2 className="text-base font-semibold text-slate-900 dark:text-white flex items-center gap-2">
+                            <LanguageIcon className="w-5 h-5 text-indigo-500" />
+                            {t('language')}
+                        </h2>
+                        <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
+                            {t('languageDesc')}
+                        </p>
+                    </div>
+                    <div className="p-6">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            {[
+                                { code: 'pt-BR', label: 'Português', region: 'Brasil', flag: '🇧🇷' },
+                                { code: 'en', label: 'English', region: 'United States', flag: '🇺🇸' },
+                            ].map((lang) => (
+                                <button
+                                    key={lang.code}
+                                    onClick={async () => {
+                                        if (i18n.language !== lang.code) {
+                                            await i18n.changeLanguage(lang.code);
+                                            if (user) {
+                                                try {
+                                                    await apiClient.updateLanguage(lang.code);
+                                                } catch (e) {
+                                                    console.error('Failed to persist language:', e);
+                                                }
+                                            }
+                                        }
+                                    }}
+                                    className={`
+                                        group relative flex items-center justify-between p-4 rounded-xl border-2 transition-all duration-300
+                                        ${i18n.language === lang.code
+                                            ? 'border-indigo-500 bg-indigo-50/50 dark:bg-indigo-900/10 shadow-sm ring-1 ring-indigo-500/20'
+                                            : 'border-slate-200 dark:border-slate-800 hover:border-indigo-200 dark:hover:border-indigo-800 hover:bg-slate-50 dark:hover:bg-slate-800/50'
+                                        }
+                                    `}
+                                >
+                                    <div className="flex items-center gap-4">
+                                        <div className="relative">
+                                            <span className="text-4xl drop-shadow-sm filter grayscale-0 transition-transform group-hover:scale-110 duration-300 block">
+                                                {lang.flag}
+                                            </span>
+                                            {i18n.language === lang.code && (
+                                                <div className="absolute -bottom-1 -right-1 w-2.5 h-2.5 bg-indigo-500 rounded-full border-2 border-white dark:border-slate-900 animate-bounce" />
+                                            )}
+                                        </div>
+                                        <div className="text-left">
+                                            <p className={`font-semibold transition-colors ${i18n.language === lang.code ? 'text-indigo-700 dark:text-indigo-300' : 'text-slate-700 dark:text-slate-300'}`}>
+                                                {lang.label}
+                                            </p>
+                                            <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">
+                                                {lang.region}
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    <div className={`
+                                        w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all duration-300
+                                        ${i18n.language === lang.code
+                                            ? 'border-indigo-500 bg-indigo-500 text-white scale-100'
+                                            : 'border-slate-300 dark:border-slate-600 group-hover:border-indigo-300 dark:group-hover:border-indigo-700'
+                                        }
+                                    `}>
+                                        {i18n.language === lang.code && (
+                                            <svg className="w-3.5 h-3.5 animate-in zoom-in duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                                                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                                            </svg>
+                                        )}
                                     </div>
                                 </button>
                             ))}

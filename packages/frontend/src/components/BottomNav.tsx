@@ -22,6 +22,7 @@ import {
     FireIcon,
     ComputerDesktopIcon,
     UserIcon,
+    QuestionMarkCircleIcon,
 } from '@heroicons/react/24/outline';
 
 import {
@@ -488,11 +489,22 @@ const Sidebar: React.FC = () => {
                 </div>
 
                 {/* Language Switcher */}
-                <LanguageSwitcher
-                    variant="inline"
-                    className={isCollapsed ? 'justify-center' : ''}
-                    isCollapsed={isCollapsed}
-                />
+                <div className="relative w-full group/lang">
+                    <LanguageSwitcher
+                        variant="inline"
+                        className={isCollapsed ? 'justify-center' : ''}
+                        isCollapsed={isCollapsed}
+                    />
+                    {!isCollapsed && (
+                        <div className="absolute right-2 top-1/2 -translate-y-1/2 group/tooltip z-10">
+                            <QuestionMarkCircleIcon className="w-4 h-4 text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300 cursor-help" />
+                            <div className="absolute bottom-full mb-2 left-1/2 -translate-x-[85%] w-48 p-2 bg-slate-800 text-white text-xs rounded shadow-lg opacity-0 invisible group-hover/tooltip:opacity-100 group-hover/tooltip:visible transition-all duration-200 z-50 pointer-events-none text-center">
+                                {t('nav.languageDisclaimer')}
+                                <div className="absolute top-full right-4 -mt-1 border-4 border-transparent border-t-slate-800"></div>
+                            </div>
+                        </div>
+                    )}
+                </div>
 
                 {/* Configurações - só para usuários logados */}
                 {user && (
