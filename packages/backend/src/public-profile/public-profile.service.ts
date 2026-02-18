@@ -164,7 +164,7 @@ export class PublicProfileService {
     <image href="https://app.treinavaga.tech/logo.png" x="0" y="0" height="32" width="32" />
     
     <!-- Brand Name -->
-    <text x="42" y="22" fill="${theme.title}" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="16" font-weight="bold">TreinaVaga AI</text>
+    <text x="42" y="22" fill="${theme.title}" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="16" font-weight="bold">TreinaVagaAI</text>
   </g>
 
   <!-- User Info (Right Aligned) -->

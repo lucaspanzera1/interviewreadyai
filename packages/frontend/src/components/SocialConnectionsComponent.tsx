@@ -8,7 +8,7 @@ import Loading from './Loading';
 import { useTranslation } from 'react-i18next';
 
 const SocialConnectionsComponent: React.FC = () => {
-  const { t } = useTranslation('social');
+  const { t } = useTranslation(['social', 'profile']);
   const { user } = useAuth();
   const navigate = useNavigate();
 
@@ -179,7 +179,7 @@ interface ConnectionItemProps {
 }
 
 const ConnectionItem: React.FC<ConnectionItemProps> = ({ user, isFollowingTab, onUnfollow, onClick }) => {
-  const { t } = useTranslation('social');
+  const { t } = useTranslation(['social', 'profile']);
 
   return (
     <div className="p-3 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors flex items-center gap-3 group">
@@ -204,7 +204,9 @@ const ConnectionItem: React.FC<ConnectionItemProps> = ({ user, isFollowingTab, o
           {user.name}
         </h3>
         <p className="text-xs text-slate-500 dark:text-slate-400 truncate">
-          {user.niche ? user.niche : t('connections.quizzesCount', { count: user.quizStats.totalCompleted })}
+          {user.niche
+            ? t(`profile:niche.${user.niche}`, { defaultValue: user.niche })
+            : t('connections.quizzesCount', { count: user.quizStats.totalCompleted })}
         </p>
       </div>
 

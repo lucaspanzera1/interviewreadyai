@@ -315,7 +315,7 @@ const PublicProfilePage: React.FC = () => {
                       <div className="flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 rounded-md">
                         <ClockIcon className="h-5 w-5 text-slate-400 dark:text-slate-500" />
                         <span className="text-slate-700 dark:text-slate-200 font-medium text-sm">
-                          {tProfile(`careerTime.${profile.careerTime}`) || profile.careerTime || tProfile('notInformed')}
+                          {profile.careerTime ? t(`careerTime.${profile.careerTime}`, { defaultValue: profile.careerTime }) : tProfile('notInformed')}
                         </span>
                       </div>
                     </div>
@@ -468,7 +468,9 @@ const PublicProfilePage: React.FC = () => {
                             {connUser.name}
                           </h3>
                           <p className="text-xs text-slate-500 dark:text-slate-400 truncate">
-                            {connUser.niche ? connUser.niche : t('connections.quizzesCount', { count: connUser.quizStats?.totalCompleted || 0 })}
+                            {connUser.niche
+                              ? (t(`niches.${connUser.niche}`) !== `niches.${connUser.niche}` ? t(`niches.${connUser.niche}`) : (tProfile(`niche.${connUser.niche}`) !== `niche.${connUser.niche}` ? tProfile(`niche.${connUser.niche}`) : connUser.niche))
+                              : t('connections.quizzesCount', { count: connUser.quizStats?.totalCompleted || 0 })}
                           </p>
                         </div>
                         <button onClick={() => navigate(`/profile/${connUser.id}`)} className="text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 p-1.5 transition-colors">
