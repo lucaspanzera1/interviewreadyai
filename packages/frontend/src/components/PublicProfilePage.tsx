@@ -136,7 +136,7 @@ const PublicProfilePage: React.FC = () => {
     <>
       <PageTitle title={profile.name} />
 
-      <div className="space-y-8 pb-32">
+      <div className="space-y-6 md:space-y-8 pb-32">
         {/* Hero Section with Header & Avatar */}
         <div className="relative mb-24 md:mb-32 group">
           <div className="relative w-full aspect-[3/1] max-h-[500px] min-h-[200px] rounded-2xl overflow-hidden shadow-sm ring-1 ring-slate-900/5 dark:ring-white/10">
@@ -174,7 +174,7 @@ const PublicProfilePage: React.FC = () => {
               />
             </div>
 
-            <div className="flex-1 pb-4 md:pb-6 text-center md:text-left pointer-events-auto flex flex-col md:flex-row items-end justify-between gap-4 w-full">
+            <div className="flex-1 pb-4 md:pb-6 text-center md:text-left pointer-events-auto flex flex-col md:flex-row items-stretch md:items-end justify-between gap-4 w-full">
               <div>
                 <h1 className="text-3xl md:text-5xl font-bold text-slate-900 dark:text-white mb-2">
                   {profile.name}
@@ -203,7 +203,7 @@ const PublicProfilePage: React.FC = () => {
               {!isOwnProfile && (
                 <button
                   onClick={toggleFollow}
-                  className={`flex items-center gap-2 px-6 py-2.5 rounded-xl font-semibold transition-all shadow-lg active:scale-95 ${profile.isFollowing
+                  className={`flex items-center justify-center md:justify-start gap-2 px-6 py-2.5 rounded-xl font-semibold transition-all shadow-lg active:scale-95 ${profile.isFollowing
                     ? 'bg-white dark:bg-slate-800 text-slate-700 dark:text-white border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700'
                     : 'bg-primary-600 hover:bg-primary-500 text-white shadow-primary-600/20'
                     }`}
@@ -262,9 +262,9 @@ const PublicProfilePage: React.FC = () => {
                   <div className={`grid grid-cols-1 ${profile.niche === 'tecnologia' ? 'md:grid-cols-2' : ''} gap-4`}>
                     <div>
                       <div className="flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 rounded-md">
-                        <LinkedInIcon className="h-5 w-5 text-[#0a66c2] dark:text-[#0a66c2]" />
+                        <LinkedInIcon className="h-5 w-5 text-[#0a66c2] dark:text-[#0a66c2] shrink-0" />
                         {profile.linkedinUrl ? (
-                          <a href={profile.linkedinUrl} target="_blank" rel="noopener noreferrer" className="text-primary-600 dark:text-primary-400 hover:underline text-sm font-medium">
+                          <a href={profile.linkedinUrl} target="_blank" rel="noopener noreferrer" className="text-primary-600 dark:text-primary-400 hover:underline text-sm font-medium truncate flex-1 block">
                             {extractUsername(profile.linkedinUrl)}
                           </a>
                         ) : <span className="text-slate-500 text-sm">N/A</span>}
@@ -273,9 +273,9 @@ const PublicProfilePage: React.FC = () => {
                     {profile.niche === 'tecnologia' && (
                       <div>
                         <div className="flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 rounded-md">
-                          <GitHubIcon className="h-5 w-5 text-[#24292f] dark:text-white" />
+                          <GitHubIcon className="h-5 w-5 text-[#24292f] dark:text-white shrink-0" />
                           {profile.githubUrl ? (
-                            <a href={profile.githubUrl} target="_blank" rel="noopener noreferrer" className="text-primary-600 dark:text-primary-400 hover:underline text-sm font-medium">
+                            <a href={profile.githubUrl} target="_blank" rel="noopener noreferrer" className="text-primary-600 dark:text-primary-400 hover:underline text-sm font-medium truncate flex-1 block">
                               {extractUsername(profile.githubUrl)}
                             </a>
                           ) : <span className="text-slate-500 text-sm">N/A</span>}
