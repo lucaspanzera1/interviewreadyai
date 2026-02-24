@@ -138,11 +138,14 @@ const MyQuizzesPage: React.FC = () => {
                     </div>
                     <button
                         onClick={() => navigate('/create-quiz')}
-                        className="group flex items-center gap-2 px-4 py-2.5 bg-primary-600 hover:bg-primary-700 text-white rounded-xl font-bold transition-all shadow-lg shadow-primary-600/20 hover:shadow-primary-600/30 hover:-translate-y-0.5 active:scale-95 active:translate-y-0 shrink-0"
+                        className="group relative flex items-center gap-2 px-4 py-2.5 bg-primary-600 hover:bg-primary-700 text-white rounded-xl font-bold transition-all shadow-lg shadow-primary-600/20 hover:shadow-primary-600/30 hover:-translate-y-0.5 active:scale-95 active:translate-y-0 shrink-0"
                     >
                         <PlusCircleIcon className="w-5 h-5 transition-transform group-hover:rotate-90" />
                         <span className="hidden sm:inline">{t('myQuizzes.createNew')}</span>
                         <span className="sm:hidden">{t('myQuizzes.create')}</span>
+                        <span className="absolute -top-2 -right-2 bg-green-500 text-white text-[10px] font-black px-1.5 py-0.5 rounded-md shadow-sm border border-white dark:border-slate-900 animate-bounce">
+                            GRÁTIS
+                        </span>
                     </button>
                 </div>
             </header>

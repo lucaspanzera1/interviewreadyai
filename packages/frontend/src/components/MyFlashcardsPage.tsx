@@ -147,12 +147,14 @@ const MyFlashcardsPage: React.FC = () => {
                     </div>
                     <button
                         onClick={() => navigate('/create-flashcard')}
-                        className="flex items-center gap-2 px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg font-medium transition-colors shadow-sm shrink-0"
+                        className="group relative flex items-center gap-2 px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg font-medium transition-colors shadow-sm shrink-0"
                     >
                         <PlusCircleIcon className="w-5 h-5" />
                         <span className="hidden sm:inline">{t('myFlashcards.createNew')}</span>
                         <span className="sm:hidden">{t('myFlashcards.createShort')}</span>
-                        <span className="ml-1 text-[10px] bg-white/20 px-1.5 py-0.5 rounded font-bold tracking-wide"></span>
+                        <span className="absolute -top-2 -right-2 bg-green-500 text-white text-[10px] font-black px-1.5 py-0.5 rounded-md shadow-sm border border-white dark:border-slate-900 animate-bounce">
+                            GRÁTIS
+                        </span>
                     </button>
                 </div>
             </header>

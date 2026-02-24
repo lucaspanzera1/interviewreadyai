@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation, Trans } from 'react-i18next';
 import PageTitle from './PageTitle';
 import FormattedText from './FormattedText';
-import { CheckCircleIcon, XCircleIcon, ArrowLeftIcon, ArrowPathIcon } from '@heroicons/react/24/outline';
+import { CheckCircleIcon, XCircleIcon, ArrowLeftIcon, ArrowPathIcon, SparklesIcon } from '@heroicons/react/24/outline';
 import { QuizQuestion, apiClient } from '../lib/api';
 import { useToast } from '../contexts/ToastContext';
 
@@ -228,13 +228,17 @@ const GeneratedQuizPage: React.FC = () => {
                   percentage >= 60 ? t('generated.goodWork') :
                     t('generated.keepPracticing')}
               </h2>
-              <p className="text-slate-600 dark:text-slate-400 text-lg mb-8 max-w-md mx-auto">
+              <p className="text-slate-600 dark:text-slate-400 text-lg mb-2 max-w-md mx-auto">
                 <Trans
                   i18nKey="generated.scoreDescription"
                   ns="quiz"
                   values={{ correct: score, total: quiz.questions.length }}
                   components={{ strong: <strong className="text-slate-900 dark:text-white" /> }}
                 />
+              </p>
+              <p className="text-green-600 dark:text-green-400 text-xs font-bold mb-8 flex items-center justify-center gap-1.5 animate-pulse">
+                <SparklesIcon className="w-3.5 h-3.5" />
+                {t('generated.freeGeneration', 'Gerado gratuitamente durante o Beta!')}
               </p>
 
               <div className="flex items-center justify-center gap-3 mb-8 opacity-80 hover:opacity-100 transition-opacity">
