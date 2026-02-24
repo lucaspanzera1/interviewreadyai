@@ -53,10 +53,6 @@ export class FlashcardService {
       throw new HttpException('User not found', HttpStatus.NOT_FOUND);
     }
     
-    if (user.tokens < 2) {
-      throw new HttpException('Insufficient tokens. You need at least 2 tokens to generate flashcards.', HttpStatus.PAYMENT_REQUIRED);
-    }
-
     try {
       console.log('Starting flashcard generation for user:', userId);
       
@@ -67,9 +63,6 @@ export class FlashcardService {
 
       // Gerar os flashcards baseados nos dados da vaga
       const flashcards = await this.generateFlashcardsFromJobData(jobData, dto, userId, lang);
-
-      // Deduzir 2 tokens do usuário após sucesso
-      await userService.removeTokensFromUser(userId, 2, 'flashcard_generation');
 
       console.log('Flashcards generated successfully');
       return flashcards;

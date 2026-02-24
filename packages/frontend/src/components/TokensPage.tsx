@@ -256,7 +256,11 @@ const TokensPage: React.FC = () => {
                           <span className="text-2xl font-bold text-green-600 dark:text-green-400">
                             R$ {pkg.value.toFixed(2)}
                           </span>
-                          <span className="text-xs text-slate-500 font-medium">{t('perMonth')}</span>
+                          {pkg.validityDays ? (
+                            <span className="text-xs text-slate-500 font-medium">{t('perMonth')}</span>
+                          ) : (
+                            <span className="text-xs text-slate-500 font-medium">{t('noExpiration')}</span>
+                          )}
                         </div>
                       )}
 

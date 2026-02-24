@@ -283,19 +283,20 @@ const CreateQuizByLinkPage: React.FC = () => {
                                 <div className="relative z-10">
                                     <form onSubmit={handleJobSubmit} className="space-y-6">
                                         {/* Token Info Card */}
-                                        {/* Token Info Card */}
-                                        <div className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border border-blue-100 dark:border-blue-700/50 rounded-xl p-5 mb-6 flex items-start gap-4 shadow-sm">
-                                            <div className="p-2.5 bg-white dark:bg-blue-900/40 rounded-lg text-blue-600 dark:text-blue-400 shrink-0 shadow-sm">
-                                                <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                                </svg>
+                                        {/* Free Access Info Card (Job) */}
+                                        <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700/50 rounded-xl p-5 mb-6 flex items-start gap-4 shadow-sm group/card hover:border-green-300 dark:hover:border-green-600 transition-colors">
+                                            <div className="p-2.5 bg-green-100 dark:bg-green-900/40 rounded-lg text-green-600 dark:text-green-400 shrink-0 shadow-sm group-hover/card:scale-110 transition-transform">
+                                                <SparklesIcon className="w-6 h-6" />
                                             </div>
                                             <div className="flex-1">
-                                                <h3 className="text-lg font-bold text-blue-900 dark:text-blue-100">
-                                                    {t('createByLink.costs1Token')}
-                                                </h3>
-                                                <p className="text-blue-700 dark:text-blue-300 mt-1 leading-relaxed">
-                                                    {t('createByLink.tokensAvailable', { count: user?.tokens || 0 })}
+                                                <div className="flex items-center gap-2">
+                                                    <h3 className="text-lg font-bold text-green-900 dark:text-green-100">
+                                                        {t('createByLink.freeAccessTitle', 'Geração Gratuita')}
+                                                    </h3>
+                                                    <span className="px-2 py-0.5 bg-green-200 dark:bg-green-800 text-green-800 dark:text-green-200 text-[10px] font-black uppercase tracking-wider rounded-md">BETA</span>
+                                                </div>
+                                                <p className="text-green-700 dark:text-green-300 mt-1 leading-relaxed text-sm">
+                                                    {t('createByLink.freeAccessDesc', 'Aproveite! Durante esta fase inicial, você pode gerar quizzes ilimitados gratuitamente. Futuramente, este recurso poderá ter um custo em tokens.')}
                                                 </p>
                                             </div>
                                         </div>
@@ -397,8 +398,8 @@ const CreateQuizByLinkPage: React.FC = () => {
 
                                         <button
                                             type="submit"
-                                            disabled={isLoading || !isValidJobUrl || !user?.tokens || user.tokens < 1}
-                                            className={`w-full flex items-center justify-center gap-3 px-8 py-4 border border-transparent text-lg font-bold rounded-xl text-white transition-all duration-300 ${isLoading || !isValidJobUrl || !user?.tokens || user.tokens < 1
+                                            disabled={isLoading || !isValidJobUrl}
+                                            className={`w-full flex items-center justify-center gap-3 px-8 py-4 border border-transparent text-lg font-bold rounded-xl text-white transition-all duration-300 ${isLoading || !isValidJobUrl
                                                 ? 'bg-slate-400 dark:bg-slate-600 cursor-not-allowed'
                                                 : 'bg-gradient-to-r from-primary-600 to-indigo-600 hover:from-primary-700 hover:to-indigo-700 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5'
                                                 }`}
@@ -429,19 +430,20 @@ const CreateQuizByLinkPage: React.FC = () => {
                             <div className="absolute bottom-0 left-0 -mb-20 -ml-20 w-64 h-64 bg-indigo-500/10 rounded-full blur-3xl group-hover:bg-indigo-500/20 transition-all duration-500"></div>
 
                             <div className="relative z-10 text-center">
-                                {/* Token Info Card */}
-                                <div className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border border-blue-100 dark:border-blue-700/50 rounded-xl p-5 mb-6 flex items-start gap-4 shadow-sm text-left">
-                                    <div className="p-2.5 bg-white dark:bg-blue-900/40 rounded-lg text-blue-600 dark:text-blue-400 shrink-0 shadow-sm">
-                                        <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                        </svg>
+                                {/* Free Access Info Card (Theme) */}
+                                <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700/50 rounded-xl p-5 mb-6 flex items-start gap-4 shadow-sm text-left group/card2 hover:border-green-300 dark:hover:border-green-600 transition-colors">
+                                    <div className="p-2.5 bg-green-100 dark:bg-green-900/40 rounded-lg text-green-600 dark:text-green-400 shrink-0 shadow-sm group-hover/card2:scale-110 transition-transform">
+                                        <SparklesIcon className="w-6 h-6" />
                                     </div>
                                     <div className="flex-1">
-                                        <h3 className="text-lg font-bold text-blue-900 dark:text-blue-100">
-                                            {t('createByLink.costs1Token')}
-                                        </h3>
-                                        <p className="text-blue-700 dark:text-blue-300 mt-1 leading-relaxed">
-                                            {t('createByLink.tokensAvailable', { count: user?.tokens || 0 })}
+                                        <div className="flex items-center gap-2">
+                                            <h3 className="text-lg font-bold text-green-900 dark:text-green-100">
+                                                {t('createByLink.freeAccessTitle', 'Geração Gratuita')}
+                                            </h3>
+                                            <span className="px-2 py-0.5 bg-green-200 dark:bg-green-800 text-green-800 dark:text-green-200 text-[10px] font-black uppercase tracking-wider rounded-md">BETA</span>
+                                        </div>
+                                        <p className="text-green-700 dark:text-green-300 mt-1 leading-relaxed text-sm">
+                                            {t('createByLink.freeAccessDesc', 'Aproveite! Durante esta fase inicial, você pode gerar quizzes ilimitados gratuitamente. Futuramente, este recurso poderá ter um custo em tokens.')}
                                         </p>
                                     </div>
                                 </div>
@@ -474,11 +476,7 @@ const CreateQuizByLinkPage: React.FC = () => {
 
                                 <button
                                     onClick={() => setIsModalOpen(true)}
-                                    disabled={!user?.tokens || user.tokens < 1}
-                                    className={`inline-flex items-center gap-3 px-8 py-4 border border-transparent text-lg font-bold rounded-xl text-white transition-all duration-300 ${!user?.tokens || user.tokens < 1
-                                        ? 'bg-slate-400 dark:bg-slate-600 cursor-not-allowed'
-                                        : 'bg-gradient-to-r from-primary-600 to-indigo-600 hover:from-primary-700 hover:to-indigo-700 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5'
-                                        }`}
+                                    className="inline-flex items-center gap-3 px-8 py-4 border border-transparent text-lg font-bold rounded-xl text-white transition-all duration-300 bg-gradient-to-r from-primary-600 to-indigo-600 hover:from-primary-700 hover:to-indigo-700 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
                                 >
                                     <SparklesIcon className="h-6 w-6" />
                                     {t('createByLink.createCustomQuiz')}

@@ -366,7 +366,7 @@ function App() {
         <Route
           path="/my-flashcards"
           element={
-            <ProtectedRoute requireRole="pro">
+            <ProtectedRoute>
               <AppLayout>
                 <MyFlashcardsPage />
               </AppLayout>

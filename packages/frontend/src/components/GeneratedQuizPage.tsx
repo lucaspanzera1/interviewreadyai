@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation, Trans } from 'react-i18next';
 import PageTitle from './PageTitle';
 import FormattedText from './FormattedText';
-import { CheckCircleIcon, XCircleIcon, ArrowLeftIcon, ArrowPathIcon } from '@heroicons/react/24/outline';
+import { CheckCircleIcon, XCircleIcon, ArrowLeftIcon, ArrowPathIcon, SparklesIcon } from '@heroicons/react/24/outline';
 import { QuizQuestion, apiClient } from '../lib/api';
 import { useToast } from '../contexts/ToastContext';
 
@@ -228,7 +228,7 @@ const GeneratedQuizPage: React.FC = () => {
                   percentage >= 60 ? t('generated.goodWork') :
                     t('generated.keepPracticing')}
               </h2>
-              <p className="text-slate-600 dark:text-slate-400 text-lg mb-8 max-w-md mx-auto">
+              <p className="text-slate-600 dark:text-slate-400 text-lg mb-2 max-w-md mx-auto">
                 <Trans
                   i18nKey="generated.scoreDescription"
                   ns="quiz"
@@ -236,15 +236,11 @@ const GeneratedQuizPage: React.FC = () => {
                   components={{ strong: <strong className="text-slate-900 dark:text-white" /> }}
                 />
               </p>
+              <p className="text-green-600 dark:text-green-400 text-xs font-bold mb-8 flex items-center justify-center gap-1.5 animate-pulse">
+                <SparklesIcon className="w-3.5 h-3.5" />
+                {t('generated.freeGeneration', 'Gerado gratuitamente durante o Beta!')}
+              </p>
 
-              <div className="flex items-center justify-center gap-3 mb-8 opacity-80 hover:opacity-100 transition-opacity">
-                <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">{t('generated.idealFor')}</span>
-                <div className="flex items-center gap-2 bg-white dark:bg-slate-900/50 px-3 py-1.5 rounded-full border border-slate-100 dark:border-slate-700 shadow-sm">
-                  <img src="https://upload.wikimedia.org/wikipedia/commons/a/a2/Gupy_Logo.svg" alt="Gupy" className="h-4 w-auto grayscale hover:grayscale-0 transition-all opacity-70 hover:opacity-100" />
-                  <div className="w-px h-3 bg-slate-200 dark:bg-slate-700" />
-                  <img src="https://upload.wikimedia.org/wikipedia/commons/f/fa/Indeed_logo.png" alt="Indeed" className="h-4 w-auto grayscale hover:grayscale-0 transition-all opacity-70 hover:opacity-100" />
-                </div>
-              </div>
 
               <div className="flex flex-col sm:flex-row gap-4 justify-center max-w-lg mx-auto">
                 <button
@@ -341,14 +337,6 @@ const GeneratedQuizPage: React.FC = () => {
             </button>
 
             <div className="flex flex-col items-center">
-              <div className="flex items-center gap-2 mb-1.5 opacity-90">
-                <div className="flex items-center gap-1.5 bg-white/80 dark:bg-slate-800/80 px-2.5 py-1 rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm backdrop-blur-sm">
-                  <img src="https://upload.wikimedia.org/wikipedia/commons/a/a2/Gupy_Logo.svg" alt="Gupy" className="h-3.5 w-auto" />
-                  <div className="w-px h-3 bg-slate-200 dark:bg-slate-600 mx-0.5" />
-                  <img src="https://upload.wikimedia.org/wikipedia/commons/f/fa/Indeed_logo.png" alt="Indeed" className="h-3.5 w-auto" />
-                </div>
-              </div>
-
               {quiz.categoria && (
                 <div className="hidden md:block text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-1">
                   {quiz.categoria}

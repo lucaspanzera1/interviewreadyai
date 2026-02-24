@@ -204,7 +204,9 @@
   .progress-bar-fill {
     @apply h-full bg-gradient-to-r from-primary-500 to-primary-600 transition-all duration-500 ease-out;
   }
+
 }
+
 
 @layer utilities {
   .text-balance {

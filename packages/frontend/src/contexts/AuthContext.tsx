@@ -8,7 +8,7 @@ interface AuthContextType {
   isLoading: boolean;
   isAuthenticated: boolean;
   showOnboarding: boolean;
-  login: (provider?: 'google' | 'github') => Promise<void>;
+  login: (provider?: 'google' | 'github' | 'linkedin') => Promise<void>;
   logout: () => Promise<void>;
   refreshUser: () => Promise<void>;
   updateProfile: (userData: Partial<User> | FormData) => Promise<void>;
@@ -54,7 +54,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     initializeAuth();
   }, []);
 
-  const login = async (provider: 'google' | 'github' = 'google'): Promise<void> => {
+  const login = async (provider: 'google' | 'github' | 'linkedin' = 'google'): Promise<void> => {
     try {
       setIsLoading(true);
       // Redirect to OAuth provider

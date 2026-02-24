@@ -74,6 +74,25 @@ export class AuthService {
   }
 
   /**
+   * Processa login do LinkedIn OAuth
+   */
+  async linkedinLogin(linkedinUser: any): Promise<TokenResponse> {
+    if (!linkedinUser) {
+      throw new UnauthorizedException('No user from LinkedIn');
+    }
+
+    const user = await this.userService.findOrCreateUser({
+      linkedinId: linkedinUser.linkedinId,
+      email: linkedinUser.email,
+      name: linkedinUser.name,
+      picture: linkedinUser.picture,
+      linkedinUrl: linkedinUser.linkedinUrl,
+    });
+
+    return this.generateTokens(user);
+  }
+
+  /**
    * Gera tokens JWT para o usuário
    */
   async generateTokens(user: UserDocument): Promise<TokenResponse> {
@@ -142,7 +161,7 @@ export class AuthService {
     return {
       module: 'AuthModule',
       status: 'active',
-      provider: 'Google OAuth, GitHub OAuth',
+      provider: 'Google OAuth, GitHub OAuth, LinkedIn OAuth',
       jwt: 'enabled',
       timestamp: new Date().toISOString(),
     };
