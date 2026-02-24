@@ -178,14 +178,20 @@ export class AuthController {
     type: UnauthorizedErrorDto
   })
   async linkedinCallback(@Req() req: Request, @Res() res: Response) {
-    // Guard already handled the redirect if user is null (e.g. OAuth error from provider)
-    if (!req.user) return;
+    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+
+    // Se o guard marcou erro (falha no OAuth do LinkedIn), redireciona para o frontend
+    if ((req as any).__linkedinAuthError || !req.user) {
+      const callbackUrl = new URL('/auth/callback', frontendUrl);
+      callbackUrl.searchParams.set('error', 'authentication_failed');
+      res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
+      return res.redirect(callbackUrl.toString());
+    }
 
     try {
       const loginData = await this.authService.linkedinLogin(req.user);
 
       // Redireciona para o frontend com os tokens como query parameters
-      const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
       const callbackUrl = new URL('/auth/callback', frontendUrl);
 
       callbackUrl.searchParams.set('access_token', loginData.accessToken);
@@ -195,7 +201,6 @@ export class AuthController {
       res.redirect(callbackUrl.toString());
     } catch (error) {
       // Redireciona para o frontend com erro
-      const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
       const callbackUrl = new URL('/auth/callback', frontendUrl);
       callbackUrl.searchParams.set('error', 'authentication_failed');
 

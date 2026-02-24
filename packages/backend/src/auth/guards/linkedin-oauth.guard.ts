@@ -7,14 +7,15 @@ import { AuthGuard } from '@nestjs/passport';
  */
 @Injectable()
 export class LinkedInOAuthGuard extends AuthGuard('linkedin') {
-  handleRequest(err: any, user: any, info: any, context: ExecutionContext) {
+  handleRequest(err: any, user: any, _info: any, context: ExecutionContext) {
     if (err || !user) {
-      const res = context.switchToHttp().getResponse();
-      const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
-      const callbackUrl = new URL('/auth/callback', frontendUrl);
-      callbackUrl.searchParams.set('error', 'authentication_failed');
-      res.redirect(callbackUrl.toString());
-      return null;
+      // Marca a request com flag de erro para o controller tratar o redirect.
+      // NÃO fazemos o redirect aqui para evitar ERR_HTTP_HEADERS_SENT:
+      // se retornássemos null o NestJS lançaria UnauthorizedException e o
+      // exception filter tentaria escrever JSON em uma resposta já enviada.
+      const req = context.switchToHttp().getRequest();
+      req.__linkedinAuthError = true;
+      return {} as any; // objeto truthy para o guard passar
     }
     return user;
   }

@@ -25,28 +25,22 @@ export class LinkedInStrategy extends PassportStrategy(Strategy, 'linkedin') {
   /**
    * Valida e processa o perfil do usuário retornado pelo LinkedIn.
    * Chama o endpoint OIDC /v2/userinfo para obter os dados do usuário.
+   * NestJS PassportStrategy remove o `done` automaticamente — retornar o usuário é suficiente.
    */
   async validate(
     accessToken: string,
-    refreshToken: string,
+    _refreshToken: string,
     _profile: any,
-    done: (error: any, user?: any) => void,
-  ): Promise<void> {
-    try {
-      const { data } = await axios.get('https://api.linkedin.com/v2/userinfo', {
-        headers: { Authorization: `Bearer ${accessToken}` },
-      });
+  ): Promise<any> {
+    const { data } = await axios.get('https://api.linkedin.com/v2/userinfo', {
+      headers: { Authorization: `Bearer ${accessToken}` },
+    });
 
-      const user = {
-        linkedinId: data.sub,
-        email: data.email,
-        name: data.name || `${data.given_name ?? ''} ${data.family_name ?? ''}`.trim(),
-        picture: data.picture,
-      };
-
-      done(null, user);
-    } catch (error) {
-      done(error);
-    }
+    return {
+      linkedinId: data.sub,
+      email: data.email,
+      name: data.name || `${data.given_name ?? ''} ${data.family_name ?? ''}`.trim(),
+      picture: data.picture,
+    };
   }
 }
