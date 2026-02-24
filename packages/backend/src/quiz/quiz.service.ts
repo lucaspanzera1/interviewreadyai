@@ -49,10 +49,6 @@ export class QuizService {
       throw new HttpException('User not found', HttpStatus.NOT_FOUND);
     }
 
-    if (user.tokens < 1) {
-      throw new HttpException('Insufficient tokens. You need at least 1 token to generate a quiz.', HttpStatus.PAYMENT_REQUIRED);
-    }
-
     const apiKey = this.configService.get<string>('GROQ_API_KEY');
     if (!apiKey) {
       throw new HttpException('GROQ_API_KEY not configured', HttpStatus.INTERNAL_SERVER_ERROR);
@@ -111,10 +107,6 @@ export class QuizService {
           isFree: false,
           isPublic: false,
         });
-
-        // Deduzir 1 token do usuário após sucesso
-        const userService = await this.getUserService();
-        await userService.removeTokensFromUser(userId, 1, 'quiz_generation');
 
         return {
           ...generatedQuiz,
@@ -797,10 +789,6 @@ IMPORTANTE:
       throw new HttpException('User not found', HttpStatus.NOT_FOUND);
     }
 
-    if (user.tokens < 1) {
-      throw new HttpException('Insufficient tokens. You need at least 1 token to generate a job quiz.', HttpStatus.PAYMENT_REQUIRED);
-    }
-
     try {
       const lang = (user.preferredLanguage as SupportedLanguage) || 'pt-BR';
 
@@ -809,9 +797,6 @@ IMPORTANTE:
 
       // Gerar o quiz baseado nos dados da vaga
       const quiz = await this.generateJobQuizFromData(jobData, userId, lang);
-
-      // Deduzir 1 token do usuário após sucesso
-      await userService.removeTokensFromUser(userId, 1, 'quiz_generation');
 
       return quiz;
     } catch (error) {
