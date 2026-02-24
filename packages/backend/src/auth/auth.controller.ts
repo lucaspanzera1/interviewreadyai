@@ -19,7 +19,7 @@ import {
 import { Request, Response } from 'express';
 import { AuthService } from './auth.service';
 import { LoginDto, TokenResponseDto, RefreshTokenDto } from './dto';
-import { GoogleOAuthGuard, GitHubOAuthGuard, JwtAuthGuard } from './guards';
+import { GoogleOAuthGuard, GitHubOAuthGuard, LinkedInOAuthGuard, JwtAuthGuard } from './guards';
 import { Public, CurrentUser } from './decorators';
 import { t, SupportedLanguage } from '../common/i18n';
 import { 
@@ -141,6 +141,64 @@ export class AuthController {
       const callbackUrl = new URL('/auth/callback', frontendUrl);
       callbackUrl.searchParams.set('error', 'authentication_failed');
       
+      res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
+      res.redirect(callbackUrl.toString());
+    }
+  }
+
+  /**
+   * Inicia o fluxo de autenticação com LinkedIn
+   */
+  @Get('linkedin/login')
+  @Public()
+  @UseGuards(LinkedInOAuthGuard)
+  @ApiOperation({ summary: 'Inicia login com LinkedIn OAuth' })
+  @ApiResponse({ 
+    status: 302, 
+    description: 'Redireciona para página de autenticação do LinkedIn' 
+  })
+  async linkedinLogin() {
+    // O guard do LinkedIn redireciona automaticamente
+  }
+
+  /**
+   * Callback do LinkedIn OAuth - processa retorno da autenticação
+   */
+  @Get('linkedin/callback')
+  @Public()
+  @UseGuards(LinkedInOAuthGuard)
+  @ApiOperation({ summary: 'Callback do LinkedIn OAuth' })
+  @ApiResponse({ 
+    status: 302, 
+    description: 'Redireciona para frontend com tokens de autenticação'
+  })
+  @ApiResponse({ 
+    status: 401, 
+    description: 'Falha na autenticação',
+    type: UnauthorizedErrorDto
+  })
+  async linkedinCallback(@Req() req: Request, @Res() res: Response) {
+    // Guard already handled the redirect if user is null (e.g. OAuth error from provider)
+    if (!req.user) return;
+
+    try {
+      const loginData = await this.authService.linkedinLogin(req.user);
+
+      // Redireciona para o frontend com os tokens como query parameters
+      const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+      const callbackUrl = new URL('/auth/callback', frontendUrl);
+
+      callbackUrl.searchParams.set('access_token', loginData.accessToken);
+      callbackUrl.searchParams.set('refresh_token', loginData.refreshToken);
+
+      res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
+      res.redirect(callbackUrl.toString());
+    } catch (error) {
+      // Redireciona para o frontend com erro
+      const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+      const callbackUrl = new URL('/auth/callback', frontendUrl);
+      callbackUrl.searchParams.set('error', 'authentication_failed');
+
       res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
       res.redirect(callbackUrl.toString());
     }

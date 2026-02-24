@@ -46,6 +46,7 @@ export class UserService {
   async findOrCreateUser(userData: {
     googleId?: string;
     githubId?: string;
+    linkedinId?: string;
     email: string;
     name: string;
     picture?: string;
@@ -65,6 +66,8 @@ export class UserService {
         user = await this.userModel.findOne({ googleId: userData.googleId });
       } else if (userData.githubId) {
         user = await this.userModel.findOne({ githubId: userData.githubId });
+      } else if (userData.linkedinId) {
+        user = await this.userModel.findOne({ linkedinId: userData.linkedinId });
       }
 
       if (!user) {
@@ -77,6 +80,8 @@ export class UserService {
             user.googleId = userData.googleId;
           } else if (userData.githubId) {
             user.githubId = userData.githubId;
+          } else if (userData.linkedinId) {
+            user.linkedinId = userData.linkedinId;
           }
           user.lastLoginAt = new Date();
 
@@ -101,6 +106,7 @@ export class UserService {
         user = new this.userModel({
           googleId: userData.googleId,
           githubId: userData.githubId,
+          linkedinId: userData.linkedinId,
           email: userData.email.toLowerCase(),
           name: userData.name,
           picture: userData.picture,

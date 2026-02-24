@@ -16,6 +16,9 @@ export class User {
   @Prop()
   githubId?: string;
 
+  @Prop()
+  linkedinId?: string;
+
   @Prop({ required: true, unique: true, lowercase: true })
   email: string;
 
