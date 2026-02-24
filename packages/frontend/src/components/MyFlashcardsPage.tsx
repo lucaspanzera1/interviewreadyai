@@ -153,7 +153,7 @@ const MyFlashcardsPage: React.FC = () => {
                         <span className="hidden sm:inline">{t('myFlashcards.createNew')}</span>
                         <span className="sm:hidden">{t('myFlashcards.createShort')}</span>
                         <span className="absolute -top-2 -right-2 bg-green-500 text-white text-[10px] font-black px-1.5 py-0.5 rounded-md shadow-sm border border-white dark:border-slate-900 animate-bounce">
-                            GRÁTIS
+                            {t('myFlashcards.freeBadge', 'GRÁTIS')}
                         </span>
                     </button>
                 </div>
