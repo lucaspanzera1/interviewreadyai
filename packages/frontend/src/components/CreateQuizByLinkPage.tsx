@@ -221,7 +221,7 @@ const CreateQuizByLinkPage: React.FC = () => {
             <main className="flex-1 w-full max-w-4xl mx-auto">
                 <div className="max-w-4xl mx-auto space-y-8">
                     {/* Quiz Type Selector */}
-                    <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl border border-slate-200 dark:border-slate-700 p-6 relative overflow-hidden group">
+                    <div id="tour-create-quiz-page" className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl border border-slate-200 dark:border-slate-700 p-6 relative overflow-hidden group">
                         <div className="relative z-10">
                             <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-4 text-center">
                                 {t('createByLink.chooseHow')}

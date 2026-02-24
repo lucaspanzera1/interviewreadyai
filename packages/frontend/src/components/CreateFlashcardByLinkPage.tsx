@@ -87,7 +87,7 @@ const CreateFlashcardByLinkPage: React.FC = () => {
             <main className="flex-1 w-full max-w-4xl mx-auto">
                 <div className="max-w-4xl mx-auto space-y-8">
                     {/* Input Section */}
-                    <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl border border-slate-200 dark:border-slate-700 p-8 sm:p-12 relative overflow-hidden group">
+                    <div id="tour-create-flashcard-page" className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl border border-slate-200 dark:border-slate-700 p-8 sm:p-12 relative overflow-hidden group">
                         {/* Background decorative elements */}
                         <div className="absolute top-0 right-0 -mt-20 -mr-20 w-64 h-64 bg-primary-500/10 rounded-full blur-3xl group-hover:bg-primary-500/20 transition-all duration-500"></div>
                         <div className="absolute bottom-0 left-0 -mb-20 -ml-20 w-64 h-64 bg-indigo-500/10 rounded-full blur-3xl group-hover:bg-indigo-500/20 transition-all duration-500"></div>
@@ -175,8 +175,8 @@ const CreateFlashcardByLinkPage: React.FC = () => {
                                             <label
                                                 key={level.value}
                                                 className={`relative p-4 rounded-xl border-2 cursor-pointer transition-all ${selectedLevel === level.value
-                                                        ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20'
-                                                        : 'border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600'
+                                                    ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20'
+                                                    : 'border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600'
                                                     }`}
                                             >
                                                 <input

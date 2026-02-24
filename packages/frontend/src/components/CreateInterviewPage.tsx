@@ -126,7 +126,7 @@ const CreateInterviewPage: React.FC = () => {
 
             {/* Main Content */}
             <main className="max-w-4xl mx-auto">
-                <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 p-6 sm:p-8">
+                <div id="tour-create-interview-page" className="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 p-6 sm:p-8">
 
                     {/* Informações importantes */}
                     <div className="mb-8 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">

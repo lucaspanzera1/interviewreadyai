@@ -204,7 +204,74 @@
   .progress-bar-fill {
     @apply h-full bg-gradient-to-r from-primary-500 to-primary-600 transition-all duration-500 ease-out;
   }
+
+  /* Driver.js Popover Gamified Styling */
+  .driver-popover {
+    @apply rounded-2xl shadow-xl p-5 border-2 transition-all !important;
+    font-family: inherit !important;
+  }
+  .driver-popover-title {
+    @apply font-bold text-lg mb-2 !important;
+  }
+  .driver-popover-description {
+    @apply text-sm leading-relaxed mb-4 !important;
+  }
+  .driver-popover-footer button {
+    @apply rounded-xl font-bold px-4 py-2 transition-all cursor-pointer text-sm !important;
+    text-shadow: none !important;
+  }
+
+  /* Driver Themes - Dark & Light variants */
+  .driver-theme-dark {
+    @apply bg-slate-800 text-white border-slate-700 !important;
+  }
+  .driver-theme-dark .driver-popover-title {
+    @apply text-white !important;
+  }
+  .driver-theme-dark .driver-popover-description {
+    @apply text-slate-300 !important;
+  }
+  .driver-theme-dark .driver-popover-footer button {
+    @apply text-slate-200 bg-slate-700 hover:bg-slate-600 border border-slate-600 !important;
+  }
+  .driver-theme-dark .driver-popover-progress-text {
+    @apply text-slate-400 !important;
+  }
+  .driver-theme-dark .driver-popover-close-btn {
+    @apply text-slate-400 hover:text-white bg-transparent border-transparent !important;
+  }
+
+  .driver-theme-light {
+    @apply bg-white text-slate-900 border-slate-200 !important;
+  }
+  .driver-theme-light .driver-popover-title {
+    @apply text-slate-900 !important;
+  }
+  .driver-theme-light .driver-popover-description {
+    @apply text-slate-600 !important;
+  }
+  .driver-theme-light .driver-popover-footer button {
+    @apply text-slate-700 bg-slate-100 hover:bg-slate-200 border border-slate-200 !important;
+  }
+  .driver-theme-light .driver-popover-progress-text {
+    @apply text-slate-500 !important;
+  }
+  .driver-theme-light .driver-popover-close-btn {
+    @apply text-slate-400 hover:text-slate-900 bg-transparent border-transparent !important;
+  }
+
+  /* Driver Color Highlights (Purple / Orange) */
+  .driver-color-purple .driver-popover-footer .driver-popover-next-btn,
+  .driver-color-purple .driver-popover-footer .driver-popover-done-btn {
+    @apply bg-purple-600 text-white border-purple-600 hover:bg-purple-500 hover:-translate-y-0.5 shadow-md shadow-purple-500/30 !important;
+  }
+  
+  .driver-color-orange .driver-popover-footer .driver-popover-next-btn,
+  .driver-color-orange .driver-popover-footer .driver-popover-done-btn {
+    @apply bg-orange-600 text-white border-orange-600 hover:bg-orange-500 hover:-translate-y-0.5 shadow-md shadow-orange-500/30 !important;
+  }
 }
+
 
 @layer utilities {
   .text-balance {

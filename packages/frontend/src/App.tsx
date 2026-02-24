@@ -14,6 +14,7 @@ import TokensPage from './components/TokensPage'
 import FreeQuizzesPage from './components/FreeQuizzesPage'
 import OnboardingProvider from './components/OnboardingProvider'
 import ToastContainer from './components/ToastContainer'
+import { GlobalTutorial } from './components/GlobalTutorial'
 import GeneratedQuizPage from './components/GeneratedQuizPage'
 import UserQuizPage from './components/UserQuizPage'
 import AdminQuizzesPage from './components/AdminQuizzesPage'
@@ -264,7 +265,7 @@ function App() {
         <Route
           path="/create-interview"
           element={
-            <ProtectedRoute requireRole="pro">
+            <ProtectedRoute>
               <AppLayout>
                 <CreateInterviewPage />
               </AppLayout>
@@ -276,7 +277,7 @@ function App() {
         <Route
           path="/my-interviews"
           element={
-            <ProtectedRoute requireRole="pro">
+            <ProtectedRoute>
               <AppLayout>
                 <MyInterviewsPage />
               </AppLayout>
@@ -366,7 +367,7 @@ function App() {
         <Route
           path="/my-flashcards"
           element={
-            <ProtectedRoute requireRole="pro">
+            <ProtectedRoute>
               <AppLayout>
                 <MyFlashcardsPage />
               </AppLayout>
@@ -462,6 +463,9 @@ function App() {
 
       {/* Onboarding modal */}
       <OnboardingProvider />
+
+      {/* Global Tutorial */}
+      <GlobalTutorial />
 
       {/* Toast notifications */}
       <ToastContainer />

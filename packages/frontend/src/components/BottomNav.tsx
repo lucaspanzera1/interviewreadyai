@@ -79,13 +79,11 @@ const Sidebar: React.FC = () => {
         };
     }, [isMobileOpen, setIsMobileOpen]);
 
-    const isPro = user?.role === 'pro';
-
     const mainNavItems = [
         { name: t('nav.home'), nameKey: 'nav.home', path: '/', icon: HomeIcon, activeIcon: HomeIconSolid },
         { name: t('nav.quizzes'), nameKey: 'nav.quizzes', path: '/my-quizzes', icon: DocumentTextIcon, activeIcon: DocumentTextIconSolid },
-        { name: t('nav.simulations'), nameKey: 'nav.simulations', path: '/my-interviews', icon: ChatBubbleLeftRightIcon, activeIcon: ChatBubbleLeftRightIconSolid, badge: 'PRO', locked: !isPro && user?.role !== 'admin' },
-        { name: t('nav.flashcards'), nameKey: 'nav.flashcards', path: '/my-flashcards', icon: RectangleStackIcon, activeIcon: RectangleStackIconSolid, badge: 'PRO', locked: !isPro && user?.role !== 'admin' },
+        { name: t('nav.simulations'), nameKey: 'nav.simulations', path: '/my-interviews', icon: ChatBubbleLeftRightIcon, activeIcon: ChatBubbleLeftRightIconSolid },
+        { name: t('nav.flashcards'), nameKey: 'nav.flashcards', path: '/my-flashcards', icon: RectangleStackIcon, activeIcon: RectangleStackIconSolid },
         { name: t('nav.explore'), nameKey: 'nav.explore', path: '/free-quizzes', icon: AcademicCapIcon, activeIcon: AcademicCapIconSolid },
 
         { name: t('nav.community'), nameKey: 'nav.community', path: '/search', icon: UsersIconLucide, activeIcon: UsersIconLucide },
@@ -220,27 +218,15 @@ const Sidebar: React.FC = () => {
                             onMouseLeave={handleMouseLeave}
                         >
                             <button
-                                onClick={() => {
-                                    if (item.locked) {
-                                        navigate('/tokens');
-                                    } else {
-                                        handleNavClick(item.path);
-                                    }
-                                }}
+                                onClick={() => handleNavClick(item.path)}
                                 className={`w-full flex items-center px-3 py-2.5 rounded-xl transition-all duration-200 border-l-4 ${active
                                     ? 'bg-primary-50 dark:bg-primary-900/10 text-primary-700 dark:text-primary-300 font-semibold border-primary-600'
-                                    : item.locked
-                                        ? 'text-slate-300 dark:text-slate-600 cursor-not-allowed border-transparent'
-                                        : 'text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white border-transparent'
+                                    : 'text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white border-transparent'
                                     } ${isCollapsed ? 'justify-center px-0' : ''}`}
                                 title={isCollapsed ? item.name : undefined}
-                                disabled={item.locked}
                             >
                                 <div className="relative">
-                                    <Icon className={`w-5 h-5 flex-shrink-0 transition-colors ${active ? 'text-primary-600 dark:text-primary-400' : item.locked ? 'text-slate-300 dark:text-slate-600' : 'text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-300'}`} />
-                                    {item.locked && (
-                                        <LockClosedIcon className="w-3 h-3 absolute -top-1 -right-1 text-slate-400 dark:text-slate-500" />
-                                    )}
+                                    <Icon className={`w-5 h-5 flex-shrink-0 transition-colors ${active ? 'text-primary-600 dark:text-primary-400' : 'text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-300'}`} />
                                 </div>
                                 <div className={`overflow-hidden whitespace-nowrap transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] ${isCollapsed ? 'max-w-0 opacity-0' : 'max-w-[200px] opacity-100'} w-full`}>
                                     <div className="flex items-center justify-between">
