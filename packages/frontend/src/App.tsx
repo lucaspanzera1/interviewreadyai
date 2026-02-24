@@ -146,11 +146,11 @@ function App() {
           </ProtectedRoute>
         } />
 
-        {/* Users page - only for authenticated users (role check is in the page/sidebar) */}
+        {/* Users page - only for admins */}
         <Route
           path="/users"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute requireRole="admin">
               <AppLayout>
                 <AdminUsers />
               </AppLayout>
@@ -162,7 +162,7 @@ function App() {
         <Route
           path="/token-packages"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute requireRole="admin">
               <AppLayout>
                 <AdminTokenPackagesPage />
               </AppLayout>
@@ -174,7 +174,7 @@ function App() {
         <Route
           path="/roles"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute requireRole="admin">
               <AppLayout>
                 <AdminRolesPage />
               </AppLayout>
@@ -400,7 +400,7 @@ function App() {
         <Route
           path="/admin/quizzes"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute requireRole="admin">
               <AppLayout>
                 <AdminQuizzesPage />
               </AppLayout>
@@ -412,7 +412,7 @@ function App() {
         <Route
           path="/admin/quizzes/:id/stats"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute requireRole="admin">
               <AppLayout>
                 <AdminQuizStatsPage />
               </AppLayout>
@@ -424,7 +424,7 @@ function App() {
         <Route
           path="/admin/quizzes/:id/details"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute requireRole="admin">
               <AppLayout>
                 <AdminQuizDetailsPage />
               </AppLayout>
