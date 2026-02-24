@@ -86,6 +86,7 @@ export class AuthService {
       email: linkedinUser.email,
       name: linkedinUser.name,
       picture: linkedinUser.picture,
+      linkedinUrl: linkedinUser.linkedinUrl,
     });
 
     return this.generateTokens(user);

@@ -32,15 +32,30 @@ export class LinkedInStrategy extends PassportStrategy(Strategy, 'linkedin') {
     _refreshToken: string,
     _profile: any,
   ): Promise<any> {
-    const { data } = await axios.get('https://api.linkedin.com/v2/userinfo', {
-      headers: { Authorization: `Bearer ${accessToken}` },
-    });
+    const headers = { Authorization: `Bearer ${accessToken}` };
+
+    const { data } = await axios.get('https://api.linkedin.com/v2/userinfo', { headers });
+
+    // Tenta obter o vanityName para construir a URL de perfil pública
+    let linkedinUrl: string | undefined;
+    try {
+      const { data: me } = await axios.get(
+        'https://api.linkedin.com/v2/me?projection=(id,vanityName)',
+        { headers },
+      );
+      if (me?.vanityName) {
+        linkedinUrl = `https://www.linkedin.com/in/${me.vanityName}`;
+      }
+    } catch {
+      // Silencioso: a URL de perfil é opcional
+    }
 
     return {
       linkedinId: data.sub,
       email: data.email,
       name: data.name || `${data.given_name ?? ''} ${data.family_name ?? ''}`.trim(),
       picture: data.picture,
+      linkedinUrl,
     };
   }
 }

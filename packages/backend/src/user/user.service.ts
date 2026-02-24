@@ -80,8 +80,11 @@ export class UserService {
             user.googleId = userData.googleId;
           } else if (userData.githubId) {
             user.githubId = userData.githubId;
+            if (userData.githubUrl) user.githubUrl = userData.githubUrl;
+            if (userData.linkedinUrl) user.linkedinUrl = userData.linkedinUrl;
           } else if (userData.linkedinId) {
             user.linkedinId = userData.linkedinId;
+            if (userData.linkedinUrl) user.linkedinUrl = userData.linkedinUrl;
           }
           user.lastLoginAt = new Date();
 
@@ -116,7 +119,7 @@ export class UserService {
           linkedinUrl: userData.linkedinUrl,
           lastLoginAt: new Date(),
           role,
-          tokens: 5, // Bônus de boas-vindas: 5 tokens no primeiro login
+          tokens: 0,
         });
         user = await user.save();
 
@@ -128,8 +131,12 @@ export class UserService {
         return user;
       }
 
-      // Se encontrar pelo provider ID, atualiza último login
+      // Se encontrar pelo provider ID, atualiza último login e URLs de perfil
       user.lastLoginAt = new Date();
+
+      // Atualiza URLs de perfil social se vieram no login
+      if (userData.linkedinUrl) user.linkedinUrl = userData.linkedinUrl;
+      if (userData.githubUrl) user.githubUrl = userData.githubUrl;
 
       // Check if role has expired (não resetar se for admin)
       if (user.roleExpiresAt && user.roleExpiresAt <= new Date() && user.role !== UserRole.ADMIN) {
