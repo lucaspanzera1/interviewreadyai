@@ -110,6 +110,7 @@ export class UserService {
           linkedinUrl: userData.linkedinUrl,
           lastLoginAt: new Date(),
           role,
+          tokens: 5, // Bônus de boas-vindas: 5 tokens no primeiro login
         });
         user = await user.save();
 
