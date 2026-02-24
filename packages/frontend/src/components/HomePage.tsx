@@ -21,7 +21,9 @@ import {
   QuestionMarkCircleIcon,
   ChatBubbleLeftRightIcon,
   FireIcon,
-  XMarkIcon
+  XMarkIcon,
+  LinkIcon,
+  AcademicCapIcon
 } from '@heroicons/react/24/outline';
 import OnboardingGuide from './OnboardingGuide';
 import ActivityHeatmap from './ActivityHeatmap';
@@ -401,42 +403,51 @@ const HomePage: React.FC = () => {
                 {t('guestFeatures.title')}
               </h2>
               <div className="grid md:grid-cols-3 gap-6">
-                {/* Feature 1: Simulados IA */}
-                <div className="group bg-white dark:bg-slate-900 border-2 border-dashed border-slate-200 dark:border-slate-800 hover:border-primary-300 dark:hover:border-primary-600 rounded-2xl p-6 transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
+                {/* Feature 1: Quiz Link */}
+                <div
+                  onClick={() => navigate('/create-quiz')}
+                  className="group cursor-pointer bg-white dark:bg-slate-900 border-2 border-dashed border-slate-200 dark:border-slate-800 hover:border-primary-300 dark:hover:border-primary-600 rounded-2xl p-6 transition-all duration-300 hover:shadow-lg hover:-translate-y-1"
+                >
                   <div className="w-14 h-14 bg-primary-100 dark:bg-primary-900/30 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                    <BoltIcon className="w-7 h-7 text-primary-600 dark:text-primary-400" />
+                    <LinkIcon className="w-7 h-7 text-primary-600 dark:text-primary-400" />
                   </div>
                   <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-2">
-                    {t('guestFeatures.aiQuizzes')}
+                    {t('guestFeatures.quizByLink')}
                   </h3>
                   <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
-                    {t('guestFeatures.aiQuizzesDesc')}
+                    {t('guestFeatures.quizByLinkDesc')}
                   </p>
                 </div>
 
-                {/* Feature 2: Interview Simulator */}
-                <div className="group bg-white dark:bg-slate-900 border-2 border-dashed border-slate-200 dark:border-slate-800 hover:border-primary-300 dark:hover:border-primary-600 rounded-2xl p-6 transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
+                {/* Feature 2: Quiz Topico */}
+                <div
+                  onClick={() => navigate('/create-quiz')}
+                  className="group cursor-pointer bg-white dark:bg-slate-900 border-2 border-dashed border-slate-200 dark:border-slate-800 hover:border-primary-300 dark:hover:border-primary-600 rounded-2xl p-6 transition-all duration-300 hover:shadow-lg hover:-translate-y-1"
+                >
                   <div className="w-14 h-14 bg-green-50 dark:bg-green-900/20 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                    <ChatBubbleLeftRightIcon className="w-7 h-7 text-green-600 dark:text-green-400" />
+                    <AcademicCapIcon className="w-7 h-7 text-green-600 dark:text-green-400" />
                   </div>
                   <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-2">
-                    {t('guestFeatures.interviewSim')}
+                    {t('guestFeatures.quizByTopic')}
                   </h3>
                   <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
-                    {t('guestFeatures.interviewSimDesc')}
+                    {t('guestFeatures.quizByTopicDesc')}
                   </p>
                 </div>
 
                 {/* Feature 3: Flashcards */}
-                <div className="group bg-white dark:bg-slate-900 border-2 border-dashed border-slate-200 dark:border-slate-800 hover:border-primary-300 dark:hover:border-primary-600 rounded-2xl p-6 transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
+                <div
+                  onClick={() => navigate('/create-flashcard')}
+                  className="group cursor-pointer bg-white dark:bg-slate-900 border-2 border-dashed border-slate-200 dark:border-slate-800 hover:border-primary-300 dark:hover:border-primary-600 rounded-2xl p-6 transition-all duration-300 hover:shadow-lg hover:-translate-y-1"
+                >
                   <div className="w-14 h-14 bg-amber-50 dark:bg-amber-900/20 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                     <DocumentTextIcon className="w-7 h-7 text-amber-600 dark:text-amber-400" />
                   </div>
                   <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-2">
-                    {t('guestFeatures.flashcardsSRS')}
+                    {t('guestFeatures.flashcardsJob')}
                   </h3>
                   <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
-                    {t('guestFeatures.flashcardsSRSDesc')}
+                    {t('guestFeatures.flashcardsJobDesc')}
                   </p>
                 </div>
               </div>

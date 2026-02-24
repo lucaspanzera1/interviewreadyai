@@ -64,12 +64,12 @@
   },
   "guestFeatures": {
     "title": "Recursos Liberados Gratuitamente",
-    "aiQuizzes": "Simulados ilimitados",
-    "aiQuizzesDesc": "Gere quizzes personalizados para qualquer vaga em segundos. Treine quantas vezes quiser sem gastar nada.",
-    "interviewSim": "Simulador de Entrevista",
-    "interviewSimDesc": "Pratique com nossa IA e receba feedback em tempo real para mandar bem na hora H.",
-    "flashcardsSRS": "Flashcards Inteligentes",
-    "flashcardsSRSDesc": "Memorize conteúdos chave com repetição espaçada. Crie seus decks de graça a partir de links de vagas."
+    "quizByLink": "Quiz por Link da Vaga",
+    "quizByLinkDesc": "Cole o link da vaga e nossa IA gera um simulado perfeito focado no que a empresa pede.",
+    "quizByTopic": "Quiz por Tópico",
+    "quizByTopicDesc": "Quer focar em React, Node ou Excel? Digite o tema e crie um quiz sob medida na mesma hora.",
+    "flashcardsJob": "Flashcards da Vaga",
+    "flashcardsJobDesc": "Transforme os requisitos de qualquer link de vaga em flashcards para fixar o conhecimento."
   },
   "lockedPanel": {
     "title": "Painel de Evolução",

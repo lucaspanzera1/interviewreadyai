@@ -227,11 +227,11 @@ const Sidebar: React.FC = () => {
                                         handleNavClick(item.path);
                                     }
                                 }}
-                                className={`w-full flex items-center px-3 py-2.5 rounded-xl transition-all duration-200 border-l-4 ${active
-                                    ? 'bg-primary-50 dark:bg-primary-900/10 text-primary-700 dark:text-primary-300 font-semibold border-primary-600'
+                                className={`w-full flex items-center px-3 py-2.5 rounded-xl transition-all duration-300 group ${active
+                                    ? 'bg-primary-50 dark:bg-primary-900/10 text-primary-700 dark:text-primary-400 font-bold shadow-sm shadow-primary-500/5'
                                     : item.locked
-                                        ? 'text-slate-300 dark:text-slate-600 cursor-not-allowed border-transparent'
-                                        : 'text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white border-transparent'
+                                        ? 'text-slate-300 dark:text-slate-600 cursor-not-allowed'
+                                        : 'text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white'
                                     } ${isCollapsed ? 'justify-center px-0' : ''}`}
                                 title={isCollapsed ? item.name : undefined}
                                 disabled={item.locked}
@@ -316,13 +316,13 @@ const Sidebar: React.FC = () => {
                                 <button
                                     key={item.name}
                                     onClick={() => handleNavClick(item.path)}
-                                    className={`w-full flex items-center px-3 py-2 rounded-md transition-all duration-200 ${active
-                                        ? 'bg-slate-100 text-slate-900 font-medium'
-                                        : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900'
-                                        } ${isCollapsed ? 'justify-center' : ''}`}
+                                    className={`w-full flex items-center px-3 py-2.5 rounded-xl transition-all duration-300 group ${active
+                                        ? 'bg-primary-50 dark:bg-primary-900/10 text-primary-700 dark:text-primary-400 font-bold shadow-sm shadow-primary-500/5'
+                                        : 'text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white'
+                                        } ${isCollapsed ? 'justify-center px-0' : ''}`}
                                     title={isCollapsed ? item.name : undefined}
                                 >
-                                    <Icon className={`w-4 h-4 flex-shrink-0 ${active ? 'text-slate-900' : 'text-slate-400'}`} />
+                                    <Icon className={`w-4 h-4 flex-shrink-0 transition-colors ${active ? 'text-primary-600 dark:text-primary-400' : 'text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-300'}`} />
                                     <div className={`overflow-hidden whitespace-nowrap transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] ${isCollapsed ? 'max-w-0 opacity-0' : 'max-w-[200px] opacity-100'}`}>
                                         <span className="text-sm pl-3 block">{item.name}</span>
                                     </div>
