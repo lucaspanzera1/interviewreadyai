@@ -460,7 +460,7 @@ const HomePage: React.FC = () => {
             {/* Left Column: Quick Actions & Tips */}
             <div className="lg:col-span-1 space-y-6 min-w-0">
               {/* Quick Actions */}
-              <section id="tour-welcome">
+              <section>
                 <h2 className="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-wider mb-4">
                   {isGuest ? t('quickActions.guestTitle') : t('quickActions.title')}
                 </h2>

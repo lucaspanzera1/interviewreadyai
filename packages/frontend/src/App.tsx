@@ -14,7 +14,6 @@ import TokensPage from './components/TokensPage'
 import FreeQuizzesPage from './components/FreeQuizzesPage'
 import OnboardingProvider from './components/OnboardingProvider'
 import ToastContainer from './components/ToastContainer'
-import { GlobalTutorial } from './components/GlobalTutorial'
 import GeneratedQuizPage from './components/GeneratedQuizPage'
 import UserQuizPage from './components/UserQuizPage'
 import AdminQuizzesPage from './components/AdminQuizzesPage'
@@ -463,9 +462,6 @@ function App() {
 
       {/* Onboarding modal */}
       <OnboardingProvider />
-
-      {/* Global Tutorial */}
-      <GlobalTutorial />
 
       {/* Toast notifications */}
       <ToastContainer />
