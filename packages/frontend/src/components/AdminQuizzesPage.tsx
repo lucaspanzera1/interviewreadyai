@@ -67,7 +67,9 @@ const AdminQuizzesPage: React.FC = () => {
         tags: [] as string[],
         quantidade_questoes: 10,
         nivel: QuizLevel.INICIANTE,
-        contexto: ''
+        contexto: '',
+        isPublic: true,
+        isFree: true,
     });
 
     useEffect(() => {
@@ -139,7 +141,9 @@ const AdminQuizzesPage: React.FC = () => {
                 tags: [],
                 quantidade_questoes: 10,
                 nivel: QuizLevel.INICIANTE,
-                contexto: ''
+                contexto: '',
+                isPublic: true,
+                isFree: true,
             });
         } catch (error) {
             toast.error('Erro ao criar quiz. Tente novamente.');
@@ -595,6 +599,26 @@ const AdminQuizzesPage: React.FC = () => {
                                             </div>
                                         </div>
 
+                                        <div className="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-900/50 rounded-xl border border-slate-200 dark:border-slate-700">
+                                            <div>
+                                                <p className="text-sm font-medium text-slate-700 dark:text-slate-300">Quiz Público e Gratuito</p>
+                                                <p className="text-xs text-slate-400 mt-0.5">Disponível em <code className="text-primary-500">/api/quiz/public</code> para todos os usuários</p>
+                                            </div>
+                                            <button
+                                                type="button"
+                                                onClick={() => setFormData(prev => ({ ...prev, isPublic: !prev.isPublic, isFree: !prev.isFree }))}
+                                                className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-primary-600 focus:ring-offset-2 ${
+                                                    formData.isPublic ? 'bg-primary-600' : 'bg-slate-200 dark:bg-slate-700'
+                                                }`}
+                                            >
+                                                <span
+                                                    className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+                                                        formData.isPublic ? 'translate-x-5' : 'translate-x-0'
+                                                    }`}
+                                                />
+                                            </button>
+                                        </div>
+
                                         <div>
                                             <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                                                 Contexto Adicional (IA)
@@ -672,6 +696,12 @@ const AdminQuizzesPage: React.FC = () => {
                                                 <h4 className="font-semibold text-blue-900 dark:text-blue-100 mb-1">Pronto para gerar!</h4>
                                                 <p className="text-sm text-blue-700 dark:text-blue-300">
                                                     A IA irá analisar seus dados e o contexto fornecido para gerar {formData.quantidade_questoes} questões de nível {formData.nivel}. Isso pode levar alguns segundos.
+                                                </p>
+                                                <p className="text-sm mt-2 font-medium">
+                                                    Visibilidade:{' '}
+                                                    <span className={formData.isPublic ? 'text-green-600 dark:text-green-400' : 'text-slate-500 dark:text-slate-400'}>
+                                                        {formData.isPublic ? '🟢 Público e Gratuito' : '🔒 Privado'}
+                                                    </span>
                                                 </p>
                                             </div>
                                         </div>

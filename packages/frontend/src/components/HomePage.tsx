@@ -257,6 +257,14 @@ const HomePage: React.FC = () => {
                 <p className="text-sm text-slate-500 dark:text-slate-400">
                   {isGuest ? t('guestSubtitle') : t('userSubtitle')}
                 </p>
+                {!isGuest && (
+                  <div className="mt-1.5 flex items-center gap-1.5">
+                    <span className="flex items-center gap-1 px-2 py-0.5 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 text-[10px] font-bold rounded-full border border-green-200 dark:border-green-800/50">
+                      <SparklesIcon className="w-3 h-3" />
+                      {t('freeResourcesBadge', 'Recursos Gratuitos Liberados!')}
+                    </span>
+                  </div>
+                )}
               </div>
               <div className="flex items-center gap-3">
                 {!isGuest && (
@@ -362,6 +370,9 @@ const HomePage: React.FC = () => {
                         </div>
                       </div>
                       <div className="px-2 py-1 bg-green-500/10 text-green-400 text-xs rounded font-bold">{t('guestCard.ready100')}</div>
+                    </div>
+                    <div className="absolute top-4 right-4 -mt-8 bg-green-500 text-white text-[10px] font-black px-2 py-1 rounded-full shadow-lg border-2 border-slate-900 animate-bounce">
+                      100% GRÁTIS
                     </div>
                     <div className="space-y-3">
                       <div className="h-2 bg-slate-800 rounded w-3/4"></div>

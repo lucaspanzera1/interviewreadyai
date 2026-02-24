@@ -104,8 +104,8 @@ export class QuizService {
           questions: generatedQuiz.questions,
           createdBy: userObjectId,
           isActive: true,
-          isFree: false,
-          isPublic: false,
+          isFree: dto.isFree ?? false,
+          isPublic: dto.isPublic ?? false,
         });
 
         return {

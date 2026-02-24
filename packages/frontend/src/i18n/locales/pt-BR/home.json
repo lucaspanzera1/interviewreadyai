@@ -4,6 +4,7 @@
   "guestLabel": "Visitante",
   "guestSubtitle": "Experimente um pouco do que oferecemos.",
   "userSubtitle": "Vamos evoluir sua carreira hoje?",
+  "freeResourcesBadge": "Recursos Gratuitos Liberados!",
   "loginButton": "Efetuar Login",
   "tokens": "Tokens",
   "stats": {
@@ -53,22 +54,22 @@
   "fullHistory": "Histórico completo",
   "questions": "questões",
   "guestHero": {
-    "badge": "Para todas as carreiras",
-    "titleWhite": "Conquiste sua vaga em ",
-    "titleGradient": "qualquer área",
-    "description": "Tech, Saúde, Vendas, Direito, Engenharia... O TreinaVaga usa IA para criar simulados personalizados para sua realidade, qualquer que seja ela.",
-    "startNow": "Começar Agora",
+    "badge": "Acesso 100% Gratuito (BETA)",
+    "titleWhite": "Acelere sua aprovação ",
+    "titleGradient": "sem custos",
+    "description": "Prepare-se para qualquer vaga com simulados de IA e Flashcards. Durante nossa fase Beta, você gera conteúdos ilimitados de graça!",
+    "startNow": "Começar Grátis Agora",
     "watchDemo": "Ver Demonstração",
-    "joinProfessionals": "Junte-se a profissionais de todas as áreas"
+    "joinProfessionals": "Junte-se a profissionais que já estão evoluindo"
   },
   "guestFeatures": {
-    "title": "O que você encontrará aqui",
-    "aiQuizzes": "Simulados com IA",
-    "aiQuizzesDesc": "Gere quizzes personalizados baseados na descrição da vaga em segundos. Prepare-se para o que realmente importa.",
-    "interviewSim": "Simulação de Entrevista",
-    "interviewSimDesc": "Pratique com uma IA que simula recrutadores reais. Receba feedback instantâneo sobre suas respostas.",
-    "flashcardsSRS": "Flashcards SRS",
-    "flashcardsSRSDesc": "Memorização de longo prazo com repetição espaçada. Nunca mais esqueça conceitos importantes."
+    "title": "Recursos Liberados Gratuitamente",
+    "aiQuizzes": "Simulados ilimitados",
+    "aiQuizzesDesc": "Gere quizzes personalizados para qualquer vaga em segundos. Treine quantas vezes quiser sem gastar nada.",
+    "interviewSim": "Simulador de Entrevista",
+    "interviewSimDesc": "Pratique com nossa IA e receba feedback em tempo real para mandar bem na hora H.",
+    "flashcardsSRS": "Flashcards Inteligentes",
+    "flashcardsSRSDesc": "Memorize conteúdos chave com repetição espaçada. Crie seus decks de graça a partir de links de vagas."
   },
   "lockedPanel": {
     "title": "Painel de Evolução",

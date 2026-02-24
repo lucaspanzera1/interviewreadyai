@@ -193,6 +193,8 @@ export interface GenerateQuizDto {
   quantidade_questoes: number;
   nivel: QuizLevel;
   contexto?: string;
+  isPublic?: boolean;
+  isFree?: boolean;
 }
 
 export interface GenerateJobQuizDto {

@@ -241,14 +241,6 @@ const GeneratedQuizPage: React.FC = () => {
                 {t('generated.freeGeneration', 'Gerado gratuitamente durante o Beta!')}
               </p>
 
-              <div className="flex items-center justify-center gap-3 mb-8 opacity-80 hover:opacity-100 transition-opacity">
-                <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">{t('generated.idealFor')}</span>
-                <div className="flex items-center gap-2 bg-white dark:bg-slate-900/50 px-3 py-1.5 rounded-full border border-slate-100 dark:border-slate-700 shadow-sm">
-                  <img src="https://upload.wikimedia.org/wikipedia/commons/a/a2/Gupy_Logo.svg" alt="Gupy" className="h-4 w-auto grayscale hover:grayscale-0 transition-all opacity-70 hover:opacity-100" />
-                  <div className="w-px h-3 bg-slate-200 dark:bg-slate-700" />
-                  <img src="https://upload.wikimedia.org/wikipedia/commons/f/fa/Indeed_logo.png" alt="Indeed" className="h-4 w-auto grayscale hover:grayscale-0 transition-all opacity-70 hover:opacity-100" />
-                </div>
-              </div>
 
               <div className="flex flex-col sm:flex-row gap-4 justify-center max-w-lg mx-auto">
                 <button
@@ -345,14 +337,6 @@ const GeneratedQuizPage: React.FC = () => {
             </button>
 
             <div className="flex flex-col items-center">
-              <div className="flex items-center gap-2 mb-1.5 opacity-90">
-                <div className="flex items-center gap-1.5 bg-white/80 dark:bg-slate-800/80 px-2.5 py-1 rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm backdrop-blur-sm">
-                  <img src="https://upload.wikimedia.org/wikipedia/commons/a/a2/Gupy_Logo.svg" alt="Gupy" className="h-3.5 w-auto" />
-                  <div className="w-px h-3 bg-slate-200 dark:bg-slate-600 mx-0.5" />
-                  <img src="https://upload.wikimedia.org/wikipedia/commons/f/fa/Indeed_logo.png" alt="Indeed" className="h-3.5 w-auto" />
-                </div>
-              </div>
-
               {quiz.categoria && (
                 <div className="hidden md:block text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-1">
                   {quiz.categoria}
