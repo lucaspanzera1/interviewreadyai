@@ -50,9 +50,10 @@
   "myFlashcards": {
     "pageTitle": "Meus Flashcards - TreinaVagaAI",
     "title": "Meus Flashcards",
-    "subtitle": "Gerencie e estude os flashcards que você criou.",
+    "subtitle": "Gerencie e estude os flashcards que você criou gerados por IA.",
     "createNew": "Criar Novos Flashcards",
     "createShort": "Criar",
+    "freeBadge": "GRÁTIS",
     "loading": "Carregando...",
     "emptyState": "Nenhum flashcard criado ainda",
     "emptyStateDesc": "Crie seus primeiros flashcards baseados em vagas de emprego para começar a estudar de forma inteligente.",

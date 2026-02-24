@@ -153,10 +153,11 @@
   "myQuizzes": {
     "title": "Meus Quizzes",
     "pageTitle": "Meus Quizzes - TreinaVagaAI",
-    "subtitle": "Gerencie sua biblioteca de estudos personalizada.",
+    "subtitle": "Gerencie e veja métricas do seu banco de simulados.",
     "createNew": "Criar Novo Quiz",
     "create": "Criar",
-    "emptyState": "Você ainda não criou nenhum quiz.",
+    "freeBadge": "GRÁTIS",
+    "emptyState": "Nenhum quiz por aqui ainda.",
     "emptyStateTitle": "Comece sua jornada!",
     "emptyStateDescription": "Você ainda não tem quizzes criados. Experimente criar um quiz personalizado baseado em uma vaga real e aumente suas chances de aprovação.",
     "emptyStateAction": "Criar Primeiro Quiz",

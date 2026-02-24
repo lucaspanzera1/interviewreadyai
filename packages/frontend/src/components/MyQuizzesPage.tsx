@@ -144,7 +144,7 @@ const MyQuizzesPage: React.FC = () => {
                         <span className="hidden sm:inline">{t('myQuizzes.createNew')}</span>
                         <span className="sm:hidden">{t('myQuizzes.create')}</span>
                         <span className="absolute -top-2 -right-2 bg-green-500 text-white text-[10px] font-black px-1.5 py-0.5 rounded-md shadow-sm border border-white dark:border-slate-900 animate-bounce">
-                            GRÁTIS
+                            {t('myQuizzes.freeBadge', 'GRÁTIS')}
                         </span>
                     </button>
                 </div>

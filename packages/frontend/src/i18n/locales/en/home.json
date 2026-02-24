@@ -4,6 +4,7 @@
   "guestLabel": "Guest",
   "guestSubtitle": "Try a little of what we offer.",
   "userSubtitle": "Let's boost your career today?",
+  "freeResourcesBadge": "Free Resources Unlocked!",
   "loginButton": "Log in",
   "tokens": "Tokens",
   "stats": {
@@ -53,22 +54,22 @@
   "fullHistory": "Full history",
   "questions": "questions",
   "guestHero": {
-    "badge": "For all careers",
-    "titleWhite": "Land your job in ",
-    "titleGradient": "any field",
-    "description": "Tech, Healthcare, Sales, Law, Engineering... TreinaVaga uses AI to create personalized quizzes for your reality, whatever it may be.",
-    "startNow": "Get Started",
+    "badge": "100% Free Access (BETA)",
+    "titleWhite": "Accelerate your success ",
+    "titleGradient": "at no cost",
+    "description": "Prepare for any job with AI quizzes and Flashcards. During our Beta phase, generate unlimited content for free!",
+    "startNow": "Start Free Now",
     "watchDemo": "Watch Demo",
-    "joinProfessionals": "Join professionals from all fields"
+    "joinProfessionals": "Join professionals who are already evolving"
   },
   "guestFeatures": {
-    "title": "What you'll find here",
-    "aiQuizzes": "AI-Powered Quizzes",
-    "aiQuizzesDesc": "Generate personalized quizzes based on job descriptions in seconds. Prepare for what really matters.",
-    "interviewSim": "Interview Simulation",
-    "interviewSimDesc": "Practice with an AI that simulates real recruiters. Get instant feedback on your answers.",
-    "flashcardsSRS": "SRS Flashcards",
-    "flashcardsSRSDesc": "Long-term memorization with spaced repetition. Never forget important concepts again."
+    "title": "Resources Unlocked For Free",
+    "aiQuizzes": "Unlimited AI Quizzes",
+    "aiQuizzesDesc": "Generate personalized quizzes for any job in seconds. Practice as much as you want without spending anything.",
+    "interviewSim": "Interview Simulator",
+    "interviewSimDesc": "Practice with our AI and receive real-time feedback to nail the real interview.",
+    "flashcardsSRS": "Smart Flashcards",
+    "flashcardsSRSDesc": "Memorize key concepts with spaced repetition. Create your decks for free from job links."
   },
   "lockedPanel": {
     "title": "Progress Dashboard",
@@ -79,6 +80,7 @@
     "preparedCandidate": "Prepared Candidate",
     "readyForChallenge": "Ready for the challenge",
     "ready100": "100% Ready",
+    "freeBadge": "100% FREE",
     "startQuiz": "Start Quiz",
     "approved": "Approved!"
   },

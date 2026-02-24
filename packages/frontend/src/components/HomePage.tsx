@@ -374,7 +374,7 @@ const HomePage: React.FC = () => {
                       <div className="px-2 py-1 bg-green-500/10 text-green-400 text-xs rounded font-bold">{t('guestCard.ready100')}</div>
                     </div>
                     <div className="absolute top-4 right-4 -mt-8 bg-green-500 text-white text-[10px] font-black px-2 py-1 rounded-full shadow-lg border-2 border-slate-900 animate-bounce">
-                      100% GRÁTIS
+                      {t('guestCard.freeBadge', '100% GRÁTIS')}
                     </div>
                     <div className="space-y-3">
                       <div className="h-2 bg-slate-800 rounded w-3/4"></div>
