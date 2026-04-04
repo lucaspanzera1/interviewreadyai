@@ -18,7 +18,7 @@
     "cardCount": "Quantidade de Flashcards",
     "cardCountRecommendation": "Recomendamos entre 10-20 flashcards para um bom equilíbrio entre abrangência e tempo de estudo.",
     "generating": "Gerando Flashcards...",
-    "generateButton": "Gerar Flashcards (2 tokens)",
+    "generateButton": "Gerar Flashcards",
     "invalidLink": "Por favor, insira um link válido de vaga de um dos sites suportados: LinkedIn, Gupy, Infojobs, Glassdoor ou Indeed.",
     "notEnoughTokens": "Você não tem tokens suficientes. Você precisa de pelo menos 2 tokens para gerar flashcards.",
     "successGenerated": "Flashcards gerados com sucesso! 2 tokens foram deduzidos.",

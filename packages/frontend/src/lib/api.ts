@@ -386,7 +386,7 @@ class ApiClient {
 
         const originalRequest = error.config;
 
-        if (error.response?.status === 401 && !originalRequest._retry) {
+        if (error.response?.status === 401 && !originalRequest._retry && !originalRequest.url?.includes('/auth/refresh')) {
           originalRequest._retry = true;
 
           try {
@@ -409,9 +409,8 @@ class ApiClient {
               return this.client(originalRequest);
             }
           } catch (refreshError) {
-            // Refresh failed, redirect to login
+            // Refresh failed, clear tokens and let the app handle redirect
             this.clearTokens();
-            window.location.href = '/login';
             return Promise.reject(refreshError);
           }
           return Promise.reject(error);
