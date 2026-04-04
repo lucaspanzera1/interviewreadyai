@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(pnpm audit:*)",
+      "Bash(npm info:*)",
+      "Bash(pnpm install:*)",
+      "Bash(grep -r \"picomatch\" node_modules/.pnpm/@nestjs+cli@10*/node_modules/@nestjs/cli/node_modules/*/package.json)",
+      "Bash(python3 -c \"import json,sys; v=json.load\\(sys.stdin\\); print\\([x for x in v if x.startswith\\('3.'\\)]\\)\")"
+    ]
+  }
+}
