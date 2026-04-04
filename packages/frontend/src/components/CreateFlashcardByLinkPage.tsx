@@ -15,7 +15,7 @@ const CreateFlashcardByLinkPage: React.FC = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const navigate = useNavigate();
-    const { user, refreshUser } = useAuth();
+    const { refreshUser } = useAuth();
     const { showToast } = useToast();
     const { t } = useTranslation('flashcard');
 
@@ -31,11 +31,6 @@ const CreateFlashcardByLinkPage: React.FC = () => {
 
             if (!isValidUrl) {
                 throw new Error(t('create.invalidLink'));
-            }
-
-            // Verificar se o usuário tem tokens
-            if (!user?.tokens || user.tokens < 2) {
-                throw new Error(t('create.notEnoughTokens'));
             }
 
             // Gerar os flashcards

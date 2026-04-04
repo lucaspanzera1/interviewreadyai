@@ -14,7 +14,7 @@ const CreateQuizByLinkPage: React.FC = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const navigate = useNavigate();
-    const { user, refreshUser } = useAuth();
+    const { refreshUser } = useAuth();
     const { showToast } = useToast();
     const { t } = useTranslation('quiz');
 
@@ -77,11 +77,6 @@ const CreateQuizByLinkPage: React.FC = () => {
                 throw new Error(t('createByLink.invalidLink'));
             }
 
-            // Verificar se o usuário tem tokens
-            if (!user?.tokens || user.tokens < 1) {
-                throw new Error(t('createByLink.notEnoughTokens'));
-            }
-
             // Gerar o quiz
             await apiClient.generateJobQuiz({ jobUrl: jobLink });
 
@@ -109,11 +104,6 @@ const CreateQuizByLinkPage: React.FC = () => {
         setError(null);
 
         try {
-            // Verificar se o usuário tem tokens
-            if (!user?.tokens || user.tokens < 1) {
-                throw new Error(t('createByLink.notEnoughTokens'));
-            }
-
             // Gerar quiz por tema
             await apiClient.generateQuiz(formData);
 
@@ -809,7 +799,7 @@ const CreateQuizByLinkPage: React.FC = () => {
                             ) : (
                                 <button
                                     onClick={handleThemeQuizSubmit}
-                                    disabled={isLoading || !user?.tokens || user.tokens < 1}
+                                    disabled={isLoading}
                                     className="px-8 py-3 bg-gradient-to-r from-primary-600 to-indigo-600 hover:from-primary-700 hover:to-indigo-700 text-white rounded-xl disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center gap-2 shadow-lg shadow-primary-600/20 font-bold transform active:scale-95 hover:shadow-xl"
                                 >
                                     {isLoading ? (

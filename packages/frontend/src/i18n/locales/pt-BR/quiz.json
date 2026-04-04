@@ -20,7 +20,7 @@
     "questionCount": "Quantidade de Questões",
     "questionCountRecommendation": "Recomendamos entre 10-20 questões para uma sessão de estudo ideal.",
     "generating": "Gerando Quiz...",
-    "generateButton": "Gerar Quiz (1 token)",
+    "generateButton": "Gerar Quiz",
     "invalidLink": "Por favor, insira um link válido do LinkedIn ou outra plataforma de vagas.",
     "notEnoughTokens": "Você não tem tokens suficientes. Cada quiz personalizado custa 1 token.",
     "successGenerated": "Quiz gerado com sucesso! 1 token foi deduzido.",
