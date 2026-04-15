@@ -3,7 +3,7 @@
 > **Transforme o link de uma vaga em um simulado técnico personalizado em segundos.**
 > 🔗 Acesse agora: **[treinavaga.tech](https://treinavaga.tech)**
 > 
-
+<img src="https://komarev.com/ghpvc/?username=lucaspanzera1&label=Views&color=brightgreen&style=flat&page_id=lucaspanzera1.interviewreadyai" alt="Profile Views" /> <img src="https://img.shields.io/badge/status-descontinuado-red?style=flat" alt="Status: Descontinuado" />
 
 ![TreinaVaga](https://www.lucaspanzera.com/interviewready.png)
 
